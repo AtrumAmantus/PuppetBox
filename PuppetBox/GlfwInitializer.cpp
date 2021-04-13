@@ -8,16 +8,16 @@
 
 namespace
 {
-	//// Update the window size on resize events
-	//void glfw_framebuffer_size_callback(GLFWwindow* window, int width, int height)
-	//{
-	//	// Grab window property data from UserPointer to update screen size values
+	// Update the window size on resize events
+	void glfw_framebuffer_size_callback(GLFWwindow* window, int width, int height)
+	{
+		// Grab window property data from UserPointer to update screen size values
 	//	WindowProperties* windowProperties = (WindowProperties*)glfwGetWindowUserPointer(window);
 	//	windowProperties->resizeWindow(width, height);
 
-	//	// Adjust render window to new size
-	//	glViewport(0, 0, width, height);
-	//}
+		// Adjust render window to new size
+		glViewport(0, 0, width, height);
+	}
 
 	//void glfw_mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	//{
@@ -39,8 +39,8 @@ void GlfwInitializer::init(std::string windowTitle, uint32_t windowWidth, uint32
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //<-- Mac only
 
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
@@ -58,8 +58,8 @@ void GlfwInitializer::init(std::string windowTitle, uint32_t windowWidth, uint32
 		// Set window as main context of current thread
 		glfwMakeContextCurrent(window_);
 
-		//// Set callback for resize events
-		//glfwSetFramebufferSizeCallback(window_, glfw_framebuffer_size_callback);
+		// Set callback for resize events
+		glfwSetFramebufferSizeCallback(window_, glfw_framebuffer_size_callback);
 
 		// SEt initial cursor pos (avoids initial movement jolts)
 		glfwSetCursorPos(window_, (double)windowWidth / 2.0, (double)windowHeight / 2.0);
@@ -85,6 +85,12 @@ void GlfwInitializer::init(std::string windowTitle, uint32_t windowWidth, uint32
 bool GlfwInitializer::hadError() const
 {
 	return error_;
+}
+
+void GlfwInitializer::postLoopCommands() const
+{
+	glfwSwapBuffers(window_);
+	glfwPollEvents();
 }
 
 GLFWwindow& GlfwInitializer::getWindow() const

@@ -27,8 +27,14 @@ class GlfwInputProcessor : public AbstractInputProcessor
 {
 public:
 	GlfwInputProcessor(GLFWwindow& window) : window_(window) {};
+	void init()
+	{
+		initKeyboardState();
+	}
 	void loadCurrentState()
 	{
+		window.windowClose = glfwWindowShouldClose(&window_);
+
 		// Store previous state
 		for (int i = 0; i < KEY_LAST + 1; ++i)
 		{

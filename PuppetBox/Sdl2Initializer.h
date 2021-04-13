@@ -75,6 +75,7 @@ public:
 	{
 		return error_;
 	}
+	void postLoopCommands() const {};
 private:
 	SDL_Window* window_ = nullptr;
 	bool error_ = false;

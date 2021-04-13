@@ -268,8 +268,16 @@
 
 #endif //_USE_SDL2
 
-#ifndef _KEY_A
+#ifndef _USE_GLFW
+#ifndef _USE_SDL2
 #error Must specify a input keycode mapping
+#endif
+#endif
+
+#ifndef _USE_SDL2
+#ifndef _USE_GLFW
+#error Must specify a input keycode mapping
+#endif
 #endif
 
 /* The unknown key */

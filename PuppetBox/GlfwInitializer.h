@@ -13,6 +13,7 @@ class GlfwInitializer : public IHardwareInitializer
 public:
 	void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
 	bool hadError() const;
+	void postLoopCommands() const;
 	GLFWwindow& getWindow() const;
 private:
 	GLFWwindow* window_ = nullptr;
