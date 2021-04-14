@@ -6,6 +6,8 @@
 
 #include "AbstractInputProcessor.h"
 #include "KeyCode.h"
+#include "Logger.h"
+#include "WindowProperties.h"
 
 #define MAX_KEY_CODES		120
 #define MAX_MOUSE_CODES		8
@@ -27,29 +29,48 @@ class GlfwInputProcessor : public AbstractInputProcessor
 {
 public:
 	GlfwInputProcessor(GLFWwindow& window) : window_(window) {};
-	void init()
+	void init(WindowProperties* windowProperties)
 	{
+		windowProperties_ = windowProperties;
 		initKeyboardState();
 	}
 	void loadCurrentState()
 	{
-		window.windowClose = glfwWindowShouldClose(&window_);
-
-		// Store previous state
-		for (int i = 0; i < KEY_LAST + 1; ++i)
+		if (windowProperties_ != nullptr)
 		{
-			keyboard.previousKeyState[i] = keyboard.keyState[i];
+			window.windowClose = glfwWindowShouldClose(&window_);
+
+			// Store previous state
+			for (int i = 0; i < KEY_LAST + 1; ++i)
+			{
+				keyboard.previousKeyState[i] = keyboard.keyState[i];
+			}
+
+			// Get current state for all registerd keys
+			const short int* keyMap = keyRegister.getKeys();
+
+			for (int i = 0; i < keyRegister.SIZE; ++i)
+			{
+				keyboard.keyState[keyMap[i]] = (glfwGetKey(&window_, keyMap[i]) != GLFW_RELEASE);
+			}
+
+			mouse.x = windowProperties_->mouse.x;
+			mouse.y = windowProperties_->mouse.y;
+			mouse.deltaX = windowProperties_->mouse.deltaX;
+			mouse.deltaY = windowProperties_->mouse.deltaY;
+			window.width = windowProperties_->width;
+			window.height = windowProperties_->height;
+			window.newWidth = windowProperties_->newWidth;
+			window.newHeight = windowProperties_->newHeight;
+			windowProperties_->resetInputs();
 		}
-
-		// Get current state for all registerd keys
-		const short int* keyMap = keyRegister.getKeys();
-
-		for (int i = 0; i < keyRegister.SIZE; ++i)
+		else
 		{
-			keyboard.keyState[keyMap[i]] = (glfwGetKey(&window_, keyMap[i]) != GLFW_RELEASE);
+			LOGGER_ERROR("GlfwInputProcess was not initialized with init()");
 		}
 	}
 private:
+	WindowProperties* windowProperties_ = nullptr;
 	KeyRegister keyRegister{};
 	GLFWwindow& window_;
 private:

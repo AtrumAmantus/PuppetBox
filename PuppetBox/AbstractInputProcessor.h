@@ -63,6 +63,8 @@ public:
 	bool windowClose = false;
 	uint32_t width = 0;
 	uint32_t height = 0;
+	uint32_t newWidth = 0;
+	uint32_t newHeight = 0;
 public:
 	bool isClosed()
 	{
