@@ -1,3 +1,6 @@
 #pragma once
 
-typedef void* (*ProcAddress)(const char* name);
+namespace PB
+{
+	typedef void* (*ProcAddress)(const char* name);
+}

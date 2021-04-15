@@ -21,12 +21,12 @@ int main(int argc, char** argv)
 
 	// Create hardware Api instance
 #ifdef _USE_SDL2
-	Sdl2InputProcessor inputProcessor{};
-	Sdl2Initializer hardwareInitializer{};
+	PB::Sdl2InputProcessor inputProcessor{};
+	PB::Sdl2Initializer hardwareInitializer{};
 #endif //_USE_SDL2
 
 #ifdef _USE_GLFW
-	GlfwInitializer hardwareInitializer{};
+	PB::GlfwInitializer hardwareInitializer{};
 #endif //_UES_GLFW
 
 	// Initialize hardware Api
@@ -37,18 +37,18 @@ int main(int argc, char** argv)
 
 		// GLFW needs window reference for input polling
 #ifdef _USE_GLFW
-		GlfwInputProcessor inputProcessor{ hardwareInitializer.getWindow() };
+		PB::GlfwInputProcessor inputProcessor{ hardwareInitializer.getWindow() };
 		inputProcessor.init(hardwareInitializer.getWindowProperties());
 #endif //_USE_GLFW
 
 		// Graphics API
-		GladGfxApi gfxApi{};
+		PB::GladGfxApi gfxApi{};
 		// TODO: fix the redundancy of this configuration
 		gfxApi.setRenderDimensions(1024, 768);
 
 		if (gfxApi.load(hardwareInitializer))
 		{
-			Engine engine{ &gfxApi, &hardwareInitializer, &inputProcessor };
+			PB::Engine engine{ &gfxApi, &hardwareInitializer, &inputProcessor };
 
 			if (engine.init())
 			{

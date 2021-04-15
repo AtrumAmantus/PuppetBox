@@ -12,19 +12,21 @@
 #include "TypeDef.h"
 #include "WindowProperties.h"
 
-class GlfwInitializer : public IHardwareInitializer
+namespace PB
 {
-public:
-	void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
-	bool hadError() const;
-	void postLoopCommands() const;
-	ProcAddress getProcAddress() const;
-	std::string initializerName() const;
-	GLFWwindow& getWindow() const;
-	WindowProperties* getWindowProperties() const;
-private:
-	GLFWwindow* window_ = nullptr;
-	bool error_ = false;
-};
-
+	class GlfwInitializer : public IHardwareInitializer
+	{
+	public:
+		void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+		bool hadError() const;
+		void postLoopCommands() const;
+		ProcAddress getProcAddress() const;
+		std::string initializerName() const;
+		GLFWwindow& getWindow() const;
+		WindowProperties* getWindowProperties() const;
+	private:
+		GLFWwindow* window_ = nullptr;
+		bool error_ = false;
+	};
+}
 #endif //_USE_GLFW

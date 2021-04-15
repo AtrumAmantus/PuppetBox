@@ -2,9 +2,12 @@
 
 #include "IHardwareInitializer.h"
 
-class IGfxApi
+namespace PB
 {
-public:
-	virtual bool load(const IHardwareInitializer& hardwareInitializer) const = 0;
-	virtual void preLoopCommands() const = 0;
-};
+	class IGfxApi
+	{
+	public:
+		virtual bool load(const IHardwareInitializer& hardwareInitializer) const = 0;
+		virtual void preLoopCommands() const = 0;
+	};
+}
