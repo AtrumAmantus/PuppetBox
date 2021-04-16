@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "KeyCode.h"
 
 namespace PB
@@ -13,7 +14,7 @@ namespace PB
 		}
 	}
 
-	void Init()
+	void Init_CharMap()
 	{
 		CharMapInsert(KEY_1, '1');
 		CharMapInsert(KEY_2, '2');

@@ -417,6 +417,6 @@
 
 namespace PB
 {
-	void Init();
+	void Init_CharMap();
 	int8_t GetCharFromCode(uint8_t code);
 }
