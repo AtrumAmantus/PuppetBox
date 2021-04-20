@@ -15,8 +15,6 @@ namespace PB
 	public:
 		void loadCurrentState() override
 		{
-			int x;
-
 			for (uint32_t i = 0; i < KEY_LAST + 1; ++i)
 			{
 				keyboard.previousKeyState[i] = keyboard.keyState[i];

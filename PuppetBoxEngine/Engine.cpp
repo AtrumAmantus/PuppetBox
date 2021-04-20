@@ -20,13 +20,24 @@ namespace PB
 
 	}
 
+	void Engine::setScene(SceneGraph* scene)
+	{
+		scene_ = scene;
+	}
+
 	void Engine::loop()
 	{
+		hardwareInitializer_.initializeGameTime();
 		while (!inputProcessor_.window.windowClose)
 		{
+			float deltaTime = hardwareInitializer_.updateElapsedTime();
+
 			gfxApi_.preLoopCommands();
 
 			processInput();
+
+			scene_->update(deltaTime);
+			scene_->render();
 
 			hardwareInitializer_.postLoopCommands();
 		}

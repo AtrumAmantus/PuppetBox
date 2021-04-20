@@ -86,6 +86,19 @@ namespace PB
 		glfwPollEvents();
 	}
 
+	void GlfwInitializer::initializeGameTime()
+	{
+		lastFrameTime_ = glfwGetTime();
+	}
+
+	float GlfwInitializer::updateElapsedTime()
+	{
+		float NOW = glfwGetTime();
+		float deltaTime = NOW - lastFrameTime_;
+		lastFrameTime_ = NOW;
+		return deltaTime;
+	}
+
 	ProcAddress GlfwInitializer::getProcAddress() const
 	{
 		return (ProcAddress)glfwGetProcAddress;

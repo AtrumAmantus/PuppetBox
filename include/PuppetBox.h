@@ -8,7 +8,16 @@
 #	define PUPPET_BOX_API __declspec(dllimport)
 #endif
 
+#include "puppetbox/AbstractSceneHandler.h"
+#include "puppetbox/BasicMessage.h"
+
 namespace PB
 {
-	extern "C" PUPPET_BOX_API void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+	class AbstractSceneHandler;
+
+	extern PUPPET_BOX_API void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+	extern PUPPET_BOX_API void CreateScene(std::string sceneName);
+	extern PUPPET_BOX_API void SetActiveScene(std::string sceneName);
+	extern PUPPET_BOX_API void SetSceneHandler(AbstractSceneHandler* sceneHandler);
+	extern PUPPET_BOX_API void Run();
 }

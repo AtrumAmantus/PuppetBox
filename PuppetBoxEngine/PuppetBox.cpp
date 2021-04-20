@@ -4,13 +4,16 @@
 #include <string>
 
 #include <PuppetBox.h>
+#include <STBI/stb_image.h>
 
 #include "AbstractInputProcessor.h"
 #include "Engine.h"
+#include "GladGfxApi.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "KeyCode.h"
-#include "GladGfxApi.h"
+#include "MessageBroker.h"
+#include "SceneGraph.h"
 
 #if defined(_USE_GLFW)
 #	include "GlfwInitializer.h"
@@ -26,13 +29,28 @@ namespace PB
 {
 	namespace
 	{
-		std::shared_ptr<IHardwareInitializer> hardwareInitializer = nullptr;
-		std::shared_ptr<AbstractInputProcessor> inputProcessor = nullptr;
-		std::shared_ptr<IGfxApi> gfxApi = nullptr;
+		std::shared_ptr<IHardwareInitializer> hardwareInitializer{ nullptr };
+		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
+		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
+		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
+		MessageBroker messageBroker{};
+		std::string activeScene;
+		SceneGraph invalidScene{ "InvalidScene", messageBroker };
+		bool pbInitialized = false;
 
 		std::shared_ptr<IGfxApi> defaultGfxApi()
 		{
 			return std::make_shared<GladGfxApi>();
+		}
+
+		SceneGraph& ActiveScene()
+		{
+			if (!activeScene.empty() && loadedScenes.find(activeScene) != loadedScenes.end())
+			{
+				return *loadedScenes.at(activeScene);
+			}
+
+			return invalidScene;
 		}
 	}
 
@@ -70,18 +88,8 @@ namespace PB
 
 			if (gfxApi->load(*hardwareInitializer))
 			{
+				pbInitialized = true;
 				LOGGER_DEBUG("GFX Api loaded.");
-
-				Engine engine{ *gfxApi, *hardwareInitializer, *inputProcessor };
-
-				if (engine.init())
-				{
-					engine.run();
-				}
-				else
-				{
-					LOGGER_ERROR("Failed to initialize Engine");
-				}
 			}
 			else
 			{
@@ -91,6 +99,56 @@ namespace PB
 		else
 		{
 			LOGGER_ERROR("Failed to initialize hardware");
+		}
+	}
+
+	void CreateScene(std::string sceneName)
+	{
+		if (loadedScenes.find(sceneName) == loadedScenes.end())
+		{
+			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, messageBroker);
+			scene->init();
+
+			loadedScenes.insert(
+				std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
+			);
+		}
+		else
+		{
+			LOGGER_ERROR("Scene already exists with this identifier name");
+		}
+	}
+
+	void SetActiveScene(std::string sceneName)
+	{
+		if (loadedScenes.find(sceneName) != loadedScenes.end())
+		{
+			activeScene = sceneName;
+		}
+		else
+		{
+			LOGGER_ERROR("Scene does not exist with this identifier name");
+		}
+	}
+
+	void SetSceneHandler(AbstractSceneHandler* sceneHandler)
+	{
+		ActiveScene().setSceneHandler(sceneHandler);
+	}
+
+	void Run()
+	{
+		Engine engine{ *gfxApi, *hardwareInitializer, *inputProcessor };
+
+		engine.setScene(&ActiveScene());
+
+		if (engine.init())
+		{
+			engine.run();
+		}
+		else
+		{
+			LOGGER_ERROR("Engine stalled.");
 		}
 	}
 }

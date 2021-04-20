@@ -6,6 +6,7 @@
 #include "AbstractInputProcessor.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
+#include "SceneGraph.h"
 
 namespace PB
 {
@@ -17,10 +18,12 @@ namespace PB
 		bool init();
 		void run();
 		void shutdown();
+		void setScene(SceneGraph* scene);
 	private:
 		IGfxApi& gfxApi_;
 		IHardwareInitializer& hardwareInitializer_;
 		AbstractInputProcessor& inputProcessor_;
+		SceneGraph* scene_ = nullptr;
 	private:
 		void loop();
 		void processInput();

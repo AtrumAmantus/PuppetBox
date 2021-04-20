@@ -20,6 +20,8 @@ namespace PB
 		void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
 		bool hadError() const;
 		void postLoopCommands() const;
+		void initializeGameTime();
+		float updateElapsedTime();
 		ProcAddress getProcAddress() const;
 		std::string initializerName() const;
 		GLFWwindow& getWindow() const;
@@ -27,6 +29,7 @@ namespace PB
 	private:
 		GLFWwindow* window_ = nullptr;
 		bool error_ = false;
+		float lastFrameTime_;
 	};
 }
 #endif //_USE_GLFW

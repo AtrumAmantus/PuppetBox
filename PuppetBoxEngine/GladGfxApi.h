@@ -24,8 +24,6 @@ namespace PB
 				std::cout << "OpenGL Shading Language Version: " << (char*)glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 				std::cout << "OpenGL Vendor: " << (char*)glGetString(GL_VENDOR) << std::endl;
 				std::cout << "OpenGL Renderer: " << (char*)glGetString(GL_RENDERER) << std::endl;
-
-				//setRenderDimensions(hardwareInitializer.)
 			}
 			else
 			{

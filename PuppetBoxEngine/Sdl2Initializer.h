@@ -67,6 +67,18 @@ namespace PB
 		{
 			SDL_GL_SwapWindow(window_);
 		};
+		void initializeGameTime()
+		{
+			lastFrameTime_ = SDL_GetPerformanceCounter();
+		};
+		float updateElapsedTime()
+		{
+			uint64_t NOW = SDL_GetPerformanceCounter();
+			uint64_t delta = (NOW - lastFrameTime_);
+			lastFrameTime_ = NOW;
+
+			return delta / (float)SDL_GetPerformanceFrequency();
+		};
 		ProcAddress getProcAddress() const
 		{
 			return SDL_GL_GetProcAddress;
@@ -76,6 +88,7 @@ namespace PB
 			return "SDL2";
 		};
 	private:
+		uint64_t lastFrameTime_;
 		SDL_Window* window_ = nullptr;
 		bool error_ = false;
 	};
