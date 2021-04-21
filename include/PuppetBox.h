@@ -19,6 +19,6 @@ namespace PB
 	extern PUPPET_BOX_API void CreateScene(std::string sceneName);
 	extern PUPPET_BOX_API void SetActiveScene(std::string sceneName);
 	extern PUPPET_BOX_API void SetSceneHandler(AbstractSceneHandler* sceneHandler);
-	extern PUPPET_BOX_API void LoadAssetLibrary(std::string archiveName);
+	extern PUPPET_BOX_API void LoadAssetPack(std::string archiveName);
 	extern PUPPET_BOX_API void Run();
 }
