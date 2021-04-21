@@ -6,7 +6,7 @@
 #include <PuppetBox.h>
 #include <STBI/stb_image.h>
 
-#include "AssetLibrary.h"
+#include "AssetArchive.h"
 #include "AbstractInputProcessor.h"
 #include "Engine.h"
 #include "GladGfxApi.h"
@@ -34,7 +34,7 @@ namespace PB
 		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
 		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
-		std::unordered_map<std::string, AssetLibrary> assetLibraries{};
+		std::unordered_map<std::string, AssetArchive> assetLibraries{};
 		MessageBroker messageBroker{};
 		std::string activeScene;
 		SceneGraph invalidScene{ "InvalidScene", messageBroker };
@@ -142,11 +142,11 @@ namespace PB
 	{
 		if (assetLibraries.find(archiveName) == assetLibraries.end())
 		{
-			AssetLibrary assetLibrary{ archiveName };
+			AssetArchive assetLibrary{ archiveName };
 			assetLibrary.init();
 
 			assetLibraries.insert(
-				std::pair<std::string, AssetLibrary>{archiveName, assetLibrary}
+				std::pair<std::string, AssetArchive>{archiveName, assetLibrary}
 			);
 			
 			LOGGER_DEBUG("'" + archiveName + "' loaded " + std::to_string(assetLibrary.assetCount()) + " assets");

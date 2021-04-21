@@ -5,10 +5,10 @@
 
 #include <ZipLib/ZipFile.h>
 
-class AssetLibrary
+class AssetArchive
 {
 public:
-	AssetLibrary(std::string archivePath) : archivePath_(archivePath) {};
+	AssetArchive(std::string archivePath) : archivePath_(archivePath) {};
 	void init()
 	{
 		auto archive = ZipFile::Open(archivePath_);
@@ -25,6 +25,18 @@ public:
 	uint32_t assetCount()
 	{
 		return archiveAssets_.size();
+	};
+	uint8_t* loadImageBinary(std::string assetName, bool* error)
+	{
+		if (hasAsset(assetName))
+		{
+
+		}
+		else
+		{
+			*error = true;
+
+		}
 	};
 private:
 	std::string archivePath_;
