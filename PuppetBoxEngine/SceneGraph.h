@@ -18,7 +18,7 @@ namespace PB
 		SceneGraph(std::string sceneName, MessageBroker& messageBroker) : id_(sceneName), messageBroker_(messageBroker) {};
 		void init()
 		{
-			subscribe(Event::Type::ADD_TO_SCENE);
+			// Nothing yet
 		};
 		void setSceneHandler(AbstractSceneHandler* sceneHandler)
 		{
@@ -38,26 +38,5 @@ namespace PB
 		std::string id_;
 		AbstractSceneHandler* sceneHandler_ = nullptr;
 		MessageBroker& messageBroker_;
-	private:
-		void subscribe(Event::Type type)
-		{
-			EventListener eventListener = [this](IMessage* message)
-			{
-				this->eventListener(message);
-			};
-
-			messageBroker_.subscribe(type, eventListener);
-		};
-		void eventListener(IMessage* message)
-		{
-			switch (message->getType())
-			{
-			case Event::Type::ADD_TO_SCENE:
-				std::cout << "Event to add item to scene: '" << message->getString() << "'" << std::endl;
-				break;
-			default:
-				LOGGER_ERROR("Scene graph did not properly handle event type " + std::to_string(message->getType()));
-			}
-		};
 	};
 }

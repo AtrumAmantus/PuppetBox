@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 
 	PB::CreateScene("MyScene");
 	PB::SetActiveScene("MyScene");
-	PB::LoadAssetPack("../spritelib1.zip");
+	PB::LoadAssetPack("Assets1.zip");
 	CustomSceneHandler handler{};
 	PB::SetSceneHandler(&handler);
 

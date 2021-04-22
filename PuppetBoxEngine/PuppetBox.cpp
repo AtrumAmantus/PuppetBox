@@ -34,9 +34,9 @@ namespace PB
 		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
 		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
-		AssetLibrary assetLibrary{};
+		AssetLibrary assetLibrary{ "../" };
 		MessageBroker messageBroker{};
-		std::string activeScene;
+		std::string activeSceneId;
 		SceneGraph invalidScene{ "InvalidScene", messageBroker };
 		bool pbInitialized = false;
 
@@ -45,15 +45,31 @@ namespace PB
 			return std::make_shared<GladGfxApi>();
 		}
 
-		SceneGraph& ActiveScene()
+		SceneGraph& activeScene()
 		{
-			if (!activeScene.empty() && loadedScenes.find(activeScene) != loadedScenes.end())
+			if (!activeSceneId.empty() && loadedScenes.find(activeSceneId) != loadedScenes.end())
 			{
-				return *loadedScenes.at(activeScene);
+				return *loadedScenes.at(activeSceneId);
 			}
 
 			return invalidScene;
 		}
+		void eventListener(IMessage* message)
+		{
+			switch (message->getType())
+			{
+			case Event::Type::ADD_TO_SCENE:
+				std::cout << "Heard event to add item to scene: '" << message->getString() << "'" << std::endl;
+				break;
+			default:
+				LOGGER_ERROR("Could not properly handle event type " + std::to_string(message->getType()));
+			}
+		};
+
+		void subscribe(Event::Type type)
+		{
+			messageBroker.subscribe(type, eventListener);
+		};
 	}
 
 	void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
@@ -90,6 +106,7 @@ namespace PB
 
 			if (gfxApi->load(*hardwareInitializer))
 			{
+				subscribe(Event::Type::ADD_TO_SCENE);
 				pbInitialized = true;
 				LOGGER_DEBUG("GFX Api loaded.");
 			}
@@ -125,7 +142,7 @@ namespace PB
 	{
 		if (loadedScenes.find(sceneName) != loadedScenes.end())
 		{
-			activeScene = sceneName;
+			activeSceneId = sceneName;
 		}
 		else
 		{
@@ -135,22 +152,19 @@ namespace PB
 
 	void SetSceneHandler(AbstractSceneHandler* sceneHandler)
 	{
-		ActiveScene().setSceneHandler(sceneHandler);
+		activeScene().setSceneHandler(sceneHandler);
 	}
 
 	void LoadAssetPack(std::string archiveName)
 	{
-		if (!assetLibrary.loadArchive(archiveName))
-		{
-			LOGGER_WARN("Library '" + archiveName + "' was already loaded");
-		}
+		assetLibrary.loadArchive(archiveName);
 	}
 
 	void Run()
 	{
 		Engine engine{ *gfxApi, *hardwareInitializer, *inputProcessor };
 
-		engine.setScene(&ActiveScene());
+		engine.setScene(&activeScene());
 
 		if (engine.init())
 		{

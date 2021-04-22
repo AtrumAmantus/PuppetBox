@@ -5,32 +5,43 @@
 #include "AssetArchive.h"
 #include "Logger.h"
 
-class AssetLibrary
+namespace PB
 {
-public:
-	bool loadArchive(std::string archiveName)
+	class AssetLibrary
 	{
-		bool success;
-
-		if (assetLibraries_.find(archiveName) == assetLibraries_.end())
+	public:
+		AssetLibrary(std::string archiveRoot) : archiveRoot_(archiveRoot) {};
+		bool loadArchive(std::string archiveName)
 		{
-			AssetArchive archive{ archiveName };
-			archive.init();
+			bool error = false;
 
-			assetLibraries_.insert(
-				std::pair<std::string, AssetArchive>{archiveName, archive}
-			);
+			if (assetLibraries_.find(archiveName) == assetLibraries_.end())
+			{
+				AssetArchive archive{ archiveName, archiveRoot_ };
+				archive.init(&error);
 
-			LOGGER_DEBUG("'" + archiveName + "' loaded " + std::to_string(archive.assetCount()) + " assets");
-			success = true;
-		}
-		else
-		{
-			success = false;
-		}
+				if (!error)
+				{
+					assetLibraries_.insert(
+						std::pair<std::string, AssetArchive>{archiveName, archive}
+					);
 
-		return success;
+					LOGGER_DEBUG("'" + archiveName + "' loaded " + std::to_string(archive.assetCount()) + " assets");
+				}
+				else
+				{
+					LOGGER_ERROR("Failed to load archive '" + archiveName + "'");
+				}
+			}
+			else
+			{
+				LOGGER_WARN("Archive '" + archiveName + "' is already loaded");
+			}
+
+			return !error;
+		};
+	private:
+		std::string archiveRoot_;
+		std::unordered_map<std::string, AssetArchive> assetLibraries_{};
 	};
-private:
-	std::unordered_map<std::string, AssetArchive> assetLibraries_{};
-};
+}
