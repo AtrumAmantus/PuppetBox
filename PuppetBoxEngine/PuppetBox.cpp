@@ -13,7 +13,6 @@
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "KeyCode.h"
-#include "MessageBroker.h"
 #include "SceneGraph.h"
 
 #if defined(_USE_GLFW)
@@ -34,10 +33,9 @@ namespace PB
 		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
 		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
-		AssetLibrary assetLibrary{ "../" };
-		MessageBroker messageBroker{};
+		std::unique_ptr<AssetLibrary> assetLibrary{ nullptr };
 		std::string activeSceneId;
-		SceneGraph invalidScene{ "InvalidScene", messageBroker };
+		SceneGraph invalidScene{ "InvalidScene" };
 		bool pbInitialized = false;
 
 		std::shared_ptr<IGfxApi> defaultGfxApi()
@@ -54,22 +52,18 @@ namespace PB
 
 			return invalidScene;
 		}
-		void eventListener(IMessage* message)
+
+		Asset::Type convertToAssetType(LibraryAsset::Type type)
 		{
-			switch (message->getType())
+			switch (type)
 			{
-			case Event::Type::ADD_TO_SCENE:
-				std::cout << "Heard event to add item to scene: '" << message->getString() << "'" << std::endl;
+			case LibraryAsset::Type::MODEL_2D:
+				return Asset::Type::MODEL_2D;
 				break;
 			default:
-				LOGGER_ERROR("Could not properly handle event type " + std::to_string(message->getType()));
+				return Asset::Type::UNKNOWN;
 			}
-		};
-
-		void subscribe(Event::Type type)
-		{
-			messageBroker.subscribe(type, eventListener);
-		};
+		}
 	}
 
 	void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
@@ -104,10 +98,12 @@ namespace PB
 			gfxApi = defaultGfxApi();
 			gfxApi->setRenderDimensions(windowWidth, windowHeight);
 
-			if (gfxApi->load(*hardwareInitializer))
+			if (gfxApi->init(*hardwareInitializer))
 			{
-				subscribe(Event::Type::ADD_TO_SCENE);
 				pbInitialized = true;
+
+				assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
+				assetLibrary->init();
 				LOGGER_DEBUG("GFX Api loaded.");
 			}
 			else
@@ -125,7 +121,7 @@ namespace PB
 	{
 		if (loadedScenes.find(sceneName) == loadedScenes.end())
 		{
-			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, messageBroker);
+			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName);
 			scene->init();
 
 			loadedScenes.insert(
@@ -157,7 +153,22 @@ namespace PB
 
 	void LoadAssetPack(std::string archiveName)
 	{
-		assetLibrary.loadArchive(archiveName);
+		assetLibrary->loadArchive(archiveName);
+	}
+
+	void CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
+	{
+		if (sceneObject == nullptr)
+		{
+			LOGGER_ERROR("SceneObject must be instantiated prior to invoking CreateSceneObject");
+		}
+		else
+		{
+			if (!assetLibrary->loadAsset(assetPath, sceneObject, convertToAssetType(type)))
+			{
+				LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+			}
+		}
 	}
 
 	void Run()
@@ -174,5 +185,7 @@ namespace PB
 		{
 			LOGGER_ERROR("Engine stalled.");
 		}
+
+		engine.shutdown();
 	}
 }

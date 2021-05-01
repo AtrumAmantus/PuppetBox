@@ -17,7 +17,7 @@ namespace PB
 
 	void Engine::shutdown()
 	{
-
+		hardwareInitializer_.destroy();
 	}
 
 	void Engine::setScene(SceneGraph* scene)

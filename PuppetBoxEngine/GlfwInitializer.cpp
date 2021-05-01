@@ -75,6 +75,11 @@ namespace PB
 		}
 	}
 
+	void GlfwInitializer::shutdown()
+	{
+		glfwTerminate();
+	}
+
 	bool GlfwInitializer::hadError() const
 	{
 		return error_;

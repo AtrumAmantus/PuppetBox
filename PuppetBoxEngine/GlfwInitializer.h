@@ -18,6 +18,7 @@ namespace PB
 	{
 	public:
 		void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+		void destroy();
 		bool hadError() const;
 		void postLoopCommands() const;
 		void initializeGameTime();

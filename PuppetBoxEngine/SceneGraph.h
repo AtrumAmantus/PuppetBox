@@ -5,9 +5,7 @@
 #include <vector>
 
 #include "../include/puppetbox/AbstractSceneHandler.h"
-#include "IMessage.h"
 #include "Logger.h"
-#include "MessageBroker.h"
 #include "TypeDef.h"
 
 namespace PB
@@ -15,7 +13,7 @@ namespace PB
 	class SceneGraph
 	{
 	public:
-		SceneGraph(std::string sceneName, MessageBroker& messageBroker) : id_(sceneName), messageBroker_(messageBroker) {};
+		SceneGraph(std::string sceneName) : id_(sceneName) {};
 		void init()
 		{
 			// Nothing yet
@@ -23,7 +21,6 @@ namespace PB
 		void setSceneHandler(AbstractSceneHandler* sceneHandler)
 		{
 			sceneHandler_ = sceneHandler;
-			sceneHandler_->setMessageBroker(&messageBroker_);
 			sceneHandler_->setUp();
 		};
 		void update(const float deltaTime)
@@ -32,11 +29,10 @@ namespace PB
 		}
 		void render() const
 		{
-			// Nothing yet
+			sceneHandler_->render();
 		}
 	private:
 		std::string id_;
 		AbstractSceneHandler* sceneHandler_ = nullptr;
-		MessageBroker& messageBroker_;
 	};
 }

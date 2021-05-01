@@ -1,6 +1,9 @@
 #pragma once
 
+#include <sstream>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace PB
 {
@@ -102,19 +105,58 @@ namespace PB
 		/// Splits the string by all whitespace characters
 		/// </summary>
 		/// <param name="str">The string to be split</param>
-		/// <param name="values">The resulting values of splitting the string</param>
-		/// <param name="valueCount">The number of resulting values from splitting the string</param>
+		/// <param name="splitValues">The resulting values of splitting the string</param>
+		/// <param name="splitCount">The number of resulting values from splitting the string</param>
 		/// <param name="excludeNull">If True, empty values are not added to the resulting values. Defaults to True</param>
-		void split(std::string str, std::string** values, uint32_t* valueCount, bool excludeNull = true);
+		void split(std::string str, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
+
+		/// <summary>
+		/// Splits the string by the given delimiter string value, limited by the split count
+		/// </summary>
+		/// <param name="str">The string to be split</param>
+		/// <param name="delimiter">The delimiting string to split on</param>
+		/// <param name="splitValues">The resulting values of splitting the string</param>
+		/// <param name="splitCount">The number of resulting values from splitting the string</param>
+		/// <param name="splitLimit">The number of times the string should be split max</param>
+		/// <param name="excludeNull">If True, empty values are not added to the resulting values. Defaults to True</param>
+		void split(std::string str, std::string delimiter, uint32_t splitLimit, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
 
 		/// <summary>
 		/// Splits the string by the given delimiter string value
 		/// </summary>
 		/// <param name="str">The string to be split</param>
 		/// <param name="delimiter">The delimiting string to split on</param>
-		/// <param name="values">The resulting values of splitting the string</param>
-		/// <param name="valueCount">The number of resulting values from splitting the string</param>
+		/// <param name="splitValues">The resulting values of splitting the string</param>
+		/// <param name="splitCount">The number of resulting values from splitting the string</param>
 		/// <param name="excludeNull">If True, empty values are not added to the resulting values. Defaults to True</param>
-		void split(std::string str, std::string delimiter, std::string** values, uint32_t* valueCount, bool excludeNull = true);
+		void split(std::string str, std::string delimiter, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
 	};
+
+	namespace NumberUtils
+	{
+		template <typename T>
+		T parseValue(const char* numberAsString, T defaultValue, bool* error)
+		{
+			T value;
+
+			std::stringstream stream(numberAsString);
+			stream >> value;
+
+			if (stream.fail()) {
+				*error = true;
+				value = defaultValue;
+				LOGGER_WARN("Could not parse value '" + std::string(numberAsString) + "'");
+			}
+
+			return value;
+		}
+	}
+
+	namespace FileUtils
+	{
+		bool getFileListFromArchive(std::string archivePath, std::unordered_set<std::string>* files);
+		bool getContentsFromArchivedFile(std::string archivePath, std::string filePath, int8_t** buffer, size_t* bufferSize);
+		bool getStreamFromArchivedFile(std::string archivePath, std::string filePath, std::istream** stream);
+		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties);
+	}
 }

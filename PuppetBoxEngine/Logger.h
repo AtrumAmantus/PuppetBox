@@ -40,13 +40,13 @@ namespace PB
 
             if (filePath.length() <= maxValue)
             {
-                int32_t i;
-                for (i = filePath.length() - 1; i >= 0; --i)
+                // If the first character of the string is \ then I don't care to remove it
+                for (size_t i = filePath.length() - 1; i > 0; --i)
                 {
                     if (filePath.at(i) == '\\')
                     {
-                        fileName = filePath.substr(i + 1, filePath.length() - i + 1);
-                        i = 0; // Found it, we're done.
+                        fileName = filePath.substr(static_cast<size_t>(i) + 1, filePath.length() - i + 1);
+                        i = 1; // Found it, we're done.
                     }
                 }
             }

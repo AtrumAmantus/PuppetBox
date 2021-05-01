@@ -1,20 +1,33 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <PuppetBox.h>
+
+#include "Entity.h"
 
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
 public:
 	void setUp()
 	{
-		std::unique_ptr<PB::BasicMessage> message = std::make_unique<PB::BasicMessage>(PB::Event::Type::ADD_TO_SCENE, "pyramid");
-		publishEvent(&(*message));
-		//addToScene("pyramid");
+		Entity* myEntity = new Entity{};
+		PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D);
+		myEntity->name = "Fred";
+		entities_.push_back(myEntity);
 	};
 	void update(float deltaTime)
 	{
 
 	};
+	void render()
+	{
+		for (auto e : entities_)
+		{
+			e->render();
+		}
+	};
+private:
+	std::vector<Entity*> entities_{};
 };

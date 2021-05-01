@@ -1,7 +1,12 @@
 #include "pch.h"
 
 #include <ctype.h>
+#include <istream>
+#include <streambuf>
 
+#include <zip/zip.h>
+
+#include "Logger.h"
 #include "Utilities.h"
 
 namespace PB
@@ -141,35 +146,35 @@ namespace PB
 			return str.substr(0, prefix.length()) == prefix;
 		}
 
-		void split(std::string str, std::string** values, uint32_t* valueCount, bool excludeNull)
+		void split(std::string str, std::string** splitValues, uint32_t* splitCount, bool excludeNull)
 		{
 			if (!str.empty())
 			{
-				*valueCount = 1;
+				*splitCount = 1;
 				std::string currentSearchString = str;
-				*values = new std::string[*valueCount];
+				*splitValues = new std::string[*splitCount];
 				size_t pos = findWhitespace(currentSearchString);
 
 				while (pos != std::string::npos)
 				{
 					if (pos > 0 || !excludeNull)
 					{
-						++(*valueCount);
+						++(*splitCount);
 
 						// Copy previously found slices
-						std::string* tmpBits = new std::string[*valueCount];
+						std::string* tmpBits = new std::string[*splitCount];
 
-						for (size_t i = 0; i < *valueCount - 2; ++i)
+						for (size_t i = 0; i < *splitCount - 2; ++i)
 						{
 							// If the arraySize is 2, then 0 entries have been initialized
-							tmpBits[i] = *values[i];
+							tmpBits[i] = (*splitValues)[i];
 						}
 
-						delete[] * values;
-						*values = tmpBits;
+						delete[] *splitValues;
+						*splitValues = tmpBits;
 
 						// Add new slice
-						(*values)[*valueCount - 2] = currentSearchString.substr(0, pos);
+						(*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
 						currentSearchString = currentSearchString.substr(pos + 1, currentSearchString.length() - pos);
 
 						// Prep for next iteration
@@ -183,44 +188,47 @@ namespace PB
 				}
 
 				// Add the remaining string as the last entry in the array
-				(*values)[*valueCount - 1] = currentSearchString;
+				(*splitValues)[*splitCount - 1] = std::string{ currentSearchString };
 			}
 			else
 			{
-				*values = nullptr;
-				*valueCount = 0;
+				*splitValues = nullptr;
+				*splitCount = 0;
 			}
 		}
 
-		void split(std::string str, std::string delimiter, std::string** values, uint32_t* valueCount, bool excludeNull)
+		void split(std::string str, std::string delimiter, uint32_t splitLimit, std::string** splitValues, uint32_t* splitCount, bool excludeNull)
 		{
 			if (!str.empty() && !delimiter.empty())
 			{
-				*valueCount = 1;
+				uint32_t maxNumberOfSplits = (splitLimit > 0) ? splitLimit : std::numeric_limits<uint32_t>::max();
+				*splitCount = 1;
 				std::string currentSearchString = str;
-				*values = new std::string[*valueCount];
+				*splitValues = new std::string[*splitCount];
 				size_t pos = currentSearchString.find(delimiter);
 
-				while (pos != std::string::npos)
+				while (maxNumberOfSplits > 0 && pos != std::string::npos)
 				{
+					--maxNumberOfSplits;
+
 					if (pos > 0 || !excludeNull)
 					{
-						++(*valueCount);
+						++(*splitCount);
 
 						// Copy previously found slices
-						std::string* tmpBits = new std::string[*valueCount];
+						std::string* tmpBits = new std::string[*splitCount];
 
-						for (size_t i = 0; i < *valueCount - 2; ++i)
+						for (size_t i = 0; i < *splitCount - 2; ++i)
 						{
 							// If the arraySize is 2, then 0 entries have been initialized
-							tmpBits[i] = *values[i];
+							tmpBits[i] = (*splitValues)[i];
 						}
 
-						delete[] *values;
-						*values = tmpBits;
+						delete[] *splitValues;
+						*splitValues = tmpBits;
 
 						// Add new slice
-						(*values)[*valueCount - 2] = currentSearchString.substr(0, pos);
+						(*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
 						currentSearchString = currentSearchString.substr(pos + delimiter.length(), currentSearchString.length() - pos);
 
 						// Prep for next iteration
@@ -234,18 +242,174 @@ namespace PB
 				}
 
 				// Add the remaining string as the last entry in the array
-				(*values)[*valueCount - 1] = currentSearchString;
+				(*splitValues)[*splitCount - 1] = currentSearchString;
 			}
 			else if (!delimiter.empty())
 			{
-				*values = new std::string[1]{ str };
-				*valueCount = 1;
+				*splitValues = new std::string[1]{ str };
+				*splitCount = 1;
 			}
 			else
 			{
-				*values = nullptr;
-				*valueCount = 0;
+				*splitValues = nullptr;
+				*splitCount = 0;
 			}
+		}
+
+		void split(std::string str, std::string delimiter, std::string** splitValues, uint32_t* splitCount, bool excludeNull)
+		{
+			split(str, delimiter, 0, splitValues, splitCount, excludeNull);
+		}
+	}
+
+	namespace FileUtils
+	{
+		namespace
+		{
+			struct membuf : std::streambuf {
+				membuf(char const* base, size_t size) {
+					char* p(const_cast<char*>(base));
+					this->setg(p, p, p + size);
+				}
+			protected:
+				pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which = std::ios_base::in)
+				{
+					if (dir == std::ios_base::cur)
+						gbump(off);
+					else if (dir == std::ios_base::end)
+						setg(eback(), egptr() + off, egptr());
+					else if (dir == std::ios_base::beg)
+						setg(eback(), eback() + off, egptr());
+					return gptr() - eback();
+				}
+			};
+			struct imemstream : virtual membuf, std::istream {
+				imemstream(char const* base, size_t size)
+					: membuf(base, size)
+					, std::istream(static_cast<std::streambuf*>(this)) {
+				}
+			};
+		}
+
+		bool getFileListFromArchive(std::string archivePath, std::unordered_set<std::string>* files)
+		{
+			struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
+
+			if (zip != nullptr)
+			{
+				int32_t n = zip_entries_total(zip);
+
+				if (n > -1)
+				{
+					if (files == nullptr)
+					{
+						files = new std::unordered_set<std::string>{};
+					}
+
+					for (size_t i = 0; i < n; ++i)
+					{
+						zip_entry_openbyindex(zip, i);
+						{
+							files->insert(zip_entry_name(zip));
+						}
+					}
+
+					return true;
+				}
+				else
+				{
+					LOGGER_ERROR("Error reading files from archive '" + archivePath + "'");
+				}
+			}
+			else
+			{
+				LOGGER_ERROR("Error reading archive '" + archivePath + "'");
+			}
+
+			return false;
+		}
+
+		bool getContentsFromArchivedFile(std::string archivePath, std::string filePath, int8_t** buffer, size_t* bufferSize)
+		{
+			bool success = false;
+
+			struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
+			{
+				if (zip != nullptr)
+				{
+					zip_entry_open(zip, filePath.c_str());
+					{
+						if (zip != nullptr)
+						{
+							if (zip_entry_read(zip, (void**)buffer, bufferSize) >= 0)
+							{
+								success = true;
+							}
+						}
+						else
+						{
+							LOGGER_ERROR("Error reading file '" + filePath + "' from archive '" + archivePath + "'");
+						}
+					}
+				}
+				else
+				{
+					LOGGER_ERROR("Error reading archive '" + archivePath + "'");
+				}
+			}
+
+			zip_close(zip);
+
+			return success;
+		}
+
+		bool getStreamFromArchivedFile(std::string archivePath, std::string filePath, std::istream** stream)
+		{
+			bool success = true;
+			int8_t* buffer = nullptr;
+			size_t bufferSize = 0;
+
+			if (getContentsFromArchivedFile(archivePath, filePath, &buffer, &bufferSize))
+			{
+				*stream = new imemstream((char*)buffer, bufferSize);
+			}
+			else
+			{
+				success = false;
+				LOGGER_ERROR("Failed to read contents of '" + archivePath + "/" + filePath + "'");
+			}
+
+			//delete buffer;
+			return success;
+		}
+
+		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties)
+		{
+			std::string line;
+			
+			while (std::getline(*stream, line))
+			{
+				StringUtils::trim(&line);
+
+				std::string* splitValues;
+				uint32_t splitCount;
+
+				StringUtils::split(line, &splitValues, &splitCount);
+
+				if (splitCount == 2)
+				{
+					properties->insert(
+						std::pair<std::string, std::string>(splitValues[0], splitValues[1])
+					);
+				}
+				else
+				{
+					LOGGER_ERROR("Invalid property data in stream");
+					return false;
+				}
+			}
+
+			return true;
 		}
 	}
 }

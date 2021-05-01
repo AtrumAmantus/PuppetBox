@@ -59,6 +59,11 @@ namespace PB
 				LOGGER_ERROR("Failed to initialize SDL");
 			}
 		};
+		void destroy()
+		{
+			if (window_) SDL_DestroyWindow(window_);
+			SDL_Quit();
+		};
 		bool hadError() const
 		{
 			return error_;
@@ -88,7 +93,7 @@ namespace PB
 			return "SDL2";
 		};
 	private:
-		uint64_t lastFrameTime_;
+		uint64_t lastFrameTime_ = 0;
 		SDL_Window* window_ = nullptr;
 		bool error_ = false;
 	};

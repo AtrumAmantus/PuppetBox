@@ -9,16 +9,69 @@
 #endif
 
 #include "puppetbox/AbstractSceneHandler.h"
-#include "puppetbox/BasicMessage.h"
+#include "puppetbox/SceneObject.h"
 
 namespace PB
 {
-	class AbstractSceneHandler;
+	namespace LibraryAsset
+	{
+		enum Type
+		{
+			MODEL_2D
+		};
+	}
 
+	class AbstractSceneHandler;
+	class SceneObject;
+
+	/**
+	 * \brief Initialize app context, create window, etc.
+	 *
+	 * \param windowTitle The label used in the window's title
+	 * \param windowWidth The initial width of the window
+	 * \param windowHeight The initial height of the window
+	 */
 	extern PUPPET_BOX_API void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+
+	/**
+	 * \brief Create a new scene referenced by the given string
+	 *
+	 * \param sceneName The name to reference the scene by
+	 */
 	extern PUPPET_BOX_API void CreateScene(std::string sceneName);
+
+	/**
+	 * \brief Set the currently active scene
+	 *
+	 * \param sceneName The name referencing the specified scene
+	 */
 	extern PUPPET_BOX_API void SetActiveScene(std::string sceneName);
+
+	/**
+	 * \brief Set a derived scene handler for the active scene
+	 *
+	 * \param sceneHandler The derived SceneHandler to facilitate scene events
+	 */
 	extern PUPPET_BOX_API void SetSceneHandler(AbstractSceneHandler* sceneHandler);
+
+	/**
+	 * \brief Loads a special PuppetBox format asset package to be utilized in the scene
+	 *
+	 * \param archiveName The name of the asset pack to load
+	 */
 	extern PUPPET_BOX_API void LoadAssetPack(std::string archiveName);
+
+	/**
+	 * \brief Injects the base assets into the given scene object.
+	 *
+	 * \param assetPath The path to the asset to inject 
+	 * \param sceneObject The SceneObject to inject assets into, must not be a nullptr.
+	 * \param type Specifies what type the requested asset is.
+	 */
+	extern PUPPET_BOX_API void CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
+
+	/**
+	 * \brief Initiates start of core engine, input processors, and render loops.
+	 */
 	extern PUPPET_BOX_API void Run();
 }

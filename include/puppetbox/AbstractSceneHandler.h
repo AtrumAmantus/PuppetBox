@@ -3,38 +3,28 @@
 #include <vector>
 
 #include "../PuppetBox.h"
-#include "../../PuppetBoxEngine/IMessage.h"
-#include "../../PuppetBoxEngine/MessageBroker.h"
 
 namespace PB
 {
-	extern PUPPET_BOX_API class AbstractSceneHandler
+	/**
+	* \brief Base class to create derived SceneHandlers for guiding events within a scene.
+	*/
+	class PUPPET_BOX_API AbstractSceneHandler
 	{
 	public:
+		/**
+		* \brief Runs only once, when the scene first loads
+		*/
 		virtual void setUp() = 0;
+
+		/**
+		* \brief Runs once per frame, after input processing, but before rendering.
+		*/
 		virtual void update(const float deltaTime) = 0;
-		void setMessageBroker(MessageBroker* messageBroker)
-		{
-			messageBroker_ = messageBroker;
-		};
-		void listener(IMessage* message)
-		{
-			eventListener(message);
-		};
-		virtual void eventListener(IMessage* message) { };
-	protected:
-		void publishEvent(IMessage* message)
-		{
-			messageBroker_->publish(message);
-		};
-		void subscribe(Event::Type eventType)
-		{
-			EventListener eventListener = [this](IMessage* message)
-			{
-				this->listener(message);
-			};
-		};
-	private:
-		MessageBroker* messageBroker_;
+
+		/**
+		* \brief Runs once per frame, after updates
+		*/
+		virtual void render() = 0;
 	};
 }
