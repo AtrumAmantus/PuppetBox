@@ -9,8 +9,10 @@
 namespace PB
 {
 	/**
-	 * \brief The basic container for renderable objects in a scene.  Derived classes should be used to extend with addtional needed attributes
+	 * \brief The basic container for renderable objects in a scene.  Derived classes should be used to extend with additional needed attributes
 	 * such as name, health, etc.
+	 * 
+	 * This class serves as a basic container to inject asset references into for later GFX API calls during rendering.
 	 */
 	class PUPPET_BOX_API SceneObject
 	{

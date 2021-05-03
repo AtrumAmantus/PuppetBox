@@ -5,11 +5,6 @@
 
 namespace PB
 {
-	bool Engine::init()
-	{
-		return true;
-	}
-
 	void Engine::run()
 	{
 		loop();

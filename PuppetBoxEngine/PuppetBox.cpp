@@ -9,7 +9,7 @@
 #include "AssetLibrary.h"
 #include "AbstractInputProcessor.h"
 #include "Engine.h"
-#include "GladGfxApi.h"
+#include "OpenGLGfxApi.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "KeyCode.h"
@@ -29,6 +29,7 @@ namespace PB
 {
 	namespace
 	{
+		// Engine context variables
 		std::shared_ptr<IHardwareInitializer> hardwareInitializer{ nullptr };
 		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
 		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
@@ -38,11 +39,21 @@ namespace PB
 		SceneGraph invalidScene{ "InvalidScene" };
 		bool pbInitialized = false;
 
+		/**
+		* \brief Helper function that provides a default IGfxApi implementation.
+		*
+		* \return A IGfxApi implementation.
+		*/
 		std::shared_ptr<IGfxApi> defaultGfxApi()
 		{
-			return std::make_shared<GladGfxApi>();
+			return std::make_shared<OpenGLGfxApi>();
 		}
 
+		/**
+		* \brief Helper function that returns a reference to the currently active SceneGraph.
+		*
+		* \return Reference to the currently active SceneGraph.
+		*/
 		SceneGraph& activeScene()
 		{
 			if (!activeSceneId.empty() && loadedScenes.find(activeSceneId) != loadedScenes.end())
@@ -53,6 +64,13 @@ namespace PB
 			return invalidScene;
 		}
 
+		/**
+		* \brief Helper function that converts publicly exposed enum to private one.
+		* 
+		* \param type	The publicly exposed asset type enum.
+		* 
+		* \return The private, inner asset type enum.
+		*/
 		Asset::Type convertToAssetType(LibraryAsset::Type type)
 		{
 			switch (type)
@@ -122,7 +140,6 @@ namespace PB
 		if (loadedScenes.find(sceneName) == loadedScenes.end())
 		{
 			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName);
-			scene->init();
 
 			loadedScenes.insert(
 				std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
@@ -177,14 +194,7 @@ namespace PB
 
 		engine.setScene(&activeScene());
 
-		if (engine.init())
-		{
-			engine.run();
-		}
-		else
-		{
-			LOGGER_ERROR("Engine stalled.");
-		}
+		engine.run();
 
 		engine.shutdown();
 	}

@@ -2,6 +2,10 @@
 
 #include <unordered_map>
 
+/**
+* \brief Creates mappings from the specific hardware library to universal application codes.
+*/
+
 #ifdef _USE_GLFW
 
 #define _KEY_UNKNOWN			-1
@@ -417,6 +421,17 @@
 
 namespace PB
 {
+	/**
+	* \brief Initializes the char map with the desired mappings of arbitrary key codes to specific ascii characters.
+	*/
 	void Init_CharMap();
+
+	/**
+	* \brief Helper function for getting the ascii character the given key code represents.
+	*
+	* \param code	The arbitrary key code to be maped to an ascii character.
+	*
+	* \return The int value for the ascii character the key code represents.
+	*/
 	int8_t GetCharFromCode(uint8_t code);
 }

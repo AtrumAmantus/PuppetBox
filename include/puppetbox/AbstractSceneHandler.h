@@ -19,6 +19,8 @@ namespace PB
 
 		/**
 		* \brief Runs once per frame, after input processing, but before rendering.
+		* 
+		* \param deltaTime The time in milliseconds since the last frame was run.
 		*/
 		virtual void update(const float deltaTime) = 0;
 

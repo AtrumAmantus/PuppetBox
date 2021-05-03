@@ -11,9 +11,19 @@
 
 namespace PB
 {
+	/**
+	* \brief SDL2 specific implementation for the IHardwareInitializer for hardware interactions.
+	*/
 	class Sdl2Initializer : public IHardwareInitializer
 	{
 	public:
+		/**
+		* \brief Invokes the SDL2 specific functions to initialize hardware configuration for future interactions.
+		* 
+		* \param windowTitle	The desired title for the window to be created.
+		* \param windowWidth	The desired width for the window to be created.
+		* \param windowHeight	The desired height for the window to be created.
+		*/
 		void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
 		{
 			if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
@@ -59,23 +69,47 @@ namespace PB
 				LOGGER_ERROR("Failed to initialize SDL");
 			}
 		};
+
+		/**
+		* \brief Releases any allocated resources and cleans up SDL2 specific configurations.
+		*/
 		void destroy()
 		{
 			if (window_) SDL_DestroyWindow(window_);
 			SDL_Quit();
 		};
+
+		/**
+		* \brief Determines if an error occured during hardware initialization.
+		* 
+		* \return True if an error occured during initialization, False otherwise.
+		*/
 		bool hadError() const
 		{
 			return error_;
 		};
+
+		/**
+		* \brief The SDL2 specific commands to be executed after each loop, such as buffer swapping.
+		*/
 		void postLoopCommands() const
 		{
 			SDL_GL_SwapWindow(window_);
 		};
+
+		/**
+		* \brief Initialize the game time for later tracking time deltas between frames.
+		*/
 		void initializeGameTime()
 		{
 			lastFrameTime_ = SDL_GetPerformanceCounter();
 		};
+
+		/**
+		* \brief Re-calculate time elapsed since last invocation.
+		* 
+		* \return The amount of time (in Milliseconds) since the last time the method was invoked.
+		*/
 		float updateElapsedTime()
 		{
 			uint64_t NOW = SDL_GetPerformanceCounter();
@@ -84,10 +118,22 @@ namespace PB
 
 			return delta / (float)SDL_GetPerformanceFrequency();
 		};
+
+		/**
+		* \brief Get a reference to the process address for configuring function pointers.
+		* 
+		* \return The SDL2 specific process address for function pointers.
+		*/
 		ProcAddress getProcAddress() const
 		{
 			return SDL_GL_GetProcAddress;
 		};
+
+		/**
+		* \brief Identifies the specific IHardwareInitializer by a string value.
+		* 
+		* \return The specific IHardwareInitializer identifier for this hardware library implementation.
+		*/
 		std::string initializerName() const
 		{
 			return "SDL2";

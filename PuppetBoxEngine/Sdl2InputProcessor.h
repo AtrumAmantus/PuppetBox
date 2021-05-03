@@ -10,9 +10,15 @@
 
 namespace PB
 {
+	/**
+	* \brief SDL2 specific InputProcessor implementation for reading hardware input.
+	*/
 	class Sdl2InputProcessor : public AbstractInputProcessor
 	{
 	public:
+		/**
+		* \brief Loads the current hardware input state, storing the previous state for doing later state checks.
+		*/
 		void loadCurrentState() override
 		{
 			for (uint32_t i = 0; i < KEY_LAST + 1; ++i)

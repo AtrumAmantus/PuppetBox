@@ -5,9 +5,18 @@ namespace PB
 {
 	namespace
 	{
-		// Key: arbitrary designator, Value: character
+		/**
+		* \brief Used to map arbitrary key codes to actual ascii characters
+		* Key: arbitrary designator, Value: character
+		*/
 		::std::unordered_map<uint8_t, uint8_t> charMap_{};
 
+		/**
+		* \brief Helper method to insider values into the charMap.
+		* 
+		* \param k	The key for the entry.
+		* \param v	The value for the entry.
+		*/
 		void CharMapInsert(uint8_t k, uint8_t v)
 		{
 			charMap_.insert(::std::pair<uint8_t, uint8_t>{ k, v });

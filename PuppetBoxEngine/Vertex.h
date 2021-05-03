@@ -4,6 +4,9 @@
 
 namespace PB
 {
+	/**
+	* \brief Struct defining data for a single vertex.
+	*/
 	struct Vertex
 	{
 		vec3 position;

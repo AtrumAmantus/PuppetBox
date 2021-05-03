@@ -10,14 +10,37 @@
 
 namespace PB
 {
+	/**
+	* \brief The primary class of the game engine, used to initialize hardware and GFX APIs, and
+	* responsible for executing the primary game loop and basic input handling.
+	*/
 	class Engine
 	{
 	public:
+		/**
+		* \brief Creates an engine instance using the given specific IGfxApi, Hardware, and Input
+		* implemenations.
+		* 
+		* \param gfxApi					The specific GFX API implementation to be used.
+		* \param hardwareInitializer	The specific hardware library implemenation.
+		* \param inputProcessor			The specific input processor for the given hardware library implementation.
+		*/
 		Engine(IGfxApi& gfxApi, IHardwareInitializer& hardwareInitializer, AbstractInputProcessor& inputProccessor) :
 			gfxApi_(gfxApi), hardwareInitializer_(hardwareInitializer), inputProcessor_(inputProccessor) {};
-		bool init();
+
+		/**
+		* \brief Executes the engine, starting the primary game loop and processing input.
+		*/
 		void run();
+
+		/**
+		* \brief Attempts to shut down the game engine.
+		*/
 		void shutdown();
+
+		/**
+		* \brief Sets the currently active scene to be used in update and render logic.
+		*/
 		void setScene(SceneGraph* scene);
 	private:
 		IGfxApi& gfxApi_;
@@ -25,7 +48,14 @@ namespace PB
 		AbstractInputProcessor& inputProcessor_;
 		SceneGraph* scene_ = nullptr;
 	private:
+		/**
+		* \brief The primary game loop.
+		*/
 		void loop();
+
+		/**
+		* \brief Handles processing of the hardware input.
+		*/
 		void processInput();
 	};
 }

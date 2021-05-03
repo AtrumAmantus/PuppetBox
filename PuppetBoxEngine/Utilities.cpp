@@ -11,6 +11,9 @@
 
 namespace PB
 {
+	/**
+	* \brief These hidden functions provide support for all whitespace characters, dependent on system definition of std::isspace().
+	*/
 	namespace
 	{
 		void ltrimWhitespace(std::string* str)
@@ -50,6 +53,13 @@ namespace PB
 
 			return str;
 		}
+		/**
+		* \brief Finds the first occurance of any whitespace character in the given string.
+		* 
+		* \param str The string to search for whitespace.
+		* 
+		* \return The index of the first whitespace character found, returns std::string::npos if not found.
+		*/
 		size_t findWhitespace(std::string str)
 		{
 			size_t i;
@@ -71,7 +81,7 @@ namespace PB
 		void trim(std::string* str)
 		{
 			trimWhitespace(str);
-		};
+		}
 
 		std::string trim(std::string str)
 		{
@@ -82,7 +92,7 @@ namespace PB
 		{
 			ltrim(str, c);
 			rtrim(str, c);
-		};
+		}
 
 		std::string trim(std::string str, const char& c)
 		{
@@ -94,12 +104,12 @@ namespace PB
 		void ltrim(std::string* str)
 		{
 			ltrimWhitespace(str);
-		};
+		}
 
 		std::string ltrim(std::string str)
 		{
 			return ltrimWhitespace(str);
-		};
+		}
 
 		void ltrim(std::string* str, const char& c)
 		{
@@ -107,24 +117,24 @@ namespace PB
 			{
 				str->erase(0, 1);
 			}
-		};
+		}
 
 		std::string ltrim(std::string str, const char& c)
 		{
 			ltrim(&str, c);
 
 			return str;
-		};
+		}
 
 		void rtrim(std::string* str)
 		{
 			rtrimWhitespace(str);
-		};
+		}
 
 		std::string rtrim(std::string str)
 		{
 			return rtrimWhitespace(str);
-		};
+		}
 
 		void rtrim(std::string* str, const char& c)
 		{
@@ -132,14 +142,14 @@ namespace PB
 			{
 				str->erase((strlen((*str).c_str()) - 1), 1);
 			}
-		};
+		}
 
 		std::string rtrim(std::string str, const char& c)
 		{
 			rtrim(&str, c);
 
 			return str;
-		};
+		}
 
 		bool startsWith(std::string str, std::string prefix)
 		{
@@ -266,6 +276,9 @@ namespace PB
 	{
 		namespace
 		{
+			/**
+			* \brief Custom buffer for building stream objects.
+			*/
 			struct membuf : std::streambuf {
 				membuf(char const* base, size_t size) {
 					char* p(const_cast<char*>(base));
@@ -283,6 +296,9 @@ namespace PB
 					return gptr() - eback();
 				}
 			};
+			/**
+			* \brief Custom stream type for storing zip data.
+			*/
 			struct imemstream : virtual membuf, std::istream {
 				imemstream(char const* base, size_t size)
 					: membuf(base, size)
@@ -379,7 +395,6 @@ namespace PB
 				LOGGER_ERROR("Failed to read contents of '" + archivePath + "/" + filePath + "'");
 			}
 
-			//delete buffer;
 			return success;
 		}
 

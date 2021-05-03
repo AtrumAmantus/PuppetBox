@@ -7,6 +7,10 @@
 
 namespace PB
 {
+	/**
+	* \brief Struct used to define Material data, including associated Shader and ImageReferences for GFX API
+	* specific implementation.
+	*/
 	struct Material
 	{
 		std::string diffuseId;

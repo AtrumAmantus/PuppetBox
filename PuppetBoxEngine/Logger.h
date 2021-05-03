@@ -10,6 +10,9 @@
 
 namespace PB
 {
+    /**
+    * \brief Logging class for application logging needs.
+    */
     class DefaultLogger
     {
     public:

@@ -10,6 +10,15 @@ namespace PB
 {
 	namespace
 	{
+		/**
+		* \brief Helper function to return a default value if a given key is not in the given unordered_map.
+		* 
+		* \param propertyName	The key that is expected to referenced the desired data in the map.
+		* \param properties		The unordered_map from which the key will be used to acquire data.
+		* \param defaultValue	The default value to use if the given unordered_map does not contain the given key.
+		* 
+		* \return Either the value from the map referenced with the given key, or the given default value if the key did not exist.
+		*/
 		std::string defaultIfNotInMap(std::string propertyName, std::unordered_map<std::string, std::string> properties, std::string defaultValue)
 		{
 			if (properties.find(propertyName) != properties.end())
@@ -20,6 +29,14 @@ namespace PB
 			return defaultValue;
 		}
 
+		/**
+		* \brief Helper function to map a properties map to a Model2D object.
+		* 
+		* \param properties	The properties map to use to map to a Model2D object.
+		* \param bool		Flag indicating an error occured if set to True.
+		* 
+		* \return The Model2D object built from the given properties map.
+		*/
 		Model2D mapToModel2D(std::unordered_map<std::string, std::string> properties, bool* error)
 		{
 			Model2D model{};
@@ -39,7 +56,14 @@ namespace PB
 			return model;
 		}
 
-		Material mapToMaterial(std::unordered_map<std::string, std::string> properties, bool* error)
+		/**
+		* \brief Helper function to map a properties map to a Material object.
+		*
+		* \param properties	The properties map to use to map to a Material object.
+		*
+		* \return The Material object built from the given properties map.
+		*/
+		Material mapToMaterial(std::unordered_map<std::string, std::string> properties)
 		{
 			Material material;
 
@@ -49,6 +73,14 @@ namespace PB
 			return material;
 		}
 
+		/**
+		* \brief Helper function to map a properties map to a Shader object.
+		*
+		* \param properties	The properties map to use to map to a Material object.
+		* \param bool		Flag indicating an error occured if set to True.
+		*
+		* \return The Material object built from the given properties map.
+		*/
 		ShaderProgram mapToShaderProgram(std::unordered_map<std::string, std::string> properties, bool* error)
 		{
 			ShaderProgram shaderProgram{};
@@ -58,6 +90,42 @@ namespace PB
 			shaderProgram.fragmentShaderPath = defaultIfNotInMap("fragment", properties, "");
 
 			return shaderProgram;
+		}
+
+		/**
+		* \brief Helper fucking to aquire the filename associated with the given virtual asset path.
+		*
+		* \param assetPath			The virtual asset path of the desired asset.
+		* \param archiveAssetIds	The unordered_map containing the virtual path -> filename associations.
+		* \param archiveAssets		The unordered_set containing all existing assets contained in the AssetArchive.
+		*
+		* \return The filename for the given virtual asset path if found, or a blank string otherwise.
+		*/
+		std::string fileNameOfAsset(
+			std::string assetPath,
+			std::unordered_map<std::string, std::string>& archiveAssetIds,
+			std::unordered_set<std::string>& archiveAssets
+		)
+		{
+			if (archiveAssetIds.find(assetPath) != archiveAssetIds.end())
+			{
+				std::string fileName = archiveAssetIds.at(assetPath);
+
+				if (archiveAssets.find(fileName) != archiveAssets.end())
+				{
+					return fileName;
+				}
+				else
+				{
+					LOGGER_ERROR("Defined asset '" + assetPath + "' could not be found");
+				}
+			}
+			else
+			{
+				LOGGER_ERROR("Unknown asset '" + assetPath + "'");
+			}
+
+			return "";
 		}
 	}
 
@@ -80,9 +148,9 @@ namespace PB
 		return success;
 	}
 
-	bool AssetArchive::hasAsset(std::string assetName)
+	bool AssetArchive::hasAsset(std::string assetPath)
 	{
-		return !assetName.empty() && archiveAssets_.find(assetName) != archiveAssets_.end();
+		return !assetPath.empty() && archiveAssets_.find(assetPath) != archiveAssets_.end();
 	}
 
 	uint64_t AssetArchive::assetCount()
@@ -90,10 +158,10 @@ namespace PB
 		return archiveAssets_.size();
 	}
 
-	std::string AssetArchive::loadAsciiData(std::string assetName, bool* error)
+	std::string AssetArchive::loadAsciiData(std::string assetPath, bool* error)
 	{
 		std::string data;
-		std::string fileName = fileNameOfAsset(assetName);
+		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
@@ -112,17 +180,17 @@ namespace PB
 		else
 		{
 			*error = true;
-			LOGGER_ERROR("Failed to retrieve asset '" + assetName + "'");
+			LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
 		}
 
 		return data;
 	}
 
-	ShaderProgram AssetArchive::loadShaderAsset(std::string assetName, bool* error)
+	ShaderProgram AssetArchive::loadShaderAsset(std::string assetPath, bool* error)
 	{
-		ShaderProgram shaderProgram{ assetName };
+		ShaderProgram shaderProgram{ assetPath };
 
-		std::string fileName = fileNameOfAsset(assetName);
+		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
@@ -137,24 +205,24 @@ namespace PB
 			if (!*error)
 			{
 				ShaderProgram program = mapToShaderProgram(modelPropertyData, error);
-				program.programPath = assetName;
+				program.programPath = assetPath;
 				return program;
 			}
 		}
 		else
 		{
 			*error = true;
-			LOGGER_ERROR("Failed to retrieve asset '" + assetName + "'");
+			LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
 		}
 
 		return shaderProgram;
 	}
 
-	ImageData AssetArchive::loadImageAsset(std::string assetName, bool* error)
+	ImageData AssetArchive::loadImageAsset(std::string assetPath, bool* error)
 	{
 		ImageData data{};
 
-		std::string fileName = fileNameOfAsset(assetName);
+		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
@@ -178,7 +246,7 @@ namespace PB
 			}
 			else
 			{
-				LOGGER_ERROR("Failed to acquire stream for asset '" + assetName + "' in archive '" + archivePath() + "'");
+				LOGGER_ERROR("Failed to acquire stream for asset '" + assetPath + "' in archive '" + archivePath() + "'");
 			}
 
 			delete stream;
@@ -186,15 +254,15 @@ namespace PB
 		else
 		{
 			*error = true;
-			LOGGER_ERROR("Failed to retrieve asset '" + assetName + "'");
+			LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
 		}
 
 		return data;
 	}
 
-	Material AssetArchive::loadMaterialAsset(std::string assetName, bool* error)
+	Material AssetArchive::loadMaterialAsset(std::string assetPath, bool* error)
 	{
-		std::string fileName = fileNameOfAsset(assetName);
+		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
@@ -208,21 +276,21 @@ namespace PB
 			delete stream;
 			if (!*error)
 			{
-				return mapToMaterial(modelPropertyData, error);
+				return mapToMaterial(modelPropertyData);
 			}
 		}
 		else
 		{
 			*error = true;
-			LOGGER_ERROR("Failed to retrieve asset '" + assetName + "'");
+			LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
 		}
 
 		return {};
 	}
 
-	Model2D AssetArchive::load2DModelAsset(std::string assetName, bool* error)
+	Model2D AssetArchive::load2DModelAsset(std::string assetPath, bool* error)
 	{
-		std::string fileName = fileNameOfAsset(assetName);
+		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
@@ -240,7 +308,7 @@ namespace PB
 
 				if (*error)
 				{
-					LOGGER_ERROR("Failed to load Model2D data for asset '" + assetName + "'");
+					LOGGER_ERROR("Failed to load Model2D data for asset '" + assetPath + "'");
 				}
 
 				return model;
@@ -249,33 +317,10 @@ namespace PB
 		else
 		{
 			*error = true;
-			LOGGER_ERROR("Failed to retrieve asset '" + assetName + "'");
+			LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
 		}
 
 		return {};
-	}
-
-	std::string AssetArchive::fileNameOfAsset(std::string assetName)
-	{
-		if (archiveAssetIds_.find(assetName) != archiveAssetIds_.end())
-		{
-			std::string fileName = archiveAssetIds_.at(assetName);
-
-			if (archiveAssets_.find(fileName) != archiveAssets_.end())
-			{
-				return fileName;
-			}
-			else
-			{
-				LOGGER_ERROR("Defined asset '" + assetName + "' could not be found");
-			}
-		}
-		else
-		{
-			LOGGER_ERROR("Unknown asset '" + assetName + "'");
-		}
-
-		return "";
 	}
 
 	std::string AssetArchive::archivePath()

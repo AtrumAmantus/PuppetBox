@@ -9,12 +9,22 @@ namespace PB
 {
 	namespace
 	{
+		/**
+		* \brief Structure used to help destruct virtual asset paths into separate archive and asset paths.
+		*/
 		struct AssetStruct
 		{
 			std::string archiveName;
 			std::string assetName;
 		};
 
+		/**
+		* \brief Helper function for placing values into a map for terser code.
+		* 
+		* \param key	The key to use for a value reference in the map.
+		* \param value	The value to place at the specified key reference in the map.
+		* \param map	The unordered_map to place the key-value pair into.
+		*/
 		template <class T>
 		void insertIntoMap(std::string key, T& value, std::unordered_map<std::string, T>& map)
 		{
@@ -23,6 +33,15 @@ namespace PB
 			);
 		}
 
+		/**
+		* \brief Helper function to break up a given virtual asset path into it's separate archive and asset paths.
+		* 
+		* \param assetPath	The virtual asset path to destruct.
+		* \param error		Flag indicating an error occured if set to True.
+		* 
+		* \return The AssetStruct containing the separated archive name and asset path, or an empty struct if
+		* an error occured destructing the virtual asset path.
+		*/
 		AssetStruct parseAssetPath(std::string assetPath, bool* error)
 		{
 			uint32_t splitCount;
@@ -42,6 +61,16 @@ namespace PB
 			return AssetStruct{};
 		}
 
+		/**
+		* \brief Helper function to get the raw shader code for a given shader asset.
+		* 
+		* \param assetPath			The virtual asset path for the desired shader asset.
+		* \param assetArchiveMap	The AssetArchive to search for the given shader asset.
+		* \param error				Flag indicating an error occured if set to True.
+		* 
+		* \return A string containing the raw shader code of the requested shader asset, or an empty
+		* string if an error occured fetching the asset.
+		*/
 		std::string loadShaderCode(std::string assetPath, std::unordered_map<std::string, AssetArchive>& assetArchiveMap, bool* error)
 		{
 			if (!StringUtils::trim(assetPath).empty())

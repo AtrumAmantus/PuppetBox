@@ -2,6 +2,10 @@
 
 namespace PB
 {
+	/**
+	* \brief OpenGL specific mesh object for storing mesh related rendering data to be used
+	* in rendering calls.
+	*/
 	struct Mesh
 	{
 		uint32_t VBO = 0;

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "GladGfxApi.h"
+#include "OpenGLGfxApi.h"
 
 #define FLOAT_EQUALITY_THRESHOLD 0.0000001f
 
@@ -10,6 +10,15 @@ namespace PB
 {
 	namespace
 	{
+		/**
+		* \brief Searches for the provided vertex in the provided vector.  Two ertices are considered equal if each of
+		* their matching attributes fall within a certain defined tolerance.
+		* 
+		* \param vertex The vertex to search for
+		* \param vector The vector to search in
+		* 
+		* \return The index of the matching vertex in the vector, or -1 if not found.
+		*/
 		int64_t findVertexInVector(Vertex& vertex, std::vector<Vertex>& vector)
 		{
 			for (uint64_t i = 0; i < vector.size(); ++i)
@@ -35,7 +44,7 @@ namespace PB
 		}
 	}
 
-	bool GladGfxApi::init(const IHardwareInitializer& hardwareInitializer) const
+	bool OpenGLGfxApi::init(const IHardwareInitializer& hardwareInitializer) const
 	{
 		bool error = false;
 
@@ -55,20 +64,20 @@ namespace PB
 		return !error;
 	}
 
-	void GladGfxApi::preLoopCommands() const
+	void OpenGLGfxApi::preLoopCommands() const
 	{
 		glViewport(0, 0, width_, height_);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void GladGfxApi::setRenderDimensions(uint32_t width, uint32_t height)
+	void OpenGLGfxApi::setRenderDimensions(uint32_t width, uint32_t height)
 	{
 		width_ = width;
 		height_ = height;
 	}
 
-	ImageReference GladGfxApi::loadImage(ImageData imageData) const
+	ImageReference OpenGLGfxApi::loadImage(ImageData imageData) const
 	{
 		ImageReference imageReference{ 0 };
 
@@ -101,7 +110,7 @@ namespace PB
 		return imageReference;
 	}
 
-	Mesh GladGfxApi::loadMesh(Vertex* vertexData, uint32_t vertexCount) const
+	Mesh OpenGLGfxApi::loadMesh(Vertex* vertexData, uint32_t vertexCount) const
 	{
 		Mesh mesh{};
 
