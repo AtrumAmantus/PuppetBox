@@ -4,6 +4,7 @@
 
 #include "IHardwareInitializer.h"
 #include "ImageData.h"
+#include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Mesh.h"
 #include "Vertex.h"
@@ -42,8 +43,9 @@ namespace PB
 		* \brief Used to execute the GFX API specific commands to load an image into GFX memory.
 		*
 		* \param imageData	The image data to be loaded into memory.
+		* \param options	Image loading options to use when loading into memory.
 		*/
-		virtual ImageReference loadImage(ImageData imageData) const = 0;
+		virtual ImageReference loadImage(ImageData imageData, ImageOptions options = {}) const = 0;
 
 		/**
 		* \brief Used to execute the GFX API specific commands to load vertex data into GFX memory.

@@ -54,6 +54,9 @@ namespace PB
 			std::cout << "OpenGL Shading Language Version: " << (char*)glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 			std::cout << "OpenGL Vendor: " << (char*)glGetString(GL_VENDOR) << std::endl;
 			std::cout << "OpenGL Renderer: " << (char*)glGetString(GL_RENDERER) << std::endl;
+
+			glEnable(GL_DEPTH_TEST);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		else
 		{
@@ -77,7 +80,7 @@ namespace PB
 		height_ = height;
 	}
 
-	ImageReference OpenGLGfxApi::loadImage(ImageData imageData) const
+	ImageReference OpenGLGfxApi::loadImage(ImageData imageData, ImageOptions options) const
 	{
 		ImageReference imageReference{ 0 };
 
@@ -87,9 +90,22 @@ namespace PB
 
 			glGenTextures(1, &openGLId);
 			glBindTexture(GL_TEXTURE_2D, openGLId);
-			// Repeat texture
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			if (options.repeatMode == ImageOptions::Mode::CLAMP_TO_BORDER)
+			{
+				// Repeat texture
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+				glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, options.colour);
+			}
+			else
+			{
+				// Repeat texture
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			}
+
 			// Linear sampling
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

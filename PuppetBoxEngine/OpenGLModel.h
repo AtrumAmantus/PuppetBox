@@ -27,6 +27,10 @@ namespace PB
 		*/
 		void render() const
 		{
+			if (material_.requiresAlphaBlending)
+			{
+				glEnable(GL_BLEND);
+			}
 			material_.shader.use();
 			material_.diffuseMap.use(GL_TEXTURE0);
 			material_.shader.setInt("material.diffuseMap", 0);
@@ -49,6 +53,7 @@ namespace PB
 
 			material_.diffuseMap.unuse(GL_TEXTURE0);
 			material_.shader.unuse();
+			glDisable(GL_BLEND);
 		}
 	private:
 		Mesh mesh_;

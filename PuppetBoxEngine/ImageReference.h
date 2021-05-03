@@ -12,6 +12,8 @@ namespace PB
 	class ImageReference
 	{
 	public:
+		bool requiresAlphaBlending = false;
+	public:
 		/**
 		* \brief Create an OpenGL specific ImageReference instance for referencing a stored image data.
 		* 

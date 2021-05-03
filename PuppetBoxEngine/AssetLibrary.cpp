@@ -230,7 +230,7 @@ namespace PB
 		return shader;
 	}
 
-	ImageReference AssetLibrary::loadImageAsset(std::string assetPath, bool* error)
+	ImageReference AssetLibrary::loadImageAsset(std::string assetPath, ImageOptions imageOptions, bool* error)
 	{
 		ImageReference imageReference{ 0 };
 		AssetStruct asset = parseAssetPath(assetPath, error);
@@ -238,7 +238,8 @@ namespace PB
 		if (!*error)
 		{
 			ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
-			imageReference = gfxApi_->loadImage(imageData);
+			imageReference = gfxApi_->loadImage(imageData, imageOptions);
+			imageReference.requiresAlphaBlending = imageData.numChannels == 4;
 			imageData.drop();
 		}
 		else
@@ -261,11 +262,12 @@ namespace PB
 			{
 				if (!material.diffuseId.empty())
 				{
-					ImageReference imageReference = loadImageAsset(material.diffuseId, error);
+					ImageReference imageReference = loadImageAsset(material.diffuseId, { ImageOptions::Mode::CLAMP_TO_BORDER }, error);
 
 					if (!*error)
 					{
 						material.diffuseMap = imageReference;
+						material.requiresAlphaBlending = imageReference.requiresAlphaBlending;
 					}
 					else
 					{

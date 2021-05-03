@@ -20,6 +20,7 @@ namespace PB
 		std::string shaderId = "unspecified";
 		uint32_t specularValue = 0;
 		float emissionValue = 0;
+		bool requiresAlphaBlending = false;
 		ImageReference diffuseMap{ 0 };
 		Shader shader{""};
 	};

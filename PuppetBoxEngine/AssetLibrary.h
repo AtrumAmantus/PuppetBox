@@ -91,13 +91,14 @@ namespace PB
 		/**
 		* \brief Loads an ImageReference asset given by the provided virtual asset path.
 		*
-		* \param assetPath	Virtual path to the requested asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param assetPath		Virtual path to the requested asset.
+		* \param imageOptions	Image loading options to use when loading into memory.
+		* \param error			Flag indicating an error occured if set to True.
 		*
 		* \return The loaded ImageReference object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		ImageReference loadImageAsset(std::string assetPath, bool* error);
+		ImageReference loadImageAsset(std::string assetPath, ImageOptions imageOptions, bool* error);
 
 		/**
 		* \brief Loads a Material asset given by the provided virtual asset path.

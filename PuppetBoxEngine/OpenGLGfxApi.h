@@ -6,6 +6,7 @@
 
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
+#include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Logger.h"
 #include "Mesh.h"
@@ -46,8 +47,9 @@ namespace PB
 		* \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.
 		*
 		* \param imageData	The image data to be loaded into memory.
+		* \param options	Image loading options to use when loading into memory.
 		*/
-		ImageReference loadImage(ImageData imageData) const;
+		ImageReference loadImage(ImageData imageData, ImageOptions options = {}) const;
 
 		/**
 		* \brief Used to execute the OpenGL API specific commands to load vertex data into GFX memory.
