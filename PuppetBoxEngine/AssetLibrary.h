@@ -34,12 +34,12 @@ namespace PB
 		/**
 		* \brief Create a AssetLibrary instance, providing the root directory for where all archives should be fetched, and
 		* IGfxApi that will be used for loading of assets.
-		* 
+		*
 		* \param archiveRoot	The root directory that AssetLibrary should look for archives when they are loaded.
 		* \param gfxApi			The derived gfxApi that will be used for loading assets.
 		*/
 		AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi);
-		
+
 		/**
 		* \brief Initializes the AssetLibrary, making initial configurations.  This call needs to be made before any others
 		* on the AssetLibrary.
@@ -49,9 +49,9 @@ namespace PB
 		/**
 		* \brief Attempts to load the archive with the given name so that it's contained assets can be used in future
 		* asset load calls.
-		* 
+		*
 		* \param archiveName	The name of the archive to attempt to load.
-		* 
+		*
 		* \return True if the archive was loaded successfully, False otherwise.
 		*/
 		bool loadArchive(std::string archiveName);
@@ -59,9 +59,9 @@ namespace PB
 		/**
 		* \brief Attempts to load the given asset into the provided SceneObject.  This logic handles loading the mesh,
 		* textures, animations, etc. for the given SceneObject.
-		* 
+		*
 		* The path is a virtual path to the asset, beginning with the actual AssetArchive name.
-		* 
+		*
 		* \param assetPath		Virtual path to the asset, beginning with actual AssetArchive name.
 		* \param sceneObject	Pointer to the SceneObject that will be impregnated with the requested asset references.
 		* \param type			The type of asset to be loaded, which will dictate asset loading configurations.  Currently
@@ -75,6 +75,10 @@ namespace PB
 		std::shared_ptr<IGfxApi> gfxApi_;
 		std::unordered_map<std::string, AssetArchive> assetArchives_{};
 		std::unordered_map<std::string, Mesh> loadedMeshes_{};
+		std::unordered_map<std::string, Material> loadedMaterials_{};
+		std::unordered_map<std::string, ImageReference> loadedImages_{};
+		std::unordered_map<std::string, std::unique_ptr<IModel>> loadedIModels_{};
+		std::unordered_map<std::string, Shader> loadedShaders_{};
 	private:
 
 		/**
@@ -123,14 +127,13 @@ namespace PB
 		Mesh loadMeshAsset(std::string assetPath, bool* error);
 
 		/**
-		* \brief Loads a SceneObject for a 2D model asset given by the provided virtual asset path.
+		* \brief Loads an IModel implementation object for a 2D model asset given by the provided virtual asset path.
 		*
 		* \param assetPath	Virtual path to the requested asset.
 		* \param error		Flag indicating an error occured if set to True.
 		*
-		* \return The loaded 2DModel SceneObject object for the respective virtual asset path, or an empty
-		* object if an error occured loading the asset.
+		* \return Pointer to the IModel implementation containing the required assets.
 		*/
-		SceneObject* load2DModelAsset(std::string assetPath, bool* error);
+		IModel* loadIModelFor2DModelSceneObject(std::string assetPath, bool* error);
 	};
 }

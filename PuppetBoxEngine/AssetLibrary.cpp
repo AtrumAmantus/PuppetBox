@@ -169,11 +169,10 @@ namespace PB
 		{
 		case Asset::Type::MODEL_2D:
 		{
-			SceneObject* so = load2DModelAsset(assetPath, &error);
+			IModel* model = loadIModelFor2DModelSceneObject(assetPath, &error);
 			if (!error)
 			{
-				*sceneObject = *so;
-				delete so;
+				*sceneObject = SceneObject{ 0, model };
 			}
 			else
 			{
@@ -193,38 +192,52 @@ namespace PB
 	{
 		Shader shader{ assetPath };
 
-		AssetStruct asset = parseAssetPath(assetPath, error);
-
-		if (!*error)
+		if (loadedShaders_.find(assetPath) == loadedShaders_.end())
 		{
-			ShaderProgram program = assetArchives_.at(asset.archiveName).loadShaderAsset(asset.assetName, error);
+			AssetStruct asset = parseAssetPath(assetPath, error);
 
-			std::string vertexCode;
-			std::string geometryCode;
-			std::string fragmentCode;
-
-			if (!*error) vertexCode = loadShaderCode(program.vertexShaderPath, assetArchives_, error);
-			if (!*error) geometryCode = loadShaderCode(program.geometryShaderPath, assetArchives_, error);
-			if (!*error) fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
-
-			shader = Shader{ assetPath, program.vertexShaderPath, program.geometryShaderPath, program.fragmentShaderPath };
-			bool loaded = true;
-			loaded = loaded && shader.loadVertexShader(vertexCode);
-			loaded = loaded && shader.loadGeometryShader(geometryCode);
-			loaded = loaded && shader.loadFragmentShader(fragmentCode);
-
-			if (loaded)
+			if (!*error)
 			{
-				shader.init();
+				ShaderProgram program = assetArchives_.at(asset.archiveName).loadShaderAsset(asset.assetName, error);
+
+				std::string vertexCode;
+				std::string geometryCode;
+				std::string fragmentCode;
+
+				if (!*error) vertexCode = loadShaderCode(program.vertexShaderPath, assetArchives_, error);
+				if (!*error) geometryCode = loadShaderCode(program.geometryShaderPath, assetArchives_, error);
+				if (!*error) fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
+
+				shader = Shader{ assetPath, program.vertexShaderPath, program.geometryShaderPath, program.fragmentShaderPath };
+				bool loaded = true;
+				loaded = loaded && shader.loadVertexShader(vertexCode);
+				loaded = loaded && shader.loadGeometryShader(geometryCode);
+				loaded = loaded && shader.loadFragmentShader(fragmentCode);
+
+				if (loaded)
+				{
+					if (shader.init())
+					{
+						insertIntoMap(assetPath, shader, loadedShaders_);
+					}
+					else
+					{
+						LOGGER_ERROR("Failed to compile shader program '" + assetPath + "'");
+					}
+				}
+				else
+				{
+					LOGGER_ERROR("Failed to load shader '" + assetPath + "'");
+				}
 			}
 			else
 			{
-				LOGGER_ERROR("Failed to load shader '" + assetPath + "'");
+				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
 			}
 		}
 		else
 		{
-			LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			shader = loadedShaders_.at(assetPath);
 		}
 
 		return shader;
@@ -233,18 +246,35 @@ namespace PB
 	ImageReference AssetLibrary::loadImageAsset(std::string assetPath, ImageOptions imageOptions, bool* error)
 	{
 		ImageReference imageReference{ 0 };
-		AssetStruct asset = parseAssetPath(assetPath, error);
 
-		if (!*error)
+		if (loadedImages_.find(assetPath) == loadedImages_.end())
 		{
-			ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
-			imageReference = gfxApi_->loadImage(imageData, imageOptions);
-			imageReference.requiresAlphaBlending = imageData.numChannels == 4;
-			imageData.drop();
+			AssetStruct asset = parseAssetPath(assetPath, error);
+
+			if (!*error)
+			{
+				ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
+				imageReference = gfxApi_->loadImage(imageData, imageOptions);
+				imageReference.requiresAlphaBlending = imageData.numChannels == 4;
+				imageData.drop();
+
+				if (!*error)
+				{
+					insertIntoMap(assetPath, imageReference, loadedImages_);
+				}
+				else
+				{
+					LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+				}
+			}
+			else
+			{
+				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			}
 		}
 		else
 		{
-			LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			imageReference = loadedImages_.at(assetPath);
 		}
 
 		return imageReference;
@@ -252,109 +282,133 @@ namespace PB
 
 	Material AssetLibrary::loadMaterialAsset(std::string assetPath, bool* error)
 	{
-		AssetStruct asset = parseAssetPath(assetPath, error);
+		Material material{};
 
-		if (!*error)
+		if (loadedMaterials_.find(assetPath) == loadedMaterials_.end())
 		{
-			Material material = assetArchives_.at(asset.archiveName).loadMaterialAsset(asset.assetName, error);
+			AssetStruct asset = parseAssetPath(assetPath, error);
 
 			if (!*error)
 			{
-				if (!material.diffuseId.empty())
+				material = assetArchives_.at(asset.archiveName).loadMaterialAsset(asset.assetName, error);
+
+				if (!*error)
 				{
-					ImageReference imageReference = loadImageAsset(material.diffuseId, { ImageOptions::Mode::CLAMP_TO_BORDER }, error);
+					if (!material.diffuseId.empty())
+					{
+						ImageReference imageReference = loadImageAsset(material.diffuseId, { ImageOptions::Mode::CLAMP_TO_BORDER }, error);
 
-					if (!*error)
-					{
-						material.diffuseMap = imageReference;
-						material.requiresAlphaBlending = imageReference.requiresAlphaBlending;
+						if (!*error)
+						{
+							material.diffuseMap = imageReference;
+							material.requiresAlphaBlending = imageReference.requiresAlphaBlending;
+						}
+						else
+						{
+							LOGGER_ERROR("Failed to load image, '" + material.diffuseId + "' for asset '" + assetPath + "'");
+						}
 					}
-					else
-					{
-						LOGGER_ERROR("Failed to load image, '" + material.diffuseId + "' for asset '" + assetPath + "'");
-					}
+
+					insertIntoMap(assetPath, material, loadedMaterials_);
 				}
-
-				return material;
+				else
+				{
+					LOGGER_ERROR("Failed to load material, '" + assetPath + "'");
+				}
 			}
 			else
 			{
-				LOGGER_ERROR("Failed to load material, '" + assetPath + "'");
+				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
 			}
 		}
 		else
 		{
-			LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			material = loadedMaterials_.at(assetPath);
 		}
 
-		return {};
+		return material;
 	}
 
 	Mesh AssetLibrary::loadMeshAsset(std::string assetPath, bool* error)
 	{
-		if (loadedMeshes_.find(assetPath) != loadedMeshes_.end())
+		Mesh mesh{};
+
+		if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
 		{
-			return loadedMeshes_.at(assetPath);
-		}
-		else
-		{
+			//TODO: Implement mesh assets
 			*error = true;
 			LOGGER_ERROR("Mesh '" + assetPath + "' does not exist");
 		}
+		else
+		{
+			mesh = loadedMeshes_.at(assetPath);
+		}
 
-		return Mesh{};
+		return mesh;
 	}
 
-	SceneObject* AssetLibrary::load2DModelAsset(std::string assetPath, bool* error)
+	IModel* AssetLibrary::loadIModelFor2DModelSceneObject(std::string assetPath, bool* error)
 	{
-		SceneObject* sceneObject = nullptr;
-		AssetStruct asset = parseAssetPath(assetPath, error);
+		IModel* model = nullptr;
 
-		if (!*error)
+		if (loadedIModels_.find(assetPath) == loadedIModels_.end())
 		{
-			Model2D model2D = assetArchives_.at(asset.archiveName).load2DModelAsset(asset.assetName, error);
-
 			if (!*error)
 			{
-				Material material = loadMaterialAsset(model2D.materialName, error);
+				AssetStruct asset = parseAssetPath(assetPath, error);
+
+				Model2D model2D = assetArchives_.at(asset.archiveName).load2DModelAsset(asset.assetName, error);
 
 				if (!*error)
 				{
-					material.shader = loadShaderAsset(material.shaderId, error);
+					Material material = loadMaterialAsset(model2D.materialName, error);
 
 					if (!*error)
 					{
-						Mesh mesh = loadMeshAsset("sprite", error);
+						material.shader = loadShaderAsset(material.shaderId, error);
 
 						if (!*error)
 						{
-							sceneObject = new SceneObject{ 0, new OpenGLModel{mesh, material} };
+							Mesh mesh = loadMeshAsset("sprite", error);
+
+							if (!*error)
+							{
+								loadedIModels_.insert(
+									std::pair<std::string, std::unique_ptr<IModel>> { assetPath, std::unique_ptr<IModel>{ new OpenGLModel(mesh, material)} }
+								);
+
+								model = &(*loadedIModels_.at(assetPath));
+							}
+							else
+							{
+								LOGGER_ERROR("Could not load mesh 'sprite' for model asset '" + assetPath + "'");
+							}
 						}
 						else
 						{
-							LOGGER_ERROR("Could not load mesh 'sprite' for model asset '" + assetPath + "'");
+							LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset '" + assetPath + "'");
 						}
 					}
 					else
 					{
-						LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset '" + assetPath + "'");
+						LOGGER_ERROR("Could not load material '" + model2D.materialName + "' for model asset '" + assetPath + "'");
 					}
 				}
 				else
 				{
-					LOGGER_ERROR("Could not load material '" + model2D.materialName + "' for model asset '" + assetPath + "'");
+					LOGGER_ERROR("Model data was corrupt for asset '" + assetPath + "'");
 				}
 			}
 			else
 			{
-				LOGGER_ERROR("Model data was corrupt for asset '" + assetPath + "'");
+				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
 			}
 		}
 		else
 		{
-			LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			model = &(*loadedIModels_.at(assetPath));
 		}
 
-		return sceneObject;
+		return model;
 	}
 }
