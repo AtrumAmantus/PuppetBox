@@ -40,15 +40,13 @@ namespace PB
 		{
 			mat4 projection = mat4::eye();
 
-			//TODO: Need to adjust this ortho projection logic.
-			float orthoScale = 100.0f;
-
-			float left = -((float)viewWidth / orthoScale); // 0.0f;
-			float right = ((float)viewWidth / orthoScale); // viewWidth;
-			float bottom = -((float)viewHeight / orthoScale); // 0.0f;
-			float top = ((float)viewHeight / orthoScale); // viewHeight;
-			float zNear = -10.0f; // -1.0f;
-			float zFar = 100.0f; // 1.0f;
+			// Using +/- (dimension / 2) will center the camera on 0,0
+			float left		= -(viewWidth / 2.0f);
+			float right		= viewWidth / 2.0f;
+			float bottom	= -(viewHeight / 2.0f);
+			float top		= viewHeight / 2.0f;
+			float zNear		= -1.0f;
+			float zFar		= 1.0f;
 
 			if (viewMode == SceneView::Mode::ORTHO)
 			{

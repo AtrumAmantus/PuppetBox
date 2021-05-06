@@ -28,7 +28,12 @@ namespace PB
 	{
 		if (mode == SceneView::Mode::ORTHO)
 		{
-			return mat4::eye();
+			return mat4{
+				1.0f, 0.0f, 0.0f, position_.x,
+				0.0f, 1.0f, 0.0f, position_.y,
+				0.0f, 0.0f, 1.0f, position_.z,
+				0.0f, 0.0f, 0.0f, 1.0f
+			};
 		}
 		else
 		{

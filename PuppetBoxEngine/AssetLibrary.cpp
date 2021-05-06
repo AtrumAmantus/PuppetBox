@@ -169,16 +169,14 @@ namespace PB
 		{
 		case Asset::Type::MODEL_2D:
 		{
-			IModel* model = loadIModelFor2DModelSceneObject(assetPath, &error);
-			if (!error)
+			if (load2DSceneObject(assetPath, sceneObject))
 			{
-				*sceneObject = SceneObject{ 0, model };
+				return true;
 			}
 			else
 			{
 				LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
 			}
-			return true;
 			break;
 		}
 		default:
@@ -347,31 +345,56 @@ namespace PB
 		return mesh;
 	}
 
-	IModel* AssetLibrary::loadIModelFor2DModelSceneObject(std::string assetPath, bool* error)
+	ModelData2D AssetLibrary::loadModelData2DAsset(std::string assetPath, bool* error)
 	{
-		IModel* model = nullptr;
+		ModelData2D data;
 
-		if (loadedIModels_.find(assetPath) == loadedIModels_.end())
+		if (loadedModelData2D_.find(assetPath) == loadedModelData2D_.end())
 		{
+			AssetStruct asset = parseAssetPath(assetPath, error);
+
 			if (!*error)
 			{
-				AssetStruct asset = parseAssetPath(assetPath, error);
+				data = assetArchives_.at(asset.archiveName).load2DModelAsset(asset.assetName, error);
+			}
+			else
+			{
+				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+			}
+		}
+		else
+		{
+			data = loadedModelData2D_.at(assetPath);
+		}
 
-				Model2D model2D = assetArchives_.at(asset.archiveName).load2DModelAsset(asset.assetName, error);
+		return data;
+	}
 
-				if (!*error)
+	bool AssetLibrary::load2DSceneObject(std::string assetPath, SceneObject* sceneObject)
+	{
+		bool error = false;
+
+		ModelData2D modelData2D = loadModelData2DAsset(assetPath, &error);
+
+		if (!error)
+		{
+			IModel* model = nullptr;
+
+			if (loadedIModels_.find(assetPath) == loadedIModels_.end())
+			{
+				if (!error)
 				{
-					Material material = loadMaterialAsset(model2D.materialName, error);
+					Material material = loadMaterialAsset(modelData2D.materialName, &error);
 
-					if (!*error)
+					if (!error)
 					{
-						material.shader = loadShaderAsset(material.shaderId, error);
+						material.shader = loadShaderAsset(material.shaderId, &error);
 
-						if (!*error)
+						if (!error)
 						{
-							Mesh mesh = loadMeshAsset("sprite", error);
+							Mesh mesh = loadMeshAsset("sprite", &error);
 
-							if (!*error)
+							if (!error)
 							{
 								loadedIModels_.insert(
 									std::pair<std::string, std::unique_ptr<IModel>> { assetPath, std::unique_ptr<IModel>{ new OpenGLModel(mesh, material)} }
@@ -391,24 +414,27 @@ namespace PB
 					}
 					else
 					{
-						LOGGER_ERROR("Could not load material '" + model2D.materialName + "' for model asset '" + assetPath + "'");
+						LOGGER_ERROR("Could not load material '" + modelData2D.materialName + "' for model asset '" + assetPath + "'");
 					}
 				}
 				else
 				{
-					LOGGER_ERROR("Model data was corrupt for asset '" + assetPath + "'");
+					LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
 				}
 			}
 			else
 			{
-				LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+				model = &(*loadedIModels_.at(assetPath));
 			}
+
+			*sceneObject = SceneObject{ 0, model };
+			sceneObject->scale = vec3{ static_cast<float>(modelData2D.width), static_cast<float>(modelData2D.height), 1.0f };
 		}
 		else
 		{
-			model = &(*loadedIModels_.at(assetPath));
+			LOGGER_ERROR("Model data was corrupt for asset '" + assetPath + "'");
 		}
 
-		return model;
+		return !error;
 	}
 }

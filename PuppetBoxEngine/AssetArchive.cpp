@@ -37,9 +37,9 @@ namespace PB
 		* 
 		* \return The Model2D object built from the given properties map.
 		*/
-		Model2D mapToModel2D(std::unordered_map<std::string, std::string> properties, bool* error)
+		ModelData2D mapToModel2D(std::unordered_map<std::string, std::string> properties, bool* error)
 		{
-			Model2D model{};
+			ModelData2D model{};
 
 			model.width = NumberUtils::parseValue(defaultIfNotInMap("width", properties, "0").c_str(), 0, error);
 			model.height = NumberUtils::parseValue(defaultIfNotInMap("height", properties, "0").c_str(), 0, error);
@@ -288,7 +288,7 @@ namespace PB
 		return {};
 	}
 
-	Model2D AssetArchive::load2DModelAsset(std::string assetPath, bool* error)
+	ModelData2D AssetArchive::load2DModelAsset(std::string assetPath, bool* error)
 	{
 		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
@@ -304,7 +304,7 @@ namespace PB
 			delete stream;
 			if (!*error)
 			{
-				Model2D model = mapToModel2D(modelPropertyData, error);
+				ModelData2D model = mapToModel2D(modelPropertyData, error);
 
 				if (*error)
 				{

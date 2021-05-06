@@ -77,6 +77,7 @@ namespace PB
 		std::unordered_map<std::string, Mesh> loadedMeshes_{};
 		std::unordered_map<std::string, Material> loadedMaterials_{};
 		std::unordered_map<std::string, ImageReference> loadedImages_{};
+		std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
 		std::unordered_map<std::string, std::unique_ptr<IModel>> loadedIModels_{};
 		std::unordered_map<std::string, Shader> loadedShaders_{};
 	private:
@@ -127,13 +128,24 @@ namespace PB
 		Mesh loadMeshAsset(std::string assetPath, bool* error);
 
 		/**
-		* \brief Loads an IModel implementation object for a 2D model asset given by the provided virtual asset path.
+		* \brief Loads a ModelData2D asset given by the provided virtual asset path.
 		*
 		* \param assetPath	Virtual path to the requested asset.
 		* \param error		Flag indicating an error occured if set to True.
 		*
-		* \return Pointer to the IModel implementation containing the required assets.
+		* \return The loaded ModelData2D object for the respective virtual asset path, or an empty
+		* object if an error occured loading the asset.
 		*/
-		IModel* loadIModelFor2DModelSceneObject(std::string assetPath, bool* error);
+		ModelData2D loadModelData2DAsset(std::string assetPath, bool* error);
+
+		/**
+		* \brief Loads the given scene object with 2D asset data.
+		*
+		* \param assetPath		Virtual path to the requested asset.
+		* \param sceneObject	The instantiated scene object to load with asset data.
+		*
+		* \return True if the scene object was succesfully loaded with assets, False otherwise.
+		*/
+		bool load2DSceneObject(std::string assetPath, SceneObject* sceneObject);
 	};
 }

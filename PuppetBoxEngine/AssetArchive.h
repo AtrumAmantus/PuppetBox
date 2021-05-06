@@ -17,12 +17,12 @@ namespace PB
 	/**
 	* \brief Struct for holding 2D Model specific data for simple communication between archive & library.
 	*/
-	struct Model2D
+	struct ModelData2D
 	{
-		uint32_t width;
-		uint32_t height;
-		int32_t offsetX;
-		int32_t offsetY;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		int32_t offsetX = 0;
+		int32_t offsetY = 0;
 		std::string materialName;
 	};
 
@@ -124,7 +124,7 @@ namespace PB
 		*
 		* \return A Model2D of the requested asset, or an empty object if an error occured.
 		*/
-		Model2D load2DModelAsset(std::string assetPath, bool* error);
+		ModelData2D load2DModelAsset(std::string assetPath, bool* error);
 	private:
 		std::string archiveName_;
 		std::string archiveRoot_;
