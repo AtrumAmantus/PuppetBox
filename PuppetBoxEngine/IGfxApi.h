@@ -24,7 +24,7 @@ namespace PB
 		* 
 		* \return True if the GFX API initialization was successful, False otherwise.
 		*/
-		virtual bool init(const IHardwareInitializer& hardwareInitializer) const = 0;
+		virtual bool init(const IHardwareInitializer& hardwareInitializer) = 0;
 		
 		/**
 		* \brief Used to define GFX API specific commands that must execute before each rendering loop.
@@ -38,6 +38,16 @@ namespace PB
 		* \param height	The desired height of the rendering area.
 		*/
 		virtual void setRenderDimensions(uint32_t width, uint32_t height) = 0;
+
+		/**
+		* \brief Get the current render window area's width.
+		*/
+		virtual uint32_t getRenderWidth() = 0;
+
+		/**
+		* \brief Get the current render window area's height.
+		*/
+		virtual uint32_t getRenderHeight() = 0;
 
 		/**
 		* \brief Used to execute the GFX API specific commands to load an image into GFX memory.
@@ -54,5 +64,18 @@ namespace PB
 		* \param vertexCount	The number of entries in the vertexData array.
 		*/
 		virtual Mesh loadMesh(Vertex* vertexData, uint32_t vertexCount) const = 0;
+
+		/**
+		* \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.
+		*/
+		virtual void initializeUBORanges() = 0;
+
+		/**
+		* \brief Sets view/projection matrices in the UBO.  Must initializeUBORanges() before use.
+		*
+		* \param view		The View Matrix to set.
+		* \param projection	The Projection Matrix to set.
+		*/
+		virtual void setTransformUBOData(mat4 view, mat4 projection) const = 0;
 	};
 }

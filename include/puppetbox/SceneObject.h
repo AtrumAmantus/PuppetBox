@@ -31,12 +31,23 @@ namespace PB
 		/**
 		* \brief World relative scale of object.
 		*/
-		vec3 scale{ 0.0f, 0.0f, 0.0f };
+		vec3 scale{ 1.0f, 1.0f, 1.0f };
 	public:
 		SceneObject() : id_(0), model_(nullptr) {};
 		SceneObject(uint32_t id, IModel* model) : id_(id), model_(model) {};
 		const uint32_t id() const;
-		virtual void update(float deltaTime) {};
+		
+		/**
+		* \brief Calls updates() and updates model matrices.
+		* 
+		* \param deltaTime	The time passed (in Milliseconds) since the last update.
+		*/
+		void update(float deltaTime)
+		{
+			updates(deltaTime);
+			vec3 transform[3] = { position, rotation, scale };
+			model_->updateModelMatrix(transform);
+		};
 
 		/**
 		* \brief Executes GFX API specific render calls on injected assets.
@@ -44,6 +55,13 @@ namespace PB
 		void render() {
 			model_->render();
 		};
+	protected:
+		/**
+		* \brief Update method for consumer defined update logic, called by update().
+		* 
+		* \param deltaTime	The time passed (in Milliseconds) since the last update.
+		*/
+		virtual void updates(float deltaTime) {};
 	private:
 		uint32_t id_ = 0;
 		IModel* model_;

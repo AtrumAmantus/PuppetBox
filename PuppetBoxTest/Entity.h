@@ -9,8 +9,8 @@ class Entity : public PB::SceneObject
 public:
 	std::string name;
 	uint8_t health = 50;
-public:
-	void update(float deltaTime)
+protected:
+	void updates(float deltaTime)
 	{
 
 	};

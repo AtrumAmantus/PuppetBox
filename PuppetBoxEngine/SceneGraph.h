@@ -5,6 +5,9 @@
 #include <vector>
 
 #include "../include/puppetbox/AbstractSceneHandler.h"
+#include "../include/puppetbox/Constants.h"
+
+#include "Camera.h"
 #include "Logger.h"
 #include "TypeDef.h"
 
@@ -22,7 +25,7 @@ namespace PB
 		* 
 		* \return The unique name this scene should be referenced by later.
 		*/
-		SceneGraph(std::string sceneName) : id_(sceneName) {};
+		SceneGraph(std::string sceneName, IGfxApi* gfxApi) : id_(sceneName), gfxApi_(gfxApi) {};
 
 		/**
 		* \brief Sets a SceneHandler for this scene.
@@ -36,6 +39,16 @@ namespace PB
 		};
 
 		/**
+		* \brief Sets the projection mode for the scene.
+		* 
+		* \param mode	The projection mode for the scene.
+		*/
+		void setCameraMode(SceneView::Mode mode)
+		{
+			viewMode_ = mode;
+		}
+
+		/**
 		* \brief Invokes the update() method of the sceneHandler, allowing updates for various scene
 		* elements for the current frame.
 		*
@@ -44,6 +57,11 @@ namespace PB
 		void update(const float deltaTime)
 		{
 			sceneHandler_->update(deltaTime);
+
+			mat4 view = camera_.calculateViewMatrix(viewMode_);
+			mat4 projection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), viewMode_);
+
+			gfxApi_->setTransformUBOData(view, projection);
 		}
 
 		/**
@@ -56,6 +74,9 @@ namespace PB
 		}
 	private:
 		std::string id_;
+		Camera camera_{};
+		SceneView::Mode viewMode_ = SceneView::Mode::ORTHO;
+		IGfxApi* gfxApi_;
 		AbstractSceneHandler* sceneHandler_ = nullptr;
 	};
 }

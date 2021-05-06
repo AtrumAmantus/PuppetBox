@@ -145,8 +145,13 @@ namespace PB
         {
             if (compileShaderProgram(&programId_, &vertexShaderId_, &geometryShaderId_, &fragmentShaderId_))
             {
-                //TODO: Add this later
-                //glUniformBlockBinding(programId_, glGetUniformBlockIndex(programId_, "Transforms"), 0);
+                // Initialize UBO locations for later use.
+                uint32_t loc = glGetUniformBlockIndex(programId_, "Transforms");
+                glUniformBlockBinding(programId_, loc, 0);
+                loc = glGetUniformBlockIndex(programId_, "LightCounter");
+                glUniformBlockBinding(programId_, loc, 1);
+                loc = glGetUniformBlockIndex(programId_, "LightData");
+                glUniformBlockBinding(programId_, loc, 2);
                 return true;
             }
         }
@@ -190,7 +195,7 @@ namespace PB
 
     void Shader::setVec2(const std::string& name, const vec2& value) const
     {
-        //glUniform2fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
+        glUniform2fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
     }
 
     void Shader::setVec2(const std::string& name, float x, float y) const
@@ -200,7 +205,7 @@ namespace PB
 
     void Shader::setVec3(const std::string& name, const vec3& value) const
     {
-        //glUniform3fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
+        glUniform3fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
     }
     void Shader::setVec3(const std::string& name, float x, float y, float z) const
     {
@@ -209,7 +214,7 @@ namespace PB
 
     void Shader::setVec4(const std::string& name, const vec4& value) const
     {
-        //glUniform4fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
+        glUniform4fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
     }
 
     void Shader::setVec4(const std::string& name, float x, float y, float z, float w) const
@@ -229,6 +234,6 @@ namespace PB
 
     void Shader::setMat4(const std::string& name, const mat4& mat) const
     {
-        //glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 }

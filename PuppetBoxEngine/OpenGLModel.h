@@ -22,6 +22,22 @@ namespace PB
 		*/
 		OpenGLModel(Mesh mesh, Material material) : mesh_(mesh), material_(material) {};
 
+		void updateModelMatrix(mat3 transform)
+		{
+			mat4 model = mat4::eye();
+			vec3 translate = transform[0];
+			vec3 rotation = transform[1];
+			vec3 scale = transform[2];
+
+			model = GfxMath::Scale(model, scale);
+			model = GfxMath::Translate(model, translate);
+			model = GfxMath::Rotate(model, rotation);
+
+			material_.shader.use();
+			material_.shader.setMat4("model", model);
+			material_.shader.unuse();
+		}
+
 		/**
 		* \brief Renders the object with OpenGL specific invocations.
 		*/

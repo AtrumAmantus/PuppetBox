@@ -36,7 +36,7 @@ namespace PB
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
 		std::unique_ptr<AssetLibrary> assetLibrary{ nullptr };
 		std::string activeSceneId;
-		SceneGraph invalidScene{ "InvalidScene" };
+		SceneGraph invalidScene{ "InvalidScene", nullptr };
 		bool pbInitialized = false;
 
 		/**
@@ -118,6 +118,8 @@ namespace PB
 
 			if (gfxApi->init(*hardwareInitializer))
 			{
+				gfxApi->initializeUBORanges();
+
 				pbInitialized = true;
 
 				assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
@@ -139,7 +141,7 @@ namespace PB
 	{
 		if (loadedScenes.find(sceneName) == loadedScenes.end())
 		{
-			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName);
+			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi));
 
 			loadedScenes.insert(
 				std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
@@ -148,6 +150,18 @@ namespace PB
 		else
 		{
 			LOGGER_ERROR("Scene already exists with this identifier name");
+		}
+	}
+
+	void SetSceneCameraMode(std::string sceneName, SceneView::Mode mode)
+	{
+		if (loadedScenes.find(sceneName) != loadedScenes.end())
+		{
+			loadedScenes.at(sceneName)->setCameraMode(mode);
+		}
+		else
+		{
+			LOGGER_ERROR("Scene does not exist with this identifier name");
 		}
 	}
 

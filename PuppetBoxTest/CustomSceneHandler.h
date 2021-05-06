@@ -19,7 +19,10 @@ public:
 	};
 	void update(float deltaTime)
 	{
-
+		for (auto e : entities_)
+		{
+			e->update(deltaTime);
+		}
 	};
 	void render()
 	{

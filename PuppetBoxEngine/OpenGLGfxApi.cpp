@@ -44,7 +44,7 @@ namespace PB
 		}
 	}
 
-	bool OpenGLGfxApi::init(const IHardwareInitializer& hardwareInitializer) const
+	bool OpenGLGfxApi::init(const IHardwareInitializer& hardwareInitializer)
 	{
 		bool error = false;
 
@@ -57,6 +57,11 @@ namespace PB
 
 			glEnable(GL_DEPTH_TEST);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			// Store the card's minimum UBO offset value for later.
+			int32_t value;
+			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &value);
+			minimumUBOOffset_ = static_cast<uint32_t>(value);
 		}
 		else
 		{
@@ -78,6 +83,16 @@ namespace PB
 	{
 		width_ = width;
 		height_ = height;
+	}
+
+	uint32_t OpenGLGfxApi::getRenderWidth()
+	{
+		return width_;
+	}
+
+	uint32_t OpenGLGfxApi::getRenderHeight()
+	{
+		return height_;
 	}
 
 	ImageReference OpenGLGfxApi::loadImage(ImageData imageData, ImageOptions options) const
@@ -219,5 +234,49 @@ namespace PB
 		mesh.drawCount = indices.size();
 
 		return mesh;
+	}
+
+	void OpenGLGfxApi::initializeUBORanges()
+	{
+		glGenBuffers(1, &UBO_);
+		glBindBuffer(GL_UNIFORM_BUFFER, UBO_);
+
+		constexpr uint32_t sizeOfTransforms = 3 * static_cast<uint32_t>(sizeof(mat4));
+		// Pad to next offset if needed
+		uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
+		// Pad to next offset if needed
+		uint32_t sizeOfLightCount = std::max(static_cast<uint32_t>(sizeof(uint32_t)), minimumUBOOffset_);
+		uint32_t firstLightOffset = lightCountOffset + sizeOfLightCount;
+		constexpr uint32_t sizeOfLights = 10 * (4 * sizeof(vec4));
+		uint32_t bufferSize = firstLightOffset + sizeOfLights;
+		// Create buffer of adequate size
+		glBufferData(GL_UNIFORM_BUFFER, bufferSize, NULL, GL_STATIC_DRAW);
+
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO_, 0, lightCountOffset);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, UBO_, lightCountOffset, sizeOfLightCount);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 2, UBO_, firstLightOffset, sizeOfLights);
+
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
+
+	void OpenGLGfxApi::setTransformUBOData(mat4 view, mat4 projection) const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, UBO_);
+
+		constexpr uint32_t sizeOfMat4 = sizeof(mat4);
+		constexpr uint32_t sizeOfTransforms = 3 * sizeOfMat4;
+		uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
+		uint32_t sizeOfLightCount = std::max(static_cast<uint32_t>(sizeof(uint32_t)), minimumUBOOffset_);
+		uint32_t firstLightOffset = std::max(sizeOfTransforms + sizeOfLightCount, 2 * minimumUBOOffset_);
+		constexpr uint32_t sizeOfLight = 4 * sizeof(vec4);
+		constexpr uint32_t sizeOfLights = 10 * sizeOfLight;
+		uint32_t bufferSize = firstLightOffset + sizeOfLights;
+		//                                    v-- Size of data
+		//              v-- Type           v-- Offset (bytes)    v-- Data
+		//glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeOfMat4, &orthoProjection[0][0]);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeOfMat4, sizeOfMat4, &projection[0][0]);
+		glBufferSubData(GL_UNIFORM_BUFFER, sizeOfMat4 * 2, sizeOfMat4, &view[0][0]);
+
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 }
