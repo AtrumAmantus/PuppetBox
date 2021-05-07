@@ -4,8 +4,17 @@ namespace PB
 {
 	namespace SceneView
 	{
-		enum Mode {
+		enum Mode
+		{
 			ORTHO
+		};
+	}
+
+	namespace AI
+	{
+		enum Behavior
+		{
+			WANDER
 		};
 	}
 }

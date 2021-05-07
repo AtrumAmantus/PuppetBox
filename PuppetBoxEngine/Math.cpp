@@ -5,6 +5,8 @@
 
 #include "Math.h"
 
+#define FLOAT_EQUALITY_THRESHOLD 0.0000001f
+
 namespace PB
 {
 	namespace GfxMath
@@ -29,6 +31,41 @@ namespace PB
 
 				return mat4{ v };
 			}
+		}
+
+		bool BasicallyEqual(vec2 v1, vec2 v2)
+		{
+			return abs(v1.x - v2.x) < FLOAT_EQUALITY_THRESHOLD
+				&& abs(v1.y - v2.y) < FLOAT_EQUALITY_THRESHOLD;
+		}
+
+		bool BasicallyEqual(vec3 v1, vec3 v2)
+		{
+			return abs(v1.x - v2.x) < FLOAT_EQUALITY_THRESHOLD
+				&& abs(v1.y - v2.y) < FLOAT_EQUALITY_THRESHOLD
+				&& abs(v1.z - v2.z) < FLOAT_EQUALITY_THRESHOLD;
+		}
+
+		bool BasicallyEqual(Vertex v1, Vertex v2)
+		{
+			return BasicallyEqual(v1.position, v2.position)
+				&& BasicallyEqual(v1.normal, v2.normal)
+				//&& BasicallyEqual(v1.colour, v2.colour)
+				&& BasicallyEqual(v1.uv, v2.uv);
+		}
+
+		float Dot(vec3 v1, vec3 v2)
+		{
+			return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
+		}
+
+		vec3 Normalize(vec3 v)
+		{
+			/**
+			* Finds the Dot product of v and itself, which is it's magnitude squared, then
+			* multiplies the inverse square of that value on the vector, normalizing it.
+			*/
+			return v * (1.0f / sqrt(Dot(v, v)));
 		}
 
 		mat4 LookAt(vec3 origin, vec3 target, vec3 up)

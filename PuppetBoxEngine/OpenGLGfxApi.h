@@ -11,9 +11,9 @@
 #include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Logger.h"
+#include "Math.h"
 #include "Mesh.h"
 #include "TypeDef.h"
-#include "Vertex.h"
 
 namespace PB
 {

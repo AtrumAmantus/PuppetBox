@@ -6,8 +6,8 @@
 #include "ImageData.h"
 #include "ImageOptions.h"
 #include "ImageReference.h"
+#include "Math.h"
 #include "Mesh.h"
-#include "Vertex.h"
 
 namespace PB
 {

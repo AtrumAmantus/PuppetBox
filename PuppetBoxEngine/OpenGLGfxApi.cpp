@@ -2,9 +2,8 @@
 
 #include <vector>
 
+#include "Math.h"
 #include "OpenGLGfxApi.h"
-
-#define FLOAT_EQUALITY_THRESHOLD 0.0000001f
 
 namespace PB
 {
@@ -25,16 +24,7 @@ namespace PB
 			{
 				Vertex v = vector.at(i);
 
-				if (
-					abs(vertex.position.x - v.position.x) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.position.y - v.position.y) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.position.z - v.position.z) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.normal.x - v.normal.x) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.normal.y - v.normal.y) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.normal.z - v.normal.z) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.uv.x - v.uv.x) < FLOAT_EQUALITY_THRESHOLD
-					&& abs(vertex.uv.y - v.uv.y) < FLOAT_EQUALITY_THRESHOLD
-					)
+				if (GfxMath::BasicallyEqual(vertex, v))
 				{
 					return i;
 				}

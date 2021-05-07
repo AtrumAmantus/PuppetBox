@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Logger.h"
+
 namespace PB
 {
 
@@ -195,6 +197,24 @@ namespace PB
 
 			return value;
 		}
+	}
+
+	/**
+	* \brief Utility for dealing with random values.
+	*/
+	namespace RandomUtils
+	{
+		/**
+		* \brief Returns values based on preloaded perlin noise values.
+		* 
+		* \param offset	The offset value to draw from the preloaded perlin values.
+		*/
+		float perlinValue(uint64_t offset);
+
+		/**
+		* \brief Returns pseudo random values with uniform distribution.
+		*/
+		float pseudoRand();
 	}
 
 	/**

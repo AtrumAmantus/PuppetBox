@@ -29,8 +29,8 @@ namespace PB
 			vec3 rotation = transform[1];
 			vec3 scale = transform[2];
 
-			model = GfxMath::Scale(model, scale);
 			model = GfxMath::Translate(model, translate);
+			model = GfxMath::Scale(model, scale);
 			model = GfxMath::Rotate(model, rotation);
 
 			material_.shader.use();
