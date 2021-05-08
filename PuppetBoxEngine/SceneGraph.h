@@ -25,7 +25,8 @@ namespace PB
 		* 
 		* \return The unique name this scene should be referenced by later.
 		*/
-		SceneGraph(std::string sceneName, IGfxApi* gfxApi) : id_(sceneName), gfxApi_(gfxApi) {};
+		SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputProcessor* inputProcessor) :
+			id_(sceneName), gfxApi_(gfxApi), inputProcessor_(inputProcessor){};
 
 		/**
 		* \brief Sets a SceneHandler for this scene.
@@ -34,6 +35,7 @@ namespace PB
 		*/
 		void setSceneHandler(AbstractSceneHandler* sceneHandler)
 		{
+			*sceneHandler = AbstractSceneHandler{ inputProcessor_ };
 			sceneHandler_ = sceneHandler;
 			sceneHandler_->setUp();
 		};
@@ -77,6 +79,7 @@ namespace PB
 		Camera camera_{};
 		SceneView::Mode viewMode_ = SceneView::Mode::ORTHO;
 		IGfxApi* gfxApi_;
+		AbstractInputProcessor* inputProcessor_;
 		AbstractSceneHandler* sceneHandler_ = nullptr;
 	};
 }

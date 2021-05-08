@@ -6,24 +6,16 @@
 #include <PuppetBox.h>
 #include <STBI/stb_image.h>
 
+#include "../include/puppetbox/AbstractInputProcessor.h"
+#include "../include/puppetbox/KeyCode.h"
 #include "AssetLibrary.h"
-#include "AbstractInputProcessor.h"
 #include "Engine.h"
 #include "OpenGLGfxApi.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
-#include "KeyCode.h"
 #include "SceneGraph.h"
-
-#if defined(_USE_GLFW)
-#	include "GlfwInitializer.h"
-#	include "GlfwInputProcessor.h"
-#elif defined(_USE_SDL2)
-#	include "Sdl2Initializer.h"
-#	include "Sdl2InputProcessor.h"
-#else
-#	error Must define ONE of GLFW or SDL2
-#endif
+#include "Sdl2Initializer.h"
+#include "Sdl2InputProcessor.h"
 
 namespace PB
 {
@@ -36,8 +28,24 @@ namespace PB
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
 		std::unique_ptr<AssetLibrary> assetLibrary{ nullptr };
 		std::string activeSceneId;
-		SceneGraph invalidScene{ "InvalidScene", nullptr };
+		SceneGraph invalidScene{ "InvalidScene", nullptr, nullptr };
 		bool pbInitialized = false;
+		/**
+		* \brief Used to map scan codes to actual ascii characters
+		* Key: scancode, Value: character
+		*/
+		std::unordered_map<uint8_t, uint8_t> charMap_{};
+
+		/**
+		* \brief Helper method to insider values into the charMap.
+		*
+		* \param k	The scancode for the entry.
+		* \param v	The value for the entry.
+		*/
+		void CharMapInsert(uint8_t k, uint8_t v)
+		{
+			charMap_.insert(std::pair<uint8_t, uint8_t>{ k, v });
+		}
 
 		/**
 		* \brief Helper function that provides a default IGfxApi implementation.
@@ -82,6 +90,67 @@ namespace PB
 				return Asset::Type::UNKNOWN;
 			}
 		}
+
+		/**
+		* \brief Initializes the char map with the desired mappings of arbitrary key codes to specific ascii characters.
+		*/
+		void Init_CharMap()
+		{
+			CharMapInsert(KEY_1, '1');
+			CharMapInsert(KEY_2, '2');
+			CharMapInsert(KEY_3, '3');
+			CharMapInsert(KEY_4, '4');
+			CharMapInsert(KEY_5, '5');
+			CharMapInsert(KEY_6, '6');
+			CharMapInsert(KEY_7, '7');
+			CharMapInsert(KEY_8, '8');
+			CharMapInsert(KEY_9, '9');
+			CharMapInsert(KEY_0, '0');
+
+			CharMapInsert(KEY_A, 'a');
+			CharMapInsert(KEY_B, 'b');
+			CharMapInsert(KEY_C, 'c');
+			CharMapInsert(KEY_D, 'd');
+			CharMapInsert(KEY_E, 'e');
+			CharMapInsert(KEY_F, 'f');
+			CharMapInsert(KEY_G, 'g');
+			CharMapInsert(KEY_H, 'h');
+			CharMapInsert(KEY_I, 'i');
+			CharMapInsert(KEY_J, 'j');
+			CharMapInsert(KEY_K, 'k');
+			CharMapInsert(KEY_L, 'l');
+			CharMapInsert(KEY_M, 'm');
+			CharMapInsert(KEY_N, 'n');
+			CharMapInsert(KEY_O, 'o');
+			CharMapInsert(KEY_P, 'p');
+			CharMapInsert(KEY_Q, 'q');
+			CharMapInsert(KEY_R, 'r');
+			CharMapInsert(KEY_S, 's');
+			CharMapInsert(KEY_T, 't');
+			CharMapInsert(KEY_U, 'u');
+			CharMapInsert(KEY_V, 'v');
+			CharMapInsert(KEY_W, 'w');
+			CharMapInsert(KEY_X, 'y');
+			CharMapInsert(KEY_Y, 'x');
+			CharMapInsert(KEY_Z, 'z');
+		}
+
+		/**
+		* \brief Helper function for getting the ascii character the given key code represents.
+		*
+		* \param code	The arbitrary key code to be maped to an ascii character.
+		*
+		* \return The int value for the ascii character the key code represents.
+		*/
+		int8_t GetCharFromCode(uint8_t code)
+		{
+			if (charMap_.find(code) != charMap_.end())
+			{
+				return charMap_.at(code);
+			}
+
+			return 0;
+		}
 	}
 
 	void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
@@ -89,26 +158,14 @@ namespace PB
 		Init_CharMap();
 
 		// Create hardware Api instance
-#ifdef _USE_SDL2
 		std::shared_ptr<Sdl2InputProcessor> inputProcessor_ = std::make_shared<Sdl2InputProcessor>();
 		std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>();
-#endif //_USE_SDL2
-
-#ifdef _USE_GLFW
-		std::shared_ptr<GlfwInitializer> hardwareInitializer_ = std::make_shared<GlfwInitializer>();
-#endif //_UES_GLFW
 
 		hardwareInitializer_->init(windowTitle, windowWidth, windowHeight);
 
 		if (!hardwareInitializer_->hadError())
 		{
 			std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
-
-			// GLFW needs window reference for input polling
-#ifdef _USE_GLFW
-			std::shared_ptr<GlfwInputProcessor> inputProcessor_ = std::make_shared<GlfwInputProcessor>(hardwareInitializer_->getWindow());
-			inputProcessor_->init(hardwareInitializer_->getWindowProperties());
-#endif //_USE_GLFW
 
 			hardwareInitializer = hardwareInitializer_;
 			inputProcessor = inputProcessor_;
@@ -141,7 +198,7 @@ namespace PB
 	{
 		if (loadedScenes.find(sceneName) == loadedScenes.end())
 		{
-			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi));
+			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputProcessor));
 
 			loadedScenes.insert(
 				std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}

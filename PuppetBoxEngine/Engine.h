@@ -1,9 +1,8 @@
 #pragma once
 
 #include <sdl2/SDL.h>
-//#include <gl/GL.h>
 
-#include "AbstractInputProcessor.h"
+#include "../include/puppetbox/AbstractInputProcessor.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "SceneGraph.h"

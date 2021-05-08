@@ -4,8 +4,8 @@
 
 #include <sdl2/SDL.h>
 
-#include "AbstractInputProcessor.h"
-#include "KeyCode.h"
+#include "../include/puppetbox/AbstractInputProcessor.h"
+#include "../include/puppetbox/KeyCode.h"
 #include "Logger.h"
 
 namespace PB
@@ -28,6 +28,8 @@ namespace PB
 
 			mouse.deltaX = 0;
 			mouse.deltaY = 0;
+			window.newHeight = 0;
+			window.newWidth = 0;
 
 			SDL_Event sdlEvent;
 
@@ -50,16 +52,30 @@ namespace PB
 					mouse.deltaX = sdlEvent.motion.xrel;
 					mouse.deltaY = sdlEvent.motion.yrel;
 					break;
+				case SDL_WINDOWEVENT:
+					handleWindowEvent(sdlEvent);
+					break;
 				default:
 					break;
 				}
 			}
-
-			if (keyboard.isPressed(KEY_ESCAPE))
-			{
-				window.windowClose = true;
-			}
 		};
+	private:
+		void handleWindowEvent(SDL_Event sdlEvent)
+		{
+			switch (sdlEvent.window.event)
+			{
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				window.newWidth = sdlEvent.window.data1;
+				window.newHeight = sdlEvent.window.data2;
+				break;
+			// This is a redundant event that only appears if it's the result of external forces.
+			//case SDL_WINDOWEVENT_RESIZED:
+			//	break;
+			default:
+				break;
+			}
+		}
 	};
 }
 

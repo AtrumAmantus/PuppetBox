@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+
+#include "../PuppetBox.h"
 #include "KeyCode.h"
 
 #define MAX_KEY_CODES		120
@@ -10,7 +13,7 @@ namespace PB
 	/**
 	* \brief Helper class for abstracting keyboard input state checks.
 	*/
-	class KeyboardInput
+	class PUPPET_BOX_API KeyboardInput
 	{
 	public:
 		uint8_t previousKeyState[KEY_LAST + 1]{};			//Stores previous state, indexed by key code
@@ -21,46 +24,34 @@ namespace PB
 		* 
 		* \return True if the key is currently down, False otheriwse.
 		*/
-		bool isDown(int key) const
-		{
-			return keyState[key] == KEY_IS_DOWN;
-		};
+		bool isDown(int key) const;
 
 		/**
 		* \brief Used to determine if a key is currently up.
 		*
 		* \return True if the key is currently up, False otheriwse.
 		*/
-		bool isUp(int key) const
-		{
-			return keyState[key] != KEY_IS_DOWN;
-		};
+		bool isUp(int key) const;
 
 		/**
 		* \brief Used to determine if a key was just pushed down.
 		*
 		* \return True if the key just switched from being up to being down, False otheriwse.
 		*/
-		bool isPressed(int key) const
-		{
-			return keyState[key] == KEY_IS_DOWN && previousKeyState[key] != KEY_IS_DOWN;
-		};
+		bool isPressed(int key) const;
 
 		/**
 		* \brief Used to determine if a key was just released.
 		*
 		* \return True if the key just switched from being down to being up, False otheriwse.
 		*/
-		bool isReleased(int key) const
-		{
-			return keyState[key] != KEY_IS_DOWN && previousKeyState[key] == KEY_IS_DOWN;
-		};
+		bool isReleased(int key) const;
 	};
 
 	/**
 	* \brief Helper class for abstracting mouse input state checks.
 	*/
-	class MouseInput
+	class PUPPET_BOX_API MouseInput
 	{
 	public:
 		uint8_t previousMouseState[MAX_MOUSE_CODES]{};
@@ -75,46 +66,34 @@ namespace PB
 		*
 		* \return True if the mouse button is currently down, False otheriwse.
 		*/
-		bool isDown(int btn) const
-		{
-			return mouseState[btn] == KEY_IS_DOWN;
-		};
+		bool isDown(int btn) const;
 
 		/**
 		* \brief Used to determine if a mouse button is currently up.
 		*
 		* \return True if the mouse button is currently up, False otheriwse.
 		*/
-		bool isUp(int btn) const
-		{
-			return mouseState[btn] != KEY_IS_DOWN;
-		};
+		bool isUp(int btn) const;
 
 		/**
 		* \brief Used to determine if a mouse button was just pushed down.
 		*
 		* \return True if the mouse button just switched from being up to being down, False otheriwse.
 		*/
-		bool isPressed(int btn) const
-		{
-			return mouseState[btn] == KEY_IS_DOWN && previousMouseState[btn] != KEY_IS_DOWN;
-		};
+		bool isPressed(int btn) const;
 
 		/**
 		* \brief Used to determine if a mouse button was just released.
 		*
 		* \return True if the mouse button just switched from being down to being up, False otheriwse.
 		*/
-		bool isReleased(int btn) const
-		{
-			return mouseState[btn] != KEY_IS_DOWN && previousMouseState[btn] == KEY_IS_DOWN;
-		};
+		bool isReleased(int btn) const;
 	};
 
 	/**
 	* \brief Helper class for abstracting window input state checks.
 	*/
-	class WindowInput
+	class PUPPET_BOX_API WindowInput
 	{
 	public:
 		bool windowClose = false;
@@ -128,16 +107,13 @@ namespace PB
 		*
 		* \return True if the window was closed (x button pressed), False otheriwse.
 		*/
-		bool isClosed()
-		{
-			return windowClose;
-		};
+		bool isClosed();
 	};
 
 	/**
 	* \brief Common interface to be used by app logic for checking and loading hardware input state.
 	*/
-	class AbstractInputProcessor
+	class PUPPET_BOX_API AbstractInputProcessor
 	{
 	public:
 		KeyboardInput keyboard;
