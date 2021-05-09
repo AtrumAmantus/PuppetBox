@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "Camera.h"
+#include "GfxMath.h"
 
 namespace PB
 {

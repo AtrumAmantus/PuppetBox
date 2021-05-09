@@ -6,12 +6,13 @@
 
 #include <glad/glad.h>
 
+#include "../include/puppetbox/DataStructures.h"
+
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Logger.h"
-#include "Math.h"
 #include "Mesh.h"
 #include "TypeDef.h"
 

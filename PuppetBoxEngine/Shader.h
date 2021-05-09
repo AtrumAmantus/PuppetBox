@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Math.h"
+#include "../include/puppetbox/DataStructures.h"
 
 namespace PB
 {

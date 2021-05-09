@@ -1,7 +1,7 @@
 #include "pch.h"
 
+#include "../include/puppetbox/DataStructures.h"
 #include "AssetLibrary.h"
-#include "Math.h"
 #include "OpenGLModel.h"
 #include "Utilities.h"
 

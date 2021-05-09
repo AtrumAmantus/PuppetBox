@@ -2,7 +2,8 @@
 
 #include <glad/glad.h>
 
-#include "IModel.h"
+#include "../include/puppetbox/IModel.h"
+#include "GfxMath.h"
 #include "Material.h"
 #include "Mesh.h"
 

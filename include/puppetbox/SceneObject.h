@@ -5,11 +5,10 @@
 #include <memory>
 
 #include "../PuppetBox.h"
-#include "../../PuppetBoxEngine/Math.h"
-#include "../../PuppetBoxEngine/IModel.h"
-
 #include "Constants.h"
+#include "DataStructures.h"
 #include "IBehavior.h"
+#include "IModel.h"
 
 namespace PB
 {

@@ -2,11 +2,12 @@
 
 #include <stdint.h>
 
+#include "../include/puppetbox/DataStructures.h"
+
 #include "IHardwareInitializer.h"
 #include "ImageData.h"
 #include "ImageOptions.h"
 #include "ImageReference.h"
-#include "Math.h"
 #include "Mesh.h"
 
 namespace PB

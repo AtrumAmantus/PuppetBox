@@ -2,7 +2,8 @@
 
 #include <vector>
 
-#include "Math.h"
+#include "../include/puppetbox/DataStructures.h"
+#include "GfxMath.h"
 #include "OpenGLGfxApi.h"
 
 namespace PB
