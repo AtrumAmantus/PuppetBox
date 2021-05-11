@@ -46,16 +46,22 @@ namespace PB
 		* \brief The max speed of the object.
 		*/
 		float speed = 64.0f;
+		std::string id;
 	public:
-		SceneObject() : id_(0), model_(nullptr) {};
-		SceneObject(uint32_t id, vec3 baseScale, IModel* model) : id_(id), baseScale_(baseScale), model_(model) {};
+		/**
+		* \brief Default constructor that is typically called by a derived class to create
+		* initial instance values.
+		*/
+		SceneObject();
 
 		/**
-		* \brief Returns the ID for the object.
-		*
-		* \return The ID of the object.
+		* \brief Typically called by PuppetBox internal logic to apply assets to an already
+		* instantiated derived object.
+		* 
+		* \param baseScale	The scale values used as a baseline for the object, SceneObject#scale values multiply this.
+		* \param model		Pointer to the IModel assets applied to this object.
 		*/
-		const uint32_t id() const;
+		SceneObject(vec3 baseScale, IModel* model);
 
 		/**
 		* \brief Calls updates() and updates model matrices.
@@ -100,7 +106,6 @@ namespace PB
 		*/
 		virtual void updates(float deltaTime) {};
 	private:
-		uint32_t id_ = 0;
 		vec3 baseScale_{ 1.0f, 1.0f, 1.0f };
 		IModel* model_ = nullptr;
 		std::unique_ptr<IBehavior> behavior_{ nullptr };
