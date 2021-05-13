@@ -244,7 +244,7 @@ namespace PB
 		assetLibrary->loadArchive(archiveName);
 	}
 
-	void CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
+	bool CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
 	{
 		if (sceneObject == nullptr)
 		{
@@ -252,11 +252,15 @@ namespace PB
 		}
 		else
 		{
-			if (!assetLibrary->loadAsset(assetPath, sceneObject, convertToAssetType(type)))
+			if (assetLibrary->loadAsset(assetPath, sceneObject, convertToAssetType(type)))
 			{
-				LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+				return true;
 			}
+
+			LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
 		}
+
+		return false;
 	}
 
 	void Run()

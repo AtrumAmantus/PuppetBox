@@ -29,12 +29,14 @@ public:
 	void setUp()
 	{
 		Entity* myEntity = new Entity{};
-		PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D);
-		myEntity->id = "Fred";
-		myEntity->name = myEntity->id;
-		myEntity->position += {0.0f, 0.0f, 0.0f};
-		myEntity->setBehavior(PB::AI::Behavior::WANDER);
-		insertIntoMap(myEntity->id, myEntity, entities_);
+		if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
+		{
+			myEntity->id = "Fred";
+			myEntity->name = myEntity->id;
+			myEntity->position += {0.0f, 0.0f, 0.0f};
+			myEntity->setBehavior(PB::AI::Behavior::WANDER);
+			insertIntoMap(myEntity->id, myEntity, entities_);
+		}
 
 		//Sprite* clickSprite = new Sprite{};
 		//PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", clickSprite, PB::LibraryAsset::Type::MODEL_2D);

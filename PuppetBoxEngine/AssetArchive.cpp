@@ -5,6 +5,7 @@
 #include <STBI/stb_image.h>
 
 #include "AssetArchive.h"
+#include "PropertyTree.h"
 
 namespace PB
 {
@@ -27,6 +28,33 @@ namespace PB
 			}
 
 			return defaultValue;
+		}
+
+		/**
+		* \brief Helper function to return a default value if a given key is not in the given PropertyTree
+		* 
+		* \param propertyName	The key that is expected to referenced the desired data in the PropertyTree.
+		* \param properties		The PropertyTree from which the key will be used to acquire data.
+		* \param defaultValue	The default value to use if the given PropertyTree does not contain the given key.
+		* 
+		* \return Either the value from the PropertyTree referenced with the given key, or the given default value if the key did not exist.
+		*/
+		std::string defaultIfNotInTree(std::string propertyName, PropertyTree& pTree, std::string defaultValue)
+		{
+			std::string value;
+			PropertyTree* childNode = pTree.get(propertyName);
+
+			if (childNode != nullptr)
+			{
+				value = childNode->value();
+
+				if (value.empty())
+				{
+					return defaultValue;
+				}
+			}
+
+			return value;
 		}
 
 		/**
@@ -57,18 +85,34 @@ namespace PB
 		}
 
 		/**
-		* \brief Helper function to map a properties map to a Material object.
+		* \brief Helper function to map a PropertyTree to a Material object.
 		*
-		* \param properties	The properties map to use to map to a Material object.
+		* \param properties	The PropertyTree to use to map to a Material object.
+		* \param bool		Flag indicating an error occured if set to True.
 		*
 		* \return The Material object built from the given properties map.
 		*/
-		Material mapToMaterial(std::unordered_map<std::string, std::string> properties)
+		Material mapToMaterial(PropertyTree& materialProperties, bool* error)
 		{
 			Material material;
 
-			material.diffuseId = defaultIfNotInMap("diffuse", properties, "");
-			material.shaderId = defaultIfNotInMap("shader", properties, "");
+			PropertyTree* diffuseProperties = materialProperties.get("diffuse");
+			std::string image = defaultIfNotInTree("image", *diffuseProperties, "");
+			uint32_t width = NumberUtils::parseValue(defaultIfNotInTree("width", *diffuseProperties, "0").c_str(), 0, error);
+			uint32_t height = NumberUtils::parseValue(defaultIfNotInTree("height", *diffuseProperties, "0").c_str(), 0, error);
+			uint32_t xOffset = NumberUtils::parseValue(defaultIfNotInTree("xOffset", *diffuseProperties, "0").c_str(), 0, error);
+			uint32_t yOffset = NumberUtils::parseValue(defaultIfNotInTree("yOffset", *diffuseProperties, "0").c_str(), 0, error);
+
+			std::string shader = defaultIfNotInTree("shader", materialProperties, "");
+
+			if (*error)
+			{
+				LOGGER_ERROR("Failed to parse values for Material Asset");
+				return {};
+			}
+
+			material.diffuseId = image;
+			material.shaderId = shader;
 
 			return material;
 		}
@@ -93,7 +137,7 @@ namespace PB
 		}
 
 		/**
-		* \brief Helper fucking to aquire the filename associated with the given virtual asset path.
+		* \brief Helper function to aquire the filename associated with the given virtual asset path.
 		*
 		* \param assetPath			The virtual asset path of the desired asset.
 		* \param archiveAssetIds	The unordered_map containing the virtual path -> filename associations.
@@ -127,6 +171,148 @@ namespace PB
 
 			return "";
 		}
+
+		/**
+		* \brief Helper function that create a property map from a stream object.  Assumes whitespace
+		* delimited key-value pairs within the stream.
+		*
+		* \param stream		The stream to read key-value pair data from.
+		* \param properties	Pointer to the unordered_map to store parsed properties in.
+		*
+		* \return True if the properties were successfully read from the stream, False otherwise.
+		*/
+		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties)
+		{
+			std::string line;
+			uint32_t lineNumber = 0;
+
+			while (std::getline(*stream, line))
+			{
+				lineNumber++;
+				StringUtils::trim(&line);
+
+				std::string* splitValues;
+				uint32_t splitCount;
+
+				StringUtils::split(line, &splitValues, &splitCount);
+
+				if (splitCount == 2)
+				{
+					properties->insert(
+						std::pair<std::string, std::string>(splitValues[0], splitValues[1])
+					);
+				}
+				else
+				{
+					LOGGER_ERROR("Invalid property data in stream '" + line + "' on line " + std::to_string(lineNumber));
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		/**
+		* \brief Helper function to count the indentation level of the given string.
+		* 
+		* \param line	The string to calculate the indentation level for.
+		* 
+		* \return The number of indentations prefixed on the given string.
+		*/
+		uint32_t countIndents(std::string line)
+		{
+			uint32_t indentCount = 0;
+
+			for (size_t i = 0; i < line.length() && line.c_str()[i] == '\t'; ++i)
+			{
+				indentCount++;
+			}
+
+			return indentCount;
+		}
+
+		/**
+		* \brief Helper function that attempts to parse the given stream into a PropertyTree.
+		* 
+		* \param stream		The stream of data to parse.
+		* \param root		The root of the PropertyTree to parse the data into.
+		* 
+		* \return True if the data was successfully parsed, False otheriwse.
+		*/
+		bool getPropertyTreeFromStream(std::istream* stream, PropertyTree* root)
+		{
+			std::string line;
+			uint32_t lineNumber = 0;
+			PropertyTree* currentNode = root;
+			uint32_t indentLevel = 0;
+			uint32_t minIndents = 0;
+			uint32_t maxIndents = 0;
+
+			while (std::getline(*stream, line))
+			{
+				lineNumber++;
+				indentLevel = countIndents(line);
+
+				if (indentLevel >= minIndents && indentLevel <= maxIndents)
+				{
+					if (indentLevel < maxIndents)
+					{
+						for (uint32_t i = maxIndents; i > indentLevel; --i)
+						{
+							currentNode = currentNode->parent();
+						}
+					}
+
+					std::string* splitValues;
+					uint32_t splitCount;
+
+					StringUtils::split(line, ":", 1, &splitValues, &splitCount);
+
+					if (splitCount == 2)
+					{
+						StringUtils::trim(&splitValues[0]);
+						StringUtils::trim(&splitValues[1]);
+
+						if (splitValues[1].empty())
+						{
+							minIndents = indentLevel + 1;
+							maxIndents = minIndents;
+
+							if (currentNode->add(splitValues[0]))
+							{
+								currentNode = currentNode->get(splitValues[0]);
+							}
+						}
+						else
+						{
+							minIndents = 0;
+							maxIndents = indentLevel;
+
+							if (currentNode->add(splitValues[0]))
+							{
+								currentNode->get(splitValues[0])->add(splitValues[1]);
+							}
+							else
+							{
+								LOGGER_WARN("Property redefinition, '" + splitValues[0] + "' on line " + std::to_string(lineNumber));
+							}
+						}
+					}
+					else
+					{
+						LOGGER_ERROR("Invalid data '" + line + "' on line " + std::to_string(lineNumber));
+						return false;
+					}
+				}
+				else
+				{
+					LOGGER_ERROR("Unexpected indentation '" + line + "' on line " + std::to_string(lineNumber));
+					return false;
+				}
+			}
+
+			return true;
+		}
 	}
 
 	bool AssetArchive::init()
@@ -137,7 +323,7 @@ namespace PB
 
 		std::istream* stream = nullptr;
 		success = success && FileUtils::getStreamFromArchivedFile(archivePath(), ".manifest", &stream);
-		success = success && FileUtils::getPropertiesFromStream(stream, &archiveAssetIds_);
+		success = success && getPropertiesFromStream(stream, &archiveAssetIds_);
 
 		if (!success)
 		{
@@ -199,7 +385,7 @@ namespace PB
 			std::unordered_map<std::string, std::string> modelPropertyData{};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-			*error = *error || !FileUtils::getPropertiesFromStream(stream, &modelPropertyData);
+			*error = *error || !getPropertiesFromStream(stream, &modelPropertyData);
 
 			delete stream;
 			if (!*error)
@@ -269,14 +455,15 @@ namespace PB
 			std::istream* stream = nullptr;
 
 			std::unordered_map<std::string, std::string> modelPropertyData{};
+			PropertyTree propertyData{"material"};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-			*error = *error || !FileUtils::getPropertiesFromStream(stream, &modelPropertyData);
+			*error = *error || !getPropertyTreeFromStream(stream, &propertyData);
 
 			delete stream;
 			if (!*error)
 			{
-				return mapToMaterial(modelPropertyData);
+				return mapToMaterial(propertyData, error);
 			}
 		}
 		else
@@ -299,7 +486,7 @@ namespace PB
 			std::unordered_map<std::string, std::string> modelPropertyData{};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-			*error = *error || !FileUtils::getPropertiesFromStream(stream, &modelPropertyData);
+			*error = *error || !getPropertiesFromStream(stream, &modelPropertyData);
 
 			delete stream;
 			if (!*error)
