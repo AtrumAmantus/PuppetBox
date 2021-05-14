@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -19,7 +20,7 @@ namespace PB
 		PropertyTree* parent();
 	private:
 		std::string value_;
-		std::unordered_map<std::string, PropertyTree*> children_{};
+		std::unordered_map<std::string, std::shared_ptr<PropertyTree>> children_{};
 		PropertyTree* parent_;
 	};
 }

@@ -20,7 +20,7 @@ namespace PB
 	{
 		if (children_.find(parameterName) != children_.end())
 		{
-			return children_.at(parameterName);
+			return &(*children_.at(parameterName));
 		}
 
 		return nullptr;
