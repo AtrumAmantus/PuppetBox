@@ -11,7 +11,6 @@
 #include <puppetbox/SceneObject.h>
 
 #include "Entity.h"
-#include "Sprite.h"
 
 namespace
 {
