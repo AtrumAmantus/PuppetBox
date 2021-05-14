@@ -37,11 +37,6 @@ public:
 			myEntity->setBehavior(PB::AI::Behavior::WANDER);
 			insertIntoMap(myEntity->id, myEntity, entities_);
 		}
-
-		//Sprite* clickSprite = new Sprite{};
-		//PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", clickSprite, PB::LibraryAsset::Type::MODEL_2D);
-		//clickSprite->id = "clicker1";
-		//insertIntoMap(clickSprite->id, clickSprite, renderLast_);
 	};
 	void update(float deltaTime)
 	{
