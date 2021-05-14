@@ -1,14 +1,22 @@
 #include "pch.h"
 
+#include <string>
+
 #include "../include/puppetbox/SceneObject.h"
 
 #include "WanderBehavior.h"
 
 namespace PB
 {
-	const uint32_t SceneObject::id() const
+	SceneObject::SceneObject() : model_(nullptr)
 	{
-		return id_;
+
+	}
+
+	SceneObject::SceneObject(vec3 baseScale, IModel* model) :
+		baseScale_(baseScale), model_(model)
+	{
+
 	}
 
 	void SceneObject::update(float deltaTime)

@@ -431,13 +431,15 @@ namespace PB
 			* Make a copy of the previous SceneObject proprety data so that
 			* it can be restored after a new instance is made.
 			*/
+			std::string id = sceneObject->id;
 			vec3 position = sceneObject->position;
 			vec3 rotation = sceneObject->rotation;
 			vec3 scale = sceneObject->scale;
 			float speed = sceneObject->speed;
 			vec3 velocity = sceneObject->velocity;
 
-			*sceneObject = SceneObject{ 0, vec3{ static_cast<float>(modelData2D.width), static_cast<float>(modelData2D.height), 1.0f }, model };
+			*sceneObject = SceneObject{ vec3{ static_cast<float>(modelData2D.width), static_cast<float>(modelData2D.height), 1.0f }, model };
+			sceneObject->id = id;
 			sceneObject->position = position;
 			sceneObject->rotation = rotation;
 			sceneObject->scale = scale;

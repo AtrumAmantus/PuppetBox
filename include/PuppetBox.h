@@ -67,8 +67,10 @@ namespace PB
 	 * \param assetPath The path to the asset to inject 
 	 * \param sceneObject The SceneObject to inject assets into, must not be a nullptr.
 	 * \param type Specifies what type the requested asset is.
+	 * 
+	 * \return True if the SceneObject was succesffully injected with assets, False otherwise.
 	 */
-	extern PUPPET_BOX_API void CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
+	extern PUPPET_BOX_API bool CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
 
 	/**
 	 * \brief Initiates start of core engine, input processors, and render loops.

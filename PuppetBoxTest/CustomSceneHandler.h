@@ -2,13 +2,25 @@
 
 #include <iostream>
 #include <memory>
-#include <vector>
+#include <string>
+#include <unordered_map>
 
 #include <PuppetBox.h>
 #include <puppetbox/Constants.h>
 #include <puppetbox/KeyCode.h>
+#include <puppetbox/SceneObject.h>
 
 #include "Entity.h"
+
+namespace
+{
+	void insertIntoMap(std::string k, PB::SceneObject* v, std::unordered_map <std::string, PB::SceneObject*>& map)
+	{
+		map.insert(
+			std::pair<std::string, PB::SceneObject*>{ k, v }
+		);
+	}
+}
 
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
@@ -16,30 +28,39 @@ public:
 	void setUp()
 	{
 		Entity* myEntity = new Entity{};
-		PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D);
-		myEntity->name = "Fred";
-		myEntity->position += {100.0f, 0.0f, 0.0f};
-		myEntity->setBehavior(PB::AI::Behavior::WANDER);
-		entities_.push_back(myEntity);
+		if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
+		{
+			myEntity->id = "Fred";
+			myEntity->name = myEntity->id;
+			myEntity->position += {0.0f, 0.0f, 0.0f};
+			myEntity->setBehavior(PB::AI::Behavior::WANDER);
+			insertIntoMap(myEntity->id, myEntity, entities_);
+		}
 	};
 	void update(float deltaTime)
 	{
 		processInput();
 
-		for (auto e : entities_)
+		for (auto& e : entities_)
 		{
-			e->update(deltaTime);
+			e.second->update(deltaTime);
 		}
 	};
 	void render()
 	{
-		for (auto e : entities_)
+		for (auto& e : entities_)
 		{
-			e->render();
+			e.second->render();
+		}
+
+		for (auto& e : renderLast_)
+		{
+			e.second->render();
 		}
 	};
 private:
-	std::vector<Entity*> entities_{};
+	std::unordered_map<std::string, PB::SceneObject*> entities_{};
+	std::unordered_map<std::string, PB::SceneObject*> renderLast_{};
 private:
 	void processInput()
 	{
@@ -55,7 +76,7 @@ private:
 
 		if (input()->mouse.deltaX != 0 || input()->mouse.deltaY != 0)
 		{
-			std::cout << "Mouse Coords: " << std::to_string(input()->mouse.deltaX) << ", " << std::to_string(input()->mouse.deltaY) << std::endl;
+			//std::cout << "Mouse Coords: " << std::to_string(input()->mouse.deltaX) << ", " << std::to_string(input()->mouse.deltaY) << std::endl;
 		}
 
 		if (input()->window.newWidth != 0 || input()->window.newHeight != 0)

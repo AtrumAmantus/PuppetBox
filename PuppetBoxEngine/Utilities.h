@@ -254,15 +254,5 @@ namespace PB
 		* \return True if the file was read and stream created successfully, False otherwise.
 		*/
 		bool getStreamFromArchivedFile(std::string archivePath, std::string filePath, std::istream** stream);
-
-		/**
-		* \brief Create a property map from a stream object.  Assumes whitespace delimited key-value pairs within the stream.
-		*
-		* \param stream		The stream to read key-value pair data from.
-		* \param properties	Pointer to the unordered_map to store parsed properties in.
-		*
-		* \return True if the properties were successfully read from the stream, False otherwise.
-		*/
-		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties);
 	}
 }

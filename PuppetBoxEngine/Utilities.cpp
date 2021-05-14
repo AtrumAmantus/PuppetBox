@@ -25,9 +25,9 @@ namespace PB
 	{
 		void ltrimWhitespace(std::string* str)
 		{
-			while (!str->empty() && std::isspace(str->at(strlen((*str).c_str()) - 1)))
+			while (!str->empty() && std::isspace(str->at(0)))
 			{
-				str->erase((strlen((*str).c_str()) - 1), 1);
+				str->erase(0, 1);
 			}
 		}
 		std::string ltrimWhitespace(std::string str)
@@ -429,35 +429,6 @@ namespace PB
 			}
 
 			return success;
-		}
-
-		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties)
-		{
-			std::string line;
-			
-			while (std::getline(*stream, line))
-			{
-				StringUtils::trim(&line);
-
-				std::string* splitValues;
-				uint32_t splitCount;
-
-				StringUtils::split(line, &splitValues, &splitCount);
-
-				if (splitCount == 2)
-				{
-					properties->insert(
-						std::pair<std::string, std::string>(splitValues[0], splitValues[1])
-					);
-				}
-				else
-				{
-					LOGGER_ERROR("Invalid property data in stream");
-					return false;
-				}
-			}
-
-			return true;
 		}
 	}
 }
