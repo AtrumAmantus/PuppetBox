@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../include/puppetbox/SceneObject.h"
+#include "puppetbox/SceneObject.h"
 
 class Entity : public PB::SceneObject
 {

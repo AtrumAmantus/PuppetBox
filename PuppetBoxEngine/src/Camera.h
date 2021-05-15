@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../include/puppetbox/Constants.h"
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/Constants.h"
+#include "puppetbox/DataStructures.h"
 
 namespace PB
 {

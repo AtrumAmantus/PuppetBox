@@ -2,8 +2,8 @@
 .vs
 *.sln
 *.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+*.filters
+*.user
 .ruleset
 x64
 [Dd]ebug*/

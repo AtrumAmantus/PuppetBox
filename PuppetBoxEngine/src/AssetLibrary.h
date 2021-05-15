@@ -9,7 +9,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
-#include "../include/puppetbox/SceneObject.h"
+#include "puppetbox/SceneObject.h"
 
 namespace PB
 {

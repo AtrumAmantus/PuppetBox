@@ -2,7 +2,7 @@
 
 #include <sdl2/SDL.h>
 
-#include "../include/puppetbox/AbstractInputProcessor.h"
+#include "puppetbox/AbstractInputProcessor.h"
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "SceneGraph.h"

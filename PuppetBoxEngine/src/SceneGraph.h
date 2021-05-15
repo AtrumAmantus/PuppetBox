@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "../include/puppetbox/AbstractSceneHandler.h"
-#include "../include/puppetbox/Constants.h"
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/AbstractSceneHandler.h"
+#include "puppetbox/Constants.h"
+#include "puppetbox/DataStructures.h"
 
 #include "Camera.h"
 #include "GfxMath.h"

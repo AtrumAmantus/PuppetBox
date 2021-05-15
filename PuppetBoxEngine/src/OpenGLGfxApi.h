@@ -6,7 +6,7 @@
 
 #include <glad/glad.h>
 
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/DataStructures.h"
 
 #include "IGfxApi.h"
 #include "IHardwareInitializer.h"

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/DataStructures.h"
 
 #include "IHardwareInitializer.h"
 #include "ImageData.h"

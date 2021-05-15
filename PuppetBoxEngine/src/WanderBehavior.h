@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../include/puppetbox/IBehavior.h"
-#include "../include/puppetbox/DataStructures.h"
-#include "../include/puppetbox/SceneObject.h"
+#include "puppetbox/IBehavior.h"
+#include "puppetbox/DataStructures.h"
+#include "puppetbox/SceneObject.h"
 #include "GfxMath.h"
 #include "Utilities.h"
 

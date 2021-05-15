@@ -2,8 +2,8 @@
 
 #include <sdl2/SDL.h>
 
-#include "../include/puppetbox/AbstractInputProcessor.h"
-#include "../include/puppetbox/KeyCode.h"
+#include "puppetbox/AbstractInputProcessor.h"
+#include "puppetbox/KeyCode.h"
 #include "Logger.h"
 
 namespace PB
