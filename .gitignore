@@ -1,5 +1,5 @@
 # MS Visual Studio
-.vs
+.vs/
 *.sln
 *.vcxproj
 *.filters
@@ -10,11 +10,16 @@ x64
 [Rr]elease*/
 
 # Cmake
-build
-bin
+build/
+bin/
+out/
 
 # Deps
 dependencies/
 
 # Assets (for now)
 *.zip
+
+# Jetbrains
+.idea/
+*.iml
