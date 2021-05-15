@@ -1,9 +1,20 @@
+# MS Visual Studio
 .vs
 *.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+.ruleset
 x64
 [Dd]ebug*/
 [Rr]elease*/
+
+# Cmake
+build
+bin
+
+# Deps
+dependencies/
+
+# Assets (for now)
 *.zip

@@ -1,5 +1,3 @@
-#ifdef _USE_SDL2
-
 #pragma once
 
 #include <sdl2/SDL.h>
@@ -78,5 +76,3 @@ namespace PB
 		}
 	};
 }
-
-#endif //_USE_SDL2

@@ -1,4 +1,3 @@
-#ifdef _USE_SDL2
 #pragma once
 
 #include <string>
@@ -144,5 +143,3 @@ namespace PB
 		bool error_ = false;
 	};
 }
-
-#endif //_USE_SDL2

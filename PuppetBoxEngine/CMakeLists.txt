@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.19)
+project(PuppetBoxEngine
+        VERSION 0.0.1)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(DEP_INCLUDES_DIR ${DEP_DIRECTORY}/include CACHE PATH "Dependency Includes" FORCE)
+set(DEP_SLIBRARY_DIR ${DEP_DIRECTORY}/lib/${ARCH_TYPE} CACHE PATH "Dependency Static Libs" FORCE)
+
+file(GLOB_RECURSE SOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+file(GLOB_RECURSE HEADER_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+
+add_library(SDL2Dep SHARED IMPORTED)
+set_property(TARGET SDL2Dep PROPERTY
+	IMPORTED_LOCATION ${DEP_DLIBRARY_DIR}/SDL2.dll)
+set_property(TARGET SDL2Dep PROPERTY
+	IMPORTED_IMPLIB ${DEP_SLIBRARY_DIR}/SDL2.lib)
+
+add_library(SDL2MainDep STATIC IMPORTED)
+set_property(TARGET SDL2MainDep PROPERTY
+	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/SDL2main.lib)
+
+add_library(ZipDep STATIC IMPORTED)
+set_property(TARGET ZipDep PROPERTY
+	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/zip.lib)
+
+add_compile_definitions(PUPPETBOXENGINE_EXPORTS)
+
+find_package(OpenGL REQUIRED)
+
+set(LIBS opengl32 SDL2Dep SDL2MainDep ZipDep)
+
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PUBLIC_HEADER_FILES})
+target_link_libraries(${PROJECT_NAME} ${LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR} ${DEP_INCLUDES_DIR})
