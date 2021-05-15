@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "../include/puppetbox/AbstractInputProcessor.h"
 
 #define KEY_IS_DOWN	1

@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include <vector>
 
 #include "../include/puppetbox/DataStructures.h"

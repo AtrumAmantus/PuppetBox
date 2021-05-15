@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include <limits>
 
 #include <STBI/stb_image.h>

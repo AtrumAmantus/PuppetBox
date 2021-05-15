@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include <ctype.h>
 #include <istream>
 #include <streambuf>

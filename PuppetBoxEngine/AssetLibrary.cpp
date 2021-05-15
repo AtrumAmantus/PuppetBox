@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "../include/puppetbox/DataStructures.h"
 #include "AssetLibrary.h"
 #include "OpenGLModel.h"

@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include <string>
 
 #include "../include/puppetbox/SceneObject.h"
