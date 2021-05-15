@@ -1,9 +1,25 @@
-.vs
+# MS Visual Studio
+.vs/
 *.sln
 *.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+*.filters
+*.user
+.ruleset
 x64
 [Dd]ebug*/
 [Rr]elease*/
+
+# Cmake
+build/
+bin/
+out/
+
+# Deps
+dependencies/
+
+# Assets (for now)
 *.zip
+
+# Jetbrains
+.idea/
+*.iml
