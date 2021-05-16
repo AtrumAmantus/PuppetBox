@@ -110,7 +110,13 @@ namespace PB
 				return {};
 			}
 
-			material.diffuseId = image;
+			material.diffuseData = {
+				image,
+				width,
+				height,
+				xOffset,
+				yOffset
+			};
 			material.shaderId = shader;
 
 			return material;

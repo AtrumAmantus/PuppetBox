@@ -5,7 +5,7 @@
 namespace PB
 {
 	/**
-	* \brief Helper object used to facilitate transfer of image data between application logic.
+	* \brief Helper object used to facilitate transfer of loaded image file data between application logic.
 	*/
 	struct ImageData
 	{

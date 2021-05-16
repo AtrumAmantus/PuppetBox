@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "ImageMapData.h"
 #include "ImageReference.h"
 #include "Shader.h"
 
@@ -13,7 +14,7 @@ namespace PB
 	*/
 	struct Material
 	{
-		std::string diffuseId;
+		ImageMapData diffuseData{};
 		std::string emissionId;
 		std::string specularId;
 		std::string normalId;
