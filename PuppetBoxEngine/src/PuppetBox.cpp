@@ -134,36 +134,28 @@ namespace PB
 	{
 		Init_CharMap();
 
+		std::shared_ptr<IGfxApi> gfxApi_ = defaultGfxApi();
+
 		// Create hardware Api instance
 		std::shared_ptr<Sdl2InputProcessor> inputProcessor_ = std::make_shared<Sdl2InputProcessor>();
-		std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>();
+		std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi_);
 
-		hardwareInitializer_->init(windowTitle, windowWidth, windowHeight);
+#ifdef _DEBUG
+		hardwareInitializer_->enableDebugger();
+#endif
 
-		if (!hardwareInitializer_->hadError())
+		if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight))
 		{
 			std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
 
+			gfxApi = gfxApi_;
 			hardwareInitializer = hardwareInitializer_;
 			inputProcessor = inputProcessor_;
 
-			gfxApi = defaultGfxApi();
-			gfxApi->setRenderDimensions(windowWidth, windowHeight);
+			pbInitialized = true;
 
-			if (gfxApi->init(*hardwareInitializer))
-			{
-				gfxApi->initializeUBORanges();
-
-				pbInitialized = true;
-
-				assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
-				assetLibrary->init();
-				LOGGER_DEBUG("GFX Api loaded.");
-			}
-			else
-			{
-				LOGGER_ERROR("Failed to initialize Engine");
-			}
+			assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
+			assetLibrary->init();
 		}
 		else
 		{

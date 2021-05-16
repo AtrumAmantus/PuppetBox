@@ -27,11 +27,11 @@ namespace PB
 		/**
 		* \brief Used to initialize OpenGL API specific configurations.
 		*
-		* \param hardwareInitializer	Reference to the current hardware library to be used for OpenGL API configurations.
+		* \param procAddress	Reference to the ProcAddress function for loading gfx function pointers.
 		*
 		* \return True if the OpenGL API initialization was successful, False otherwise.
 		*/
-		bool init(const IHardwareInitializer& hardwareInitializer) override;
+		bool init(const PB::ProcAddress procAddress) override;
 
 		/**
 		* \brief Used to define OpenGL API specific commands that must execute before each rendering loop.
@@ -84,6 +84,13 @@ namespace PB
 		* \param projection	The Projection Matrix to set.
 		*/
 		void setTransformUBOData(mat4 view, mat4 projection) const override;
+
+		/**
+		* \brief Enables the OpenGL API debugger.
+		*
+		* \return True if the debugger was enabled, False otherwise.
+		*/
+		bool initGfxDebug() const override;
 	private:
 		std::uint32_t width_ = 0;
 		std::uint32_t height_ = 0;

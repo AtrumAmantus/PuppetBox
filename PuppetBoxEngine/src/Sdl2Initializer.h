@@ -4,6 +4,7 @@
 
 #include <sdl2/SDL.h>
 
+#include "IGfxApi.h"
 #include "IHardwareInitializer.h"
 #include "Logger.h"
 #include "TypeDef.h"
@@ -16,22 +17,39 @@ namespace PB
 	class Sdl2Initializer : public IHardwareInitializer
 	{
 	public:
+		Sdl2Initializer(IGfxApi& gfxApi) : gfxApi_(gfxApi) {};
+
+		//TODO: Add this to the IHardwareInitializer
+		/**
+		* \brief Set a flag signaling to configure SDL2 to initialize the GFX API debugging features.
+		*/
+		void enableDebugger()
+		{
+			useDebugger_ = true;
+		};
+
 		/**
 		* \brief Invokes the SDL2 specific functions to initialize hardware configuration for future interactions.
 		* 
 		* \param windowTitle	The desired title for the window to be created.
 		* \param windowWidth	The desired width for the window to be created.
 		* \param windowHeight	The desired height for the window to be created.
+		* 
+		* \return True if the hardware successfully initialized, False otherwise.
 		*/
-		void init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) override
+		bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) override
 		{
+			bool error = false;
+
 			if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
 			{
 				int context_flags = 0;
 
-#ifdef _DEBUG
-				context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
-#endif
+				if (useDebugger_)
+				{
+					context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+				}
+
 				SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
 				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
@@ -52,21 +70,51 @@ namespace PB
 					}
 					else
 					{
-						error_ = true;
+						error = true;
 						LOGGER_ERROR("Failed to create context");
 					}
 				}
 				else
 				{
-					error_ = true;
+					error = true;
 					LOGGER_ERROR("Failed to create window");
 				}
 			}
 			else
 			{
-				error_ = true;
+				error = true;
 				LOGGER_ERROR("Failed to initialize SDL");
 			}
+
+			if (!error)
+			{
+				gfxApi_.setRenderDimensions(windowWidth, windowHeight);
+
+				if (gfxApi_.init(SDL_GL_GetProcAddress))
+				{
+					if (useDebugger_)
+					{
+						if (gfxApi_.initGfxDebug())
+						{
+							std::cout << "GFX API Debugger Loaded." << std::endl;
+						}
+						else
+						{
+							LOGGER_ERROR("Failed to initialize GFX debugger");
+						}
+					}
+
+					gfxApi_.initializeUBORanges();
+
+					std::cout << "GFX API Loaded." << std::endl;
+				}
+				else
+				{
+					LOGGER_ERROR("Failed to initialize GFX API");
+				}
+			}
+
+			return !error;
 		};
 
 		/**
@@ -76,16 +124,6 @@ namespace PB
 		{
 			if (window_) SDL_DestroyWindow(window_);
 			SDL_Quit();
-		};
-
-		/**
-		* \brief Determines if an error occured during hardware initialization.
-		* 
-		* \return True if an error occured during initialization, False otherwise.
-		*/
-		bool hadError() const override
-		{
-			return error_;
 		};
 
 		/**
@@ -119,16 +157,6 @@ namespace PB
 		};
 
 		/**
-		* \brief Get a reference to the process address for configuring function pointers.
-		* 
-		* \return The SDL2 specific process address for function pointers.
-		*/
-		ProcAddress getProcAddress() const override
-		{
-			return SDL_GL_GetProcAddress;
-		};
-
-		/**
 		* \brief Identifies the specific IHardwareInitializer by a string value.
 		* 
 		* \return The specific IHardwareInitializer identifier for this hardware library implementation.
@@ -139,7 +167,8 @@ namespace PB
 		};
 	private:
 		std::uint64_t lastFrameTime_ = 0;
+		IGfxApi& gfxApi_;
 		SDL_Window* window_ = nullptr;
-		bool error_ = false;
+		bool useDebugger_ = false;
 	};
 }

@@ -21,11 +21,11 @@ namespace PB
 		/**
 		* \brief Used to initialize GFX API specific configurations.
 		* 
-		* \param hardwareInitializer	Reference to the current hardware library to be used for GFX API configurations.
+		* \param procAddress	Reference to the ProcAddress function for loading gfx function pointers.
 		* 
 		* \return True if the GFX API initialization was successful, False otherwise.
 		*/
-		virtual bool init(const IHardwareInitializer& hardwareInitializer) = 0;
+		virtual bool init(const PB::ProcAddress procAddress) = 0;
 		
 		/**
 		* \brief Used to define GFX API specific commands that must execute before each rendering loop.
@@ -78,5 +78,12 @@ namespace PB
 		* \param projection	The Projection Matrix to set.
 		*/
 		virtual void setTransformUBOData(mat4 view, mat4 projection) const = 0;
+
+		/**
+		* \brief Enables GFX API Debugging if it has one.
+		* 
+		* \return True if the debugger was found and enabled, False otherwise.
+		*/
+		virtual bool initGfxDebug() const = 0;
 	};
 }
