@@ -25,26 +25,10 @@ namespace PB
 		*/
 		OpenGLModel(Mesh mesh, Material material) : mesh_(mesh), material_(std::move(material)) {};
 
-		void updateModelMatrix(mat3 transform) override
-		{
-			mat4 model = mat4::eye();
-			vec3 translate = transform[0];
-			vec3 rotation = transform[1];
-			vec3 scale = transform[2];
-
-			model = GfxMath::Translate(model, translate);
-			model = GfxMath::Scale(model, scale);
-			model = GfxMath::Rotate(model, rotation);
-
-			material_.shader.use();
-			material_.shader.setMat4("model", model);
-			material_.shader.unuse();
-		}
-
 		/**
 		* \brief Renders the object with OpenGL specific invocations.
 		*/
-		void render() const override
+		void render(mat3 transform) const override
 		{
 			if (material_.requiresAlphaBlending)
 			{
@@ -53,6 +37,17 @@ namespace PB
 			material_.shader.use();
 			material_.diffuseMap.use(GL_TEXTURE0);
 			material_.shader.setInt("material.diffuseMap", 0);
+
+			vec4 diffuseUvAdjust{
+			    static_cast<float>(material_.diffuseData.width) / static_cast<float>(material_.diffuseMap.width),
+			    static_cast<float>(material_.diffuseData.height) / static_cast<float>(material_.diffuseMap.height),
+			    static_cast<float>(material_.diffuseData.xOffset),
+			    static_cast<float>(material_.diffuseData.yOffset)
+			};
+
+			material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
+
+            updateModelMatrix(transform);
 
 			glBindVertexArray(mesh_.VAO);
 
@@ -77,5 +72,16 @@ namespace PB
 	private:
 		Mesh mesh_;
 		Material material_;
+	private:
+        void updateModelMatrix(mat3 transform) const
+        {
+            mat4 model = mat4::eye();
+
+            model = GfxMath::Translate(model, transform[0]);
+            model = GfxMath::Scale(model, transform[2]);
+            model = GfxMath::Rotate(model, transform[1]);
+
+            material_.shader.setMat4("model", model);
+        }
 	};
 }

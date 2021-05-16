@@ -10,12 +10,10 @@ namespace PB
 	class IModel
 	{
 	public:
-		virtual void updateModelMatrix(mat3 transform) = 0;
-
 		/**
 		* \brief Method used by application logic to render an object using the GFX API invocations of
 		* the derived implementation.
 		*/
-		virtual void render() const = 0;
+		virtual void render(mat3 transform) const = 0;
 	};
 }

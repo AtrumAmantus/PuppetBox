@@ -12,14 +12,11 @@ namespace PB
 	class ImageReference
 	{
 	public:
-		bool requiresAlphaBlending = false;
+        std::uint32_t width = 0;
+        std::uint32_t height = 0;
+        bool requiresAlphaBlending = false;
 	public:
-		/**
-		* \brief Create an OpenGL specific ImageReference instance for referencing a stored image data.
-		* 
-		* \param id	The OpenGL id for referencing the stored image data.
-		*/
-		explicit ImageReference(std::uint32_t id) : referenceId_(id) {};
+	    explicit ImageReference(std::uint32_t referenceId) : referenceId_(referenceId) {};
 
 		/**
 		* \brief Instructs the API to use this image data to populate the uniform variable at the given
@@ -58,6 +55,6 @@ namespace PB
 
 		};
 	private:
-        std::uint32_t referenceId_;
+        std::uint32_t referenceId_ = 0;
 	};
 }
