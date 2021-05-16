@@ -2,19 +2,16 @@
 #include <string>
 
 #include <PuppetBox.h>
-#include <STBI/stb_image.h>
 
-#include "../include/puppetbox/AbstractInputProcessor.h"
-#include "../include/puppetbox/KeyCode.h"
 #include "AssetLibrary.h"
 #include "Engine.h"
 #include "OpenGLGfxApi.h"
-#include "IGfxApi.h"
-#include "IHardwareInitializer.h"
-#include "SceneGraph.h"
 #include "Sdl2Initializer.h"
 #include "Sdl2InputProcessor.h"
 
+// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
 	namespace
@@ -32,7 +29,7 @@ namespace PB
 		* \brief Used to map scan codes to actual ascii characters
 		* Key: scancode, Value: character
 		*/
-		std::unordered_map<uint8_t, uint8_t> charMap_{};
+		std::unordered_map<std::uint8_t, std::int8_t> charMap_{};
 
 		/**
 		* \brief Helper method to insider values into the charMap.
@@ -40,9 +37,9 @@ namespace PB
 		* \param k	The scancode for the entry.
 		* \param v	The value for the entry.
 		*/
-		void CharMapInsert(uint8_t k, uint8_t v)
+		void CharMapInsert(std::uint8_t k, std::uint8_t v)
 		{
-			charMap_.insert(std::pair<uint8_t, uint8_t>{ k, v });
+			charMap_.insert(std::pair<std::uint8_t, std::uint8_t>{ k, v });
 		}
 
 		/**
@@ -83,7 +80,6 @@ namespace PB
 			{
 			case LibraryAsset::Type::MODEL_2D:
 				return Asset::Type::MODEL_2D;
-				break;
 			default:
 				return Asset::Type::UNKNOWN;
 			}
@@ -132,26 +128,9 @@ namespace PB
 			CharMapInsert(KEY_Y, 'x');
 			CharMapInsert(KEY_Z, 'z');
 		}
-
-		/**
-		* \brief Helper function for getting the ascii character the given key code represents.
-		*
-		* \param code	The arbitrary key code to be maped to an ascii character.
-		*
-		* \return The int value for the ascii character the key code represents.
-		*/
-		int8_t GetCharFromCode(uint8_t code)
-		{
-			if (charMap_.find(code) != charMap_.end())
-			{
-				return charMap_.at(code);
-			}
-
-			return 0;
-		}
 	}
 
-	void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
+	void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight)
 	{
 		Init_CharMap();
 
@@ -192,7 +171,7 @@ namespace PB
 		}
 	}
 
-	void CreateScene(std::string sceneName)
+	void CreateScene(const std::string& sceneName)
 	{
 		if (loadedScenes.find(sceneName) == loadedScenes.end())
 		{
@@ -208,7 +187,7 @@ namespace PB
 		}
 	}
 
-	void SetSceneCameraMode(std::string sceneName, SceneView::Mode mode)
+	void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode)
 	{
 		if (loadedScenes.find(sceneName) != loadedScenes.end())
 		{
@@ -220,7 +199,7 @@ namespace PB
 		}
 	}
 
-	void SetActiveScene(std::string sceneName)
+	void SetActiveScene(const std::string& sceneName)
 	{
 		if (loadedScenes.find(sceneName) != loadedScenes.end())
 		{
@@ -237,12 +216,12 @@ namespace PB
 		activeScene().setSceneHandler(sceneHandler);
 	}
 
-	void LoadAssetPack(std::string archiveName)
+	void LoadAssetPack(const std::string& archiveName)
 	{
 		assetLibrary->loadArchive(archiveName);
 	}
 
-	bool CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
+	bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
 	{
 		if (sceneObject == nullptr)
 		{
@@ -263,12 +242,30 @@ namespace PB
 
 	void Run()
 	{
-		Engine engine{ *gfxApi, *hardwareInitializer, *inputProcessor };
+	    if (pbInitialized) {
+            Engine engine{*gfxApi, *hardwareInitializer, *inputProcessor};
 
-		engine.setScene(&activeScene());
+            engine.setScene(&activeScene());
 
-		engine.run();
+            engine.run();
 
-		engine.shutdown();
+            engine.shutdown();
+        }
+	    else
+        {
+            LOGGER_ERROR("PuppetBox context was not initialized, must call PB::Init() before PB::Run()");
+	        hardwareInitializer->destroy();
+        }
 	}
+
+    std::int8_t GetCharFromCode(std::uint8_t code)
+    {
+        if (charMap_.find(code) != charMap_.end())
+        {
+            return charMap_.at(code);
+        }
+
+        return 0;
+    }
 }
+#pragma clang diagnostic pop

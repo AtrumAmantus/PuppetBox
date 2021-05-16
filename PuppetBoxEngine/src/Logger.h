@@ -16,39 +16,42 @@ namespace PB
     class DefaultLogger
     {
     public:
-        static void debug(const std::string& message, const std::string& filePath, int line)
+        static void debug(const std::string& message, const std::string& filePath, std::uint32_t line)
         {
             log("DEBUG", message, filePath, line);
         }
-        static void warn(const std::string& message, const std::string& filePath, int line)
+        static void warn(const std::string& message, const std::string& filePath, std::uint32_t line)
         {
             log("WARN", message, filePath, line);
         }
-        static void error(const std::string& message, const std::string& filePath, int line)
+        static void error(const std::string& message, const std::string& filePath, std::uint32_t line)
         {
             log("ERROR", message, filePath, line);
         }
     private:
-        static void log(const std::string& level, const std::string& message, const std::string& filePath, int line)
+        static void log(
+                const std::string& level,
+                const std::string& message,
+                const std::string& filePath,
+                std::uint32_t line)
         {
             time_t now;
             time(&now);
             const std::string fileName = getFileName(filePath);
             std::cout << now << " | " << level << " | " << fileName << " (" << line << "): " << message << std::endl;
         };
-        static const std::string getFileName(const std::string& filePath)
+        static std::string getFileName(const std::string& filePath)
         {
             std::string fileName;
-            constexpr int64_t maxValue = std::numeric_limits<int64_t>::max();
 
-            if (filePath.length() <= maxValue)
+            if (filePath.length() <= UINT32_MAX)
             {
                 // If the first character of the string is \ then I don't care to remove it
-                for (size_t i = filePath.length() - 1; i > 0; --i)
+                for (std::size_t i = filePath.length() - 1; i > 0; --i)
                 {
                     if (filePath.at(i) == '\\')
                     {
-                        fileName = filePath.substr(static_cast<size_t>(i) + 1, filePath.length() - i + 1);
+                        fileName = filePath.substr(static_cast<std::size_t>(i) + 1, filePath.length() - i + 1);
                         i = 1; // Found it, we're done.
                     }
                 }

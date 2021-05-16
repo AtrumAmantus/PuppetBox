@@ -1,6 +1,11 @@
+#pragma warning(disable : 4068) // Unknown pragmas warning
+// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include "puppetbox/DataStructures.h"
 
@@ -22,30 +27,30 @@ namespace PB
         * \param geometryPath   The virtual asset path of the geometry shader asset.
         * \param fragmentPath   The virtual asset path of the fragment shader asset.
         */
-        Shader(
-            const std::string shaderName,
-            const std::string vertexPath = "",
-            const std::string geometryPath = "",
-            const std::string fragmentPath = ""
+        explicit Shader(
+            std::string  shaderName,
+            std::string  vertexPath = "",
+            std::string  geometryPath = "",
+            std::string  fragmentPath = ""
         ) :
-            shaderName_(shaderName),
-            vertexPath_(vertexPath),
-            geometryPath_(geometryPath),
-            fragmentPath_(fragmentPath) {};
+            shaderName_(std::move(shaderName)),
+            vertexPath_(std::move(vertexPath)),
+            geometryPath_(std::move(geometryPath)),
+            fragmentPath_(std::move(fragmentPath)) {};
 
         /**
         * \brief Gets the gfx API specific ID for the shader program.
         * 
         * \return The ID of the shader program.
         */
-        const uint32_t id() const;
+        std::uint32_t id() const;
 
         /**
         * \brief Gets the name for the shader program.
         *
         * \return The name of the shader program, represented by the it's virtual asset path.
         */
-        const std::string name() const;
+        std::string name() const;
 
         /**
         * \brief Builds a vertex shader with the given shader code to be used in the shader program.
@@ -54,7 +59,7 @@ namespace PB
         * 
         * \return True if the shader compiled successfully, False otherwise.
         */
-        bool loadVertexShader(std::string shaderCode);
+        bool loadVertexShader(const std::string& shaderCode);
 
         /**
         * \brief Builds a geometry shader with the given shader code to be used in the shader program.
@@ -63,7 +68,7 @@ namespace PB
         *
         * \return True if the shader compiled successfully, False otherwise.
         */
-        bool loadGeometryShader(std::string shaderCode);
+        bool loadGeometryShader(const std::string& shaderCode);
 
         /**
         * \brief Builds a fragment shader with the given shader code to be used in the shader program.
@@ -72,7 +77,7 @@ namespace PB
         *
         * \return True if the shader compiled successfully, False otherwise.
         */
-        bool loadFragmentShader(std::string shaderCode);
+        bool loadFragmentShader(const std::string& shaderCode);
 
         /**
         * \brief Compiles the shader program using the previously compiled shaders
@@ -105,7 +110,7 @@ namespace PB
         * \param name   The name of the uniform variable in the shader.
         * \param value  The desired value for the uniform variable in the shader.
         */
-        void setInt(const std::string& name, int32_t value) const;
+        void setInt(const std::string& name, std::int32_t value) const;
 
         /**
         * \brief Sets a Unsigned Integer uniform value in the shader.
@@ -113,7 +118,7 @@ namespace PB
         * \param name   The name of the uniform variable in the shader.
         * \param value  The desired value for the uniform variable in the shader.
         */
-        void setUInt(const std::string& name, uint32_t value) const;
+        void setUInt(const std::string& name, std::uint32_t value) const;
 
         /**
         * \brief Sets a Float uniform value in the shader.
@@ -205,9 +210,10 @@ namespace PB
         std::string vertexPath_;
         std::string geometryPath_;
         std::string fragmentPath_;
-        uint32_t programId_ = 0;
-        uint32_t vertexShaderId_ = 0;
-        uint32_t geometryShaderId_ = 0;
-        uint32_t fragmentShaderId_ = 0;
+        std::uint32_t programId_ = 0;
+        std::uint32_t vertexShaderId_ = 0;
+        std::uint32_t geometryShaderId_ = 0;
+        std::uint32_t fragmentShaderId_ = 0;
     };
 }
+#pragma clang diagnostic pop

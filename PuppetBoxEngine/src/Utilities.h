@@ -1,3 +1,7 @@
+#pragma warning(disable : 4068) // Unknown pragmas warning
+// OCUnusedGlobalDeclarationInspection - Utility Class - Might not be using all right now.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <sstream>
@@ -125,7 +129,7 @@ namespace PB
 		*
 		* \return True if the given string starts with the given prefix, False otherwise.
 		*/
-		bool startsWith(std::string str, std::string prefix);
+		bool startsWith(const std::string& str, const std::string& prefix);
 
 		/**
 		* \brief Splits the given string by whitespace values, with an option to allow or disallow null values
@@ -137,7 +141,11 @@ namespace PB
 		* \param excludeNull	If true, allows null values in the array of split values due to repeating whitespace characters.
 		* in the original string, otherwise null values will be omitted.
 		*/
-		void split(std::string str, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
+		void split(
+		        const std::string& str,
+		        std::string** splitValues,
+		        std::uint32_t* splitCount,
+		        bool excludeNull = true);
 
 		/**
 		* \brief Splits the given string by the provided delimiter value, up to a maximum limit, with an option to allow
@@ -151,7 +159,13 @@ namespace PB
 		* \param excludeNull	If true, allows null values in the array of split values due to repeating delimiter characters.
 		* in the original string, otherwise null values will be omitted.
 		*/
-		void split(std::string str, std::string delimiter, uint32_t splitLimit, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
+		void split(
+		        const std::string& str,
+		        const std::string& delimiter,
+		        std::uint32_t splitLimit,
+		        std::string** splitValues,
+		        std::uint32_t* splitCount,
+		        bool excludeNull = true);
 
 		/**
 		* \brief Splits the given string by the provided delimiter value, with an option to allow
@@ -164,8 +178,13 @@ namespace PB
 		* \param excludeNull	If true, allows null values in the array of split values due to repeating delimiter characters.
 		* in the original string, otherwise null values will be omitted.
 		*/
-		void split(std::string str, std::string delimiter, std::string** splitValues, uint32_t* splitCount, bool excludeNull = true);
-	};
+		void split(
+		        const std::string& str,
+		        const std::string& delimiter,
+		        std::string** splitValues,
+		        std::uint32_t* splitCount,
+		        bool excludeNull = true);
+	}
 
 	/**
 	* \brief Utility namespace for common Number oriented functions.
@@ -209,7 +228,7 @@ namespace PB
 		* 
 		* \param offset	The offset value to draw from the preloaded perlin values.
 		*/
-		float perlinValue(uint64_t offset);
+		float perlinValue(std::uint64_t offset);
 
 		/**
 		* \brief Returns pseudo random values with uniform distribution.
@@ -230,7 +249,7 @@ namespace PB
 		*
 		* \return True if the list was read successfully, False otherwise.
 		*/
-		bool getFileListFromArchive(std::string archivePath, std::unordered_set<std::string>* files);
+		bool getFileListFromArchive(const std::string& archivePath, std::unordered_set<std::string>* files);
 
 		/**
 		* \brief Gets the raw bytes of a file inside an archive.
@@ -242,7 +261,11 @@ namespace PB
 		*
 		* \return True if the contents were read successfully, False otherwise.
 		*/
-		bool getContentsFromArchivedFile(std::string archivePath, std::string filePath, int8_t** buffer, size_t* bufferSize);
+		bool getContentsFromArchivedFile(
+		        const std::string& archivePath,
+		        const std::string& filePath,
+		        std::int8_t** buffer,
+		        std::size_t* bufferSize);
 
 		/**
 		* \brief Gets a stream object for the contents of a given file in the given archive.
@@ -253,6 +276,10 @@ namespace PB
 		*
 		* \return True if the file was read and stream created successfully, False otherwise.
 		*/
-		bool getStreamFromArchivedFile(std::string archivePath, std::string filePath, std::istream** stream);
+		bool getStreamFromArchivedFile(
+		        const std::string& archivePath,
+		        const std::string& filePath,
+		        std::istream** stream);
 	}
 }
+#pragma clang diagnostic pop

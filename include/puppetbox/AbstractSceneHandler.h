@@ -15,8 +15,8 @@ namespace PB
 	class PUPPET_BOX_API AbstractSceneHandler
 	{
 	public:
-		AbstractSceneHandler() {};
-		AbstractSceneHandler(AbstractInputProcessor* inputProcessor) : inputProcessor_(inputProcessor) {};
+		AbstractSceneHandler() = default;
+		explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor) : inputProcessor_(inputProcessor) {};
 		/**
 		* \brief Runs only once, when the scene first loads
 		*/

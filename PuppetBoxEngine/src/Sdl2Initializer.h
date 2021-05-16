@@ -23,7 +23,7 @@ namespace PB
 		* \param windowWidth	The desired width for the window to be created.
 		* \param windowHeight	The desired height for the window to be created.
 		*/
-		void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
+		void init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) override
 		{
 			if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
 			{
@@ -72,7 +72,7 @@ namespace PB
 		/**
 		* \brief Releases any allocated resources and cleans up SDL2 specific configurations.
 		*/
-		void destroy()
+		void destroy() override
 		{
 			if (window_) SDL_DestroyWindow(window_);
 			SDL_Quit();
@@ -83,7 +83,7 @@ namespace PB
 		* 
 		* \return True if an error occured during initialization, False otherwise.
 		*/
-		bool hadError() const
+		bool hadError() const override
 		{
 			return error_;
 		};
@@ -91,7 +91,7 @@ namespace PB
 		/**
 		* \brief The SDL2 specific commands to be executed after each loop, such as buffer swapping.
 		*/
-		void postLoopCommands() const
+		void postLoopCommands() const override
 		{
 			SDL_GL_SwapWindow(window_);
 		};
@@ -99,7 +99,7 @@ namespace PB
 		/**
 		* \brief Initialize the game time for later tracking time deltas between frames.
 		*/
-		void initializeGameTime()
+		void initializeGameTime() override
 		{
 			lastFrameTime_ = SDL_GetPerformanceCounter();
 		};
@@ -109,13 +109,13 @@ namespace PB
 		* 
 		* \return The amount of time (in Milliseconds) since the last time the method was invoked.
 		*/
-		float updateElapsedTime()
+		float updateElapsedTime() override
 		{
-			uint64_t NOW = SDL_GetPerformanceCounter();
-			uint64_t delta = (NOW - lastFrameTime_);
+			std::uint64_t NOW = SDL_GetPerformanceCounter();
+			std::uint64_t delta = (NOW - lastFrameTime_);
 			lastFrameTime_ = NOW;
 
-			return delta / (float)SDL_GetPerformanceFrequency();
+			return static_cast<float>(delta) / static_cast<float>(SDL_GetPerformanceFrequency());
 		};
 
 		/**
@@ -123,7 +123,7 @@ namespace PB
 		* 
 		* \return The SDL2 specific process address for function pointers.
 		*/
-		ProcAddress getProcAddress() const
+		ProcAddress getProcAddress() const override
 		{
 			return SDL_GL_GetProcAddress;
 		};
@@ -133,12 +133,12 @@ namespace PB
 		* 
 		* \return The specific IHardwareInitializer identifier for this hardware library implementation.
 		*/
-		std::string initializerName() const
+		std::string initializerName() const override
 		{
 			return "SDL2";
 		};
 	private:
-		uint64_t lastFrameTime_ = 0;
+		std::uint64_t lastFrameTime_ = 0;
 		SDL_Window* window_ = nullptr;
 		bool error_ = false;
 	};

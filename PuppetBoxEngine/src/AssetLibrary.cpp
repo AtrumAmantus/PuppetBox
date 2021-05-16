@@ -1,7 +1,8 @@
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/DataStructures.h"
 #include "AssetLibrary.h"
+
+#include <utility>
 #include "OpenGLModel.h"
-#include "Utilities.h"
 
 namespace PB
 {
@@ -40,9 +41,9 @@ namespace PB
 		* \return The AssetStruct containing the separated archive name and asset path, or an empty struct if
 		* an error occured destructing the virtual asset path.
 		*/
-		AssetStruct parseAssetPath(std::string assetPath, bool* error)
+		AssetStruct parseAssetPath(const std::string& assetPath, bool* error)
 		{
-			uint32_t splitCount;
+            std::uint32_t splitCount;
 			std::string* splitValues = nullptr;
 			StringUtils::split(assetPath, "/", 1, &splitValues, &splitCount);
 
@@ -69,7 +70,7 @@ namespace PB
 		* \return A string containing the raw shader code of the requested shader asset, or an empty
 		* string if an error occured fetching the asset.
 		*/
-		std::string loadShaderCode(std::string assetPath, std::unordered_map<std::string, AssetArchive>& assetArchiveMap, bool* error)
+		std::string loadShaderCode(const std::string& assetPath, std::unordered_map<std::string, AssetArchive>& assetArchiveMap, bool* error)
 		{
 			if (!StringUtils::trim(assetPath).empty())
 			{
@@ -98,14 +99,14 @@ namespace PB
 		}
 	}
 
-	AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi) : archiveRoot_(archiveRoot), gfxApi_(gfxApi)
+	AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi) : archiveRoot_(std::move(archiveRoot)), gfxApi_(std::move(gfxApi))
 	{
 
 	}
 
 	void AssetLibrary::init()
 	{
-		Vertex* vData = new Vertex[]{
+		auto* vData = new Vertex[]{
 			{{ 0.5,  0.5, 0.0}, {0.0, 0.0, 1.0}, {1.0, 1.0}},
 			{{-0.5,  0.5, 0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0}},
 			{{-0.5, -0.5, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0}},
@@ -122,7 +123,7 @@ namespace PB
 		insertIntoMap("sprite", spriteMesh, loadedMeshes_);
 	}
 
-	bool AssetLibrary::loadArchive(std::string archiveName)
+	bool AssetLibrary::loadArchive(const std::string& archiveName)
 	{
 		bool error = false;
 
@@ -159,7 +160,7 @@ namespace PB
 		return !error;
 	}
 
-	bool AssetLibrary::loadAsset(std::string assetPath, SceneObject* sceneObject, Asset::Type type)
+	bool AssetLibrary::loadAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type)
 	{
 		bool error = false;
 
@@ -184,7 +185,7 @@ namespace PB
 		return false;
 	}
 
-	Shader AssetLibrary::loadShaderAsset(std::string assetPath, bool* error)
+	Shader AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
 	{
 		Shader shader{ assetPath };
 
@@ -205,8 +206,8 @@ namespace PB
 				if (!*error) fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
 
 				shader = Shader{ assetPath, program.vertexShaderPath, program.geometryShaderPath, program.fragmentShaderPath };
-				bool loaded = true;
-				loaded = loaded && shader.loadVertexShader(vertexCode);
+				bool loaded;
+				loaded = shader.loadVertexShader(vertexCode);
 				loaded = loaded && shader.loadGeometryShader(geometryCode);
 				loaded = loaded && shader.loadFragmentShader(fragmentCode);
 
@@ -239,7 +240,7 @@ namespace PB
 		return shader;
 	}
 
-	ImageReference AssetLibrary::loadImageAsset(std::string assetPath, ImageOptions imageOptions, bool* error)
+	ImageReference AssetLibrary::loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error)
 	{
 		ImageReference imageReference{ 0 };
 
@@ -276,7 +277,7 @@ namespace PB
 		return imageReference;
 	}
 
-	Material AssetLibrary::loadMaterialAsset(std::string assetPath, bool* error)
+	Material AssetLibrary::loadMaterialAsset(const std::string& assetPath, bool* error)
 	{
 		Material material{};
 
@@ -325,7 +326,7 @@ namespace PB
 		return material;
 	}
 
-	Mesh AssetLibrary::loadMeshAsset(std::string assetPath, bool* error)
+	Mesh AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
 	{
 		Mesh mesh{};
 
@@ -343,7 +344,7 @@ namespace PB
 		return mesh;
 	}
 
-	ModelData2D AssetLibrary::loadModelData2DAsset(std::string assetPath, bool* error)
+	ModelData2D AssetLibrary::loadModelData2DAsset(const std::string& assetPath, bool* error)
 	{
 		ModelData2D data;
 
@@ -368,7 +369,7 @@ namespace PB
 		return data;
 	}
 
-	bool AssetLibrary::load2DSceneObject(std::string assetPath, SceneObject* sceneObject)
+	bool AssetLibrary::load2DSceneObject(const std::string& assetPath, SceneObject* sceneObject)
 	{
 		bool error = false;
 

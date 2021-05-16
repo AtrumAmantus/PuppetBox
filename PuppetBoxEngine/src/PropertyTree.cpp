@@ -1,20 +1,22 @@
 #include "PropertyTree.h"
 
+#include <utility>
+
 #include "Logger.h"
 
 namespace PB
 {
-	PropertyTree::PropertyTree() : value_(""), parent_(nullptr)
+	PropertyTree::PropertyTree() : parent_(nullptr)
 	{
 
 	}
 
-	PropertyTree::PropertyTree(std::string value, PropertyTree* parent) : value_(value), parent_(parent)
+	PropertyTree::PropertyTree(std::string value, PropertyTree* parent) : value_(std::move(value)), parent_(parent)
 	{
 
 	}
 
-	PropertyTree* PropertyTree::get(std::string parameterName)
+	PropertyTree* PropertyTree::get(const std::string& parameterName)
 	{
 		if (children_.find(parameterName) != children_.end())
 		{
@@ -35,12 +37,12 @@ namespace PB
 		return "";
 	}
 
-	bool PropertyTree::has(std::string parameterName)
+	bool PropertyTree::has(const std::string& parameterName)
 	{
 		return children_.find(parameterName) != children_.end();
 	}
 
-	bool PropertyTree::add(std::string parameterName)
+	bool PropertyTree::add(const std::string& parameterName)
 	{
 		bool exists = has(parameterName);
 
@@ -51,7 +53,7 @@ namespace PB
 		return !exists;
 	}
 
-	bool PropertyTree::remove(std::string parameterName)
+	bool PropertyTree::remove(const std::string& parameterName)
 	{
 		return children_.erase(parameterName) > 0;
 	}

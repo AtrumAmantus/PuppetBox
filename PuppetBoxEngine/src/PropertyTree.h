@@ -10,12 +10,12 @@ namespace PB
 	{
 	public:
 		PropertyTree();
-		PropertyTree(std::string value, PropertyTree* parent = nullptr);
-		PropertyTree* get(std::string parameterName);
+		explicit PropertyTree(std::string value, PropertyTree* parent = nullptr);
+		PropertyTree* get(const std::string& parameterName);
 		std::string value();
-		bool has(std::string parameterName);
-		bool add(std::string parameterName);
-		bool remove(std::string parameterName);
+		bool has(const std::string& parameterName);
+		bool add(const std::string& parameterName);
+		bool remove(const std::string& parameterName);
 		bool isLeaf();
 		PropertyTree* parent();
 	private:

@@ -10,7 +10,7 @@ public:
 	std::string name;
 	uint8_t health = 50;
 protected:
-	void updates(float deltaTime)
+	void updates(float deltaTime) override
 	{
 
 	};

@@ -21,7 +21,7 @@ namespace PB
 		* \param windowWidth	The desired width for the window to be created.
 		* \param windowHeight	The desired height for the window to be created.
 		*/
-		virtual void init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight) = 0;
+		virtual void init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) = 0;
 
 		/**
 		* \brief Releases any allocated resources and cleans up hardware specific library configurations.

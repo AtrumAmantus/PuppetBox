@@ -1,3 +1,7 @@
+#pragma warning(disable : 4068) // Unknown pragmas warning
+// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <string>
@@ -23,14 +27,14 @@ namespace PB
 	 * \param windowWidth The initial width of the window
 	 * \param windowHeight The initial height of the window
 	 */
-	extern PUPPET_BOX_API void Init(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
+	extern PUPPET_BOX_API void Init(const std::string& windowTitle, int32_t windowWidth, int32_t windowHeight);
 
 	/**
 	 * \brief Create a new scene referenced by the given string
 	 *
 	 * \param sceneName The name to reference the scene by
 	 */
-	extern PUPPET_BOX_API void CreateScene(std::string sceneName);
+	extern PUPPET_BOX_API void CreateScene(const std::string& sceneName);
 
 	/**
 	* \brief Set the camera mode for the scene associated to the given reference.
@@ -38,14 +42,14 @@ namespace PB
 	* \param sceneName	The reference name of the scene to affect.
 	* \param mode		The camera mode to apply to the referenced scene.
 	*/
-	extern PUPPET_BOX_API void SetSceneCameraMode(std::string sceneName, SceneView::Mode mode);
+	extern PUPPET_BOX_API void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode);
 
 	/**
 	 * \brief Set the currently active scene
 	 *
 	 * \param sceneName The name referencing the specified scene
 	 */
-	extern PUPPET_BOX_API void SetActiveScene(std::string sceneName);
+	extern PUPPET_BOX_API void SetActiveScene(const std::string& sceneName);
 
 	/**
 	 * \brief Set a derived scene handler for the active scene
@@ -59,7 +63,7 @@ namespace PB
 	 *
 	 * \param archiveName The name of the asset pack to load
 	 */
-	extern PUPPET_BOX_API void LoadAssetPack(std::string archiveName);
+	extern PUPPET_BOX_API void LoadAssetPack(const std::string& archiveName);
 
 	/**
 	 * \brief Injects the base assets into the given scene object.
@@ -70,10 +74,20 @@ namespace PB
 	 * 
 	 * \return True if the SceneObject was succesffully injected with assets, False otherwise.
 	 */
-	extern PUPPET_BOX_API bool CreateSceneObject(std::string assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
+	extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
 
 	/**
 	 * \brief Initiates start of core engine, input processors, and render loops.
 	 */
 	extern PUPPET_BOX_API void Run();
+
+    /**
+    * \brief Helper function for getting the ascii character the given key code represents.
+    *
+    * \param code	The arbitrary key code to be maped to an ascii character.
+    *
+    * \return The int value for the ascii character the key code represents.
+    */
+    extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code);
 }
+#pragma clang diagnostic pop

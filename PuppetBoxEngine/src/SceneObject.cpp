@@ -1,6 +1,6 @@
 #include <string>
 
-#include "../include/puppetbox/SceneObject.h"
+#include "puppetbox/SceneObject.h"
 
 #include "WanderBehavior.h"
 
@@ -23,18 +23,18 @@ namespace PB
 		vec3 transform[3] = { position, rotation, actualScale() };
 		if (model_ != nullptr)
 		{
-			model_->updateModelMatrix(transform);
+            model_->updateModelMatrix(mat3{transform});
 		}
 		if (behavior_ != nullptr)
 		{
 			behavior_->update(this, deltaTime);
 		}
-	};
+	}
 
 	void SceneObject::render()
 	{
 		model_->render();
-	};
+	}
 
 	void SceneObject::setBehavior(AI::Behavior behavior)
 	{
@@ -54,7 +54,7 @@ namespace PB
 		behavior_ = std::move(behavior);
 	}
 
-	vec3 SceneObject::actualScale()
+	vec3 SceneObject::actualScale() const
 	{
 		return vec3{
 			scale.x * baseScale_.x,

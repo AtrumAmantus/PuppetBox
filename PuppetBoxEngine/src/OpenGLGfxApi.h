@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <iostream>
 
@@ -31,12 +31,12 @@ namespace PB
 		*
 		* \return True if the OpenGL API initialization was successful, False otherwise.
 		*/
-		bool init(const IHardwareInitializer& hardwareInitializer);
+		bool init(const IHardwareInitializer& hardwareInitializer) override;
 
 		/**
 		* \brief Used to define OpenGL API specific commands that must execute before each rendering loop.
 		*/
-		void preLoopCommands() const;
+		void preLoopCommands() const override;
 
 		/**
 		* \brief Used to execute OpenGL API specific command to set renderer dimensions.
@@ -44,17 +44,17 @@ namespace PB
 		* \param width	The desired width of the rendering area.
 		* \param height	The desired height of the rendering area.
 		*/
-		void setRenderDimensions(uint32_t width, uint32_t height);
+		void setRenderDimensions(std::uint32_t width, std::uint32_t height) override;
 
 		/**
 		* \brief Get the current render window area's width.
 		*/
-		uint32_t getRenderWidth();
+		std::uint32_t getRenderWidth() override;
 
 		/**
 		* \brief Get the current render window area's height.
 		*/
-		uint32_t getRenderHeight();
+		std::uint32_t getRenderHeight() override;
 
 		/**
 		* \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.
@@ -62,7 +62,7 @@ namespace PB
 		* \param imageData	The image data to be loaded into memory.
 		* \param options	Image loading options to use when loading into memory.
 		*/
-		ImageReference loadImage(ImageData imageData, ImageOptions options = {}) const;
+		ImageReference loadImage(ImageData imageData, ImageOptions options) const override;
 
 		/**
 		* \brief Used to execute the OpenGL API specific commands to load vertex data into GFX memory.
@@ -70,12 +70,12 @@ namespace PB
 		* \param vertexData		The vertex data to load into memory.
 		* \param vertexCount	The number of entries in the vertexData array.
 		*/
-		Mesh loadMesh(Vertex* vertexData, uint32_t vertexCount) const;
+		Mesh loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const override;
 
 		/**
 		* \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.
 		*/
-		void initializeUBORanges();
+		void initializeUBORanges() override;
 
 		/**
 		* \brief Sets view/projection matrices in the UBO.  Must initializeUBORanges() before use.
@@ -83,11 +83,11 @@ namespace PB
 		* \param view		The View Matrix to set.
 		* \param projection	The Projection Matrix to set.
 		*/
-		void setTransformUBOData(mat4 view, mat4 projection) const;
+		void setTransformUBOData(mat4 view, mat4 projection) const override;
 	private:
-		uint32_t width_ = 0;
-		uint32_t height_ = 0;
-		uint32_t UBO_ = 0;
-		uint32_t minimumUBOOffset_ = 0;
+		std::uint32_t width_ = 0;
+		std::uint32_t height_ = 0;
+		std::uint32_t UBO_ = 0;
+		std::uint32_t minimumUBOOffset_ = 0;
 	};
 }

@@ -3,10 +3,7 @@
 
 namespace PB
 {
-	Camera::Camera()
-	{
-
-	}
+	Camera::Camera() = default;
 
 	Camera::Camera(vec3 position, vec3 direction) : position_(position), direction_(direction)
 	{
