@@ -15,7 +15,7 @@ namespace PB
         bool compileShaderProgram(
                 std::uint32_t* programId,
                 const std::uint32_t* vShaderId,
-                const std::uint32_t* gShaderid,
+                const std::uint32_t* gShaderId,
                 const std::uint32_t* fShaderId)
         {
             int success;
@@ -23,17 +23,17 @@ namespace PB
             // shader Program
             *programId = glCreateProgram();
 
-            if (vShaderId != 0) // NOLINT(modernize-use-nullptr)
+            if (*vShaderId != 0) // NOLINT(modernize-use-nullptr)
             {
                 glAttachShader(*programId, *vShaderId);
             }
 
-            if (gShaderid != 0) // NOLINT(modernize-use-nullptr)
+            if (*gShaderId != 0) // NOLINT(modernize-use-nullptr)
             {
-                glAttachShader(*programId, *gShaderid);
+                glAttachShader(*programId, *gShaderId);
             }
 
-            if (fShaderId != 0) // NOLINT(modernize-use-nullptr)
+            if (*fShaderId != 0) // NOLINT(modernize-use-nullptr)
             {
                 glAttachShader(*programId, *fShaderId);
             }
@@ -49,7 +49,7 @@ namespace PB
 
             // delete the shaders as they're linked into our program now and no longer necessary
             glDeleteShader(*vShaderId);
-            glDeleteShader(*gShaderid);
+            glDeleteShader(*gShaderId);
             glDeleteShader(*fShaderId);
 
             return success;
@@ -150,11 +150,26 @@ namespace PB
             {
                 // Initialize UBO locations for later use.
                 std::uint32_t loc = glGetUniformBlockIndex(programId_, "Transforms");
-                glUniformBlockBinding(programId_, loc, 0);
+
+                if (loc != GL_INVALID_INDEX)
+                {
+                    glUniformBlockBinding(programId_, loc, 0);
+                }
+
                 loc = glGetUniformBlockIndex(programId_, "LightCounter");
-                glUniformBlockBinding(programId_, loc, 1);
+
+                if (loc != GL_INVALID_INDEX)
+                {
+                    glUniformBlockBinding(programId_, loc, 1);
+                }
+
                 loc = glGetUniformBlockIndex(programId_, "LightData");
-                glUniformBlockBinding(programId_, loc, 2);
+
+                if (loc != GL_INVALID_INDEX)
+                {
+                    glUniformBlockBinding(programId_, loc, 2);
+                }
+
                 return true;
             }
         }
