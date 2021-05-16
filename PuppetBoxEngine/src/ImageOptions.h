@@ -2,7 +2,7 @@
 
 struct ImageOptions
 {
-	const enum Mode {
+	enum Mode {
 		REPEAT,
 		CLAMP_TO_BORDER
 	};

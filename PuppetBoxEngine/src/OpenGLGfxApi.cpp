@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "../include/puppetbox/DataStructures.h"
+#include "puppetbox/DataStructures.h"
 #include "GfxMath.h"
 #include "OpenGLGfxApi.h"
 
@@ -17,9 +17,9 @@ namespace PB
 		* 
 		* \return The index of the matching vertex in the vector, or -1 if not found.
 		*/
-		int64_t findVertexInVector(Vertex& vertex, std::vector<Vertex>& vector)
+        std::int32_t findVertexInVector(Vertex& vertex, std::vector<Vertex>& vector)
 		{
-			for (uint64_t i = 0; i < vector.size(); ++i)
+			for (std::int32_t i = 0; i < vector.size() && i < INT32_MAX; ++i)
 			{
 				Vertex v = vector.at(i);
 
@@ -48,9 +48,9 @@ namespace PB
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			// Store the card's minimum UBO offset value for later.
-			int32_t value;
+			std::int32_t value;
 			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &value);
-			minimumUBOOffset_ = static_cast<uint32_t>(value);
+			minimumUBOOffset_ = static_cast<std::uint32_t>(value);
 		}
 		else
 		{
@@ -68,18 +68,18 @@ namespace PB
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLGfxApi::setRenderDimensions(uint32_t width, uint32_t height)
+	void OpenGLGfxApi::setRenderDimensions(std::uint32_t width, std::uint32_t height)
 	{
 		width_ = width;
 		height_ = height;
 	}
 
-	uint32_t OpenGLGfxApi::getRenderWidth()
+    std::uint32_t OpenGLGfxApi::getRenderWidth()
 	{
 		return width_;
 	}
 
-	uint32_t OpenGLGfxApi::getRenderHeight()
+    std::uint32_t OpenGLGfxApi::getRenderHeight()
 	{
 		return height_;
 	}
@@ -90,7 +90,7 @@ namespace PB
 
 		if (imageData.bufferData)
 		{
-			uint32_t openGLId;
+            std::uint32_t openGLId;
 
 			glGenTextures(1, &openGLId);
 			glBindTexture(GL_TEXTURE_2D, openGLId);
@@ -115,7 +115,7 @@ namespace PB
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 			// Support alpha enabled images (PNGs)
-			uint32_t format = imageData.numChannels == 4 ? GL_RGBA : GL_RGB;
+            std::int32_t format = imageData.numChannels == 4 ? GL_RGBA : GL_RGB;
 			// Generate texture from previously bound image
 			glTexImage2D(GL_TEXTURE_2D, 0, format, imageData.width, imageData.height, 0, format, GL_UNSIGNED_BYTE, imageData.bufferData);
 			// Attaches texture images to texture object currently bound
@@ -124,27 +124,27 @@ namespace PB
 			// Free up binding after we create it
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			imageReference = { openGLId };
+			imageReference = ImageReference{ openGLId };
 		}
 
 		return imageReference;
 	}
 
-	Mesh OpenGLGfxApi::loadMesh(Vertex* vertexData, uint32_t vertexCount) const
+	Mesh OpenGLGfxApi::loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const
 	{
 		Mesh mesh{};
 
-		uint32_t stride = 3 + 3 + 2 + (3 * vertexData[0].useColour);
+        std::uint32_t stride = 3 + 3 + 2 + (3 * vertexData[0].useColour);
 
 		std::vector<Vertex> uniqueVertices{};
-		std::vector<uint32_t> indices{};
+		std::vector<std::uint32_t> indices{};
 
-		uint32_t indexCounter = 0;
+        std::uint32_t indexCounter = 0;
 
 		// Filter out duplicate vertices, create EBO indices
-		for (uint32_t i = 0; i < vertexCount; ++i)
+		for (std::uint32_t i = 0; i < vertexCount; ++i)
 		{
-			int64_t index = findVertexInVector(vertexData[i], uniqueVertices);
+			std::int32_t index = findVertexInVector(vertexData[i], uniqueVertices);
 
 			if (index < 0)
 			{
@@ -153,18 +153,16 @@ namespace PB
 			}
 			else
 			{
-				indices.push_back(static_cast<uint32_t>(index));
+				indices.push_back(static_cast<std::uint32_t>(index));
 			}
 		}
 
 		std::vector<float> vboData{};
 
 		// Convert unique vertex vector to float array
-		for (uint64_t i = 0; i < uniqueVertices.size(); ++i)
+		for (auto& v : uniqueVertices)
 		{
-			Vertex v = uniqueVertices.at(i);
-
-			vboData.push_back(v.position.x);
+		    vboData.push_back(v.position.x);
 			vboData.push_back(v.position.y);
 			vboData.push_back(v.position.z);
 
@@ -191,27 +189,27 @@ namespace PB
 		glBindVertexArray(mesh.VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-		glBufferData(GL_ARRAY_BUFFER, (sizeof(vboData[0]) * vboData.size()), &vboData[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<std::intmax_t>(sizeof(vboData[0]) * vboData.size()), &vboData[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<std::intmax_t>(sizeof(indices[0]) * indices.size()), &indices[0], GL_STATIC_DRAW);
 
 		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)), (void*)0); // NOLINT(modernize-use-nullptr)
 		glEnableVertexAttribArray(0);
 
 		// normal attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
 		// texture attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
 		if (vertexData[0].useColour)
 		{
 			// colour attribute
-			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(8 * sizeof(float)));
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)), (void*)(8 * sizeof(float)));
 			glEnableVertexAttribArray(3);
 		}
 
@@ -230,16 +228,16 @@ namespace PB
 		glGenBuffers(1, &UBO_);
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO_);
 
-		constexpr uint32_t sizeOfTransforms = 3 * static_cast<uint32_t>(sizeof(mat4));
+		constexpr std::uint32_t sizeOfTransforms = 3 * static_cast<std::uint32_t>(sizeof(mat4));
 		// Pad to next offset if needed
-		uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
+		std::uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
 		// Pad to next offset if needed
-		uint32_t sizeOfLightCount = std::max(static_cast<uint32_t>(sizeof(uint32_t)), minimumUBOOffset_);
-		uint32_t firstLightOffset = lightCountOffset + sizeOfLightCount;
-		constexpr uint32_t sizeOfLights = 10 * (4 * sizeof(vec4));
-		uint32_t bufferSize = firstLightOffset + sizeOfLights;
+		std::uint32_t sizeOfLightCount = std::max(static_cast<std::uint32_t>(sizeof(std::uint32_t)), minimumUBOOffset_);
+		std::uint32_t firstLightOffset = lightCountOffset + sizeOfLightCount;
+		constexpr std::uint32_t sizeOfLights = 10 * (4 * sizeof(vec4));
+		std::uint32_t bufferSize = firstLightOffset + sizeOfLights;
 		// Create buffer of adequate size
-		glBufferData(GL_UNIFORM_BUFFER, bufferSize, NULL, GL_STATIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, bufferSize, nullptr, GL_STATIC_DRAW);
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO_, 0, lightCountOffset);
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, UBO_, lightCountOffset, sizeOfLightCount);
@@ -252,14 +250,15 @@ namespace PB
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO_);
 
-		constexpr uint32_t sizeOfMat4 = sizeof(mat4);
-		constexpr uint32_t sizeOfTransforms = 3 * sizeOfMat4;
-		uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
-		uint32_t sizeOfLightCount = std::max(static_cast<uint32_t>(sizeof(uint32_t)), minimumUBOOffset_);
-		uint32_t firstLightOffset = std::max(sizeOfTransforms + sizeOfLightCount, 2 * minimumUBOOffset_);
-		constexpr uint32_t sizeOfLight = 4 * sizeof(vec4);
-		constexpr uint32_t sizeOfLights = 10 * sizeOfLight;
-		uint32_t bufferSize = firstLightOffset + sizeOfLights;
+		constexpr std::uint32_t sizeOfMat4 = sizeof(mat4);
+		//TODO: Used when lights are implemented
+//		constexpr std::uint32_t sizeOfTransforms = 3 * sizeOfMat4;
+//		std::uint32_t lightCountOffset = std::max(sizeOfTransforms, minimumUBOOffset_);
+//		std::uint32_t sizeOfLightCount = std::max(static_cast<std::uint32_t>(sizeof(std::uint32_t)), minimumUBOOffset_);
+//		std::uint32_t firstLightOffset = std::max(sizeOfTransforms + sizeOfLightCount, 2 * minimumUBOOffset_);
+//		constexpr std::uint32_t sizeOfLight = 4 * sizeof(vec4);
+//		constexpr std::uint32_t sizeOfLights = 10 * sizeOfLight;
+//		std::uint32_t bufferSize = firstLightOffset + sizeOfLights;
 		//                                    v-- Size of data
 		//              v-- Type           v-- Offset (bytes)    v-- Data
 		//glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeOfMat4, &orthoProjection[0][0]);

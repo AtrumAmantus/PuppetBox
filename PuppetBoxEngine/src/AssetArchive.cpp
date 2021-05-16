@@ -1,4 +1,5 @@
 #include <limits>
+#include <utility>
 
 #include <STBI/stb_image.h>
 
@@ -18,7 +19,7 @@ namespace PB
 		* 
 		* \return Either the value from the map referenced with the given key, or the given default value if the key did not exist.
 		*/
-		std::string defaultIfNotInMap(std::string propertyName, std::unordered_map<std::string, std::string> properties, std::string defaultValue)
+		std::string defaultIfNotInMap(const std::string& propertyName, std::unordered_map<std::string, std::string> properties, std::string defaultValue)
 		{
 			if (properties.find(propertyName) != properties.end())
 			{
@@ -40,7 +41,7 @@ namespace PB
 		std::string defaultIfNotInTree(std::string propertyName, PropertyTree& pTree, std::string defaultValue)
 		{
 			std::string value;
-			PropertyTree* childNode = pTree.get(propertyName);
+			PropertyTree* childNode = pTree.get(std::move(propertyName));
 
 			if (childNode != nullptr)
 			{
@@ -63,7 +64,7 @@ namespace PB
 		* 
 		* \return The Model2D object built from the given properties map.
 		*/
-		ModelData2D mapToModel2D(std::unordered_map<std::string, std::string> properties, bool* error)
+		ModelData2D mapToModel2D(const std::unordered_map<std::string, std::string>& properties, bool* error)
 		{
 			ModelData2D model{};
 
@@ -96,10 +97,10 @@ namespace PB
 
 			PropertyTree* diffuseProperties = materialProperties.get("diffuse");
 			std::string image = defaultIfNotInTree("image", *diffuseProperties, "");
-			uint32_t width = NumberUtils::parseValue(defaultIfNotInTree("width", *diffuseProperties, "0").c_str(), 0, error);
-			uint32_t height = NumberUtils::parseValue(defaultIfNotInTree("height", *diffuseProperties, "0").c_str(), 0, error);
-			uint32_t xOffset = NumberUtils::parseValue(defaultIfNotInTree("xOffset", *diffuseProperties, "0").c_str(), 0, error);
-			uint32_t yOffset = NumberUtils::parseValue(defaultIfNotInTree("yOffset", *diffuseProperties, "0").c_str(), 0, error);
+            std::uint32_t width = NumberUtils::parseValue(defaultIfNotInTree("width", *diffuseProperties, "0").c_str(), 0, error);
+            std::uint32_t height = NumberUtils::parseValue(defaultIfNotInTree("height", *diffuseProperties, "0").c_str(), 0, error);
+            std::uint32_t xOffset = NumberUtils::parseValue(defaultIfNotInTree("xOffset", *diffuseProperties, "0").c_str(), 0, error);
+            std::uint32_t yOffset = NumberUtils::parseValue(defaultIfNotInTree("yOffset", *diffuseProperties, "0").c_str(), 0, error);
 
 			std::string shader = defaultIfNotInTree("shader", materialProperties, "");
 
@@ -123,7 +124,7 @@ namespace PB
 		*
 		* \return The Material object built from the given properties map.
 		*/
-		ShaderProgram mapToShaderProgram(std::unordered_map<std::string, std::string> properties, bool* error)
+		ShaderProgram mapToShaderProgram(const std::unordered_map<std::string, std::string>& properties, bool* error)
 		{
 			ShaderProgram shaderProgram{};
 
@@ -144,7 +145,7 @@ namespace PB
 		* \return The filename for the given virtual asset path if found, or a blank string otherwise.
 		*/
 		std::string fileNameOfAsset(
-			std::string assetPath,
+			const std::string& assetPath,
 			std::unordered_map<std::string, std::string>& archiveAssetIds,
 			std::unordered_set<std::string>& archiveAssets
 		)
@@ -182,7 +183,7 @@ namespace PB
 		bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties)
 		{
 			std::string line;
-			uint32_t lineNumber = 0;
+            std::uint32_t lineNumber = 0;
 
 			while (std::getline(*stream, line))
 			{
@@ -190,7 +191,7 @@ namespace PB
 				StringUtils::trim(&line);
 
 				std::string* splitValues;
-				uint32_t splitCount;
+                std::uint32_t splitCount;
 
 				StringUtils::split(line, &splitValues, &splitCount);
 
@@ -217,11 +218,11 @@ namespace PB
 		* 
 		* \return The number of indentations prefixed on the given string.
 		*/
-		uint32_t countIndents(std::string line)
+        std::uint32_t countIndents(const std::string& line)
 		{
-			uint32_t indentCount = 0;
+            std::uint32_t indentCount = 0;
 
-			for (size_t i = 0; i < line.length() && line.c_str()[i] == '\t'; ++i)
+			for (std::size_t i = 0; i < line.length() && line.c_str()[i] == '\t'; ++i)
 			{
 				indentCount++;
 			}
@@ -240,11 +241,11 @@ namespace PB
 		bool getPropertyTreeFromStream(std::istream* stream, PropertyTree* root)
 		{
 			std::string line;
-			uint32_t lineNumber = 0;
+            std::uint32_t lineNumber = 0;
 			PropertyTree* currentNode = root;
-			uint32_t indentLevel = 0;
-			uint32_t minIndents = 0;
-			uint32_t maxIndents = 0;
+            std::uint32_t indentLevel;
+            std::uint32_t minIndents = 0;
+            std::uint32_t maxIndents = 0;
 
 			while (std::getline(*stream, line))
 			{
@@ -255,14 +256,14 @@ namespace PB
 				{
 					if (indentLevel < maxIndents)
 					{
-						for (uint32_t i = maxIndents; i > indentLevel; --i)
+						for (std::uint32_t i = maxIndents; i > indentLevel; --i)
 						{
 							currentNode = currentNode->parent();
 						}
 					}
 
 					std::string* splitValues;
-					uint32_t splitCount;
+                    std::uint32_t splitCount;
 
 					StringUtils::split(line, ":", 1, &splitValues, &splitCount);
 
@@ -315,9 +316,9 @@ namespace PB
 
 	bool AssetArchive::init()
 	{
-		bool success = true;
+		bool success;
 
-		success = success && FileUtils::getFileListFromArchive(archivePath(), &archiveAssets_);
+		success = FileUtils::getFileListFromArchive(archivePath(), &archiveAssets_);
 
 		std::istream* stream = nullptr;
 		success = success && FileUtils::getStreamFromArchivedFile(archivePath(), ".manifest", &stream);
@@ -332,25 +333,25 @@ namespace PB
 		return success;
 	}
 
-	bool AssetArchive::hasAsset(std::string assetPath)
+	bool AssetArchive::hasAsset(const std::string& assetPath)
 	{
 		return !assetPath.empty() && archiveAssets_.find(assetPath) != archiveAssets_.end();
 	}
 
-	uint64_t AssetArchive::assetCount()
+    std::uint64_t AssetArchive::assetCount()
 	{
 		return archiveAssets_.size();
 	}
 
-	std::string AssetArchive::loadAsciiData(std::string assetPath, bool* error)
+	std::string AssetArchive::loadAsciiData(const std::string& assetPath, bool* error)
 	{
 		std::string data;
 		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
 		if (hasAsset(fileName))
 		{
-			int8_t* buffer = nullptr;
-			size_t bufferSize = 0;
+            std::int8_t* buffer = nullptr;
+            std::size_t bufferSize = 0;
 
 			*error = *error || !FileUtils::getContentsFromArchivedFile(archivePath(), fileName, &buffer, &bufferSize);
 
@@ -370,7 +371,7 @@ namespace PB
 		return data;
 	}
 
-	ShaderProgram AssetArchive::loadShaderAsset(std::string assetPath, bool* error)
+	ShaderProgram AssetArchive::loadShaderAsset(const std::string& assetPath, bool* error)
 	{
 		ShaderProgram shaderProgram{ assetPath };
 
@@ -402,7 +403,7 @@ namespace PB
 		return shaderProgram;
 	}
 
-	ImageData AssetArchive::loadImageAsset(std::string assetPath, bool* error)
+	ImageData AssetArchive::loadImageAsset(const std::string& assetPath, bool* error)
 	{
 		ImageData data{};
 
@@ -416,17 +417,17 @@ namespace PB
 
 			if (FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream))
 			{
-				stream->ignore(std::numeric_limits<std::streamsize>::max());
-				int64_t streamLength = stream->gcount();
+				stream->ignore(INTMAX_MAX);
+                std::int64_t streamLength = stream->gcount();
 				stream->clear();
-				stream->seekg(0, stream->beg);
+				stream->seekg(0, std::istream::beg);
 
 				char* buffer = new char[streamLength];
 
 				stream->read(buffer, streamLength);
 
 				//TODO: Check if streamLength is too long, expecting only 32bit value
-				data.bufferData = stbi_load_from_memory((uint8_t*)buffer, streamLength, &data.width, &data.height, &data.numChannels, 0);
+				data.bufferData = stbi_load_from_memory((std::uint8_t*)buffer, streamLength, &data.width, &data.height, &data.numChannels, 0);
 			}
 			else
 			{
@@ -444,7 +445,7 @@ namespace PB
 		return data;
 	}
 
-	Material AssetArchive::loadMaterialAsset(std::string assetPath, bool* error)
+	Material AssetArchive::loadMaterialAsset(const std::string& assetPath, bool* error)
 	{
 		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
@@ -473,7 +474,7 @@ namespace PB
 		return {};
 	}
 
-	ModelData2D AssetArchive::load2DModelAsset(std::string assetPath, bool* error)
+	ModelData2D AssetArchive::load2DModelAsset(const std::string& assetPath, bool* error)
 	{
 		std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 

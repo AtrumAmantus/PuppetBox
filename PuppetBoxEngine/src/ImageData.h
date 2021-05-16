@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace PB
 {
@@ -9,11 +9,11 @@ namespace PB
 	*/
 	struct ImageData
 	{
-		uint8_t* bufferData;
+		std::uint8_t* bufferData;
 		// Buffer size is derived from width & height of image
-		int32_t width;
-		int32_t height;
-		int32_t numChannels;
+		std::int32_t width;
+        std::int32_t height;
+        std::int32_t numChannels;
 		/**
 		* \brief Used to free the buffer data of the image data once it is no longer needed.
 		*/

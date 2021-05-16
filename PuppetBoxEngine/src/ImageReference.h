@@ -19,7 +19,7 @@ namespace PB
 		* 
 		* \param id	The OpenGL id for referencing the stored image data.
 		*/
-		ImageReference(uint32_t id) : referenceId_(id) {};
+		explicit ImageReference(std::uint32_t id) : referenceId_(id) {};
 
 		/**
 		* \brief Instructs the API to use this image data to populate the uniform variable at the given
@@ -28,7 +28,7 @@ namespace PB
 		* \param locationId	The location of the uniform variable to populate with the image data for
 		* future rendering calls.
 		*/
-		void use(int32_t locationId) const
+		void use(std::int32_t locationId) const
 		{
 			// Bind for use in current render
 			glActiveTexture(locationId);
@@ -42,7 +42,8 @@ namespace PB
 		* \param locationId	The location of the uniform variable to stop populating with the image data for
 		* future rendering calls.
 		*/
-		void unuse(int32_t locationId) const
+        // Keeping this non static for consistency with ImageReference#use()
+		void unuse(std::int32_t locationId) const // NOLINT(readability-convert-member-functions-to-static)
 		{
 			// Unbind after use in current render
 			glActiveTexture(locationId);
@@ -57,6 +58,6 @@ namespace PB
 
 		};
 	private:
-		uint32_t referenceId_;
+        std::uint32_t referenceId_;
 	};
 }

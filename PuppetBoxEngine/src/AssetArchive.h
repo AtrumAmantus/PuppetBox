@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include <STBI/stb_image.h>
 
@@ -19,10 +20,10 @@ namespace PB
 	*/
 	struct ModelData2D
 	{
-		uint32_t width = 0;
-		uint32_t height = 0;
-		int32_t offsetX = 0;
-		int32_t offsetY = 0;
+        std::uint32_t width = 0;
+        std::uint32_t height = 0;
+        std::int32_t offsetX = 0;
+        std::int32_t offsetY = 0;
 		std::string materialName;
 	};
 
@@ -51,7 +52,7 @@ namespace PB
 		* \param archiveName	The name of the desired archive to load.
 		* \param archiveRoot	The root directory to look in for the archive.
 		*/
-		AssetArchive(std::string archiveName, std::string archiveRoot) : archiveName_(archiveName), archiveRoot_(archiveRoot) {};
+		AssetArchive(std::string archiveName, std::string archiveRoot) : archiveName_(std::move(archiveName)), archiveRoot_(std::move(archiveRoot)) {};
 
 		/**
 		* \brief Initializes the AssetArchive's initial configurations.  This is needed before any other AssetArchive
@@ -66,14 +67,14 @@ namespace PB
 		* 
 		* \return True if the AssetArchive contains the given asset, False otherwise.
 		*/
-		bool hasAsset(std::string assetPath);
+		bool hasAsset(const std::string& assetPath);
 
 		/**
 		* \brief Gives the asset count for the AssetArchive.
 		* 
 		* \return The total number of assets the AssetArchive contains (including the manifest file).
 		*/
-		uint64_t assetCount();
+        std::uint64_t assetCount();
 
 		/**
 		* \brief Loads an asset's contents as raw ascii data.
@@ -84,7 +85,7 @@ namespace PB
 		* \return A string containing the raw contents of the requested asset, or an empty string if an
 		* error occured.
 		*/
-		std::string loadAsciiData(std::string assetPath, bool* error);
+		std::string loadAsciiData(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Returns a ShaderProgram for the given shader asset.
@@ -94,7 +95,7 @@ namespace PB
 		*
 		* \return A ShaderProgram of the requested asset, or an empty object if an error occured.
 		*/
-		ShaderProgram loadShaderAsset(std::string assetPath, bool* error);
+		ShaderProgram loadShaderAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Returns a ImageData for the given shader asset.
@@ -104,7 +105,7 @@ namespace PB
 		*
 		* \return A ImageData of the requested asset, or an empty object if an error occured.
 		*/
-		ImageData loadImageAsset(std::string assetPath, bool* error);
+		ImageData loadImageAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Returns a Material for the given shader asset.
@@ -114,7 +115,7 @@ namespace PB
 		*
 		* \return A Material of the requested asset, or an empty object if an error occured.
 		*/
-		Material loadMaterialAsset(std::string assetPath, bool* error);
+		Material loadMaterialAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Returns a Model2D for the given shader asset.
@@ -124,7 +125,7 @@ namespace PB
 		*
 		* \return A Model2D of the requested asset, or an empty object if an error occured.
 		*/
-		ModelData2D load2DModelAsset(std::string assetPath, bool* error);
+		ModelData2D load2DModelAsset(const std::string& assetPath, bool* error);
 	private:
 		std::string archiveName_;
 		std::string archiveRoot_;

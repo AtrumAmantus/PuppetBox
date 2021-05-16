@@ -18,7 +18,7 @@ namespace PB
 		std::string specularId;
 		std::string normalId;
 		std::string shaderId = "unspecified";
-		uint32_t specularValue = 0;
+        std::uint32_t specularValue = 0;
 		float emissionValue = 0;
 		bool requiresAlphaBlending = false;
 		ImageReference diffuseMap{ 0 };

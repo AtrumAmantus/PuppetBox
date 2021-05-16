@@ -1,7 +1,7 @@
 #pragma once
 
-#include <assert.h>
-#include <stdint.h>
+#include <cassert>
+#include <cstdint>
 
 #include "../include/puppetbox/Constants.h"
 
@@ -51,7 +51,7 @@ namespace PB
             return *this;
         };
 
-        vec3 operator+(const vec3& rhv)
+        vec3 operator+(const vec3& rhv) const
         {
             return {
                     this->x + rhv.x,
@@ -60,7 +60,7 @@ namespace PB
             };
         };
 
-        vec3 operator-(const vec3& rhv)
+        vec3 operator-(const vec3& rhv) const
         {
             return {
                     this->x - rhv.x,
@@ -69,7 +69,7 @@ namespace PB
             };
         };
 
-        vec3 operator*(const float& rhv)
+        vec3 operator*(const float& rhv) const
         {
             return {
                     this->x * rhv,
@@ -95,7 +95,7 @@ namespace PB
             assert(i < 4);
             return (&x)[i];
         };
-        vec4 operator*(float scalar)
+        vec4 operator*(float scalar) const
         {
             return vec4{
                     this->x * scalar,
@@ -104,7 +104,7 @@ namespace PB
                     this->w * scalar
             };
         };
-        vec4 operator+(vec4 v)
+        vec4 operator+(vec4 v) const
         {
             return vec4{
                     this->x + v.x,
@@ -122,7 +122,7 @@ namespace PB
 
     struct mat3
     {
-        mat3(vec3 v[3])
+        explicit mat3(vec3 v[3])
         {
             values_[0] = v[0];
             values_[1] = v[1];
@@ -173,7 +173,7 @@ namespace PB
 
     struct mat4
     {
-        mat4(vec4 v[4])
+        explicit mat4(vec4 v[4])
         {
             values_[0] = v[0];
             values_[1] = v[1];

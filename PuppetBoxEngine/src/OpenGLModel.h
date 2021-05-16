@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include <utility>
+
 #include "puppetbox/IModel.h"
 #include "GfxMath.h"
 #include "Material.h"
@@ -21,9 +23,9 @@ namespace PB
 		* \param mesh		The OpenGL specific mesh data to use for rendering calls.
 		* \param material	The OpenGL specific material data to use for rendering calls.
 		*/
-		OpenGLModel(Mesh mesh, Material material) : mesh_(mesh), material_(material) {};
+		OpenGLModel(Mesh mesh, Material material) : mesh_(mesh), material_(std::move(material)) {};
 
-		void updateModelMatrix(mat3 transform)
+		void updateModelMatrix(mat3 transform) override
 		{
 			mat4 model = mat4::eye();
 			vec3 translate = transform[0];
@@ -42,7 +44,7 @@ namespace PB
 		/**
 		* \brief Renders the object with OpenGL specific invocations.
 		*/
-		void render() const
+		void render() const override
 		{
 			if (material_.requiresAlphaBlending)
 			{
@@ -57,7 +59,7 @@ namespace PB
 			if (mesh_.EBO != 0)
 			{
 				//                           v-- number of indices to draw
-				glDrawElements(GL_TRIANGLES, mesh_.drawCount, GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_TRIANGLES, mesh_.drawCount, GL_UNSIGNED_INT, 0); // NOLINT(modernize-use-nullptr)
 			}
 			else
 			{

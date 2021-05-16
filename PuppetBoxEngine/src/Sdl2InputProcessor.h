@@ -19,7 +19,7 @@ namespace PB
 		*/
 		void loadCurrentState() override
 		{
-			for (uint32_t i = 0; i < KEY_LAST + 1; ++i)
+			for (std::uint32_t i = 0; i < KEY_LAST + 1; ++i)
 			{
 				keyboard.previousKeyState[i] = keyboard.keyState[i];
 			}

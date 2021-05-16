@@ -54,7 +54,7 @@ namespace PB
 		*
 		* \return True if the archive was loaded successfully, False otherwise.
 		*/
-		bool loadArchive(std::string archiveName);
+		bool loadArchive(const std::string& archiveName);
 
 		/**
 		* \brief Attempts to load the given asset into the provided SceneObject.  This logic handles loading the mesh,
@@ -69,7 +69,7 @@ namespace PB
 		*
 		* \return True if the asset was loaded successfully, False otherwise.
 		*/
-		bool loadAsset(std::string assetPath, SceneObject* sceneObject, Asset::Type type);
+		bool loadAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type);
 	private:
 		std::string archiveRoot_;
 		std::shared_ptr<IGfxApi> gfxApi_;
@@ -91,7 +91,7 @@ namespace PB
 		* \return The loaded Shader object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		Shader loadShaderAsset(std::string assetPath, bool* error);
+		Shader loadShaderAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Loads an ImageReference asset given by the provided virtual asset path.
@@ -103,7 +103,7 @@ namespace PB
 		* \return The loaded ImageReference object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		ImageReference loadImageAsset(std::string assetPath, ImageOptions imageOptions, bool* error);
+		ImageReference loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error);
 
 		/**
 		* \brief Loads a Material asset given by the provided virtual asset path.
@@ -114,18 +114,18 @@ namespace PB
 		* \return The loaded Material object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		Material loadMaterialAsset(std::string assetPath, bool* error);
+		Material loadMaterialAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Loads a Mesh asset given by the provided virtual asset path.
-		*
-		* \param assetPath	Virtual path to the requested asset.
+const 		*
+		* \pa&ram assetPath	Virtual path to the requested asset.
 		* \param error		Flag indicating an error occured if set to True.
 		*
 		* \return The loaded Mesh object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		Mesh loadMeshAsset(std::string assetPath, bool* error);
+		Mesh loadMeshAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Loads a ModelData2D asset given by the provided virtual asset path.
@@ -136,7 +136,7 @@ namespace PB
 		* \return The loaded ModelData2D object for the respective virtual asset path, or an empty
 		* object if an error occured loading the asset.
 		*/
-		ModelData2D loadModelData2DAsset(std::string assetPath, bool* error);
+		ModelData2D loadModelData2DAsset(const std::string& assetPath, bool* error);
 
 		/**
 		* \brief Loads the given scene object with 2D asset data.
@@ -146,6 +146,6 @@ namespace PB
 		*
 		* \return True if the scene object was succesfully loaded with assets, False otherwise.
 		*/
-		bool load2DSceneObject(std::string assetPath, SceneObject* sceneObject);
+		bool load2DSceneObject(const std::string& assetPath, SceneObject* sceneObject);
 	};
 }

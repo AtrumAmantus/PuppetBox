@@ -11,12 +11,12 @@ namespace PB
 	class WanderBehavior : public IBehavior
 	{
 	public:
-		void init(SceneObject* sceneObject)
+		void init(SceneObject* sceneObject) override
 		{
 			targetPosition_ = sceneObject->position;
 		};
 
-		void update(SceneObject* sceneObject, float deltaTime)
+		void update(SceneObject* sceneObject, float deltaTime) override
 		{
 			if (waitTime_ <= 0)
 			{

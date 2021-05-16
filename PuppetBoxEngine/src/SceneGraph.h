@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "puppetbox/AbstractSceneHandler.h"
@@ -28,7 +29,7 @@ namespace PB
 		* \return The unique name this scene should be referenced by later.
 		*/
 		SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputProcessor* inputProcessor) :
-			id_(sceneName), gfxApi_(gfxApi), inputProcessor_(inputProcessor){};
+			id_(std::move(sceneName)), gfxApi_(gfxApi), inputProcessor_(inputProcessor){};
 
 		/**
 		* \brief Sets a SceneHandler for this scene.

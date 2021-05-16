@@ -1,5 +1,4 @@
 #include <PuppetBox.h>
-#include <puppetbox/Constants.h>
 
 #include "CustomSceneHandler.h"
 

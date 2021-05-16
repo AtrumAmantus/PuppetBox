@@ -1,5 +1,3 @@
-#include <fstream>
-#include <sstream>
 #include <unordered_map>
 
 #include <glad/glad.h>
@@ -7,28 +5,35 @@
 #include "Logger.h"
 #include "Shader.h"
 
+// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
     namespace
     {
-        bool compileShaderProgram(uint32_t* programId, uint32_t* vShaderId, uint32_t* gShaderid, uint32_t* fShaderId)
+        bool compileShaderProgram(
+                std::uint32_t* programId,
+                const std::uint32_t* vShaderId,
+                const std::uint32_t* gShaderid,
+                const std::uint32_t* fShaderId)
         {
             int success;
             char infoLog[512];
             // shader Program
             *programId = glCreateProgram();
 
-            if (vShaderId != 0)
+            if (vShaderId != 0) // NOLINT(modernize-use-nullptr)
             {
                 glAttachShader(*programId, *vShaderId);
             }
 
-            if (gShaderid != 0)
+            if (gShaderid != 0) // NOLINT(modernize-use-nullptr)
             {
                 glAttachShader(*programId, *gShaderid);
             }
 
-            if (fShaderId != 0)
+            if (fShaderId != 0) // NOLINT(modernize-use-nullptr)
             {
                 glAttachShader(*programId, *fShaderId);
             }
@@ -38,7 +43,7 @@ namespace PB
             glGetProgramiv(*programId, GL_LINK_STATUS, &success);
             if (!success)
             {
-                glGetProgramInfoLog(*programId, 512, NULL, infoLog);
+                glGetProgramInfoLog(*programId, 512, nullptr, infoLog);
                 LOGGER_ERROR("Failed to link program'\n" + std::string(infoLog));
             }
 
@@ -50,7 +55,7 @@ namespace PB
             return success;
         }
 
-        void checkForShaderCompileError(const uint32_t shaderId, const char* shaderName, bool* error)
+        void checkForShaderCompileError(const std::uint32_t shaderId, const char* shaderName, bool* error)
         {
             int success;
             const int BUFF_SIZE = 1024;
@@ -60,33 +65,33 @@ namespace PB
             if (!success)
             {
                 *error = true;
-                glGetShaderInfoLog(shaderId, BUFF_SIZE, NULL, infoLog);
+                glGetShaderInfoLog(shaderId, BUFF_SIZE, nullptr, infoLog);
                 LOGGER_ERROR("Failed to load shader " + std::string(shaderName) + "\n" + std::string(infoLog));
             }
         }
 
-        bool compileShader(uint32_t* shaderId, const int shaderType, const char* shaderSource, const char* shaderName)
+        bool compileShader(std::uint32_t* shaderId, const int shaderType, const char* shaderSource, const char* shaderName)
         {
             bool error = false;
             *shaderId = glCreateShader(shaderType);
-            glShaderSource(*shaderId, 1, &shaderSource, NULL);
+            glShaderSource(*shaderId, 1, &shaderSource, nullptr);
             glCompileShader(*shaderId);
             checkForShaderCompileError(*shaderId, shaderName, &error);
             return !error;
         }
     }
 
-    const uint32_t Shader::id() const
+    std::uint32_t Shader::id() const
     {
         return programId_;
     }
 
-    const std::string Shader::name() const
+    std::string Shader::name() const
     {
         return shaderName_;
     }
 
-    bool Shader::loadVertexShader(std::string shaderCode)
+    bool Shader::loadVertexShader(const std::string& shaderCode)
     {
         if (programId_ == 0 && vertexShaderId_ == 0)
         {
@@ -103,7 +108,7 @@ namespace PB
         return true;
     }
 
-    bool Shader::loadGeometryShader(std::string shaderCode)
+    bool Shader::loadGeometryShader(const std::string& shaderCode)
     {
         if (programId_ == 0 && geometryShaderId_ == 0)
         {
@@ -120,7 +125,7 @@ namespace PB
         return true;
     }
 
-    bool Shader::loadFragmentShader(std::string shaderCode)
+    bool Shader::loadFragmentShader(const std::string& shaderCode)
     {
         if (programId_ == 0 && fragmentShaderId_ == 0)
         {
@@ -144,7 +149,7 @@ namespace PB
             if (compileShaderProgram(&programId_, &vertexShaderId_, &geometryShaderId_, &fragmentShaderId_))
             {
                 // Initialize UBO locations for later use.
-                uint32_t loc = glGetUniformBlockIndex(programId_, "Transforms");
+                std::uint32_t loc = glGetUniformBlockIndex(programId_, "Transforms");
                 glUniformBlockBinding(programId_, loc, 0);
                 loc = glGetUniformBlockIndex(programId_, "LightCounter");
                 glUniformBlockBinding(programId_, loc, 1);
@@ -166,7 +171,8 @@ namespace PB
         glUseProgram(programId_);
     }
 
-    void Shader::unuse() const
+    // Keeping this non static for consistency with Shader#use()
+    void Shader::unuse() const // NOLINT(readability-convert-member-functions-to-static)
     {
         glUseProgram(0);
     }
@@ -181,7 +187,7 @@ namespace PB
         glUniform1i(glGetUniformLocation(programId_, name.c_str()), value);
     }
 
-    void Shader::setUInt(const std::string& name, uint32_t value) const
+    void Shader::setUInt(const std::string& name, std::uint32_t value) const
     {
         glUniform1ui(glGetUniformLocation(programId_, name.c_str()), value);
     }
@@ -235,3 +241,4 @@ namespace PB
         glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 }
+#pragma clang diagnostic pop

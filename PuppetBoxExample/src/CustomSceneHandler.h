@@ -14,7 +14,10 @@
 
 namespace
 {
-	void insertIntoMap(std::string k, PB::SceneObject* v, std::unordered_map <std::string, PB::SceneObject*>& map)
+	void insertIntoMap(
+	        const std::string& k,
+	        PB::SceneObject* v,
+	        std::unordered_map <std::string, PB::SceneObject*>& map)
 	{
 		map.insert(
 			std::pair<std::string, PB::SceneObject*>{ k, v }
@@ -25,9 +28,9 @@ namespace
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
 public:
-	void setUp()
+	void setUp() override
 	{
-		Entity* myEntity = new Entity{};
+		auto* myEntity = new Entity{};
 		if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
 		{
 			myEntity->id = "Fred";
@@ -37,7 +40,7 @@ public:
 			insertIntoMap(myEntity->id, myEntity, entities_);
 		}
 	};
-	void update(float deltaTime)
+	void update(float deltaTime) override
 	{
 		processInput();
 
@@ -46,7 +49,7 @@ public:
 			e.second->update(deltaTime);
 		}
 	};
-	void render()
+	void render() override
 	{
 		for (auto& e : entities_)
 		{

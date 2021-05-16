@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <memory>
 
@@ -97,7 +97,7 @@ namespace PB
 		* 
 		* \return The actual scale of the object.
 		*/
-		vec3 actualScale();
+		vec3 actualScale() const;
 	protected:
 		/**
 		* \brief Update method for consumer defined update logic, called by update().
