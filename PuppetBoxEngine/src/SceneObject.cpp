@@ -20,6 +20,7 @@ namespace PB
 	void SceneObject::update(float deltaTime)
 	{
 		updates(deltaTime);
+
 		if (behavior_ != nullptr)
 		{
 			behavior_->update(this, deltaTime);

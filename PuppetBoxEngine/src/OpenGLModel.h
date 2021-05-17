@@ -39,10 +39,10 @@ namespace PB
 			material_.shader.setInt("material.diffuseMap", 0);
 
 			vec4 diffuseUvAdjust{
-			    static_cast<float>(material_.diffuseData.width) / static_cast<float>(material_.diffuseMap.width),
-			    static_cast<float>(material_.diffuseData.height) / static_cast<float>(material_.diffuseMap.height),
-			    static_cast<float>(material_.diffuseData.xOffset),
-			    static_cast<float>(material_.diffuseData.yOffset)
+				static_cast<float>(material_.diffuseData.width) / static_cast<float>(material_.diffuseMap.width),
+				static_cast<float>(material_.diffuseData.height) / static_cast<float>(material_.diffuseMap.height),
+				static_cast<float>(material_.diffuseData.xOffset) / static_cast<float>(material_.diffuseMap.width),
+			    static_cast<float>(material_.diffuseData.yOffset) / static_cast<float>(material_.diffuseMap.height)
 			};
 
 			material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
