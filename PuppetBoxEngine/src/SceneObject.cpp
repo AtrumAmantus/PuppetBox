@@ -29,7 +29,7 @@ namespace PB
 
 	void SceneObject::render()
 	{
-        vec3 transform[3] = { position, rotation, actualScale() };
+		vec3 transform[3] = { position, rotation, actualScale() };
 		model_->render(mat3{transform});
 	}
 

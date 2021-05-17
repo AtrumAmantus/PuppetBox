@@ -252,8 +252,8 @@ namespace PB
 			{
 				ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
 				imageReference = gfxApi_->loadImage(imageData, imageOptions);
-                imageReference.width = imageData.width;
-                imageReference.height = imageData.height;
+				imageReference.width = imageData.width;
+				imageReference.height = imageData.height;
 				imageReference.requiresAlphaBlending = imageData.numChannels == 4;
 				imageData.drop();
 
