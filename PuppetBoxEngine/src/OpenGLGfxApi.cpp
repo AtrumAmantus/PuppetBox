@@ -108,7 +108,7 @@ namespace PB
 
 	void OpenGLGfxApi::preLoopCommands() const
 	{
-		glViewport(0, 0, width_, height_);
+		glViewport(0, 0, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -263,7 +263,7 @@ namespace PB
 		glBindVertexArray(0);
 
 		// TODO: Hardcoded to only support EBO, revisit this? reason?
-		mesh.drawCount = indices.size();
+		mesh.drawCount = static_cast<int32_t>(indices.size());
 
 		return mesh;
 	}

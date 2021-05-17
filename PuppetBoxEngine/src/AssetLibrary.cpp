@@ -252,6 +252,8 @@ namespace PB
 			{
 				ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
 				imageReference = gfxApi_->loadImage(imageData, imageOptions);
+				imageReference.width = imageData.width;
+				imageReference.height = imageData.height;
 				imageReference.requiresAlphaBlending = imageData.numChannels == 4;
 				imageData.drop();
 
@@ -291,9 +293,9 @@ namespace PB
 
 				if (!*error)
 				{
-					if (!material.diffuseId.empty())
+					if (!material.diffuseData.image.empty())
 					{
-						ImageReference imageReference = loadImageAsset(material.diffuseId, { ImageOptions::Mode::CLAMP_TO_BORDER }, error);
+						ImageReference imageReference = loadImageAsset(material.diffuseData.image, { ImageOptions::Mode::CLAMP_TO_BORDER }, error);
 
 						if (!*error)
 						{
@@ -302,7 +304,7 @@ namespace PB
 						}
 						else
 						{
-							LOGGER_ERROR("Failed to load image, '" + material.diffuseId + "' for asset '" + assetPath + "'");
+							LOGGER_ERROR("Failed to load image, '" + material.diffuseData.image + "' for asset '" + assetPath + "'");
 						}
 					}
 

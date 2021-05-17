@@ -20,11 +20,7 @@ namespace PB
 	void SceneObject::update(float deltaTime)
 	{
 		updates(deltaTime);
-		vec3 transform[3] = { position, rotation, actualScale() };
-		if (model_ != nullptr)
-		{
-            model_->updateModelMatrix(mat3{transform});
-		}
+
 		if (behavior_ != nullptr)
 		{
 			behavior_->update(this, deltaTime);
@@ -33,7 +29,8 @@ namespace PB
 
 	void SceneObject::render()
 	{
-		model_->render();
+		vec3 transform[3] = { position, rotation, actualScale() };
+		model_->render(mat3{transform});
 	}
 
 	void SceneObject::setBehavior(AI::Behavior behavior)

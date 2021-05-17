@@ -11,6 +11,7 @@
 #include <puppetbox/SceneObject.h>
 
 #include "Entity.h"
+#include "Sprite.h"
 
 namespace
 {
@@ -31,20 +32,35 @@ public:
 	void setUp() override
 	{
 		auto* myEntity = new Entity{};
+
 		if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
 		{
 			myEntity->id = "Fred";
 			myEntity->name = myEntity->id;
-			myEntity->position += {0.0f, 0.0f, 0.0f};
+			myEntity->position = PB::vec2{100.0f, 50.0f};
 			myEntity->setBehavior(PB::AI::Behavior::WANDER);
 			insertIntoMap(myEntity->id, myEntity, entities_);
+		}
+
+		auto* mySprite = new Sprite{};
+
+		if (PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", mySprite, PB::LibraryAsset::Type::MODEL_2D))
+		{
+			mySprite->id = "click";
+			mySprite->position = PB::vec2{-100.0f, 50.0f};
+			insertIntoMap(mySprite->id, mySprite, renderLast_);
 		}
 	};
 	void update(float deltaTime) override
 	{
 		processInput();
-
+		
 		for (auto& e : entities_)
+		{
+			e.second->update(deltaTime);
+		}
+
+		for (auto& e : renderLast_)
 		{
 			e.second->update(deltaTime);
 		}

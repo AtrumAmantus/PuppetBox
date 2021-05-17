@@ -43,11 +43,25 @@ namespace PB
             return (&x)[i];
         };
 
+        vec3& operator=(const vec2& rhv)
+        {
+            this->x = rhv.x;
+            this->y = rhv.y;
+            return *this;
+        }
+
         vec3& operator+=(vec3 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
             this->z += rhv.z;
+            return *this;
+        };
+
+        vec3& operator+=(vec2 const& rhv)
+        {
+            this->x += rhv.x;
+            this->y += rhv.y;
             return *this;
         };
 
