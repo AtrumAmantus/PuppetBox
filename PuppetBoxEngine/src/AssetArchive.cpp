@@ -1,4 +1,3 @@
-#include <limits>
 #include <utility>
 
 #include <STBI/stb_image.h>
@@ -64,15 +63,15 @@ namespace PB
 		* 
 		* \return The Model2D object built from the given properties map.
 		*/
-		ModelData2D mapToModel2D(const std::unordered_map<std::string, std::string>& properties, bool* error)
+		ModelData2D mapToModel2D(PropertyTree& modelProperties, bool* error)
 		{
 			ModelData2D model{};
 
-			model.width = NumberUtils::parseValue(defaultIfNotInMap("width", properties, "0").c_str(), 0, error);
-			model.height = NumberUtils::parseValue(defaultIfNotInMap("height", properties, "0").c_str(), 0, error);
-			model.offsetX = NumberUtils::parseValue(defaultIfNotInMap("offsetX", properties, "0").c_str(), 0, error);
-			model.offsetY = NumberUtils::parseValue(defaultIfNotInMap("offsetY", properties, "0").c_str(), 0, error);
-			model.materialName = defaultIfNotInMap("material", properties, "");
+            model.width = NumberUtils::parseValue(defaultIfNotInTree("width", modelProperties, "0").c_str(), 0, error);
+            model.height = NumberUtils::parseValue(defaultIfNotInTree("height", modelProperties, "0").c_str(), 0, error);
+            model.offsetX = NumberUtils::parseValue(defaultIfNotInTree("offsetX", modelProperties, "0").c_str(), 0, error);
+            model.offsetY = NumberUtils::parseValue(defaultIfNotInTree("offsetY", modelProperties, "0").c_str(), 0, error);
+            model.materialName = defaultIfNotInTree("material", modelProperties, "");
 
 			if (*error)
 			{
@@ -125,24 +124,29 @@ namespace PB
 		/**
 		* \brief Helper function to map a properties map to a Shader object.
 		*
-		* \param properties	The properties map to use to map to a Material object.
-		* \param bool		Flag indicating an error occured if set to True.
+		* \param shaderProperties	The properties tree to use to map to a Shader object.
+		* \param bool		Flag indicating an error occurred if set to True.
 		*
 		* \return The Material object built from the given properties map.
 		*/
-		ShaderProgram mapToShaderProgram(const std::unordered_map<std::string, std::string>& properties, bool* error)
+		ShaderProgram mapToShaderProgram(PropertyTree& shaderProperties, bool* error)
 		{
 			ShaderProgram shaderProgram{};
 
-			shaderProgram.vertexShaderPath = defaultIfNotInMap("vertex", properties, "");
-			shaderProgram.geometryShaderPath = defaultIfNotInMap("geometry", properties, "");
-			shaderProgram.fragmentShaderPath = defaultIfNotInMap("fragment", properties, "");
+            shaderProgram.vertexShaderPath = defaultIfNotInTree("vertex", shaderProperties, "");
+            shaderProgram.fragmentShaderPath = defaultIfNotInTree("fragment", shaderProperties, "");
+            shaderProgram.geometryShaderPath = defaultIfNotInTree("geometry", shaderProperties, "");
+
+            if (shaderProgram.vertexShaderPath == "" || shaderProgram.fragmentShaderPath == "") {
+                *error = true;
+                LOGGER_ERROR("Failed to load shader program, invalid vertex/fragment shader");
+            }
 
 			return shaderProgram;
 		}
 
 		/**
-		* \brief Helper function to aquire the filename associated with the given virtual asset path.
+		* \brief Helper function to acquire the filename associated with the given virtual asset path.
 		*
 		* \param assetPath			The virtual asset path of the desired asset.
 		* \param archiveAssetIds	The unordered_map containing the virtual path -> filename associations.
@@ -387,15 +391,16 @@ namespace PB
 		{
 			std::istream* stream = nullptr;
 
-			std::unordered_map<std::string, std::string> modelPropertyData{};
+            PropertyTree propertyData{"shader"};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-			*error = *error || !getPropertiesFromStream(stream, &modelPropertyData);
+            *error = *error || !getPropertyTreeFromStream(stream, &propertyData);
 
 			delete stream;
+
 			if (!*error)
 			{
-				ShaderProgram program = mapToShaderProgram(modelPropertyData, error);
+				ShaderProgram program = mapToShaderProgram(propertyData, error);
 				program.programPath = assetPath;
 				return program;
 			}
@@ -459,7 +464,6 @@ namespace PB
 		{
 			std::istream* stream = nullptr;
 
-			std::unordered_map<std::string, std::string> modelPropertyData{};
 			PropertyTree propertyData{"material"};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
@@ -488,15 +492,15 @@ namespace PB
 		{
 			std::istream* stream = nullptr;
 
-			std::unordered_map<std::string, std::string> modelPropertyData{};
+            PropertyTree propertyData{"model"};
 
 			*error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-			*error = *error || !getPropertiesFromStream(stream, &modelPropertyData);
+			*error = *error || !getPropertyTreeFromStream(stream, &propertyData);
 
 			delete stream;
 			if (!*error)
 			{
-				ModelData2D model = mapToModel2D(modelPropertyData, error);
+				ModelData2D model = mapToModel2D(propertyData, error);
 
 				if (*error)
 				{
