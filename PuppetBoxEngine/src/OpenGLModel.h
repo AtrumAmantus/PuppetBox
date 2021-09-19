@@ -3,11 +3,12 @@
 #include <glad/glad.h>
 
 #include <utility>
+#include <vector>
+
+#include "puppetbox/DataStructures.h"
 
 #include "IModel.h"
-#include "puppetbox/DataStructures.h"
-#include "Material.h"
-#include "Mesh.h"
+#include "RenderedMesh.h"
 
 namespace PB
 {
@@ -20,17 +21,15 @@ namespace PB
 		/**
 		* \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
 		* 
-		* \param mesh		The OpenGL specific mesh data to use for rendering calls.
-		* \param material	The OpenGL specific material data to use for rendering calls.
+		* \param renderedMeshes Vector of {@link RenderedMesh} objects to use for model rendering.
 		*/
-		OpenGLModel(Mesh mesh, Material material);
+		OpenGLModel(std::vector<RenderedMesh> renderedMeshes);
 
 		/**
 		* \brief Renders the object with OpenGL specific invocations.
 		*/
 		void render(mat3 transform) const override;
 	private:
-		Mesh mesh_;
-		Material material_;
+		std::vector<RenderedMesh> renderedMeshes_;
 	};
 }

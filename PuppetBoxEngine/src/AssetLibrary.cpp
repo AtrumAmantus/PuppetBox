@@ -2,6 +2,7 @@
 #include "AssetLibrary.h"
 
 #include <utility>
+
 #include "OpenGLModel.h"
 
 namespace PB
@@ -397,8 +398,11 @@ namespace PB
 
 							if (!error)
 							{
+                                std::vector<RenderedMesh> renderedMeshes{};
+                                renderedMeshes.push_back(RenderedMesh{mesh, material});
+
 								loadedIModels_.insert(
-									std::pair<std::string, std::unique_ptr<IModel>> { assetPath, std::unique_ptr<IModel>{ new OpenGLModel(mesh, material)} }
+									std::pair<std::string, std::unique_ptr<IModel>> { assetPath, std::unique_ptr<IModel>{ new OpenGLModel(renderedMeshes)} }
 								);
 
 								model = &(*loadedIModels_.at(assetPath));
