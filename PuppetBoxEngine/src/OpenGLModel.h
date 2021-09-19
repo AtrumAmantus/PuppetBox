@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "puppetbox/IModel.h"
+#include "IModel.h"
 #include "puppetbox/DataStructures.h"
 #include "Material.h"
 #include "Mesh.h"

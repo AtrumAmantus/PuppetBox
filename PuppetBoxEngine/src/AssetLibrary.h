@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "IGfxApi.h"
 #include "ImageReference.h"
+#include "IModel.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"

@@ -255,7 +255,7 @@ namespace PB
 				imageReference.width = imageData.width;
 				imageReference.height = imageData.height;
 				imageReference.requiresAlphaBlending = imageData.numChannels == 4;
-				imageData.drop();
+                imageData.clear();
 
 				if (!*error)
 				{

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataStructures.h"
+#include "puppetbox/DataStructures.h"
 
 namespace PB
 {

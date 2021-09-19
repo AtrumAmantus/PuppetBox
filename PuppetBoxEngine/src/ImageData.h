@@ -17,7 +17,7 @@ namespace PB
 		/**
 		* \brief Used to free the buffer data of the image data once it is no longer needed.
 		*/
-		void drop()
+		void clear()
 		{
 			free(bufferData);
 			bufferData = nullptr;

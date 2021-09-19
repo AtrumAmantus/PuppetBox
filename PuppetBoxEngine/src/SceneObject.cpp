@@ -2,6 +2,7 @@
 
 #include "puppetbox/SceneObject.h"
 
+#include "IModel.h"
 #include "WanderBehavior.h"
 
 namespace PB
