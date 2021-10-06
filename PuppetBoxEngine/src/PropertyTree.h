@@ -4,8 +4,11 @@
 #include <string>
 #include <unordered_map>
 
+#include "puppetbox/DataStructures.h"
+
 namespace PB
 {
+    //TODO: Fix the way node values are stored/retrieved
 	class PropertyTree
 	{
 	public:
@@ -17,6 +20,7 @@ namespace PB
 		bool add(const std::string& parameterName);
 		bool remove(const std::string& parameterName);
 		bool isLeaf();
+        std::vector<std::string> children();
 		PropertyTree* parent();
 	private:
 		std::string value_;

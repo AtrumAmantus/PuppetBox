@@ -15,16 +15,26 @@
 
 namespace PB
 {
+    enum MeshType {
+        SPRITE
+    };
+
+    struct MeshData
+    {
+        MeshType type = SPRITE;
+        vec2 offset{0, 0};
+        std::string materialPath;
+    };
+
 	/**
 	* \brief Struct for holding 2D Model specific data for simple communication between archive & library.
 	*/
 	struct ModelData2D
 	{
-        std::uint32_t width = 0;
-        std::uint32_t height = 0;
-        std::int32_t offsetX = 0;
-        std::int32_t offsetY = 0;
-		std::string materialName;
+        vec2 offset{0, 0};
+        vec2 scale{0, 0};
+        MeshData mesh{};
+        std::unordered_map<std::string, ModelData2D> children{};
 	};
 
 	/**

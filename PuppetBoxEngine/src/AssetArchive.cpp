@@ -63,15 +63,43 @@ namespace PB
 		* 
 		* \return The Model2D object built from the given properties map.
 		*/
-		ModelData2D mapToModel2D(PropertyTree& modelProperties, bool* error)
+		ModelData2D mapToModel2D(PropertyTree& rootProperties, bool* error)
 		{
 			ModelData2D model{};
 
-            model.width = NumberUtils::parseValue(defaultIfNotInTree("width", modelProperties, "0").c_str(), 0, error);
-            model.height = NumberUtils::parseValue(defaultIfNotInTree("height", modelProperties, "0").c_str(), 0, error);
-            model.offsetX = NumberUtils::parseValue(defaultIfNotInTree("offsetX", modelProperties, "0").c_str(), 0, error);
-            model.offsetY = NumberUtils::parseValue(defaultIfNotInTree("offsetY", modelProperties, "0").c_str(), 0, error);
-            model.materialName = defaultIfNotInTree("material", modelProperties, "");
+            if (rootProperties.has("scale"))
+            {
+                PropertyTree *scaleProperties = rootProperties.get("scale");
+                model.scale.x = NumberUtils::parseValue(defaultIfNotInTree("x", *scaleProperties, "0").c_str(), 0, error);
+                model.scale.y = NumberUtils::parseValue(defaultIfNotInTree("y", *scaleProperties, "0").c_str(), 0, error);
+            }
+
+            if (rootProperties.has("offset"))
+            {
+                PropertyTree* offsetProperties = rootProperties.get("offset");
+                model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0, error);
+                model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0, error);
+            }
+
+            PropertyTree* meshProperties = rootProperties.get("mesh");
+            //TODO: Make this not hardcoded.
+            model.mesh.type = SPRITE;
+            model.mesh.materialPath = meshProperties->get("material")->value();
+
+            PropertyTree* meshOffsetProperties = meshProperties->get("offset");
+            model.mesh.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *meshOffsetProperties, "0").c_str(), 0, error);
+            model.mesh.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *meshOffsetProperties, "0").c_str(), 0, error);
+
+            if (rootProperties.has("children"))
+            {
+                PropertyTree* childrenProperties = rootProperties.get("children");
+
+                for (auto& childName : childrenProperties->children()) {
+                    ModelData2D child = mapToModel2D(*childrenProperties->get(childName), error);
+
+                    model.children[childName] = child;
+                }
+            }
 
 			if (*error)
 			{
@@ -232,7 +260,7 @@ namespace PB
 		{
             std::uint32_t indentCount = 0;
 
-			for (std::size_t i = 0; i < line.length() && line.c_str()[i] == '\t'; ++i)
+			for (std::size_t i = 0; i < line.length() && line.c_str()[i] == ' '; ++i)
 			{
 				indentCount++;
 			}
@@ -262,62 +290,53 @@ namespace PB
 				lineNumber++;
 				indentLevel = countIndents(line);
 
-				if (indentLevel >= minIndents && indentLevel <= maxIndents)
-				{
-					if (indentLevel < maxIndents)
-					{
-						for (std::uint32_t i = maxIndents; i > indentLevel; --i)
-						{
-							currentNode = currentNode->parent();
-						}
-					}
+                if (indentLevel % 2 == 0) {
+                    if (indentLevel >= minIndents && indentLevel <= maxIndents) {
+                        if (indentLevel < maxIndents) {
+                            for (std::uint32_t i = maxIndents; i > indentLevel; i -= 2) {
+                                currentNode = currentNode->parent();
+                            }
+                        }
 
-					std::string* splitValues;
-                    std::uint32_t splitCount;
+                        std::string *splitValues;
+                        std::uint32_t splitCount;
 
-					StringUtils::split(line, ":", 1, &splitValues, &splitCount);
+                        StringUtils::split(line, ":", 1, &splitValues, &splitCount);
 
-					if (splitCount == 2)
-					{
-						StringUtils::trim(&splitValues[0]);
-						StringUtils::trim(&splitValues[1]);
+                        if (splitCount == 2) {
+                            StringUtils::trim(&splitValues[0]);
+                            StringUtils::trim(&splitValues[1]);
 
-						if (splitValues[1].empty())
-						{
-							minIndents = indentLevel + 1;
-							maxIndents = minIndents;
+                            if (splitValues[1].empty()) {
+                                minIndents = indentLevel + 2;
+                                maxIndents = minIndents;
 
-							if (currentNode->add(splitValues[0]))
-							{
-								currentNode = currentNode->get(splitValues[0]);
-							}
-						}
-						else
-						{
-							minIndents = 0;
-							maxIndents = indentLevel;
+                                if (currentNode->add(splitValues[0])) {
+                                    currentNode = currentNode->get(splitValues[0]);
+                                }
+                            } else {
+                                minIndents = 0;
+                                maxIndents = indentLevel;
 
-							if (currentNode->add(splitValues[0]))
-							{
-								currentNode->get(splitValues[0])->add(splitValues[1]);
-							}
-							else
-							{
-								LOGGER_WARN("Property redefinition, '" + splitValues[0] + "' on line " + std::to_string(lineNumber));
-							}
-						}
-					}
-					else
-					{
-						LOGGER_ERROR("Invalid data '" + line + "' on line " + std::to_string(lineNumber));
-						return false;
-					}
-				}
-				else
-				{
-					LOGGER_ERROR("Unexpected indentation '" + line + "' on line " + std::to_string(lineNumber));
-					return false;
-				}
+                                if (currentNode->add(splitValues[0])) {
+                                    currentNode->get(splitValues[0])->add(splitValues[1]);
+                                } else {
+                                    LOGGER_WARN("Property redefinition, '" + splitValues[0] + "' on line " +
+                                                std::to_string(lineNumber));
+                                }
+                            }
+                        } else {
+                            LOGGER_ERROR("Invalid data '" + line + "' on line " + std::to_string(lineNumber));
+                            return false;
+                        }
+                    } else {
+                        LOGGER_ERROR("Unexpected indentation '" + line + "' on line " + std::to_string(lineNumber));
+                        return false;
+                    }
+                } else {
+                    LOGGER_ERROR("Invalid indentation (odd spaces) '" + line + "' on line " + std::to_string(lineNumber));
+                    return false;
+                }
 			}
 
 			return true;
@@ -500,7 +519,17 @@ namespace PB
 			delete stream;
 			if (!*error)
 			{
-				ModelData2D model = mapToModel2D(propertyData, error);
+                ModelData2D model{};
+
+                if (propertyData.has("root"))
+                {
+                     model = mapToModel2D(*propertyData.get("root"), error);
+                }
+                else
+                {
+                    *error = true;
+                    LOGGER_ERROR("Invalid Model2D data, must contain root node.");
+                }
 
 				if (*error)
 				{

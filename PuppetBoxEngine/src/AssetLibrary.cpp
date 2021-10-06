@@ -386,7 +386,7 @@ namespace PB
 			{
 				if (!error)
 				{
-					Material material = loadMaterialAsset(modelData2D.materialName, &error);
+					Material material = loadMaterialAsset(modelData2D.mesh.materialPath, &error);
 
 					if (!error)
 					{
@@ -401,11 +401,9 @@ namespace PB
                                 std::vector<RenderedMesh> renderedMeshes{};
                                 renderedMeshes.push_back(RenderedMesh{mesh, material});
 
-								loadedIModels_.insert(
-									std::pair<std::string, std::unique_ptr<IModel>> { assetPath, std::unique_ptr<IModel>{ new OpenGLModel(renderedMeshes)} }
-								);
+                                loadedIModels_[assetPath] = std::unique_ptr<IModel>{ new OpenGLModel(renderedMeshes)};
 
-								model = &(*loadedIModels_.at(assetPath));
+								model = &(*loadedIModels_[assetPath]);
 							}
 							else
 							{
@@ -419,7 +417,7 @@ namespace PB
 					}
 					else
 					{
-						LOGGER_ERROR("Could not load material '" + modelData2D.materialName + "' for model asset '" + assetPath + "'");
+						LOGGER_ERROR("Could not load material '" + modelData2D.mesh.materialPath + "' for model asset '" + assetPath + "'");
 					}
 				}
 				else
@@ -429,11 +427,11 @@ namespace PB
 			}
 			else
 			{
-				model = &(*loadedIModels_.at(assetPath));
+				model = &(*loadedIModels_[assetPath]);
 			}
 			
 			/**
-			* Make a copy of the previous SceneObject proprety data so that
+			* Make a copy of the previous SceneObject property data so that
 			* it can be restored after a new instance is made.
 			*/
 			std::string id = sceneObject->id;
@@ -443,7 +441,7 @@ namespace PB
 			float speed = sceneObject->speed;
 			vec3 velocity = sceneObject->velocity;
 
-			*sceneObject = SceneObject{ vec3{ static_cast<float>(modelData2D.width), static_cast<float>(modelData2D.height), 1.0f }, model };
+			*sceneObject = SceneObject{ vec3{ static_cast<float>(modelData2D.scale.x), static_cast<float>(modelData2D.scale.y), 1.0f }, model };
 			sceneObject->id = id;
 			sceneObject->position = position;
 			sceneObject->rotation = rotation;

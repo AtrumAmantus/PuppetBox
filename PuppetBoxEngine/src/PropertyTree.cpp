@@ -63,6 +63,17 @@ namespace PB
 		return children_.empty();
 	}
 
+    std::vector<std::string> PropertyTree::children()
+    {
+        std::vector<std::string> children{};
+
+        for (auto itr = children_.begin(); itr != children_.end(); ++itr) {
+            children.push_back(itr->first);
+        }
+
+        return children;
+    }
+
 	PropertyTree* PropertyTree::parent()
 	{
 		return parent_;
