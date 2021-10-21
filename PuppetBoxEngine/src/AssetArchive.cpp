@@ -79,6 +79,7 @@ namespace PB
                 PropertyTree* offsetProperties = rootProperties.get("offset");
                 model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0, error);
                 model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0, error);
+                model.offset.z = NumberUtils::parseValue(defaultIfNotInTree("z", *offsetProperties, "0").c_str(), 0, error);
             }
 
             PropertyTree* meshProperties = rootProperties.get("mesh");
@@ -89,6 +90,8 @@ namespace PB
             PropertyTree* meshOffsetProperties = meshProperties->get("offset");
             model.mesh.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *meshOffsetProperties, "0").c_str(), 0, error);
             model.mesh.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *meshOffsetProperties, "0").c_str(), 0, error);
+
+            model.name = rootProperties.name();
 
             if (rootProperties.has("children"))
             {

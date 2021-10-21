@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <string>
 
 #include "../include/puppetbox/Constants.h"
 
@@ -257,5 +258,20 @@ namespace PB
         vec2 uv;
         vec3 colour{ 0.0f, 0.0f, 0.0f };
         bool useColour = false;
+    };
+
+    struct Bone
+    {
+        vec3 offset {0, 0, 0};
+        vec3 rotation {0, 0, 0};
+        vec3 scale {1, 1, 1};
+    };
+
+    struct BoneMap
+    {
+        std::string name;
+        std::string parent;
+        std::uint32_t depth;
+        Bone bone{};
     };
 }

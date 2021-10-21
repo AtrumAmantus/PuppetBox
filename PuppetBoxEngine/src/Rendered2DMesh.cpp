@@ -1,15 +1,15 @@
-#include "RenderedMesh.h"
+#include "Rendered2DMesh.h"
 
 #include "GfxMath.h"
 
 namespace PB
 {
-    RenderedMesh::RenderedMesh(Mesh mesh, Material material) : mesh_(mesh), material_(material)
+    Rendered2DMesh::Rendered2DMesh(Mesh mesh, Material material) : mesh_(mesh), material_(material)
     {
 
     }
 
-    void RenderedMesh::render(mat3 transform) const
+    void Rendered2DMesh::render(mat3 transform, Bone* bones, std::uint32_t boneCount) const
     {
         if (material_.requiresAlphaBlending)
         {
@@ -32,7 +32,9 @@ namespace PB
         mat4 model = mat4::eye();
 
         model = GfxMath::Translate(model, transform[0]);
+        model = GfxMath::Translate(model, bones[boneCount - 1].offset);
         model = GfxMath::Scale(model, transform[2]);
+        model = GfxMath::Scale(model, mesh_.scale);
         model = GfxMath::Rotate(model, transform[1]);
 
         material_.shader.setMat4("model", model);

@@ -9,6 +9,7 @@
 #include "IModel.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "RenderedMesh.h"
 #include "Shader.h"
 #include "puppetbox/SceneObject.h"
 
@@ -79,7 +80,6 @@ namespace PB
 		std::unordered_map<std::string, Material> loadedMaterials_{};
 		std::unordered_map<std::string, ImageReference> loadedImages_{};
 		std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
-		std::unordered_map<std::string, std::unique_ptr<IModel>> loadedIModels_{};
 		std::unordered_map<std::string, Shader> loadedShaders_{};
 	private:
 
@@ -119,7 +119,7 @@ namespace PB
 
 		/**
 		* \brief Loads a Mesh asset given by the provided virtual asset path.
-const 		*
+ 		*
 		* \pa&ram assetPath	Virtual path to the requested asset.
 		* \param error		Flag indicating an error occured if set to True.
 		*
@@ -145,8 +145,11 @@ const 		*
 		* \param assetPath		Virtual path to the requested asset.
 		* \param sceneObject	The instantiated scene object to load with asset data.
 		*
-		* \return True if the scene object was succesfully loaded with assets, False otherwise.
+		* \return True if the scene object was successfully loaded with assets, False otherwise.
 		*/
 		bool load2DSceneObject(const std::string& assetPath, SceneObject* sceneObject);
+
+        bool buildMeshAndBones(ModelData2D modelData, std::string parent, std::uint32_t depth, std::unordered_map<std::string, BoneMap> &bones,
+                               std::unordered_map<std::string, RenderedMesh*> &meshes);
 	};
 }

@@ -13,8 +13,9 @@ namespace PB
 	{
 	public:
 		PropertyTree();
-		explicit PropertyTree(std::string value, PropertyTree* parent = nullptr);
+		explicit PropertyTree(std::string name, PropertyTree* parent = nullptr);
 		PropertyTree* get(const std::string& parameterName);
+        std::string name();
 		std::string value();
 		bool has(const std::string& parameterName);
 		bool add(const std::string& parameterName);
@@ -23,7 +24,7 @@ namespace PB
         std::vector<std::string> children();
 		PropertyTree* parent();
 	private:
-		std::string value_;
+        std::string name_;
 		std::unordered_map<std::string, std::shared_ptr<PropertyTree>> children_{};
 		PropertyTree* parent_;
 	};

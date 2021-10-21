@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "OpenGLModel.h"
+#include "Rendered2DMesh.h"
 
 namespace PB
 {
@@ -380,74 +381,39 @@ namespace PB
 
 		if (!error)
 		{
-			IModel* model = nullptr;
+			IModel* model;
 
-			if (loadedIModels_.find(assetPath) == loadedIModels_.end())
-			{
-				if (!error)
-				{
-					Material material = loadMaterialAsset(modelData2D.mesh.materialPath, &error);
+            std::unordered_map<std::string, RenderedMesh*> meshes{};
+            std::unordered_map<std::string, BoneMap> bones{};
+            error = !buildMeshAndBones(modelData2D, "", 0, bones, meshes);
 
-					if (!error)
-					{
-						material.shader = loadShaderAsset(material.shaderId, &error);
+            if (!error)
+            {
+                model = new OpenGLModel{bones, meshes};
 
-						if (!error)
-						{
-							Mesh mesh = loadMeshAsset("sprite", &error);
+                /**
+                * Make a copy of the previous SceneObject property data so that
+                * it can be restored after a new instance is made.
+                */
+                std::string id = sceneObject->id;
+                vec3 position = sceneObject->position;
+                vec3 rotation = sceneObject->rotation;
+                vec3 scale = sceneObject->scale;
+                float speed = sceneObject->speed;
+                vec3 velocity = sceneObject->velocity;
 
-							if (!error)
-							{
-                                std::vector<RenderedMesh> renderedMeshes{};
-                                renderedMeshes.push_back(RenderedMesh{mesh, material});
-
-                                loadedIModels_[assetPath] = std::unique_ptr<IModel>{ new OpenGLModel(renderedMeshes)};
-
-								model = &(*loadedIModels_[assetPath]);
-							}
-							else
-							{
-								LOGGER_ERROR("Could not load mesh 'sprite' for model asset '" + assetPath + "'");
-							}
-						}
-						else
-						{
-							LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset '" + assetPath + "'");
-						}
-					}
-					else
-					{
-						LOGGER_ERROR("Could not load material '" + modelData2D.mesh.materialPath + "' for model asset '" + assetPath + "'");
-					}
-				}
-				else
-				{
-					LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-				}
-			}
-			else
-			{
-				model = &(*loadedIModels_[assetPath]);
-			}
-			
-			/**
-			* Make a copy of the previous SceneObject property data so that
-			* it can be restored after a new instance is made.
-			*/
-			std::string id = sceneObject->id;
-			vec3 position = sceneObject->position;
-			vec3 rotation = sceneObject->rotation;
-			vec3 scale = sceneObject->scale;
-			float speed = sceneObject->speed;
-			vec3 velocity = sceneObject->velocity;
-
-			*sceneObject = SceneObject{ vec3{ static_cast<float>(modelData2D.scale.x), static_cast<float>(modelData2D.scale.y), 1.0f }, model };
-			sceneObject->id = id;
-			sceneObject->position = position;
-			sceneObject->rotation = rotation;
-			sceneObject->scale = scale;
-			sceneObject->speed = speed;
-			sceneObject->velocity = velocity;
+                *sceneObject = SceneObject{ vec3{ modelData2D.baseScale.x, modelData2D.baseScale.y, 1.0f }, model };
+                sceneObject->id = id;
+                sceneObject->position = position;
+                sceneObject->rotation = rotation;
+                sceneObject->scale = scale;
+                sceneObject->speed = speed;
+                sceneObject->velocity = velocity;
+            }
+            else
+            {
+                LOGGER_ERROR("Failed to load model data for asset '" + assetPath + "'");
+            }
 		}
 		else
 		{
@@ -456,4 +422,70 @@ namespace PB
 
 		return !error;
 	}
+
+    bool AssetLibrary::buildMeshAndBones(
+            ModelData2D modelData,
+            std::string parent,
+            std::uint32_t depth,
+            std::unordered_map<std::string, BoneMap> &bones,
+            std::unordered_map<std::string, RenderedMesh*> &meshes
+    )
+    {
+        bool error = false;
+
+        Material material = loadMaterialAsset(modelData.mesh.materialPath, &error);
+
+        if (!error)
+        {
+            material.shader = loadShaderAsset(material.shaderId, &error);
+
+            if (!error)
+            {
+                Mesh mesh = loadMeshAsset("sprite", &error);
+
+                mesh.scale = modelData.scale;
+
+                if (!error)
+                {
+                    BoneMap boneMap = BoneMap {
+                        modelData.name,
+                        parent,
+                        depth,
+                        {
+                            vec3{modelData.offset.x, modelData.offset.y, modelData.offset.z},
+                            vec3{modelData.scale.x, modelData.scale.y},
+                            {}
+                        }
+                    };
+
+                    bones.insert(
+                            std::pair<std::string, BoneMap>{modelData.name, boneMap}
+                            );
+
+                    meshes.insert(
+                            std::pair<std::string, RenderedMesh*>{modelData.name, new Rendered2DMesh(mesh, material)}
+                    );
+
+                    for (auto itr = modelData.children.begin(); !error && itr != modelData.children.end(); ++itr)
+                    {
+                        error = !buildMeshAndBones(modelData.children.at(itr->first), modelData.name, depth + 1, bones, meshes);
+                    }
+                }
+                else
+                {
+                    LOGGER_ERROR("Could not load mesh 'sprite' for model asset");
+                }
+            }
+            else
+            {
+                LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset");
+            }
+        }
+        else
+        {
+            LOGGER_ERROR("Could not load material '" + modelData.mesh.materialPath + "' for model asset");
+        }
+
+        return !error;
+    }
 }

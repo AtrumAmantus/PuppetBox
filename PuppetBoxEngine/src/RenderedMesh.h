@@ -1,30 +1,18 @@
 #pragma once
 
-#include "Material.h"
-#include "Mesh.h"
+#include "puppetbox/DataStructures.h"
 
 namespace PB
 {
     /**
-     * Wrapper for {@link Mesh} and {@link Material} objects for a particular renderable mesh.
+     * Wrapper for {@link Mesh} and {@link Material} objects for a particular rendered mesh.
      */
     class RenderedMesh
     {
     public:
         /**
-        * \brief Creates a wrapper for the render data.
-        *
-        * \param mesh		The OpenGL specific mesh data to use for rendering calls.
-        * \param material	The OpenGL specific material data to use for rendering calls.
-        */
-        RenderedMesh(Mesh mesh, Material material);
-
-        /**
         * \brief Renders the object with OpenGL specific invocations.
         */
-        void render(mat3 transform) const;
-    private:
-        Mesh mesh_;
-        Material material_;
+        virtual void render(mat3 transform, Bone* bones, std::uint32_t boneCount) const = 0;
     };
 }

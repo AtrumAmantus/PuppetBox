@@ -12,5 +12,6 @@ namespace PB
         std::uint32_t EBO = 0;
         std::uint32_t VAO = 0;
         std::int32_t drawCount = 0;
+        vec3 scale {1, 1, 1};
 	};
 }

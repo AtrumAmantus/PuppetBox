@@ -11,7 +11,7 @@ namespace PB
 
 	}
 
-	PropertyTree::PropertyTree(std::string value, PropertyTree* parent) : value_(std::move(value)), parent_(parent)
+	PropertyTree::PropertyTree(std::string name, PropertyTree* parent) : name_(std::move(name)), parent_(parent)
 	{
 
 	}
@@ -26,11 +26,16 @@ namespace PB
 		return nullptr;
 	}
 
+    std::string PropertyTree::name()
+    {
+        return name_;
+    }
+
 	std::string PropertyTree::value()
 	{
 		if (children_.size() == 1 && children_.begin()->second->isLeaf())
 		{
-			return children_.begin()->second->value_;
+			return children_.begin()->second->name_;
 		}
 		
 		LOGGER_ERROR("Node does not have a singular child leaf node, no value to retrieve");
@@ -46,9 +51,7 @@ namespace PB
 	{
 		bool exists = has(parameterName);
 
-		children_.insert(
-			std::pair<std::string, PropertyTree*>{ parameterName, new PropertyTree(parameterName, this) }
-		);
+        children_[parameterName] = std::make_shared<PropertyTree>(parameterName, this);
 
 		return !exists;
 	}

@@ -31,9 +31,11 @@ namespace PB
 	*/
 	struct ModelData2D
 	{
-        vec2 offset{0, 0};
-        vec2 scale{0, 0};
+        vec3 offset{0, 0, 0};
+        vec2 baseScale{1, 1};
+        vec2 scale{1, 1};
         MeshData mesh{};
+        std::string name;
         std::unordered_map<std::string, ModelData2D> children{};
 	};
 
