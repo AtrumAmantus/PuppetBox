@@ -80,6 +80,8 @@ namespace PB
                 model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0, error);
                 model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0, error);
                 model.offset.z = NumberUtils::parseValue(defaultIfNotInTree("z", *offsetProperties, "0").c_str(), 0, error);
+                //TODO: Fix this hack
+                model.offset.z *= 0.1;
             }
 
             PropertyTree* meshProperties = rootProperties.get("mesh");
