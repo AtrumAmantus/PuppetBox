@@ -14,11 +14,13 @@
 
 #include "puppetbox/AbstractSceneHandler.h"
 #include "puppetbox/Constants.h"
+#include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
 
 namespace PB
 {
 	class SceneObject;
+    class IAnimationCatalogue;
 
 	/**
 	 * \brief Initialize app context, create window, etc.
@@ -72,9 +74,11 @@ namespace PB
 	 * \param sceneObject The SceneObject to inject assets into, must not be a nullptr.
 	 * \param type Specifies what type the requested asset is.
 	 * 
-	 * \return True if the SceneObject was succesffully injected with assets, False otherwise.
+	 * \return True if the SceneObject was successfully injected with assets, False otherwise.
 	 */
 	extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
+
+    extern PUPPET_BOX_API IAnimationCatalogue* CreateAnimationCatalogue();
 
 	/**
 	 * \brief Initiates start of core engine, input processors, and render loops.

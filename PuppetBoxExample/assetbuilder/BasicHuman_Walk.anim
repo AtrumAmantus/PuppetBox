@@ -1,0 +1,20 @@
+skeleton:
+  root:
+    - head
+    - leftHand
+    - rightHand
+fps: 30
+length: 30
+keyframes:
+  0:
+    head:
+      position:
+        x: 0
+        y: 10
+        z: 0.2
+  15:
+    head:
+      position:
+        x: 0
+        y: 16
+        z: 0.2

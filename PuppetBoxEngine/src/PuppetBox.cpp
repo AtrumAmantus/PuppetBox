@@ -3,6 +3,7 @@
 
 #include <PuppetBox.h>
 
+#include "AnimationCatalogue.h"
 #include "AssetLibrary.h"
 #include "Engine.h"
 #include "OpenGLGfxApi.h"
@@ -21,7 +22,7 @@ namespace PB
 		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
 		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
 		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
-		std::unique_ptr<AssetLibrary> assetLibrary{ nullptr };
+		std::shared_ptr<AssetLibrary> assetLibrary{ nullptr };
 		std::string activeSceneId;
 		SceneGraph invalidScene{ "InvalidScene", nullptr, nullptr };
 		bool pbInitialized = false;
@@ -154,7 +155,7 @@ namespace PB
 
 			pbInitialized = true;
 
-			assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
+			assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi);
 			assetLibrary->init();
 		}
 		else
@@ -231,6 +232,11 @@ namespace PB
 
 		return false;
 	}
+
+    IAnimationCatalogue* CreateAnimationCatalogue()
+    {
+        return new AnimationCatalogue(assetLibrary);
+    }
 
 	void Run()
 	{

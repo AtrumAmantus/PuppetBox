@@ -8,6 +8,8 @@
 
 #include <STBI/stb_image.h>
 
+#include "puppetbox/IAnimationCatalogue.h"
+
 #include "ImageData.h"
 #include "Logger.h"
 #include "Material.h"
@@ -92,10 +94,10 @@ namespace PB
 		* \brief Loads an asset's contents as raw ascii data.
 		* 
 		* \param assetPath	The virtual asset path of the desired asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		* 
 		* \return A string containing the raw contents of the requested asset, or an empty string if an
-		* error occured.
+		* error occurred.
 		*/
 		std::string loadAsciiData(const std::string& assetPath, bool* error);
 
@@ -103,19 +105,23 @@ namespace PB
 		* \brief Returns a ShaderProgram for the given shader asset.
 		*
 		* \param assetPath	The virtual asset path of the desired asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		*
-		* \return A ShaderProgram of the requested asset, or an empty object if an error occured.
+		* \return A ShaderProgram of the requested asset, or an empty object if an error occurred.
 		*/
 		ShaderProgram loadShaderAsset(const std::string& assetPath, bool* error);
+
+        bool loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, std::string>& map);
+
+        bool loadAnimationAsset(const std::string& name, const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map);
 
 		/**
 		* \brief Returns a ImageData for the given shader asset.
 		*
 		* \param assetPath	The virtual asset path of the desired asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		*
-		* \return A ImageData of the requested asset, or an empty object if an error occured.
+		* \return A ImageData of the requested asset, or an empty object if an error occurred.
 		*/
 		ImageData loadImageAsset(const std::string& assetPath, bool* error);
 
@@ -123,9 +129,9 @@ namespace PB
 		* \brief Returns a Material for the given shader asset.
 		*
 		* \param assetPath	The virtual asset path of the desired asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		*
-		* \return A Material of the requested asset, or an empty object if an error occured.
+		* \return A Material of the requested asset, or an empty object if an error occurred.
 		*/
 		Material loadMaterialAsset(const std::string& assetPath, bool* error);
 
@@ -133,9 +139,9 @@ namespace PB
 		* \brief Returns a Model2D for the given shader asset.
 		*
 		* \param assetPath	The virtual asset path of the desired asset.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		*
-		* \return A Model2D of the requested asset, or an empty object if an error occured.
+		* \return A Model2D of the requested asset, or an empty object if an error occurred.
 		*/
 		ModelData2D load2DModelAsset(const std::string& assetPath, bool* error);
 	private:

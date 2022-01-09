@@ -28,11 +28,11 @@ namespace PB
         };
 
         material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
+        material_.shader.setMat4("boneTransform", bones[0].translation);
 
         mat4 model = mat4::eye();
 
         model = GfxMath::Translate(model, transform[0]);
-        model = GfxMath::Translate(model, bones[boneCount - 1].offset);
         model = GfxMath::Scale(model, transform[2]);
         model = GfxMath::Scale(model, mesh_.scale);
         model = GfxMath::Rotate(model, transform[1]);

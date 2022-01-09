@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 project(PuppetBoxEngine
         VERSION 0.0.1)
 
-set(CMAKE_CXX_STANDARD 17)
-
 set(DEP_INCLUDES_DIR ${DEP_DIRECTORY}/include CACHE PATH "Dependency Includes" FORCE)
 set(DEP_SLIBRARY_DIR ${DEP_DIRECTORY}/lib/${ARCH_TYPE} CACHE PATH "Dependency Static Libs" FORCE)
 

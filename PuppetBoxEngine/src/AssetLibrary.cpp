@@ -38,10 +38,10 @@ namespace PB
 		* \brief Helper function to break up a given virtual asset path into it's separate archive and asset paths.
 		* 
 		* \param assetPath	The virtual asset path to destruct.
-		* \param error		Flag indicating an error occured if set to True.
+		* \param error		Flag indicating an error occurred if set to True.
 		* 
 		* \return The AssetStruct containing the separated archive name and asset path, or an empty struct if
-		* an error occured destructing the virtual asset path.
+		* an error occurred destructing the virtual asset path.
 		*/
 		AssetStruct parseAssetPath(const std::string& assetPath, bool* error)
 		{
@@ -67,10 +67,10 @@ namespace PB
 		* 
 		* \param assetPath			The virtual asset path for the desired shader asset.
 		* \param assetArchiveMap	The AssetArchive to search for the given shader asset.
-		* \param error				Flag indicating an error occured if set to True.
+		* \param error				Flag indicating an error occurred if set to True.
 		* 
 		* \return A string containing the raw shader code of the requested shader asset, or an empty
-		* string if an error occured fetching the asset.
+		* string if an error occurred fetching the asset.
 		*/
 		std::string loadShaderCode(const std::string& assetPath, std::unordered_map<std::string, AssetArchive>& assetArchiveMap, bool* error)
 		{
@@ -186,6 +186,58 @@ namespace PB
 
 		return false;
 	}
+
+    bool AssetLibrary::loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map)
+    {
+        bool error = false;
+
+//        if (loadedAnimationSets_.find(assetPath) == loadedAnimationSets_.end())
+//        {
+            AssetStruct asset = parseAssetPath(assetPath, &error);
+
+            if (!error)
+            {
+                std::unordered_map<std::string, std::string> animMap{};
+                error = error || !assetArchives_.at(asset.archiveName).loadAnimationSetAsset(asset.assetName, animMap);
+
+                if (!error)
+                {
+                    for (const auto &entry: animMap)
+                    {
+                        error = error || !loadAnimationAsset(entry.first, entry.second, map);
+                    }
+                }
+                else
+                {
+                    LOGGER_ERROR("Failed to load animation set, '" + assetPath + "'");
+                }
+            }
+            else
+            {
+                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+            }
+//        }
+
+        return !error;
+    }
+
+    bool AssetLibrary::loadAnimationAsset(const std::string& animName, const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map)
+    {
+        bool error = false;
+
+        AssetStruct asset = parseAssetPath(assetPath, &error);
+
+        if (!error)
+        {
+            error = error || !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, map);
+        }
+        else
+        {
+            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+        }
+
+        return !error;
+    }
 
 	Shader AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
 	{
@@ -449,12 +501,12 @@ namespace PB
                 {
                     BoneMap boneMap = BoneMap {
                         modelData.name,
-                        parent,
+                        std::move(parent),
                         depth,
                         {
-                            vec3{modelData.offset.x, modelData.offset.y, modelData.offset.z},
-                            vec3{modelData.scale.x, modelData.scale.y},
-                            {}
+                                {modelData.offset.x, modelData.offset.y, modelData.offset.z},
+                                {modelData.scale.x, modelData.scale.y, 1},
+                                {}
                         }
                     };
 

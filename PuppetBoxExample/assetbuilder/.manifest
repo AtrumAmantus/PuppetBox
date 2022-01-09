@@ -9,3 +9,5 @@ Materials/TestHead TestHead.mat
 Shaders/Basic/Vertex basic.vertex.shader
 Shaders/Basic/Fragment basic.fragment.shader
 Shaders/Basic basic.program.shader
+Animations/BasicHuman BasicHuman.anims
+Animations/BasicHuman/Walk BasicHuman_Walk.anim

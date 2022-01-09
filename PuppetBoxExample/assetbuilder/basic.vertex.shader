@@ -15,12 +15,13 @@ layout(std140) uniform Transforms
 	mat4 view;
 };
 uniform mat4 model;
+uniform mat4 boneTransform;
 
 void main()
 {
 	vec4 local = vec4(aPos, 1.0);
 	
-	gl_Position = projection * view * model * local;
+	gl_Position = projection * view * boneTransform * model * local;
 	
 	vs_out.uvCoord = aUv;
 }

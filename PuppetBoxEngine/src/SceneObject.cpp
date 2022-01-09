@@ -22,6 +22,11 @@ namespace PB
 	{
 		updates(deltaTime);
 
+        if (model_ != nullptr)
+        {
+            model_->update(deltaTime);
+        }
+
 		if (behavior_ != nullptr)
 		{
 			behavior_->update(this, deltaTime);
@@ -51,6 +56,11 @@ namespace PB
 	{
 		behavior_ = std::move(behavior);
 	}
+
+    void SceneObject::playAnimation(std::unique_ptr<IAnimator> animator)
+    {
+        model_->playAnimation(std::move(animator));
+    }
 
 	vec3 SceneObject::actualScale() const
 	{

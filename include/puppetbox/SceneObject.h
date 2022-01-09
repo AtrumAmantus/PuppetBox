@@ -7,10 +7,12 @@
 #include "../PuppetBox.h"
 #include "Constants.h"
 #include "DataStructures.h"
+#include "IAnimationCatalogue.h"
 #include "IBehavior.h"
 
 namespace PB
 {
+    class IAnimator;
     class IModel;
 
 	/**
@@ -91,6 +93,8 @@ namespace PB
 		* \param behavior	The custom derived behavior to set.
 		*/
 		void setBehavior(std::unique_ptr<IBehavior> behavior);
+
+        void playAnimation(std::unique_ptr<IAnimator> animator);
 
 		/**
 		* \brief Returns the actual scale of the object, which is the product of the

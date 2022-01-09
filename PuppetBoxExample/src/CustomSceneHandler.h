@@ -7,6 +7,7 @@
 
 #include <PuppetBox.h>
 #include <puppetbox/Constants.h>
+#include <puppetbox/IAnimationCatalogue.h>
 #include <puppetbox/KeyCode.h>
 #include <puppetbox/SceneObject.h>
 
@@ -33,23 +34,33 @@ public:
 	{
 		auto* myEntity = new Entity{};
 
+        PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
+
 		if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
 		{
 			myEntity->id = "Fred";
 			myEntity->name = myEntity->id;
 			myEntity->position = PB::vec2{100.0f, 50.0f};
 			myEntity->setBehavior(PB::AI::Behavior::WANDER);
+//            myEntity->playAnimation(anims.get("walk"), PB::Anim::LOOP);
 			insertIntoMap(myEntity->id, myEntity, entities_);
 		}
 
-		auto* mySprite = new Sprite{};
+        if (anims->load("Assets1/Animations/BasicHuman"))
+        {
+            myEntity->playAnimation(anims->get("walk"));
+            //TODO: Use animation
+//            PB::Log.error("Failed to load catalogue");
+        }
 
-		if (PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", mySprite, PB::LibraryAsset::Type::MODEL_2D))
-		{
-			mySprite->id = "click";
-			mySprite->position = PB::vec2{-100.0f, 50.0f};
-			insertIntoMap(mySprite->id, mySprite, renderLast_);
-		}
+//		auto* mySprite = new Sprite{};
+//
+//		if (PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", mySprite, PB::LibraryAsset::Type::MODEL_2D))
+//		{
+//			mySprite->id = "click";
+//			mySprite->position = PB::vec2{-100.0f, 50.0f};
+//			insertIntoMap(mySprite->id, mySprite, renderLast_);
+//		}
 	};
 	void update(float deltaTime) override
 	{

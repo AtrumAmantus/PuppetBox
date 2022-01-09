@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.19)
 project(PuppetBox
         VERSION 0.0.1)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(ARCH_TYPE x64 CACHE PATH "System architecture" FORCE)
 
 set(CMAKE_GENERATOR_PLATFORM ${ARCH_TYPE})
