@@ -10,9 +10,9 @@ namespace PB
 {
     namespace
     {
-        inline Result<Keyframe> findKeyframeForBone(const std::string &boneName, const std::vector<Keyframe> &keyframes)
+        inline Result<Keyframe> findKeyframeForBone(const std::string& boneName, const std::vector<Keyframe>& keyframes)
         {
-            for (const auto &keyframe: keyframes)
+            for (const auto& keyframe: keyframes)
             {
                 if (keyframe.boneName == boneName)
                 {
@@ -40,7 +40,7 @@ namespace PB
             std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes
     ) : boneMap_(std::move(boneMap)), fps_(fps), length_(length), keyframes_(std::move(keyframes))
     {
-        for (auto &i: keyframes_)
+        for (auto& i: keyframes_)
         {
             keyframeIndexes_.push_back(i.first);
         }
@@ -48,7 +48,7 @@ namespace PB
         std::sort(keyframeIndexes_.begin(), keyframeIndexes_.end());
     }
 
-    Animator::Animator(IAnimation *animation) : animation_(animation),
+    Animator::Animator(IAnimation* animation) : animation_(animation),
                                                 sequenceDuration_((float) animation->getLength() / animation->getFps())
     {
 
@@ -82,7 +82,7 @@ namespace PB
         std::unique_ptr<Keyframe> nextKey{nullptr};
 
         // Map frame values for each bone for the current frame
-        for (const auto &bone: boneMap_)
+        for (const auto& bone: boneMap_)
         {
             bool mappedKey = false;
             prevKey.reset();
@@ -107,7 +107,7 @@ namespace PB
                 std::unique_ptr<Keyframe> lastKey{nullptr};
 
                 // Search every keyframe we have
-                for (const auto &index: keyframeIndexes_)
+                for (const auto& index: keyframeIndexes_)
                 {
                     // Don't check the requested frame, we already know it's not there
                     if (index != frame)
@@ -216,8 +216,11 @@ namespace PB
             if (!mappedKey)
             {
                 glm::mat4 rot = rotVecToMat4(glm::mat4(1.0), transformVectors.rotation);
-                glm::mat4 pos = glm::translate(glm::mat4(1.0), {transformVectors.position.x, transformVectors.position.y, transformVectors.position.z});
-                glm::mat4 sca = glm::scale(glm::mat4(1.0), {transformVectors.scale.x, transformVectors.scale.y, transformVectors.scale.z});
+                glm::mat4 pos = glm::translate(glm::mat4(1.0),
+                                               {transformVectors.position.x, transformVectors.position.y,
+                                                transformVectors.position.z});
+                glm::mat4 sca = glm::scale(glm::mat4(1.0), {transformVectors.scale.x, transformVectors.scale.y,
+                                                            transformVectors.scale.z});
 
                 glm::mat4 transformation = pos * rot * sca;
 
@@ -230,7 +233,7 @@ namespace PB
 
         // Transformations are defined as relative to original position, so now
         // we add in the bone offsets to complete the transformation values.
-        for (auto &entry: keyframeTransformationMatrixMap)
+        for (auto& entry: keyframeTransformationMatrixMap)
         {
             auto bone = boneMap_.at(entry.first);
 
@@ -269,7 +272,7 @@ namespace PB
 
         boneTransformations_.clear();
 
-        for (auto &keyFrame: currentKeyframes_)
+        for (auto& keyFrame: currentKeyframes_)
         {
             mat4 matrix = mat4::eye();
 
@@ -300,12 +303,12 @@ namespace PB
 
     }
 
-    bool AnimationCatalogue::load(const std::string &assetPath)
+    bool AnimationCatalogue::load(const std::string& assetPath)
     {
         return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
     }
 
-    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string &animationName) const
+    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationName) const
     {
         if (animations_.find(animationName) != animations_.end())
         {

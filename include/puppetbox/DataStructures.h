@@ -19,13 +19,13 @@ namespace PB
             float y, g, t = 0;
         };
 
-        float &operator[](uint32_t i)
+        float& operator[](uint32_t i)
         {
             assert(i < 2);
             return (&x)[i];
         };
 
-        const float &operator[](uint32_t i) const
+        const float& operator[](uint32_t i) const
         {
             assert(i < 2);
             return (&x)[i];
@@ -47,26 +47,26 @@ namespace PB
             float z, b, p = 0;
         };
 
-        float &operator[](uint32_t i)
+        float& operator[](uint32_t i)
         {
             assert(i < 3);
             return (&x)[i];
         };
 
-        const float &operator[](uint32_t i) const
+        const float& operator[](uint32_t i) const
         {
             assert(i < 3);
             return (&x)[i];
         };
 
-        vec3 &operator=(const vec2 &rhv)
+        vec3& operator=(const vec2& rhv)
         {
             this->x = rhv.x;
             this->y = rhv.y;
             return *this;
         };
 
-        vec3 &operator+=(vec3 const &rhv)
+        vec3& operator+=(vec3 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
@@ -74,14 +74,14 @@ namespace PB
             return *this;
         };
 
-        vec3 &operator+=(vec2 const &rhv)
+        vec3& operator+=(vec2 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
             return *this;
         };
 
-        vec3 operator+(const vec3 &rhv) const
+        vec3 operator+(const vec3& rhv) const
         {
             return {
                     this->x + rhv.x,
@@ -90,7 +90,7 @@ namespace PB
             };
         };
 
-        vec3 operator-(const vec3 &rhv) const
+        vec3 operator-(const vec3& rhv) const
         {
             return {
                     this->x - rhv.x,
@@ -99,7 +99,7 @@ namespace PB
             };
         };
 
-        vec3 operator*(const float &scalar) const
+        vec3 operator*(const float& scalar) const
         {
             return {
                     this->x * scalar,
@@ -108,7 +108,7 @@ namespace PB
             };
         };
 
-        vec3 operator/(const float &scalar) const
+        vec3 operator/(const float& scalar) const
         {
             return {
                     this->x / scalar,
@@ -117,7 +117,7 @@ namespace PB
             };
         };
 
-        bool operator==(const vec3 &rhs) const
+        bool operator==(const vec3& rhs) const
         {
             return this->x == rhs.x
                    && this->y == rhs.y
@@ -144,13 +144,13 @@ namespace PB
             float w, a, q = 0;
         };
 
-        float &operator[](uint32_t i)
+        float& operator[](uint32_t i)
         {
             assert(i < 4);
             return (&x)[i];
         };
 
-        const float &operator[](uint32_t i) const
+        const float& operator[](uint32_t i) const
         {
             assert(i < 4);
             return (&x)[i];
@@ -176,7 +176,7 @@ namespace PB
             };
         };
 
-        vec4 operator-(const vec4 &rhv) const
+        vec4 operator-(const vec4& rhv) const
         {
             return {
                     this->x - rhv.x,
@@ -186,7 +186,7 @@ namespace PB
             };
         };
 
-        vec4 operator/(const float &scalar) const
+        vec4 operator/(const float& scalar) const
         {
             return {
                     this->x / scalar,
@@ -196,7 +196,7 @@ namespace PB
             };
         };
 
-        vec4 &operator+=(vec4 const &rhv)
+        vec4& operator+=(vec4 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
@@ -205,7 +205,7 @@ namespace PB
             return *this;
         };
 
-        vec4 &operator+=(vec3 const &rhv)
+        vec4& operator+=(vec3 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
@@ -213,7 +213,7 @@ namespace PB
             return *this;
         };
 
-        bool operator==(const vec4 &rhs) const
+        bool operator==(const vec4& rhs) const
         {
             return this->x == rhs.x
                    && this->y == rhs.y
@@ -239,9 +239,9 @@ namespace PB
         };
 
         mat3(
-                const float &x1, const float &y1, const float &z1,
-                const float &x2, const float &y2, const float &z2,
-                const float &x3, const float &y3, const float &z3
+                const float& x1, const float& y1, const float& z1,
+                const float& x2, const float& y2, const float& z2,
+                const float& x3, const float& y3, const float& z3
         )
         {
             values_[0][0] = x1;
@@ -264,13 +264,13 @@ namespace PB
             values_[2] = s;
         }
 
-        vec3 &operator[](uint32_t i)
+        vec3& operator[](uint32_t i)
         {
             assert(i < 3);
             return this->values_[i];
         };
 
-        const vec3 &operator[](uint32_t i) const
+        const vec3& operator[](uint32_t i) const
         {
             assert(i < 3);
             return this->values_[i];
@@ -301,7 +301,7 @@ namespace PB
             values_[3] = v[3];
         };
 
-        explicit mat4(const float *mat4)
+        explicit mat4(const float* mat4)
         {
             for (std::uint8_t i = 0; i < 4; ++i)
             {
@@ -313,10 +313,10 @@ namespace PB
         }
 
         mat4(
-                const float &x1, const float &y1, const float &z1, const float &w1,
-                const float &x2, const float &y2, const float &z2, const float &w2,
-                const float &x3, const float &y3, const float &z3, const float &w3,
-                const float &x4, const float &y4, const float &z4, const float &w4
+                const float& x1, const float& y1, const float& z1, const float& w1,
+                const float& x2, const float& y2, const float& z2, const float& w2,
+                const float& x3, const float& y3, const float& z3, const float& w3,
+                const float& x4, const float& y4, const float& z4, const float& w4
         )
         {
             values_[0][0] = x1;
@@ -340,19 +340,19 @@ namespace PB
             values_[3][3] = w4;
         };
 
-        vec4 &operator[](uint32_t i)
+        vec4& operator[](uint32_t i)
         {
             assert(i < 4);
             return this->values_[i];
         };
 
-        const vec4 &operator[](uint32_t i) const
+        const vec4& operator[](uint32_t i) const
         {
             assert(i < 4);
             return this->values_[i];
         };
 
-        mat4 &operator*=(mat4 const &rhv)
+        mat4& operator*=(mat4 const& rhv)
         {
             mat4 newMatrix{};
 

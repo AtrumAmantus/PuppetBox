@@ -5,8 +5,8 @@
 class Sprite : public PB::SceneObject
 {
 protected:
-	void updates(float deltaTime) override
-	{
+    void updates(float deltaTime) override
+    {
 
-	};
+    };
 };

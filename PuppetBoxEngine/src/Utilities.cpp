@@ -16,435 +16,447 @@
 
 namespace PB
 {
-	/**
-	* \brief These hidden functions provide support for all whitespace characters, dependent on system definition of std::isspace().
-	*/
-	namespace
-	{
-		void ltrimWhitespace(std::string* str)
-		{
-			while (!str->empty() && std::isspace(str->at(0)))
-			{
-				str->erase(0, 1);
-			}
-		}
-		std::string ltrimWhitespace(std::string str)
-		{
-			ltrimWhitespace(&str);
+    /**
+    * \brief These hidden functions provide support for all whitespace characters, dependent on system definition of std::isspace().
+    */
+    namespace
+    {
+        void ltrimWhitespace(std::string* str)
+        {
+            while (!str->empty() && std::isspace(str->at(0)))
+            {
+                str->erase(0, 1);
+            }
+        }
 
-			return str;
-		}
-		void rtrimWhitespace(std::string* str)
-		{
-			while (!str->empty() && std::isspace(str->at(strlen((*str).c_str()) - 1)))
-			{
-				str->erase((strlen((*str).c_str()) - 1), 1);
-			}
-		}
-		std::string rtrimWhitespace(std::string str)
-		{
-			rtrimWhitespace(&str);
+        std::string ltrimWhitespace(std::string str)
+        {
+            ltrimWhitespace(&str);
 
-			return str;
-		}
-		void trimWhitespace(std::string* str)
-		{
-			ltrimWhitespace(str);
-			rtrimWhitespace(str);
-		}
-		std::string trimWhitespace(std::string str)
-		{
-			trimWhitespace(&str);
+            return str;
+        }
 
-			return str;
-		}
-		/**
-		* \brief Finds the first occurance of any whitespace character in the given string.
-		* 
-		* \param str The string to search for whitespace.
-		* 
-		* \return The index of the first whitespace character found, returns std::string::npos if not found.
-		*/
-		std::size_t findWhitespace(std::string str)
-		{
-			std::size_t i;
+        void rtrimWhitespace(std::string* str)
+        {
+            while (!str->empty() && std::isspace(str->at(strlen((*str).c_str()) - 1)))
+            {
+                str->erase((strlen((*str).c_str()) - 1), 1);
+            }
+        }
 
-			for (i = 0; i < str.length(); ++i)
-			{
-				if (std::isspace(str.at(i)))
-				{
-					return i;
-				}
-			}
-			
-			return std::string::npos;
-		}
-	}
+        std::string rtrimWhitespace(std::string str)
+        {
+            rtrimWhitespace(&str);
 
-	namespace StringUtils
-	{
-		void trim(std::string* str)
-		{
-			trimWhitespace(str);
-		}
+            return str;
+        }
 
-		std::string trim(std::string str)
-		{
-			return trimWhitespace(std::move(str));
-		}
+        void trimWhitespace(std::string* str)
+        {
+            ltrimWhitespace(str);
+            rtrimWhitespace(str);
+        }
 
-		void trim(std::string* str, const char& c)
-		{
-			ltrim(str, c);
-			rtrim(str, c);
-		}
+        std::string trimWhitespace(std::string str)
+        {
+            trimWhitespace(&str);
 
-		std::string trim(std::string str, const char& c)
-		{
-			trim(&str, c);
+            return str;
+        }
 
-			return str;
-		}
+        /**
+        * \brief Finds the first occurance of any whitespace character in the given string.
+        *
+        * \param str The string to search for whitespace.
+        *
+        * \return The index of the first whitespace character found, returns std::string::npos if not found.
+        */
+        std::size_t findWhitespace(std::string str)
+        {
+            std::size_t i;
 
-		void ltrim(std::string* str)
-		{
-			ltrimWhitespace(str);
-		}
+            for (i = 0; i < str.length(); ++i)
+            {
+                if (std::isspace(str.at(i)))
+                {
+                    return i;
+                }
+            }
 
-		std::string ltrim(std::string str)
-		{
-			return ltrimWhitespace(std::move(str));
-		}
+            return std::string::npos;
+        }
+    }
 
-		void ltrim(std::string* str, const char& c)
-		{
-			while (!str->empty() && str->at(0) == c)
-			{
-				str->erase(0, 1);
-			}
-		}
+    namespace StringUtils
+    {
+        void trim(std::string* str)
+        {
+            trimWhitespace(str);
+        }
 
-		std::string ltrim(std::string str, const char& c)
-		{
-			ltrim(&str, c);
+        std::string trim(std::string str)
+        {
+            return trimWhitespace(std::move(str));
+        }
 
-			return str;
-		}
+        void trim(std::string* str, const char& c)
+        {
+            ltrim(str, c);
+            rtrim(str, c);
+        }
 
-		void rtrim(std::string* str)
-		{
-			rtrimWhitespace(str);
-		}
+        std::string trim(std::string str, const char& c)
+        {
+            trim(&str, c);
 
-		std::string rtrim(std::string str)
-		{
-			return rtrimWhitespace(std::move(str));
-		}
+            return str;
+        }
 
-		void rtrim(std::string* str, const char& c)
-		{
-			while (!str->empty() && str->at(strlen((*str).c_str()) - 1) == c)
-			{
-				str->erase((strlen((*str).c_str()) - 1), 1);
-			}
-		}
+        void ltrim(std::string* str)
+        {
+            ltrimWhitespace(str);
+        }
 
-		std::string rtrim(std::string str, const char& c)
-		{
-			rtrim(&str, c);
+        std::string ltrim(std::string str)
+        {
+            return ltrimWhitespace(std::move(str));
+        }
 
-			return str;
-		}
+        void ltrim(std::string* str, const char& c)
+        {
+            while (!str->empty() && str->at(0) == c)
+            {
+                str->erase(0, 1);
+            }
+        }
 
-		bool startsWith(const std::string& str, const std::string& prefix)
-		{
-			return str.substr(0, prefix.length()) == prefix;
-		}
+        std::string ltrim(std::string str, const char& c)
+        {
+            ltrim(&str, c);
 
-		void split(const std::string& str, std::string** splitValues, std::uint32_t* splitCount, bool excludeNull)
-		{
-			if (!str.empty())
-			{
-				*splitCount = 1;
-				std::string currentSearchString = str;
-				*splitValues = new std::string[*splitCount];
-				std::size_t pos = findWhitespace(currentSearchString);
+            return str;
+        }
 
-				while (pos != std::string::npos)
-				{
-					if (pos > 0 || !excludeNull)
-					{
-						++(*splitCount);
+        void rtrim(std::string* str)
+        {
+            rtrimWhitespace(str);
+        }
 
-						// Copy previously found slices
-						auto* tmpBits = new std::string[*splitCount];
+        std::string rtrim(std::string str)
+        {
+            return rtrimWhitespace(std::move(str));
+        }
 
-						for (std::size_t i = 0; i < *splitCount - 2; ++i)
-						{
-							// If the arraySize is 2, then 0 entries have been initialized
-							tmpBits[i] = (*splitValues)[i];
-						}
+        void rtrim(std::string* str, const char& c)
+        {
+            while (!str->empty() && str->at(strlen((*str).c_str()) - 1) == c)
+            {
+                str->erase((strlen((*str).c_str()) - 1), 1);
+            }
+        }
 
-						delete[] *splitValues;
-						*splitValues = tmpBits;
+        std::string rtrim(std::string str, const char& c)
+        {
+            rtrim(&str, c);
 
-						// Add new slice
-						(*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
-						currentSearchString = currentSearchString.substr(pos + 1, currentSearchString.length() - pos);
+            return str;
+        }
 
-						// Prep for next iteration
-						pos = findWhitespace(currentSearchString);
-					}
-					else
-					{
-						// The currentSearchString started with the delimiter, just remove it and run again
-						currentSearchString = currentSearchString.substr(1, currentSearchString.length() - 1);
-					}
-				}
+        bool startsWith(const std::string& str, const std::string& prefix)
+        {
+            return str.substr(0, prefix.length()) == prefix;
+        }
 
-				// Add the remaining string as the last entry in the array
-				(*splitValues)[*splitCount - 1] = std::string{ currentSearchString };
-			}
-			else
-			{
-				*splitValues = nullptr;
-				*splitCount = 0;
-			}
-		}
+        void split(const std::string& str, std::string** splitValues, std::uint32_t* splitCount, bool excludeNull)
+        {
+            if (!str.empty())
+            {
+                *splitCount = 1;
+                std::string currentSearchString = str;
+                *splitValues = new std::string[*splitCount];
+                std::size_t pos = findWhitespace(currentSearchString);
 
-		void split(
-		        const std::string& str,
-		        const std::string& delimiter,
-		        std::uint32_t splitLimit,
-		        std::string** splitValues,
-		        std::uint32_t* splitCount,
-		        bool excludeNull)
-		{
-			if (!str.empty() && !delimiter.empty())
-			{
-				std::uint32_t maxNumberOfSplits = (splitLimit > 0) ? splitLimit : UINT32_MAX;
-				*splitCount = 1;
-				std::string currentSearchString = str;
-				*splitValues = new std::string[*splitCount];
-				std::size_t pos = currentSearchString.find(delimiter);
+                while (pos != std::string::npos)
+                {
+                    if (pos > 0 || !excludeNull)
+                    {
+                        ++(*splitCount);
 
-				while (maxNumberOfSplits > 0 && pos != std::string::npos)
-				{
-					--maxNumberOfSplits;
+                        // Copy previously found slices
+                        auto* tmpBits = new std::string[*splitCount];
 
-					if (pos > 0 || !excludeNull)
-					{
-						++(*splitCount);
+                        for (std::size_t i = 0; i < *splitCount - 2; ++i)
+                        {
+                            // If the arraySize is 2, then 0 entries have been initialized
+                            tmpBits[i] = (*splitValues)[i];
+                        }
 
-						// Copy previously found slices
-						auto* tmpBits = new std::string[*splitCount];
+                        delete[] *splitValues;
+                        *splitValues = tmpBits;
 
-						for (std::size_t i = 0; i < *splitCount - 2; ++i)
-						{
-							// If the arraySize is 2, then 0 entries have been initialized
-							tmpBits[i] = (*splitValues)[i];
-						}
+                        // Add new slice
+                        (*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
+                        currentSearchString = currentSearchString.substr(pos + 1, currentSearchString.length() - pos);
 
-						delete[] *splitValues;
-						*splitValues = tmpBits;
+                        // Prep for next iteration
+                        pos = findWhitespace(currentSearchString);
+                    }
+                    else
+                    {
+                        // The currentSearchString started with the delimiter, just remove it and run again
+                        currentSearchString = currentSearchString.substr(1, currentSearchString.length() - 1);
+                    }
+                }
 
-						// Add new slice
-						(*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
-						currentSearchString = currentSearchString.substr(pos + delimiter.length(), currentSearchString.length() - pos);
+                // Add the remaining string as the last entry in the array
+                (*splitValues)[*splitCount - 1] = std::string{currentSearchString};
+            }
+            else
+            {
+                *splitValues = nullptr;
+                *splitCount = 0;
+            }
+        }
 
-						// Prep for next iteration
-						pos = currentSearchString.find(delimiter);
-					}
-					else
-					{
-						// The currentSearchString started with the delimiter, just remove it and run again
-						currentSearchString = currentSearchString.substr(1, currentSearchString.length() - 1);
-					}
-				}
+        void split(
+                const std::string& str,
+                const std::string& delimiter,
+                std::uint32_t splitLimit,
+                std::string** splitValues,
+                std::uint32_t* splitCount,
+                bool excludeNull)
+        {
+            if (!str.empty() && !delimiter.empty())
+            {
+                std::uint32_t maxNumberOfSplits = (splitLimit > 0) ? splitLimit : UINT32_MAX;
+                *splitCount = 1;
+                std::string currentSearchString = str;
+                *splitValues = new std::string[*splitCount];
+                std::size_t pos = currentSearchString.find(delimiter);
 
-				// Add the remaining string as the last entry in the array
-				(*splitValues)[*splitCount - 1] = currentSearchString;
-			}
-			else if (!delimiter.empty())
-			{
-				*splitValues = new std::string[1]{ str };
-				*splitCount = 1;
-			}
-			else
-			{
-				*splitValues = nullptr;
-				*splitCount = 0;
-			}
-		}
+                while (maxNumberOfSplits > 0 && pos != std::string::npos)
+                {
+                    --maxNumberOfSplits;
 
-		void split(
-		        const std::string& str,
-		        const std::string& delimiter,
-		        std::string** splitValues,
-		        std::uint32_t* splitCount,
-		        bool excludeNull)
-		{
-			split(str, delimiter, 0, splitValues, splitCount, excludeNull);
-		}
-	}
+                    if (pos > 0 || !excludeNull)
+                    {
+                        ++(*splitCount);
 
-	namespace RandomUtils
-	{
-		namespace
-		{
-			float perlinValues_[] = { PERLIN_NOISE };
-			float pseudoRandom_[] = { PSEUDO_RANDOM };
+                        // Copy previously found slices
+                        auto* tmpBits = new std::string[*splitCount];
 
-			std::uint32_t nextPseudoIndex = 0;
-		}
+                        for (std::size_t i = 0; i < *splitCount - 2; ++i)
+                        {
+                            // If the arraySize is 2, then 0 entries have been initialized
+                            tmpBits[i] = (*splitValues)[i];
+                        }
 
-		float perlinValue(std::uint64_t offset)
-		{
-			offset %= PERLIN_NOISE_COUNT;
-			return perlinValues_[offset];
-		}
+                        delete[] *splitValues;
+                        *splitValues = tmpBits;
 
-		float pseudoRand()
-		{
-			float value = pseudoRandom_[nextPseudoIndex];
-			nextPseudoIndex++;
-			nextPseudoIndex %= PSEUDO_COUNT;
+                        // Add new slice
+                        (*splitValues)[*splitCount - 2] = currentSearchString.substr(0, pos);
+                        currentSearchString = currentSearchString.substr(pos + delimiter.length(),
+                                                                         currentSearchString.length() - pos);
 
-			return value;
-		}
-	}
+                        // Prep for next iteration
+                        pos = currentSearchString.find(delimiter);
+                    }
+                    else
+                    {
+                        // The currentSearchString started with the delimiter, just remove it and run again
+                        currentSearchString = currentSearchString.substr(1, currentSearchString.length() - 1);
+                    }
+                }
 
-	namespace FileUtils
-	{
-		namespace
-		{
-			/**
-			* \brief Custom buffer for building stream objects.
-			*/
-			struct membuf : std::streambuf {
-				membuf(char const* base, std::size_t size) {
-					char* p(const_cast<char*>(base));
-					this->setg(p, p, p + size);
-				}
-			protected:
-				pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override
-				{
-					if (dir == std::ios_base::cur)
-						gbump(static_cast<std::int32_t>(off));
-					else if (dir == std::ios_base::end)
-						setg(eback(), egptr() + off, egptr());
-					else if (dir == std::ios_base::beg)
-						setg(eback(), eback() + off, egptr());
-					return gptr() - eback();
-				}
-			};
-			/**
-			* \brief Custom stream type for storing zip data.
-			*/
-			struct imemstream : virtual membuf, std::istream {
-				imemstream(char const* base, std::size_t size)
-					: membuf(base, size)
-					, std::istream(static_cast<std::streambuf*>(this)) {
-				}
-			};
-		}
+                // Add the remaining string as the last entry in the array
+                (*splitValues)[*splitCount - 1] = currentSearchString;
+            }
+            else if (!delimiter.empty())
+            {
+                *splitValues = new std::string[1]{str};
+                *splitCount = 1;
+            }
+            else
+            {
+                *splitValues = nullptr;
+                *splitCount = 0;
+            }
+        }
 
-		bool getFileListFromArchive(const std::string& archivePath, std::unordered_set<std::string>* files)
-		{
-			struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
+        void split(
+                const std::string& str,
+                const std::string& delimiter,
+                std::string** splitValues,
+                std::uint32_t* splitCount,
+                bool excludeNull)
+        {
+            split(str, delimiter, 0, splitValues, splitCount, excludeNull);
+        }
+    }
 
-			if (zip != nullptr)
-			{
-				std::int32_t n = zip_entries_total(zip);
+    namespace RandomUtils
+    {
+        namespace
+        {
+            float perlinValues_[] = {PERLIN_NOISE};
+            float pseudoRandom_[] = {PSEUDO_RANDOM};
 
-				if (n > -1)
-				{
-					if (files == nullptr)
-					{
-						files = new std::unordered_set<std::string>{};
-					}
+            std::uint32_t nextPseudoIndex = 0;
+        }
 
-					for (std::int32_t i = 0; i < n; ++i)
-					{
-						zip_entry_openbyindex(zip, i);
-						{
-							files->insert(zip_entry_name(zip));
-						}
-					}
+        float perlinValue(std::uint64_t offset)
+        {
+            offset %= PERLIN_NOISE_COUNT;
+            return perlinValues_[offset];
+        }
 
-					return true;
-				}
-				else
-				{
-					LOGGER_ERROR("Error reading files from archive '" + archivePath + "'");
-				}
-			}
-			else
-			{
-				LOGGER_ERROR("Error reading archive '" + archivePath + "'");
-			}
+        float pseudoRand()
+        {
+            float value = pseudoRandom_[nextPseudoIndex];
+            nextPseudoIndex++;
+            nextPseudoIndex %= PSEUDO_COUNT;
 
-			return false;
-		}
+            return value;
+        }
+    }
 
-		bool getContentsFromArchivedFile(
-		        const std::string& archivePath,
-		        const std::string& filePath,
-		        std::int8_t** buffer,
-		        std::size_t* bufferSize)
-		{
-			bool success = false;
+    namespace FileUtils
+    {
+        namespace
+        {
+            /**
+            * \brief Custom buffer for building stream objects.
+            */
+            struct membuf : std::streambuf
+            {
+                membuf(char const* base, std::size_t size)
+                {
+                    char* p(const_cast<char*>(base));
+                    this->setg(p, p, p + size);
+                }
 
-			struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
-			{
-				if (zip != nullptr)
-				{
-					zip_entry_open(zip, filePath.c_str());
-					{
-						if (zip != nullptr)
-						{
-							if (zip_entry_read(zip, (void**)buffer, bufferSize) >= 0)
-							{
-								success = true;
-							}
-						}
-						else
-						{
-							LOGGER_ERROR("Error reading file '" + filePath + "' from archive '" + archivePath + "'");
-						}
-					}
-				}
-				else
-				{
-					LOGGER_ERROR("Error reading archive '" + archivePath + "'");
-				}
-			}
+            protected:
+                pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override
+                {
+                    if (dir == std::ios_base::cur)
+                        gbump(static_cast<std::int32_t>(off));
+                    else if (dir == std::ios_base::end)
+                        setg(eback(), egptr() + off, egptr());
+                    else if (dir == std::ios_base::beg)
+                        setg(eback(), eback() + off, egptr());
+                    return gptr() - eback();
+                }
+            };
 
-			zip_close(zip);
+            /**
+            * \brief Custom stream type for storing zip data.
+            */
+            struct imemstream : virtual membuf, std::istream
+            {
+                imemstream(char const* base, std::size_t size)
+                        : membuf(base, size), std::istream(static_cast<std::streambuf*>(this))
+                {
+                }
+            };
+        }
 
-			return success;
-		}
+        bool getFileListFromArchive(const std::string& archivePath, std::unordered_set<std::string>* files)
+        {
+            struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
 
-		bool getStreamFromArchivedFile(
-		        const std::string& archivePath,
-		        const std::string& filePath,
-		        std::istream** stream)
-		{
-			bool success = true;
-			std::int8_t* buffer = nullptr;
-			std::size_t bufferSize = 0;
+            if (zip != nullptr)
+            {
+                std::int32_t n = zip_entries_total(zip);
 
-			if (getContentsFromArchivedFile(archivePath, filePath, &buffer, &bufferSize))
-			{
-				*stream = new imemstream((char*)buffer, bufferSize);
-			}
-			else
-			{
-				success = false;
-				LOGGER_ERROR("Failed to read contents of '" + archivePath + "/" + filePath + "'");
-			}
+                if (n > -1)
+                {
+                    if (files == nullptr)
+                    {
+                        files = new std::unordered_set<std::string>{};
+                    }
 
-			return success;
-		}
-	}
+                    for (std::int32_t i = 0; i < n; ++i)
+                    {
+                        zip_entry_openbyindex(zip, i);
+                        {
+                            files->insert(zip_entry_name(zip));
+                        }
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    LOGGER_ERROR("Error reading files from archive '" + archivePath + "'");
+                }
+            }
+            else
+            {
+                LOGGER_ERROR("Error reading archive '" + archivePath + "'");
+            }
+
+            return false;
+        }
+
+        bool getContentsFromArchivedFile(
+                const std::string& archivePath,
+                const std::string& filePath,
+                std::int8_t** buffer,
+                std::size_t* bufferSize)
+        {
+            bool success = false;
+
+            struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
+            {
+                if (zip != nullptr)
+                {
+                    zip_entry_open(zip, filePath.c_str());
+                    {
+                        if (zip != nullptr)
+                        {
+                            if (zip_entry_read(zip, (void**) buffer, bufferSize) >= 0)
+                            {
+                                success = true;
+                            }
+                        }
+                        else
+                        {
+                            LOGGER_ERROR("Error reading file '" + filePath + "' from archive '" + archivePath + "'");
+                        }
+                    }
+                }
+                else
+                {
+                    LOGGER_ERROR("Error reading archive '" + archivePath + "'");
+                }
+            }
+
+            zip_close(zip);
+
+            return success;
+        }
+
+        bool getStreamFromArchivedFile(
+                const std::string& archivePath,
+                const std::string& filePath,
+                std::istream** stream)
+        {
+            bool success = true;
+            std::int8_t* buffer = nullptr;
+            std::size_t bufferSize = 0;
+
+            if (getContentsFromArchivedFile(archivePath, filePath, &buffer, &bufferSize))
+            {
+                *stream = new imemstream((char*) buffer, bufferSize);
+            }
+            else
+            {
+                success = false;
+                LOGGER_ERROR("Failed to read contents of '" + archivePath + "/" + filePath + "'");
+            }
+
+            return success;
+        }
+    }
 }

@@ -19,7 +19,8 @@ namespace PB
                 std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes
         );
 
-        std::unordered_map<std::string, Keyframe> getFrames(std::uint8_t frame, std::unordered_map<std::string, BoneMap> bones) const override;
+        std::unordered_map<std::string, Keyframe>
+        getFrames(std::uint8_t frame, std::unordered_map<std::string, BoneMap> bones) const override;
 
         std::uint8_t getFps() const override;
 
@@ -39,14 +40,14 @@ namespace PB
     class Animator : public IAnimator
     {
     public:
-        explicit Animator(IAnimation *animation);
+        explicit Animator(IAnimation* animation);
 
         void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) override;
 
         std::unordered_map<std::string, mat4> getBoneTransformations() const override;
 
     private:
-        IAnimation *animation_;
+        IAnimation* animation_;
         float sequenceTime_ = 0;
         float sequenceDuration_;
         std::unordered_map<std::string, mat4> boneTransformations_;
@@ -58,12 +59,12 @@ namespace PB
     public:
         explicit AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary);
 
-        bool load(const std::string &assetPath) override;
+        bool load(const std::string& assetPath) override;
 
-        std::unique_ptr<IAnimator> get(const std::string &animationName) const override;
+        std::unique_ptr<IAnimator> get(const std::string& animationName) const override;
 
     private:
-        std::unordered_map<std::string, IAnimation *> animations_{};
+        std::unordered_map<std::string, IAnimation*> animations_{};
         std::shared_ptr<AssetLibrary> assetLibrary_;
     };
 }

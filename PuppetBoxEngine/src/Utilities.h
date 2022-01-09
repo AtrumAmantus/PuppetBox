@@ -20,7 +20,7 @@ namespace PB
         *
         * \param Pointer to the original string to trim.
         */
-        void trim(std::string *str);
+        void trim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the beginning and the end of the string, returning a new string.
@@ -37,7 +37,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void trim(std::string *str, const char &c);
+        void trim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the beginning and the end of the string, returning a new string.
@@ -47,14 +47,14 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string trim(std::string str, const char &c);
+        std::string trim(std::string str, const char& c);
 
         /**
         * \brief Trims all whitespace from the beginning of the string, altering the original string.
         *
         * \param str	Pointer to the original string to trim.
         */
-        void ltrim(std::string *str);
+        void ltrim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the beginning of the string, returning a new string.
@@ -71,7 +71,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void ltrim(std::string *str, const char &c);
+        void ltrim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the beginning of the string, returning a new string.
@@ -81,14 +81,14 @@ namespace PB
         *
         * \return  The new trimmed string.
         */
-        std::string ltrim(std::string str, const char &c);
+        std::string ltrim(std::string str, const char& c);
 
         /**
         * \brief Trims all whitespace from the end of the string, altering the original string.
         *
         * \param str	Pointer to the original string to trim.
         */
-        void rtrim(std::string *str);
+        void rtrim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the end of the string, returning a new string.
@@ -105,7 +105,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void rtrim(std::string *str, const char &c);
+        void rtrim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the end of the string, returning a new string.
@@ -115,7 +115,7 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string rtrim(std::string str, const char &c);
+        std::string rtrim(std::string str, const char& c);
 
         /**
         * \brief Determines if the given string starts with the given prefix.
@@ -125,7 +125,7 @@ namespace PB
         *
         * \return True if the given string starts with the given prefix, False otherwise.
         */
-        bool startsWith(const std::string &str, const std::string &prefix);
+        bool startsWith(const std::string& str, const std::string& prefix);
 
         /**
         * \brief Splits the given string by whitespace values, with an option to allow or disallow null values
@@ -138,9 +138,9 @@ namespace PB
         * in the original string, otherwise null values will be omitted.
         */
         void split(
-                const std::string &str,
-                std::string **splitValues,
-                std::uint32_t *splitCount,
+                const std::string& str,
+                std::string** splitValues,
+                std::uint32_t* splitCount,
                 bool excludeNull = true);
 
         /**
@@ -156,11 +156,11 @@ namespace PB
         * in the original string, otherwise null values will be omitted.
         */
         void split(
-                const std::string &str,
-                const std::string &delimiter,
+                const std::string& str,
+                const std::string& delimiter,
                 std::uint32_t splitLimit,
-                std::string **splitValues,
-                std::uint32_t *splitCount,
+                std::string** splitValues,
+                std::uint32_t* splitCount,
                 bool excludeNull = true);
 
         /**
@@ -175,10 +175,10 @@ namespace PB
         * in the original string, otherwise null values will be omitted.
         */
         void split(
-                const std::string &str,
-                const std::string &delimiter,
-                std::string **splitValues,
-                std::uint32_t *splitCount,
+                const std::string& str,
+                const std::string& delimiter,
+                std::string** splitValues,
+                std::uint32_t* splitCount,
                 bool excludeNull = true);
     }
 
@@ -197,7 +197,7 @@ namespace PB
         * \return The value parsed from the string, or the default value if it could not be parsed.
         */
         template<typename T>
-        T parseValue(const char *numberAsString, T defaultValue, bool *error)
+        T parseValue(const char* numberAsString, T defaultValue, bool* error)
         {
             T value;
 
@@ -254,7 +254,7 @@ namespace PB
         *
         * \return True if the list was read successfully, False otherwise.
         */
-        bool getFileListFromArchive(const std::string &archivePath, std::unordered_set<std::string> *files);
+        bool getFileListFromArchive(const std::string& archivePath, std::unordered_set<std::string>* files);
 
         /**
         * \brief Gets the raw bytes of a file inside an archive.
@@ -267,10 +267,10 @@ namespace PB
         * \return True if the contents were read successfully, False otherwise.
         */
         bool getContentsFromArchivedFile(
-                const std::string &archivePath,
-                const std::string &filePath,
-                std::int8_t **buffer,
-                std::size_t *bufferSize);
+                const std::string& archivePath,
+                const std::string& filePath,
+                std::int8_t** buffer,
+                std::size_t* bufferSize);
 
         /**
         * \brief Gets a stream object for the contents of a given file in the given archive.
@@ -282,8 +282,8 @@ namespace PB
         * \return True if the file was read and stream created successfully, False otherwise.
         */
         bool getStreamFromArchivedFile(
-                const std::string &archivePath,
-                const std::string &filePath,
-                std::istream **stream);
+                const std::string& archivePath,
+                const std::string& filePath,
+                std::istream** stream);
     }
 }

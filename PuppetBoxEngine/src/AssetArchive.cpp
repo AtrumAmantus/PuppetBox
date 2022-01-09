@@ -21,7 +21,7 @@ namespace PB
         * \return Either the value from the map referenced with the given key, or the given default value if the key did not exist.
         */
         std::string
-        defaultIfNotInMap(const std::string &propertyName, std::unordered_map<std::string, std::string> properties,
+        defaultIfNotInMap(const std::string& propertyName, std::unordered_map<std::string, std::string> properties,
                           std::string defaultValue)
         {
             if (properties.find(propertyName) != properties.end())
@@ -41,10 +41,10 @@ namespace PB
         *
         * \return Either the value from the PropertyTree referenced with the given key, or the given default value if the key did not exist.
         */
-        std::string defaultIfNotInTree(std::string propertyName, PropertyTree &pTree, std::string defaultValue)
+        std::string defaultIfNotInTree(std::string propertyName, PropertyTree& pTree, std::string defaultValue)
         {
             std::string value;
-            PropertyTree *childNode = pTree.get(std::move(propertyName));
+            PropertyTree* childNode = pTree.get(std::move(propertyName));
 
             if (childNode != nullptr)
             {
@@ -67,13 +67,13 @@ namespace PB
         *
         * \return The Model2D object built from the given properties map.
         */
-        ModelData2D mapToModel2D(PropertyTree &rootProperties, bool *error)
+        ModelData2D mapToModel2D(PropertyTree& rootProperties, bool* error)
         {
             ModelData2D model{};
 
             if (rootProperties.has("scale"))
             {
-                PropertyTree *scaleProperties = rootProperties.get("scale");
+                PropertyTree* scaleProperties = rootProperties.get("scale");
                 model.scale.x = NumberUtils::parseValue(defaultIfNotInTree("x", *scaleProperties, "0").c_str(), 0,
                                                         error);
                 model.scale.y = NumberUtils::parseValue(defaultIfNotInTree("y", *scaleProperties, "0").c_str(), 0,
@@ -82,7 +82,7 @@ namespace PB
 
             if (rootProperties.has("offset"))
             {
-                PropertyTree *offsetProperties = rootProperties.get("offset");
+                PropertyTree* offsetProperties = rootProperties.get("offset");
                 model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0,
                                                          error);
                 model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0,
@@ -93,12 +93,12 @@ namespace PB
                 model.offset.z *= 0.1;
             }
 
-            PropertyTree *meshProperties = rootProperties.get("mesh");
+            PropertyTree* meshProperties = rootProperties.get("mesh");
             //TODO: Make this not hardcoded.
             model.mesh.type = SPRITE;
             model.mesh.materialPath = meshProperties->get("material")->value();
 
-            PropertyTree *meshOffsetProperties = meshProperties->get("offset");
+            PropertyTree* meshOffsetProperties = meshProperties->get("offset");
             model.mesh.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *meshOffsetProperties, "0").c_str(),
                                                           0, error);
             model.mesh.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *meshOffsetProperties, "0").c_str(),
@@ -108,9 +108,9 @@ namespace PB
 
             if (rootProperties.has("children"))
             {
-                PropertyTree *childrenProperties = rootProperties.get("children");
+                PropertyTree* childrenProperties = rootProperties.get("children");
 
-                for (auto &childName: childrenProperties->children())
+                for (auto& childName: childrenProperties->children())
                 {
                     ModelData2D child = mapToModel2D(*childrenProperties->get(childName), error);
 
@@ -135,11 +135,11 @@ namespace PB
         *
         * \return The Material object built from the given properties map.
         */
-        Material mapToMaterial(PropertyTree &materialProperties, bool *error)
+        Material mapToMaterial(PropertyTree& materialProperties, bool* error)
         {
             Material material;
 
-            PropertyTree *diffuseProperties = materialProperties.get("diffuse");
+            PropertyTree* diffuseProperties = materialProperties.get("diffuse");
             std::string image = defaultIfNotInTree("image", *diffuseProperties, "");
             std::uint32_t width = NumberUtils::parseValue(defaultIfNotInTree("width", *diffuseProperties, "0").c_str(),
                                                           0, error);
@@ -171,13 +171,13 @@ namespace PB
         }
 
         std::unordered_map<std::string, BoneMap>
-        mapToBones(PropertyTree *pTree, const std::string &parentName, bool *error)
+        mapToBones(PropertyTree* pTree, const std::string& parentName, bool* error)
         {
             std::unordered_map<std::string, BoneMap> boneMap{};
 
             if (!pTree->children().empty())
             {
-                for (auto &p: pTree->children())
+                for (auto& p: pTree->children())
                 {
                     auto childMap = mapToBones(pTree->get(p), pTree->name(), error);
                     boneMap.insert(childMap.begin(), childMap.end());
@@ -258,7 +258,7 @@ namespace PB
         {
             std::vector<Keyframe> keyframes{};
 
-            for (auto& childName : pTree->children())
+            for (auto& childName: pTree->children())
             {
                 if (!*error)
                 {
@@ -280,13 +280,13 @@ namespace PB
             return keyframes;
         }
 
-        std::unordered_map<std::uint8_t, std::vector<Keyframe>> mapToKeyframes(PropertyTree *pTree, bool *error)
+        std::unordered_map<std::uint8_t, std::vector<Keyframe>> mapToKeyframes(PropertyTree* pTree, bool* error)
         {
             std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes{};
 
             if (!pTree->children().empty())
             {
-                for (auto& childName : pTree->children())
+                for (auto& childName: pTree->children())
                 {
                     if (!*error)
                     {
@@ -323,7 +323,7 @@ namespace PB
         *
         * \return The Material object built from the given properties map.
         */
-        ShaderProgram mapToShaderProgram(PropertyTree &shaderProperties, bool *error)
+        ShaderProgram mapToShaderProgram(PropertyTree& shaderProperties, bool* error)
         {
             ShaderProgram shaderProgram{};
 
@@ -350,9 +350,9 @@ namespace PB
         * \return The filename for the given virtual asset path if found, or a blank string otherwise.
         */
         std::string fileNameOfAsset(
-                const std::string &assetPath,
-                std::unordered_map<std::string, std::string> &archiveAssetIds,
-                std::unordered_set<std::string> &archiveAssets
+                const std::string& assetPath,
+                std::unordered_map<std::string, std::string>& archiveAssetIds,
+                std::unordered_set<std::string>& archiveAssets
         )
         {
             if (archiveAssetIds.find(assetPath) != archiveAssetIds.end())
@@ -385,7 +385,7 @@ namespace PB
         *
         * \return True if the properties were successfully read from the stream, False otherwise.
         */
-        bool getPropertiesFromStream(std::istream *stream, std::unordered_map<std::string, std::string> *properties)
+        bool getPropertiesFromStream(std::istream* stream, std::unordered_map<std::string, std::string>* properties)
         {
             std::string line;
             std::uint32_t lineNumber = 0;
@@ -395,7 +395,7 @@ namespace PB
                 lineNumber++;
                 StringUtils::trim(&line);
 
-                std::string *splitValues;
+                std::string* splitValues;
                 std::uint32_t splitCount;
 
                 StringUtils::split(line, &splitValues, &splitCount);
@@ -424,7 +424,7 @@ namespace PB
         *
         * \return The number of indentations prefixed on the given string.
         */
-        std::uint32_t countIndents(const std::string &line)
+        std::uint32_t countIndents(const std::string& line)
         {
             std::uint32_t indentCount = 0;
 
@@ -444,12 +444,12 @@ namespace PB
         *
         * \return True if the data was successfully parsed, False otheriwse.
         */
-        bool getPropertyTreeFromStream(std::istream *stream, PropertyTree *root)
+        bool getPropertyTreeFromStream(std::istream* stream, PropertyTree* root)
         {
             bool success = true;
             std::string line;
             std::uint32_t lineNumber = 0;
-            PropertyTree *currentNode = root;
+            PropertyTree* currentNode = root;
             std::uint32_t indentLevel;
             std::uint32_t minIndents = 0;
             std::uint32_t maxIndents = 0;
@@ -502,7 +502,7 @@ namespace PB
                             }
                             else
                             {
-                                std::string *splitValues;
+                                std::string* splitValues;
                                 std::uint32_t splitCount;
 
                                 StringUtils::split(line, ":", 1, &splitValues, &splitCount);
@@ -570,7 +570,7 @@ namespace PB
 
         success = FileUtils::getFileListFromArchive(archivePath(), &archiveAssets_);
 
-        std::istream *stream = nullptr;
+        std::istream* stream = nullptr;
         success = success && FileUtils::getStreamFromArchivedFile(archivePath(), ".manifest", &stream);
         success = success && getPropertiesFromStream(stream, &archiveAssetIds_);
 
@@ -583,7 +583,7 @@ namespace PB
         return success;
     }
 
-    bool AssetArchive::hasAsset(const std::string &assetPath)
+    bool AssetArchive::hasAsset(const std::string& assetPath)
     {
         return !assetPath.empty() && archiveAssets_.find(assetPath) != archiveAssets_.end();
     }
@@ -593,21 +593,21 @@ namespace PB
         return archiveAssets_.size();
     }
 
-    std::string AssetArchive::loadAsciiData(const std::string &assetPath, bool *error)
+    std::string AssetArchive::loadAsciiData(const std::string& assetPath, bool* error)
     {
         std::string data;
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
         if (hasAsset(fileName))
         {
-            std::int8_t *buffer = nullptr;
+            std::int8_t* buffer = nullptr;
             std::size_t bufferSize = 0;
 
             *error = *error || !FileUtils::getContentsFromArchivedFile(archivePath(), fileName, &buffer, &bufferSize);
 
             if (!*error)
             {
-                data = std::string((char *) buffer, bufferSize);
+                data = std::string((char*) buffer, bufferSize);
             }
 
             delete buffer;
@@ -621,7 +621,7 @@ namespace PB
         return data;
     }
 
-    ShaderProgram AssetArchive::loadShaderAsset(const std::string &assetPath, bool *error)
+    ShaderProgram AssetArchive::loadShaderAsset(const std::string& assetPath, bool* error)
     {
         ShaderProgram shaderProgram{assetPath};
 
@@ -629,7 +629,7 @@ namespace PB
 
         if (hasAsset(fileName))
         {
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             PropertyTree propertyData{"shader"};
 
@@ -655,14 +655,14 @@ namespace PB
     }
 
     bool
-    AssetArchive::loadAnimationSetAsset(const std::string &assetPath, std::unordered_map<std::string, std::string> &map)
+    AssetArchive::loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, std::string>& map)
     {
         bool error;
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
         if (hasAsset(fileName))
         {
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             PropertyTree propertyData{"animations"};
 
@@ -673,7 +673,7 @@ namespace PB
 
             if (!error)
             {
-                for (auto &childName: propertyData.children())
+                for (auto& childName: propertyData.children())
                 {
                     map.insert(
                             std::pair<std::string, std::string>(childName, propertyData.get(childName)->value())
@@ -694,15 +694,15 @@ namespace PB
         return !error;
     }
 
-    bool AssetArchive::loadAnimationAsset(const std::string &name, const std::string &assetPath,
-                                          std::unordered_map<std::string, IAnimation *> &map)
+    bool AssetArchive::loadAnimationAsset(const std::string& name, const std::string& assetPath,
+                                          std::unordered_map<std::string, IAnimation*>& map)
     {
         bool error;
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
         if (hasAsset(fileName))
         {
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             PropertyTree propertyData{"animations"};
 
@@ -721,13 +721,15 @@ namespace PB
 
                 if (!error)
                 {
-                    std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes = mapToKeyframes(propertyData.get("keyframes"),
-                                                                                          &error);
+                    std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes = mapToKeyframes(
+                            propertyData.get("keyframes"),
+                            &error);
 
                     if (!error)
                     {
                         map.insert(
-                                std::pair<std::string, IAnimation *>(name, new Animation(boneMap, fps, length, keyframes))
+                                std::pair<std::string, IAnimation*>(name,
+                                                                    new Animation(boneMap, fps, length, keyframes))
                         );
                     }
                 }
@@ -750,7 +752,7 @@ namespace PB
         return !error;
     }
 
-    ImageData AssetArchive::loadImageAsset(const std::string &assetPath, bool *error)
+    ImageData AssetArchive::loadImageAsset(const std::string& assetPath, bool* error)
     {
         ImageData data{};
 
@@ -760,7 +762,7 @@ namespace PB
         {
             stbi_set_flip_vertically_on_load(true);
 
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             if (FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream))
             {
@@ -769,12 +771,12 @@ namespace PB
                 stream->clear();
                 stream->seekg(0, std::istream::beg);
 
-                char *buffer = new char[streamLength];
+                char* buffer = new char[streamLength];
 
                 stream->read(buffer, streamLength);
 
                 //TODO: Check if streamLength is too long, expecting only 32bit value
-                data.bufferData = stbi_load_from_memory((std::uint8_t *) buffer, streamLength, &data.width,
+                data.bufferData = stbi_load_from_memory((std::uint8_t*) buffer, streamLength, &data.width,
                                                         &data.height, &data.numChannels, 0);
             }
             else
@@ -794,13 +796,13 @@ namespace PB
         return data;
     }
 
-    Material AssetArchive::loadMaterialAsset(const std::string &assetPath, bool *error)
+    Material AssetArchive::loadMaterialAsset(const std::string& assetPath, bool* error)
     {
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
         if (hasAsset(fileName))
         {
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             PropertyTree propertyData{"material"};
 
@@ -822,13 +824,13 @@ namespace PB
         return {};
     }
 
-    ModelData2D AssetArchive::load2DModelAsset(const std::string &assetPath, bool *error)
+    ModelData2D AssetArchive::load2DModelAsset(const std::string& assetPath, bool* error)
     {
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
         if (hasAsset(fileName))
         {
-            std::istream *stream = nullptr;
+            std::istream* stream = nullptr;
 
             PropertyTree propertyData{"model"};
 

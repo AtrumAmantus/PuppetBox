@@ -12,14 +12,14 @@ namespace PB
 
     }
 
-	OpenGLModel::OpenGLModel(
+    OpenGLModel::OpenGLModel(
             std::unordered_map<std::string, BoneMap> bones,
             std::unique_ptr<IAnimator> animator,
             std::unordered_map<std::string, RenderedMesh*> renderedMeshes
-            ) : bones_(std::move(bones)), animator_(std::move(animator)), renderedMeshes_(std::move(renderedMeshes))
-	{
+    ) : bones_(std::move(bones)), animator_(std::move(animator)), renderedMeshes_(std::move(renderedMeshes))
+    {
 
-	}
+    }
 
     void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator)
     {
@@ -34,9 +34,9 @@ namespace PB
         }
     }
 
-	void OpenGLModel::render(mat3 transform) const
-	{
-        for(auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
+    void OpenGLModel::render(mat3 transform) const
+    {
+        for (auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
         {
             Bone* bones = nullptr;
 
@@ -51,12 +51,12 @@ namespace PB
             {
                 Bone bone{};
                 bone.translation = mat4::eye();
-                bones = new Bone[] {bone};
+                bones = new Bone[]{bone};
             }
 
             itr->second->render(transform, bones, 1);
         }
-	}
+    }
 
     Bone* OpenGLModel::buildBoneArray(const std::string& boneName, const std::vector<BoneMap>& boneTransforms) const
     {

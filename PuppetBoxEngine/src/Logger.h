@@ -20,14 +20,17 @@ namespace PB
         {
             log("DEBUG", message, filePath, line);
         }
+
         static void warn(const std::string& message, const std::string& filePath, std::uint32_t line)
         {
             log("WARN", message, filePath, line);
         }
+
         static void error(const std::string& message, const std::string& filePath, std::uint32_t line)
         {
             log("ERROR", message, filePath, line);
         }
+
     private:
         static void log(
                 const std::string& level,
@@ -40,6 +43,7 @@ namespace PB
             const std::string fileName = getFileName(filePath);
             std::cout << now << " | " << level << " | " << fileName << " (" << line << "): " << message << std::endl;
         };
+
         static std::string getFileName(const std::string& filePath)
         {
             std::string fileName;
