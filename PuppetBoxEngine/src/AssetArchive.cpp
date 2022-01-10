@@ -41,10 +41,10 @@ namespace PB
         *
         * \return Either the value from the PropertyTree referenced with the given key, or the given default value if the key did not exist.
         */
-        std::string defaultIfNotInTree(std::string propertyName, PropertyTree& pTree, std::string defaultValue)
+        std::string defaultIfNotInTree(const std::string& propertyName, PropertyTree& pTree, std::string defaultValue)
         {
             std::string value;
-            PropertyTree* childNode = pTree.get(std::move(propertyName));
+            PropertyTree* childNode = pTree.get(propertyName);
 
             if (childNode != nullptr)
             {
@@ -74,20 +74,20 @@ namespace PB
             if (rootProperties.has("scale"))
             {
                 PropertyTree* scaleProperties = rootProperties.get("scale");
-                model.scale.x = NumberUtils::parseValue(defaultIfNotInTree("x", *scaleProperties, "0").c_str(), 0,
+                model.scale.x = NumberUtils::parseValue(defaultIfNotInTree("x", *scaleProperties, "0").c_str(), 0.0f,
                                                         error);
-                model.scale.y = NumberUtils::parseValue(defaultIfNotInTree("y", *scaleProperties, "0").c_str(), 0,
+                model.scale.y = NumberUtils::parseValue(defaultIfNotInTree("y", *scaleProperties, "0").c_str(), 0.0f,
                                                         error);
             }
 
             if (rootProperties.has("offset"))
             {
                 PropertyTree* offsetProperties = rootProperties.get("offset");
-                model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0,
+                model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0.0f,
                                                          error);
-                model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0,
+                model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0.0f,
                                                          error);
-                model.offset.z = NumberUtils::parseValue(defaultIfNotInTree("z", *offsetProperties, "0").c_str(), 0,
+                model.offset.z = NumberUtils::parseValue(defaultIfNotInTree("z", *offsetProperties, "0").c_str(), 0.0f,
                                                          error);
                 //TODO: Fix this hack
                 model.offset.z *= 0.1;
@@ -100,9 +100,9 @@ namespace PB
 
             PropertyTree* meshOffsetProperties = meshProperties->get("offset");
             model.mesh.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *meshOffsetProperties, "0").c_str(),
-                                                          0, error);
+                                                          0.0f, error);
             model.mesh.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *meshOffsetProperties, "0").c_str(),
-                                                          0, error);
+                                                          0.0f, error);
 
             model.name = rootProperties.name();
 
@@ -201,15 +201,15 @@ namespace PB
                 auto position = pTree->get("position");
                 keyframe.position.x = NumberUtils::parseValue(
                         defaultIfNotInTree("x", *position, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
                 keyframe.position.y = NumberUtils::parseValue(
                         defaultIfNotInTree("y", *position, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
                 keyframe.position.z = NumberUtils::parseValue(
                         defaultIfNotInTree("z", *position, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
             }
 
@@ -218,15 +218,15 @@ namespace PB
                 auto rotation = pTree->get("rotation");
                 keyframe.rotation.x = NumberUtils::parseValue(
                         defaultIfNotInTree("x", *rotation, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
                 keyframe.rotation.y = NumberUtils::parseValue(
                         defaultIfNotInTree("y", *rotation, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
                 keyframe.rotation.z = NumberUtils::parseValue(
                         defaultIfNotInTree("z", *rotation, "0").c_str(),
-                        0, error
+                        0.0f, error
                 );
             }
 
@@ -235,15 +235,15 @@ namespace PB
                 auto scale = pTree->get("scale");
                 keyframe.scale.x = NumberUtils::parseValue(
                         defaultIfNotInTree("x", *scale, "1").c_str(),
-                        1, error
+                        1.0f, error
                 );
                 keyframe.scale.y = NumberUtils::parseValue(
                         defaultIfNotInTree("y", *scale, "1").c_str(),
-                        1, error
+                        1.0f, error
                 );
                 keyframe.scale.z = NumberUtils::parseValue(
                         defaultIfNotInTree("z", *scale, "1").c_str(),
-                        1, error
+                        1.0f, error
                 );
             }
             else
@@ -331,7 +331,7 @@ namespace PB
             shaderProgram.fragmentShaderPath = defaultIfNotInTree("fragment", shaderProperties, "");
             shaderProgram.geometryShaderPath = defaultIfNotInTree("geometry", shaderProperties, "");
 
-            if (shaderProgram.vertexShaderPath == "" || shaderProgram.fragmentShaderPath == "")
+            if (shaderProgram.vertexShaderPath.empty() || shaderProgram.fragmentShaderPath.empty())
             {
                 *error = true;
                 LOGGER_ERROR("Failed to load shader program, invalid vertex/fragment shader");

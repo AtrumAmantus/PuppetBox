@@ -10,11 +10,11 @@ keyframes:
     head:
       position:
         x: 0
-        y: 10
+        y: 13
         z: 0.2
   15:
     head:
       position:
         x: 0
-        y: 16
+        y: 17
         z: 0.2

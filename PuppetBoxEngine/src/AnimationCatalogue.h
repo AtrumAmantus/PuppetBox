@@ -20,13 +20,13 @@ namespace PB
         );
 
         std::unordered_map<std::string, Keyframe>
-        getFrames(std::uint8_t frame, std::unordered_map<std::string, BoneMap> bones) const override;
+        getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const override;
 
         std::uint8_t getFps() const override;
 
         std::uint8_t getLength() const override;
 
-    private:  //TODO: Figure out where to load these properties, I need to store bone offset data for the bone transformation matrices.
+    private:
         const std::unordered_map<std::string, BoneMap> boneMap_{};
         const std::uint8_t fps_;
         const std::uint8_t length_;
@@ -51,7 +51,6 @@ namespace PB
         float sequenceTime_ = 0;
         float sequenceDuration_;
         std::unordered_map<std::string, mat4> boneTransformations_;
-        std::unordered_map<std::string, Keyframe> currentKeyframes_{};
     };
 
     class AnimationCatalogue : public IAnimationCatalogue

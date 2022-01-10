@@ -39,7 +39,7 @@ namespace PB
     {
     public:
         virtual std::unordered_map<std::string, Keyframe>
-        getFrames(std::uint8_t frame, std::unordered_map<std::string, BoneMap> bones) const = 0;
+        getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const = 0;
 
         virtual std::uint8_t getFps() const = 0;
 
