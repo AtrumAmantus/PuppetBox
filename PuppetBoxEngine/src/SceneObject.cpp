@@ -1,4 +1,5 @@
 #include <string>
+#include <utility>
 
 #include "puppetbox/SceneObject.h"
 
@@ -11,8 +12,8 @@ namespace PB
 
     }
 
-    SceneObject::SceneObject(vec3 baseScale, IModel* model) :
-            baseScale_(baseScale), model_(model)
+    SceneObject::SceneObject(std::string id, vec3 baseScale, IModel* model) :
+            id_(std::move(id)), baseScale_(baseScale), model_(model)
     {
 
     }
@@ -68,5 +69,20 @@ namespace PB
                 scale.y * baseScale_.y,
                 scale.z * baseScale_.z
         };
+    }
+
+    std::string SceneObject::getId() const
+    {
+        return id_;
+    }
+
+    bool SceneObject::operator==(const SceneObject& rhs) const
+    {
+        return id_ == rhs.id_;
+    }
+
+    bool SceneObject::operator!=(const SceneObject& rhs) const
+    {
+        return !(rhs == *this);
     }
 }

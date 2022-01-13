@@ -13,5 +13,5 @@ protected:
     void updates(float deltaTime) override
     {
 
-    };
+    }
 };

@@ -5,6 +5,7 @@
 
 #include "OpenGLModel.h"
 #include "Rendered2DMesh.h"
+#include "Utilities.h"
 
 namespace PB
 {
@@ -455,15 +456,14 @@ namespace PB
                 * Make a copy of the previous SceneObject property data so that
                 * it can be restored after a new instance is made.
                 */
-                std::string id = sceneObject->id;
                 vec3 position = sceneObject->position;
                 vec3 rotation = sceneObject->rotation;
                 vec3 scale = sceneObject->scale;
                 float speed = sceneObject->speed;
                 vec3 velocity = sceneObject->velocity;
 
-                *sceneObject = SceneObject{vec3{modelData2D.baseScale.x, modelData2D.baseScale.y, 1.0f}, model};
-                sceneObject->id = id;
+                *sceneObject = SceneObject{StringUtils::uuid(),
+                                           vec3{modelData2D.baseScale.x, modelData2D.baseScale.y, 1.0f}, model};
                 sceneObject->position = position;
                 sceneObject->rotation = rotation;
                 sceneObject->scale = scale;

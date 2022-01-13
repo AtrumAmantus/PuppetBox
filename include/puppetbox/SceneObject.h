@@ -47,7 +47,6 @@ namespace PB
         * \brief The max speed of the object.
         */
         float speed = 64.0f;
-        std::string id;
     public:
         /**
         * \brief Default constructor that is typically called by a derived class to create
@@ -62,7 +61,7 @@ namespace PB
         * \param baseScale	The scale values used as a baseline for the object, SceneObject#scale values multiply this.
         * \param model		Pointer to the IModel assets applied to this object.
         */
-        SceneObject(vec3 baseScale, IModel* model);
+        SceneObject(std::string id, vec3 baseScale, IModel* model);
 
         /**
         * \brief Calls updates() and updates model matrices.
@@ -102,6 +101,12 @@ namespace PB
         */
         vec3 actualScale() const;
 
+        std::string getId() const;
+
+        bool operator==(const SceneObject& rhs) const;
+
+        bool operator!=(const SceneObject& rhs) const;
+
     protected:
         /**
         * \brief Update method for consumer defined update logic, called by update().
@@ -110,6 +115,7 @@ namespace PB
         */
         virtual void updates(float deltaTime) {};
     private:
+        std::string id_;
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         IModel* model_ = nullptr;
         std::unique_ptr<IBehavior> behavior_{nullptr};

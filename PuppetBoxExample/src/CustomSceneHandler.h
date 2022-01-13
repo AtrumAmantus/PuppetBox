@@ -38,19 +38,15 @@ public:
 
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
         {
-            myEntity->id = "Fred";
-            myEntity->name = myEntity->id;
+            myEntity->name = "Fred";
             myEntity->position = PB::vec2{100.0f, 50.0f};
             myEntity->setBehavior(PB::AI::Behavior::WANDER);
-//            myEntity->playAnimation(anims.get("walk"), PB::Anim::LOOP);
-            insertIntoMap(myEntity->id, myEntity, entities_);
+            addSceneObject(myEntity);
         }
 
         if (anims->load("Assets1/Animations/BasicHuman"))
         {
             myEntity->playAnimation(anims->get("walk"));
-            //TODO: Use animation
-//            PB::Log.error("Failed to load catalogue");
         }
 
 //		auto* mySprite = new Sprite{};
@@ -62,39 +58,8 @@ public:
 //			insertIntoMap(mySprite->id, mySprite, renderLast_);
 //		}
     };
-
-    void update(float deltaTime) override
-    {
-        processInput();
-
-        for (auto& e: entities_)
-        {
-            e.second->update(deltaTime);
-        }
-
-        for (auto& e: renderLast_)
-        {
-            e.second->update(deltaTime);
-        }
-    };
-
-    void render() override
-    {
-        for (auto& e: entities_)
-        {
-            e.second->render();
-        }
-
-        for (auto& e: renderLast_)
-        {
-            e.second->render();
-        }
-    };
-private:
-    std::unordered_map<std::string, PB::SceneObject*> entities_{};
-    std::unordered_map<std::string, PB::SceneObject*> renderLast_{};
-private:
-    void processInput()
+protected:
+    void processInput() const override
     {
         if (input()->keyboard.isPressed(KEY_ESCAPE))
         {

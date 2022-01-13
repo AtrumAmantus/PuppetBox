@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 #include <ctime>
 #include <sstream>
@@ -180,6 +182,13 @@ namespace PB
                 std::string** splitValues,
                 std::uint32_t* splitCount,
                 bool excludeNull = true);
+
+        /**
+         * \brief Generates a Universally Unique Identifier
+         *
+         * @return A UUID string.
+         */
+        std::string uuid();
     }
 
     /**
