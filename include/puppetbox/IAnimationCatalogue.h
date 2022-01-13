@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../PuppetBox.h"
+#include "puppetbox/TypeDef.h"
 #include "DataStructures.h"
 
 #include <memory>

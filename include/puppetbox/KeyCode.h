@@ -1,6 +1,3 @@
-// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #pragma once
 
 #define KEY_UNKNOWN                0x00    // 0
@@ -168,4 +165,3 @@
 #define KEY_MEDIA_CALC            0xfb    // 251
 
 #define KEY_LAST                KEY_MEDIA_CALC
-#pragma clang diagnostic pop

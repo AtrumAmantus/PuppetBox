@@ -2,13 +2,11 @@
 
 #include <vector>
 
-#include "../PuppetBox.h"
+#include "puppetbox/TypeDef.h"
 #include "AbstractInputProcessor.h"
 
 namespace PB
 {
-    class AbstractInputProcessor;
-
     /**
     * \brief Base class to create derived SceneHandlers for guiding events within a scene.
     */

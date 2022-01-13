@@ -4,18 +4,15 @@
 
 #include <memory>
 
-#include "../PuppetBox.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "IAnimationCatalogue.h"
 #include "IBehavior.h"
+#include "IModel.h"
+#include "TypeDef.h"
 
 namespace PB
 {
-    class IAnimator;
-
-    class IModel;
-
     /**
      * \brief The basic container for renderable objects in a scene.  Derived classes should be used to extend with additional needed attributes
      * such as name, health, etc.

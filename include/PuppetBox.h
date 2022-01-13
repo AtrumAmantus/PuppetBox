@@ -1,28 +1,15 @@
-#pragma warning(disable : 4068) // Unknown pragmas warning
-// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <string>
-
-#ifdef PUPPETBOXENGINE_EXPORTS
-#	define PUPPET_BOX_API __declspec(dllexport)
-#else
-#	define PUPPET_BOX_API __declspec(dllimport)
-#endif
 
 #include "puppetbox/AbstractSceneHandler.h"
 #include "puppetbox/Constants.h"
 #include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
+#include "puppetbox/TypeDef.h"
 
 namespace PB
 {
-    class SceneObject;
-
-    class IAnimationCatalogue;
-
     /**
      * \brief Initialize app context, create window, etc.
      *
@@ -96,4 +83,3 @@ namespace PB
     */
     extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code);
 }
-#pragma clang diagnostic pop

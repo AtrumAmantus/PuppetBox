@@ -9,8 +9,8 @@
 
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/IAnimationCatalogue.h"
+#include "puppetbox/IModel.h"
 
-#include "IModel.h"
 #include "RenderedMesh.h"
 
 namespace PB

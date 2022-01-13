@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-#include "../include/puppetbox/Constants.h"
+#include "Constants.h"
 
 namespace PB
 {

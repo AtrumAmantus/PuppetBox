@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SceneObject.h"
+
 namespace PB
 {
     class SceneObject;

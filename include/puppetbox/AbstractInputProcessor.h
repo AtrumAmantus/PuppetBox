@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "../PuppetBox.h"
 #include "KeyCode.h"
+#include "TypeDef.h"
 
 #define MAX_KEY_CODES        120
 #define MAX_MOUSE_CODES        8

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "puppetbox/DataStructures.h"
+#include "DataStructures.h"
+#include "IAnimationCatalogue.h"
 
 #include <vector>
 

@@ -5,11 +5,11 @@
 #include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
 
+#include "puppetbox/IModel.h"
 #include "AssetArchive.h"
 #include "Logger.h"
 #include "IGfxApi.h"
 #include "ImageReference.h"
-#include "IModel.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "RenderedMesh.h"
