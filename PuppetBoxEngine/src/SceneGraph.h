@@ -9,7 +9,7 @@
 #include "puppetbox/Constants.h"
 #include "puppetbox/DataStructures.h"
 
-#include "Camera.h"
+#include "puppetbox/Camera.h"
 #include "GfxMath.h"
 #include "Logger.h"
 #include "TypeDef.h"
@@ -38,8 +38,14 @@ namespace PB
         */
         void setSceneHandler(AbstractSceneHandler* sceneHandler)
         {
+            if (sceneHandler_ != nullptr)
+            {
+                sceneHandler_->setCamera(nullptr);
+            }
+
             *sceneHandler = AbstractSceneHandler{inputProcessor_};
             sceneHandler_ = sceneHandler;
+            sceneHandler_->setCamera(&camera_);
             sceneHandler_->setUp();
         };
 

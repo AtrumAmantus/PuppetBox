@@ -60,6 +60,9 @@ namespace PB
         std::uint32_t y = 0;
         std::int32_t deltaX = 0;
         std::int32_t deltaY = 0;
+        // Mouse wheel vector, +/- 1
+        std::int32_t wheelXDir = 0;
+        std::int32_t wheelYDir = 0;
     public:
         /**
         * \brief Used to determine if a mouse button is currently down.

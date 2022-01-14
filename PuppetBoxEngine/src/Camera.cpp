@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "puppetbox/Camera.h"
 #include "GfxMath.h"
 
 namespace PB
@@ -20,13 +20,29 @@ namespace PB
         //TODO: Implement rotate() method;
     }
 
+    void Camera::zoom(std::uint8_t direction)
+    {
+        zoom_ += direction;
+
+        if (zoom_ > maxZoom_)
+        {
+            zoom_ = maxZoom_;
+        }
+        else if (zoom_ < minZoom_)
+        {
+            zoom_ = minZoom_;
+        }
+    }
+
     mat4 Camera::calculateViewMatrix(SceneView::Mode mode)
     {
         if (mode == SceneView::Mode::ORTHO)
         {
+            float z = (float)zoom_ / 10;
+
             return mat4{
-                    1.0f, 0.0f, 0.0f, position_.x,
-                    0.0f, 1.0f, 0.0f, position_.y,
+                    z, 0.0f, 0.0f, position_.x,
+                    0.0f, z, 0.0f, position_.y,
                     0.0f, 0.0f, 1.0f, position_.z,
                     0.0f, 0.0f, 0.0f, 1.0f
             };

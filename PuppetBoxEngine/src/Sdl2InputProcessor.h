@@ -26,6 +26,8 @@ namespace PB
 
             mouse.deltaX = 0;
             mouse.deltaY = 0;
+            mouse.wheelXDir = 0;
+            mouse.wheelYDir = 0;
             window.newHeight = 0;
             window.newWidth = 0;
 
@@ -44,6 +46,19 @@ namespace PB
                     case SDL_KEYUP:
                         keyboard.keyState[sdlEvent.key.keysym.scancode] = 0;
                         break;
+                    case SDL_MOUSEBUTTONDOWN:
+                        mouse.mouseState[sdlEvent.button.button] = 1;
+                        break;
+                    case SDL_MOUSEBUTTONUP:
+                        mouse.mouseState[sdlEvent.button.button] = 0;
+                        break;
+                    case SDL_MOUSEWHEEL:
+                    {
+                        std::int32_t invert = 1 - (sdlEvent.wheel.direction * 2);
+                        mouse.wheelXDir = sdlEvent.wheel.x * invert;
+                        mouse.wheelYDir = sdlEvent.wheel.y * invert;
+                        break;
+                    }
                     case SDL_MOUSEMOTION:
                         mouse.x = sdlEvent.motion.x;
                         mouse.y = sdlEvent.motion.y;

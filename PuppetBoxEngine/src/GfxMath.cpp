@@ -82,17 +82,18 @@ namespace PB::GfxMath
         float right = vWidth / 2.0f;
         float bottom = -(vHeight / 2.0f);
         float top = vHeight / 2.0f;
+
         float zNear = -1.0f;
         float zFar = 1.0f;
 
         if (viewMode == SceneView::Mode::ORTHO)
         {
-            projection[0][0] = 2.0f / (right - left);
-            projection[1][1] = 2.0f / (top - bottom);
-            projection[2][2] = -(2.0f / (zFar - zNear));
-            projection[3][0] = -((right + left) / (right - left));
-            projection[3][1] = -((top + bottom) / (top - bottom));
-            projection[3][2] = -((zFar + zNear) / (zFar - zNear));
+            projection[0][0] = 2.0f / (right - left); // Normalize x, world center on [0,0]
+            projection[1][1] = 2.0f / (top - bottom); // Normalize y, world center on [0,0], not inverted so +y is "up"
+            projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z, inverted so +z is toward user
+            projection[3][0] = 0; //-((right + left) / (right - left)); //TODO: What are these for?
+            projection[3][1] = 0; //-((top + bottom) / (top - bottom)); //TODO: What are these for?
+            projection[3][2] = 0; //-((zFar + zNear) / (zFar - zNear)); //TODO: What are these for?
         }
         else
         {

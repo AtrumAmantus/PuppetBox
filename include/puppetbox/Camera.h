@@ -1,14 +1,15 @@
 #pragma once
 
-#include "puppetbox/Constants.h"
-#include "puppetbox/DataStructures.h"
+#include "Constants.h"
+#include "DataStructures.h"
+#include "TypeDef.h"
 
 namespace PB
 {
     /**
     * \brief Acts as the point of reference within the scene for render calls.
     */
-    class Camera
+    class PUPPET_BOX_API Camera
     {
     public:
         /**
@@ -39,6 +40,14 @@ namespace PB
         void rotate(vec3 rotation);
 
         /**
+         * \brief Zoom in with the camera in the given direction.  Input should be positive or negative
+         * integers.
+         *
+         * \param direction The direction to scroll in (negative/out or positive/in).
+         */
+        void zoom(std::uint8_t direction);
+
+        /**
         * \brief Calculates a View Matrix from the camera's attributes.
         *
         * \param mode	The current projection mode for the camera (Perspective / Ortho).
@@ -53,6 +62,9 @@ namespace PB
         vec3 up_{};
         vec3 right_{};
         vec3 moveVector_{};
+        std::uint8_t zoom_ = 10;
+        std::uint8_t minZoom_ = 5;
+        std::uint8_t maxZoom_ = 15;
         float cameraSpeed_ = 1.0f;
     };
 }

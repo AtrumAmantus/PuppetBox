@@ -59,7 +59,7 @@ public:
 //		}
     };
 protected:
-    void processInput() const override
+    void processInputs() override
     {
         if (input()->keyboard.isPressed(KEY_ESCAPE))
         {
@@ -73,13 +73,19 @@ protected:
 
         if (input()->mouse.deltaX != 0 || input()->mouse.deltaY != 0)
         {
-            //std::cout << "Mouse Coords: " << std::to_string(input()->mouse.deltaX) << ", " << std::to_string(input()->mouse.deltaY) << std::endl;
+//            std::cout << "Mouse Delta: " << std::to_string(input()->mouse.deltaX) << ", " << std::to_string(input()->mouse.deltaY) << std::endl;
+//            std::cout << "Mouse Coords: " << std::to_string(input()->mouse.x) << ", " << std::to_string(input()->mouse.y) << std::endl;
         }
 
         if (input()->window.newWidth != 0 || input()->window.newHeight != 0)
         {
             std::cout << "Window Size: " << std::to_string(input()->window.newWidth) << "x"
                       << std::to_string(input()->window.newHeight) << std::endl;
+        }
+
+        if (input()->mouse.wheelYDir != 0)
+        {
+            getCamera()->zoom(static_cast<std::uint8_t>(input()->mouse.wheelYDir));
         }
     }
 };
