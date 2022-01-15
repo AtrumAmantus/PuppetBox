@@ -83,6 +83,20 @@ protected:
                       << std::to_string(input()->window.newHeight) << std::endl;
         }
 
+        PB::vec3 moveVec{};
+
+        if (input()->keyboard.isDown(KEY_UP) || input()->keyboard.isDown(KEY_DOWN))
+        {
+            moveVec.y = input()->keyboard.isDown(KEY_UP) + (-1 * input()->keyboard.isDown(KEY_DOWN));
+        }
+
+        if (input()->keyboard.isDown(KEY_RIGHT) || input()->keyboard.isDown(KEY_LEFT))
+        {
+            moveVec.x = input()->keyboard.isDown(KEY_RIGHT) + (-1 * input()->keyboard.isDown(KEY_LEFT));
+        }
+
+        getCamera()->move(moveVec);
+
         if (input()->mouse.wheelYDir != 0)
         {
             getCamera()->zoom(static_cast<std::uint8_t>(input()->mouse.wheelYDir));

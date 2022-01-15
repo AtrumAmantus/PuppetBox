@@ -33,6 +33,7 @@ namespace PB
         virtual void update(const float deltaTime)
         {
             processInput();
+            camera_->update(deltaTime);
 
             for (auto& e: sceneObjects_)
             {

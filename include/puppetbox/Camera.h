@@ -26,6 +26,13 @@ namespace PB
         Camera(vec3 position, vec3 direction);
 
         /**
+         * \brief Update the current state of the camera based on current input.
+         *
+         * \param deltaTime The time (in milliseconds) since the last update().
+         */
+        void update(float deltaTime);
+
+        /**
         * \brief Set the move vector for the camera.
         *
         * \param vector	A vector containing movement values along x, y, and z axis.
@@ -45,7 +52,7 @@ namespace PB
          *
          * \param direction The direction to scroll in (negative/out or positive/in).
          */
-        void zoom(std::uint8_t direction);
+        void zoom(std::int8_t direction);
 
         /**
         * \brief Calculates a View Matrix from the camera's attributes.
@@ -54,7 +61,7 @@ namespace PB
         *
         * \return The calculated mat4 view matrix.
         */
-        mat4 calculateViewMatrix(SceneView::Mode mode);
+        mat4 calculateViewMatrix(SceneView::Mode mode) const;
 
     private:
         vec3 position_{};
@@ -62,9 +69,10 @@ namespace PB
         vec3 up_{};
         vec3 right_{};
         vec3 moveVector_{};
-        std::uint8_t zoom_ = 10;
-        std::uint8_t minZoom_ = 5;
-        std::uint8_t maxZoom_ = 15;
-        float cameraSpeed_ = 1.0f;
+        float currentZoom_ = 100.0f;
+        float targetZoom_ = 100.0f;
+        float minZoom_ = 50.0f;
+        float maxZoom_ = 150.0f;
+        float cameraSpeed_ = 100.0f;
     };
 }

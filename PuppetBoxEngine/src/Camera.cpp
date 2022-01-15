@@ -10,9 +10,15 @@ namespace PB
 
     }
 
+    void Camera::update(float deltaTime)
+    {
+        position_ += (moveVector_ * (cameraSpeed_ * deltaTime));
+        currentZoom_ = targetZoom_;
+    }
+
     void Camera::move(vec3 vector)
     {
-        moveVector_ += vector;
+        moveVector_ = vector;
     }
 
     void Camera::rotate(vec3 rotation)
@@ -20,25 +26,25 @@ namespace PB
         //TODO: Implement rotate() method;
     }
 
-    void Camera::zoom(std::uint8_t direction)
+    void Camera::zoom(std::int8_t direction)
     {
-        zoom_ += direction;
+        targetZoom_ += direction;
 
-        if (zoom_ > maxZoom_)
+        if (targetZoom_ > maxZoom_)
         {
-            zoom_ = maxZoom_;
+            targetZoom_ = maxZoom_;
         }
-        else if (zoom_ < minZoom_)
+        else if (targetZoom_ < minZoom_)
         {
-            zoom_ = minZoom_;
+            targetZoom_ = minZoom_;
         }
     }
 
-    mat4 Camera::calculateViewMatrix(SceneView::Mode mode)
+    mat4 Camera::calculateViewMatrix(SceneView::Mode mode) const
     {
         if (mode == SceneView::Mode::ORTHO)
         {
-            float z = (float)zoom_ / 10;
+            float z = currentZoom_ / 100.0f;
 
             return mat4{
                     z, 0.0f, 0.0f, position_.x,
