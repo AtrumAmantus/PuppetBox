@@ -99,7 +99,7 @@ protected:
 
         if (input()->mouse.wheelYDir != 0)
         {
-            getCamera()->zoom(static_cast<std::uint8_t>(input()->mouse.wheelYDir));
+            getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
         }
     }
 };
