@@ -21,6 +21,10 @@ add_library(SDL2MainDep STATIC IMPORTED)
 set_property(TARGET SDL2MainDep PROPERTY
 	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/SDL2main.lib)
 
+add_library(freeType STATIC IMPORTED)
+set_property(TARGET freeType PROPERTY
+	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/freetyped.lib)
+
 add_library(ZipDep STATIC IMPORTED)
 set_property(TARGET ZipDep PROPERTY
 	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/zip.lib)
@@ -29,7 +33,7 @@ add_compile_definitions(PUPPETBOXENGINE_EXPORTS)
 
 find_package(OpenGL REQUIRED)
 
-set(LIBS opengl32 SDL2Dep SDL2MainDep ZipDep)
+set(LIBS opengl32 SDL2Dep SDL2MainDep freeType ZipDep)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES} ${PUBLIC_HEADER_FILES})
 target_link_libraries(${PROJECT_NAME} ${LIBS})

@@ -32,6 +32,7 @@ class CustomSceneHandler : public PB::AbstractSceneHandler
 public:
     void setUp() override
     {
+
         auto* myEntity = new Entity{};
 
         PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
@@ -59,6 +60,11 @@ public:
 //		}
     };
 protected:
+    void updates(float deltaTime) override
+    {
+        // Nothing yet.
+    }
+
     void processInputs() override
     {
         if (input()->keyboard.isPressed(KEY_ESCAPE))

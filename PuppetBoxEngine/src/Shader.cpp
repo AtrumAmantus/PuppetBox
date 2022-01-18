@@ -5,9 +5,6 @@
 #include "Logger.h"
 #include "Shader.h"
 
-// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
     namespace
@@ -258,4 +255,3 @@ namespace PB
         glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 }
-#pragma clang diagnostic pop

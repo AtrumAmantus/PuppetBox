@@ -8,6 +8,54 @@
 
 namespace PB
 {
+    struct ivec2
+    {
+        union
+        {
+            std::int32_t x, r, s = 0;
+        };
+        union
+        {
+            std::int32_t y, g, t = 0;
+        };
+
+        std::int32_t& operator[](std::uint32_t i)
+        {
+            assert(i < 2);
+            return (&x)[i];
+        }
+
+        const std::int32_t& operator[](std::uint32_t i) const
+        {
+            assert(i < 2);
+            return (&x)[i];
+        }
+    };
+
+    struct uivec2
+    {
+        union
+        {
+            std::uint32_t x, r, s = 0;
+        };
+        union
+        {
+            std::uint32_t y, g, t = 0;
+        };
+
+        std::uint32_t& operator[](std::uint32_t i)
+        {
+            assert(i < 2);
+            return (&x)[i];
+        }
+
+        const std::uint32_t& operator[](std::uint32_t i) const
+        {
+            assert(i < 2);
+            return (&x)[i];
+        }
+    };
+
     struct vec2
     {
         union
@@ -19,13 +67,13 @@ namespace PB
             float y, g, t = 0;
         };
 
-        float& operator[](uint32_t i)
+        float& operator[](std::uint32_t i)
         {
             assert(i < 2);
             return (&x)[i];
         };
 
-        const float& operator[](uint32_t i) const
+        const float& operator[](std::uint32_t i) const
         {
             assert(i < 2);
             return (&x)[i];
@@ -47,13 +95,13 @@ namespace PB
             float z, b, p = 0;
         };
 
-        float& operator[](uint32_t i)
+        float& operator[](std::uint32_t i)
         {
             assert(i < 3);
             return (&x)[i];
         };
 
-        const float& operator[](uint32_t i) const
+        const float& operator[](std::uint32_t i) const
         {
             assert(i < 3);
             return (&x)[i];
@@ -144,13 +192,13 @@ namespace PB
             float w, a, q = 0;
         };
 
-        float& operator[](uint32_t i)
+        float& operator[](std::uint32_t i)
         {
             assert(i < 4);
             return (&x)[i];
         };
 
-        const float& operator[](uint32_t i) const
+        const float& operator[](std::uint32_t i) const
         {
             assert(i < 4);
             return (&x)[i];
@@ -270,7 +318,7 @@ namespace PB
             return this->values_[i];
         };
 
-        const vec3& operator[](uint32_t i) const
+        const vec3& operator[](std::uint32_t i) const
         {
             assert(i < 3);
             return this->values_[i];
@@ -355,13 +403,13 @@ namespace PB
             values_[3][3] = w4;
         };
 
-        vec4& operator[](uint32_t i)
+        vec4& operator[](std::uint32_t i)
         {
             assert(i < 4);
             return this->values_[i];
         };
 
-        const vec4& operator[](uint32_t i) const
+        const vec4& operator[](std::uint32_t i) const
         {
             assert(i < 4);
             return this->values_[i];

@@ -71,8 +71,10 @@ namespace PB
 
             mat4 view = camera_.calculateViewMatrix(viewMode_);
             mat4 projection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), viewMode_);
+            mat4 orthoProjection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(),
+                                                       SceneView::ORTHO);
 
-            gfxApi_->setTransformUBOData(view, projection);
+            gfxApi_->setTransformUBOData(view, projection, orthoProjection);
         }
 
         /**

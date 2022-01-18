@@ -80,10 +80,11 @@ namespace PB
         /**
         * \brief Sets view/projection matrices in the UBO.  Must initializeUBORanges() before use.
         *
-        * \param view		The View Matrix to set.
-        * \param projection	The Projection Matrix to set.
+        * \param view		        The View Matrix to set.
+        * \param projection	        The Projection Matrix to set.
+        * \param orthoProjection    The orthographic projection matrix to set.
         */
-        void setTransformUBOData(mat4 view, mat4 projection) const override;
+        void setTransformUBOData(mat4 view, mat4 projection, mat4 orthoProjection) const override;
 
         /**
         * \brief Enables the OpenGL API debugger.

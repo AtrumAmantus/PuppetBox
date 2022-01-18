@@ -75,7 +75,18 @@ namespace PB
         *
         * \return True if the asset was loaded successfully, False otherwise.
         */
-        bool loadAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type);
+        bool loadModelAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type);
+
+        /**
+        * \brief Loads a Shader asset given by the provided virtual asset path.
+        *
+        * \param assetPath	Virtual path to the requested asset.
+        * \param error		Flag indicating an error occurred if set to True.
+        *
+        * \return The loaded Shader object for the respective virtual asset path, or an empty
+        * object if an error occurred loading the asset.
+        */
+        Shader loadShaderAsset(const std::string& assetPath, bool* error);
 
         bool loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map);
 
@@ -92,17 +103,6 @@ namespace PB
         std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
         std::unordered_map<std::string, Shader> loadedShaders_{};
     private:
-
-        /**
-        * \brief Loads a Shader asset given by the provided virtual asset path.
-        *
-        * \param assetPath	Virtual path to the requested asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return The loaded Shader object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
-        */
-        Shader loadShaderAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Loads an ImageReference asset given by the provided virtual asset path.

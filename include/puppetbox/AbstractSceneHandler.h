@@ -27,6 +27,8 @@ namespace PB
 
         /**
         * \brief Runs once per frame, after input processing, but before rendering.
+         *
+         * <p>Can be overridden to get complete control of update logic.</p>
         *
         * \param deltaTime The time in milliseconds since the last frame was run.
         */
@@ -39,6 +41,8 @@ namespace PB
             {
                 e.second->update(deltaTime);
             }
+
+            updates(deltaTime);
         };
 
         /**
@@ -84,9 +88,16 @@ namespace PB
         };
 
         /**
-         * \brief Defined by child class to all customization of input processing
+         * \brief Defined by child class for additional customized input processing.
          */
         virtual void processInputs() {};
+
+        /**
+         * \brief Defined by child class for additional custom frame update logic.
+         *
+         * \param deltaTime The time (in milliseconds) that has passed since the last update().
+         */
+        virtual void updates(float deltaTime) {};
 
         /**
          * \brief Add an object to the scene, allowing engine level handling of object events.

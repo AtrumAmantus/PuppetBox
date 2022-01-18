@@ -10,9 +10,6 @@
 #include "Sdl2Initializer.h"
 #include "Sdl2InputProcessor.h"
 
-// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
     namespace
@@ -222,7 +219,7 @@ namespace PB
         }
         else
         {
-            if (assetLibrary->loadAsset(assetPath, sceneObject, convertToAssetType(type)))
+            if (assetLibrary->loadModelAsset(assetPath, sceneObject, convertToAssetType(type)))
             {
                 return true;
             }
@@ -267,4 +264,3 @@ namespace PB
         return 0;
     }
 }
-#pragma clang diagnostic pop

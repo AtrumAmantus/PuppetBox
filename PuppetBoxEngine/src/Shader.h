@@ -1,7 +1,3 @@
-#pragma warning(disable : 4068) // Unknown pragmas warning
-// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <string>
@@ -217,4 +213,3 @@ namespace PB
         std::uint32_t fragmentShaderId_ = 0;
     };
 }
-#pragma clang diagnostic pop

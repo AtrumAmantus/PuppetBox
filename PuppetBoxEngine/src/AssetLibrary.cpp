@@ -166,80 +166,20 @@ namespace PB
         return !error;
     }
 
-    bool AssetLibrary::loadAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type)
+    bool AssetLibrary::loadModelAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type)
     {
         bool error = false;
 
         switch (type)
         {
             case Asset::Type::MODEL_2D:
-            {
-                if (load2DSceneObject(assetPath, sceneObject))
-                {
-                    return true;
-                }
-                else
+                if (!load2DSceneObject(assetPath, sceneObject))
                 {
                     LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
                 }
                 break;
-            }
             default:
                 LOGGER_ERROR("Can not load asset '" + assetPath + "' of undefined type");
-        }
-
-        return false;
-    }
-
-    bool AssetLibrary::loadAnimationSetAsset(const std::string& assetPath,
-                                             std::unordered_map<std::string, IAnimation*>& map)
-    {
-        bool error = false;
-
-//        if (loadedAnimationSets_.find(assetPath) == loadedAnimationSets_.end())
-//        {
-        AssetStruct asset = parseAssetPath(assetPath, &error);
-
-        if (!error)
-        {
-            std::unordered_map<std::string, std::string> animMap{};
-            error = error || !assetArchives_.at(asset.archiveName).loadAnimationSetAsset(asset.assetName, animMap);
-
-            if (!error)
-            {
-                for (const auto& entry: animMap)
-                {
-                    error = error || !loadAnimationAsset(entry.first, entry.second, map);
-                }
-            }
-            else
-            {
-                LOGGER_ERROR("Failed to load animation set, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-        }
-//        }
-
-        return !error;
-    }
-
-    bool AssetLibrary::loadAnimationAsset(const std::string& animName, const std::string& assetPath,
-                                          std::unordered_map<std::string, IAnimation*>& map)
-    {
-        bool error = false;
-
-        AssetStruct asset = parseAssetPath(assetPath, &error);
-
-        if (!error)
-        {
-            error = error || !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, map);
-        }
-        else
-        {
-            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
         }
 
         return !error;
@@ -299,6 +239,60 @@ namespace PB
         }
 
         return shader;
+    }
+
+    bool AssetLibrary::loadAnimationSetAsset(const std::string& assetPath,
+                                             std::unordered_map<std::string, IAnimation*>& map)
+    {
+        bool error = false;
+
+//        if (loadedAnimationSets_.find(assetPath) == loadedAnimationSets_.end())
+//        {
+        AssetStruct asset = parseAssetPath(assetPath, &error);
+
+        if (!error)
+        {
+            std::unordered_map<std::string, std::string> animMap{};
+            error = error || !assetArchives_.at(asset.archiveName).loadAnimationSetAsset(asset.assetName, animMap);
+
+            if (!error)
+            {
+                for (const auto& entry: animMap)
+                {
+                    error = error || !loadAnimationAsset(entry.first, entry.second, map);
+                }
+            }
+            else
+            {
+                LOGGER_ERROR("Failed to load animation set, '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+        }
+//        }
+
+        return !error;
+    }
+
+    bool AssetLibrary::loadAnimationAsset(const std::string& animName, const std::string& assetPath,
+                                          std::unordered_map<std::string, IAnimation*>& map)
+    {
+        bool error = false;
+
+        AssetStruct asset = parseAssetPath(assetPath, &error);
+
+        if (!error)
+        {
+            error = error || !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, map);
+        }
+        else
+        {
+            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+        }
+
+        return !error;
     }
 
     ImageReference AssetLibrary::loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error)
