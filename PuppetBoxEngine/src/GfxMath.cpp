@@ -78,10 +78,10 @@ namespace PB::GfxMath
         auto vHeight = static_cast<float>(viewHeight);
 
         // Using +/- (dimension / 2) will center the camera on 0,0
-        float left = -(vWidth / 2.0f);
-        float right = vWidth / 2.0f;
-        float bottom = -(vHeight / 2.0f);
-        float top = vHeight / 2.0f;
+        float left = 0;
+        float right = vWidth;
+        float bottom = 0;
+        float top = vHeight;
 
         float zNear = -1.0f;
         float zFar = 1.0f;
@@ -91,8 +91,8 @@ namespace PB::GfxMath
             projection[0][0] = 2.0f / (right - left); // Normalize x, world center on [0,0]
             projection[1][1] = 2.0f / (top - bottom); // Normalize y, world center on [0,0], not inverted so +y is "up"
             projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z, inverted so +z is toward user
-            projection[3][0] = 0; //-((right + left) / (right - left)); //TODO: What are these for?
-            projection[3][1] = 0; //-((top + bottom) / (top - bottom)); //TODO: What are these for?
+            projection[3][0] = -((right + left) / (right - left)); // Sets x:0 to left edge
+            projection[3][1] = -((top + bottom) / (top - bottom)); // Sets y:0 to top edge
             projection[3][2] = 0; //-((zFar + zNear) / (zFar - zNear)); //TODO: What are these for?
         }
         else

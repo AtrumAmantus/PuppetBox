@@ -21,6 +21,11 @@ namespace PB
         moveVector_ = vector;
     }
 
+    void Camera::setPosition(vec3 position)
+    {
+        position_ = position;
+    }
+
     void Camera::rotate(vec3 rotation)
     {
         //TODO: Implement rotate() method;
@@ -46,10 +51,12 @@ namespace PB
         {
             float z = currentZoom_ / 100.0f;
 
+            // Negative coords because moving the "camera" is really just
+            // moving the "world" the opposite direction.
             return mat4{
-                    z, 0.0f, 0.0f, position_.x,
-                    0.0f, z, 0.0f, position_.y,
-                    0.0f, 0.0f, 1.0f, position_.z,
+                    z, 0.0f, 0.0f, -position_.x,
+                    0.0f, z, 0.0f, -position_.y,
+                    0.0f, 0.0f, 1.0f, -position_.z,
                     0.0f, 0.0f, 0.0f, 1.0f
             };
         }

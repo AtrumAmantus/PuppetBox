@@ -37,6 +37,8 @@ public:
 
         PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
 
+        getCamera()->setPosition({-400, -300, 0});
+
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
         {
             myEntity->name = "Fred";

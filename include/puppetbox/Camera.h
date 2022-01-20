@@ -33,11 +33,19 @@ namespace PB
         void update(float deltaTime);
 
         /**
-        * \brief Set the move vector for the camera.
+        * \brief Set the move vector for the camera that will be used to calculate position changes during
+        * update() calls.
         *
         * \param vector	A vector containing movement values along x, y, and z axis.
         */
         void move(vec3 vector);
+
+        /**
+        * \brief Instantly set the current position of the camera.
+        *
+        * \param vector	A vector containing position values for x, y, and z axis.
+        */
+        void setPosition(vec3 vector);
 
         /**
         * \brief Set the rotation of the camera.
