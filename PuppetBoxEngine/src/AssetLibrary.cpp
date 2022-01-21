@@ -110,57 +110,30 @@ namespace PB
 
     }
 
-    void AssetLibrary::init()
-    {
-        auto* vData = new Vertex[]{
-                {{0.5,  0.5,  0.0}, {0.0, 0.0, 1.0}, {1.0, 1.0}},
-                {{-0.5, 0.5,  0.0}, {0.0, 0.0, 1.0}, {0.0, 1.0}},
-                {{-0.5, -0.5, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0}},
-
-                {{-0.5, -0.5, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0}},
-                {{0.5,  -0.5, 0.0}, {0.0, 0.0, 1.0}, {1.0, 0.0}},
-                {{0.5,  0.5,  0.0}, {0.0, 0.0, 1.0}, {1.0, 1.0}}
-        };
-
-        Mesh spriteMesh = gfxApi_->loadMesh(vData, 6);
-
-        delete[] vData;
-
-        insertIntoMap("sprite", spriteMesh, loadedMeshes_);
-    }
-
     bool AssetLibrary::loadArchive(const std::string& archiveName)
     {
         bool error = false;
 
-        if (!loadedMeshes_.empty())
+        if (assetArchives_.find(archiveName) == assetArchives_.end())
         {
-            if (assetArchives_.find(archiveName) == assetArchives_.end())
+            AssetArchive archive{archiveName, archiveRoot_};
+
+            if (archive.init())
             {
-                AssetArchive archive{archiveName, archiveRoot_};
+                assetArchives_.insert(
+                        std::pair<std::string, AssetArchive>{archiveName, archive}
+                );
 
-                if (archive.init())
-                {
-                    assetArchives_.insert(
-                            std::pair<std::string, AssetArchive>{archiveName, archive}
-                    );
-
-                    LOGGER_DEBUG("'" + archiveName + "' loaded " + std::to_string(archive.assetCount()) + " assets");
-                }
-                else
-                {
-                    LOGGER_ERROR("Failed to load archive '" + archiveName + "'");
-                }
+                LOGGER_DEBUG("'" + archiveName + "' loaded " + std::to_string(archive.assetCount()) + " assets");
             }
             else
             {
-                LOGGER_WARN("Archive '" + archiveName + "' is already loaded");
+                LOGGER_ERROR("Failed to load archive '" + archiveName + "'");
             }
         }
         else
         {
-            error = true;
-            LOGGER_ERROR("AssetLibrary needs to be initialized before loading archives");
+            LOGGER_WARN("Archive '" + archiveName + "' is already loaded");
         }
 
         return !error;
@@ -295,6 +268,38 @@ namespace PB
         return !error;
     }
 
+    Mesh AssetLibrary::loadMeshAsset(const std::string &assetPath, bool *error)
+    {
+        Mesh mesh{};
+
+        if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
+        {
+            AssetStruct asset = parseAssetPath(assetPath, error);
+
+            if (!*error)
+            {
+                std::vector<Vertex> meshData = assetArchives_
+                        .at(asset.archiveName)
+                        .loadMeshDataAsset(asset.assetName, error);
+
+                mesh = gfxApi_->loadMesh(&meshData[0], meshData.size());
+                loadedMeshes_.insert(
+                        std::pair<std::string, Mesh>{assetPath, mesh}
+                );
+            }
+            else
+            {
+                LOGGER_ERROR("Invalid mesh asset, '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            mesh = loadedMeshes_.at(assetPath);
+        }
+
+        return mesh;
+    }
+
     ImageReference AssetLibrary::loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error)
     {
         ImageReference imageReference{0};
@@ -383,24 +388,6 @@ namespace PB
         }
 
         return material;
-    }
-
-    Mesh AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
-    {
-        Mesh mesh{};
-
-        if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
-        {
-            //TODO: Implement mesh assets
-            *error = true;
-            LOGGER_ERROR("Mesh '" + assetPath + "' does not exist");
-        }
-        else
-        {
-            mesh = loadedMeshes_.at(assetPath);
-        }
-
-        return mesh;
     }
 
     ModelData2D AssetLibrary::loadModelData2DAsset(const std::string& assetPath, bool* error)
@@ -495,7 +482,7 @@ namespace PB
 
             if (!error)
             {
-                Mesh mesh = loadMeshAsset("sprite", &error);
+                Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
 
                 mesh.scale = modelData.scale;
 

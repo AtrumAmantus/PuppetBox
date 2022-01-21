@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include <STBI/stb_image.h>
 
@@ -117,6 +118,8 @@ namespace PB
 
         bool loadAnimationAsset(const std::string& name, const std::string& assetPath,
                                 std::unordered_map<std::string, IAnimation*>& map);
+
+        std::vector<Vertex> loadMeshDataAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Returns a ImageData for the given shader asset.

@@ -752,6 +752,52 @@ namespace PB
         return !error;
     }
 
+    std::vector<Vertex> AssetArchive::loadMeshDataAsset(const std::string& assetPath, bool* error)
+    {
+        std::vector<Vertex> meshData{};
+
+        std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
+
+        if (hasAsset(fileName))
+        {
+            std::istream* stream = nullptr;
+
+            *error = !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
+
+            float values[8]{};
+            std::uint8_t i = 0;
+
+            while (!stream->eof())
+            {
+                *stream >> values[i++];
+
+                if (i >= 8)
+                {
+                    meshData.push_back(Vertex{
+                        vec3{values[0], values[1], values[2]},
+                        vec3{values[3], values[4], values[5]},
+                        vec2{values[6], values[7]}
+                    });
+
+                    i = 0;
+                }
+            }
+
+            if (i != 0)
+            {
+                *error = true;
+                LOGGER_ERROR("Incomplete/Corrupt mesh data for asset '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            *error = true;
+            LOGGER_ERROR("Invalid mesh data asset, '" + assetPath + "'");
+        }
+
+        return meshData;
+    }
+
     ImageData AssetArchive::loadImageAsset(const std::string& assetPath, bool* error)
     {
         ImageData data{};

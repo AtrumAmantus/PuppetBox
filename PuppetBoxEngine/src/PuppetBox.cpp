@@ -153,7 +153,6 @@ namespace PB
             pbInitialized = true;
 
             assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi);
-            assetLibrary->init();
         }
         else
         {

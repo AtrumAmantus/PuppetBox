@@ -6,6 +6,7 @@ Sprites/GenericMob GenericMob.m
 Materials/TestBody TestBody.mat
 Materials/TestHand TestHand.mat
 Materials/TestHead TestHead.mat
+Mesh/Sprite sprite.mesh
 Shaders/Basic/Vertex basic.vertex.shader
 Shaders/Basic/Fragment basic.fragment.shader
 Shaders/Basic basic.program.shader

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
@@ -44,13 +45,7 @@ namespace PB
         * \param archiveRoot	The root directory that AssetLibrary should look for archives when they are loaded.
         * \param gfxApi			The derived gfxApi that will be used for loading assets.
         */
-        AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi);
-
-        /**
-        * \brief Initializes the AssetLibrary, making initial configurations.  This call needs to be made before any others
-        * on the AssetLibrary.
-        */
-        void init();
+        AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi>  gfxApi, FontLoader* fontLoader);
 
         /**
         * \brief Attempts to load the archive with the given name so that it's contained assets can be used in future
@@ -93,6 +88,17 @@ namespace PB
         bool loadAnimationAsset(const std::string& animName, const std::string& assetPath,
                                 std::unordered_map<std::string, IAnimation*>& map);
 
+        /**
+        * \brief Loads a Mesh asset given by the provided virtual asset path.
+         *
+        * \pa&ram assetPath	Virtual path to the requested asset.
+        * \param error		Flag indicating an error occurred if set to True.
+        *
+        * \return The loaded Mesh object for the respective virtual asset path, or an empty
+        * object if an error occurred loading the asset.
+        */
+        Mesh loadMeshAsset(const std::string& assetPath, bool* error);
+
     private:
         std::string archiveRoot_;
         std::shared_ptr<IGfxApi> gfxApi_;
@@ -126,17 +132,6 @@ namespace PB
         * object if an error occurred loading the asset.
         */
         Material loadMaterialAsset(const std::string& assetPath, bool* error);
-
-        /**
-        * \brief Loads a Mesh asset given by the provided virtual asset path.
-         *
-        * \pa&ram assetPath	Virtual path to the requested asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return The loaded Mesh object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
-        */
-        Mesh loadMeshAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Loads a ModelData2D asset given by the provided virtual asset path.
