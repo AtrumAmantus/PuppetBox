@@ -3,7 +3,7 @@ project(PuppetBoxEngine
         VERSION 0.0.1)
 
 set(DEP_INCLUDES_DIR ${DEP_DIRECTORY}/include CACHE PATH "Dependency Includes" FORCE)
-set(DEP_SLIBRARY_DIR ${DEP_DIRECTORY}/lib/${ARCH_TYPE} CACHE PATH "Dependency Static Libs" FORCE)
+set(DEP_SLIBRARY_DIR ${DEP_DIRECTORY}/lib/${ARCH_TYPE}/${BUILD_TYPE} CACHE PATH "Dependency Static Libs" FORCE)
 
 file(GLOB_RECURSE SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
@@ -23,7 +23,7 @@ set_property(TARGET SDL2MainDep PROPERTY
 
 add_library(freeType STATIC IMPORTED)
 set_property(TARGET freeType PROPERTY
-	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/freetyped.lib)
+	IMPORTED_LOCATION ${DEP_SLIBRARY_DIR}/freetype.lib)
 
 add_library(ZipDep STATIC IMPORTED)
 set_property(TARGET ZipDep PROPERTY
