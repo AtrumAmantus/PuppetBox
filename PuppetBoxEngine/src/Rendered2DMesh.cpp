@@ -31,7 +31,6 @@ namespace PB
         material_.shader.setMat4("boneTransform", bones[0].translation);
 
         mat4 model = mat4::eye();
-
         model = GfxMath::Translate(model, transform[0]);
         model = GfxMath::Scale(model, transform[2]);
         model = GfxMath::Scale(model, mesh_.scale);
