@@ -1,60 +1,77 @@
 #include "OpenGLModel.h"
 
-#include "GfxMath.h"
+#include <utility>
 
 namespace PB
 {
-	OpenGLModel::OpenGLModel(Mesh mesh, Material material) : mesh_(mesh), material_(std::move(material))
-	{
+    OpenGLModel::OpenGLModel(
+            std::unordered_map<std::string, BoneMap> bones,
+            std::unordered_map<std::string, RenderedMesh*> renderedMeshes
+    ) : bones_(std::move(bones)), animator_(nullptr), renderedMeshes_(std::move(renderedMeshes))
+    {
 
-	}
+    }
 
-	void OpenGLModel::render(mat3 transform) const
-	{
-		if (material_.requiresAlphaBlending)
-		{
-			glEnable(GL_BLEND);
-		}
+    OpenGLModel::OpenGLModel(
+            std::unordered_map<std::string, BoneMap> bones,
+            std::unique_ptr<IAnimator> animator,
+            std::unordered_map<std::string, RenderedMesh*> renderedMeshes
+    ) : bones_(std::move(bones)), animator_(std::move(animator)), renderedMeshes_(std::move(renderedMeshes))
+    {
 
-		material_.shader.use();
-		material_.diffuseMap.use(GL_TEXTURE0);
-		material_.shader.setInt("material.diffuseMap", 0);
+    }
 
-		vec4 diffuseUvAdjust{
-			static_cast<float>(material_.diffuseData.width) / static_cast<float>(material_.diffuseMap.width),
-			static_cast<float>(material_.diffuseData.height) / static_cast<float>(material_.diffuseMap.height),
-			static_cast<float>(material_.diffuseData.xOffset) / static_cast<float>(material_.diffuseMap.width),
-			static_cast<float>(material_.diffuseData.yOffset) / static_cast<float>(material_.diffuseMap.height)
-		};
+    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator)
+    {
+        animator_ = std::move(animator);
+    }
 
-		material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
+    void OpenGLModel::update(float deltaTime)
+    {
+        if (animator_ != nullptr)
+        {
+            animator_->update(deltaTime, bones_);
+        }
+    }
 
-		mat4 model = mat4::eye();
+    void OpenGLModel::render(mat3 transform) const
+    {
+        for (auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
+        {
+            Bone* bones = nullptr;
 
-		model = GfxMath::Translate(model, transform[0]);
-		model = GfxMath::Scale(model, transform[2]);
-		model = GfxMath::Rotate(model, transform[1]);
+            if (animator_ != nullptr)
+            {
+                //TODO: This won't work for all models, need support for meshes with multiple bones
+                bones = new Bone[1];
+                auto boneTransformations = animator_->getBoneTransformations();
+                bones[0].translation = boneTransformations.at(itr->first);
+            }
+            else
+            {
+                Bone bone{};
+                bone.translation = mat4::eye();
+                bones = new Bone[]{bone};
+            }
 
-		material_.shader.setMat4("model", model);
+            itr->second->render(transform, bones, 1);
+        }
+    }
 
-		glBindVertexArray(mesh_.VAO);
+    Bone* OpenGLModel::buildBoneArray(const std::string& boneName, const std::vector<BoneMap>& boneTransforms) const
+    {
+        std::string currentBone = boneName;
 
-		if (mesh_.EBO != 0)
-		{
-			//                           v-- number of indices to draw
-			glDrawElements(GL_TRIANGLES, mesh_.drawCount, GL_UNSIGNED_INT, 0); // NOLINT(modernize-use-nullptr)
-		}
-		else
-		{
-			//                            v-- number of vertices to draw
-			glDrawArrays(GL_TRIANGLES, 0, mesh_.drawCount);
-		}
+        std::int32_t lastIndex = bones_.at(boneName).depth + 1;
 
-		// Unset VAO for next render
-		glBindVertexArray(0);
+        Bone* bones = new Bone[lastIndex--];
 
-		material_.diffuseMap.unuse(GL_TEXTURE0);
-		material_.shader.unuse();
-		glDisable(GL_BLEND);
-	}
+        while (lastIndex >= 0)
+        {
+            bones[lastIndex--] = bones_.at(currentBone).bone;
+            currentBone = bones_.at(currentBone).parent;
+        }
+
+        return bones;
+    }
 }

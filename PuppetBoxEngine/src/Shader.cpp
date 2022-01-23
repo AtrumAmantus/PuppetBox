@@ -5,9 +5,6 @@
 #include "Logger.h"
 #include "Shader.h"
 
-// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
     namespace
@@ -70,7 +67,8 @@ namespace PB
             }
         }
 
-        bool compileShader(std::uint32_t* shaderId, const int shaderType, const char* shaderSource, const char* shaderName)
+        bool
+        compileShader(std::uint32_t* shaderId, const int shaderType, const char* shaderSource, const char* shaderName)
         {
             bool error = false;
             *shaderId = glCreateShader(shaderType);
@@ -194,7 +192,7 @@ namespace PB
 
     void Shader::setBool(const std::string& name, bool value) const
     {
-        glUniform1i(glGetUniformLocation(programId_, name.c_str()), (int)value);
+        glUniform1i(glGetUniformLocation(programId_, name.c_str()), (int) value);
     }
 
     void Shader::setInt(const std::string& name, int value) const
@@ -226,6 +224,7 @@ namespace PB
     {
         glUniform3fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
     }
+
     void Shader::setVec3(const std::string& name, float x, float y, float z) const
     {
         glUniform3f(glGetUniformLocation(programId_, name.c_str()), x, y, z);
@@ -256,4 +255,3 @@ namespace PB
         glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 }
-#pragma clang diagnostic pop

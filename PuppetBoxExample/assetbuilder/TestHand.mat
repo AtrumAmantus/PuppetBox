@@ -1,0 +1,7 @@
+diffuse:
+  image: Assets1/Textures/TestHand
+  width: 16
+  height: 16
+  xOffset: 0
+  yOffset: 0
+shader: Assets1/Shaders/Basic

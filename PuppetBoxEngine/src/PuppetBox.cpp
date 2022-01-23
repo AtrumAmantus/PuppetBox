@@ -1,240 +1,271 @@
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <PuppetBox.h>
 
+#include "AnimationCatalogue.h"
 #include "AssetLibrary.h"
 #include "Engine.h"
+#include "FontLoader.h"
 #include "OpenGLGfxApi.h"
 #include "Sdl2Initializer.h"
 #include "Sdl2InputProcessor.h"
+#include "UIComponents.h"
 
-// OCUnusedGlobalDeclarationInspection - Public API - Not all functions will be used.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 namespace PB
 {
-	namespace
-	{
-		// Engine context variables
-		std::shared_ptr<IHardwareInitializer> hardwareInitializer{ nullptr };
-		std::shared_ptr<AbstractInputProcessor> inputProcessor{ nullptr };
-		std::shared_ptr<IGfxApi> gfxApi{ nullptr };
-		std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
-		std::unique_ptr<AssetLibrary> assetLibrary{ nullptr };
-		std::string activeSceneId;
-		SceneGraph invalidScene{ "InvalidScene", nullptr, nullptr };
-		bool pbInitialized = false;
-		/**
-		* \brief Used to map scan codes to actual ascii characters
-		* Key: scancode, Value: character
-		*/
-		std::unordered_map<std::uint8_t, std::int8_t> charMap_{};
+    namespace
+    {
+        // Engine context variables
+        std::shared_ptr<IHardwareInitializer> hardwareInitializer{nullptr};
+        std::shared_ptr<AbstractInputProcessor> inputProcessor{nullptr};
+        std::shared_ptr<IGfxApi> gfxApi{nullptr};
+        FontLoader fontLoader{nullptr};
+        std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
+        std::shared_ptr<AssetLibrary> assetLibrary{nullptr};
+        std::string activeSceneId;
+        SceneGraph invalidScene{"InvalidScene", nullptr, nullptr};
+        bool pbInitialized = false;
+        /**
+        * \brief Used to map scan codes to actual ascii characters
+        * Key: scancode, Value: character
+        */
+        std::unordered_map<std::uint8_t, std::int8_t> charMap_{};
 
-		/**
-		* \brief Helper method to insider values into the charMap.
-		*
-		* \param k	The scancode for the entry.
-		* \param v	The value for the entry.
-		*/
-		void CharMapInsert(std::uint8_t k, std::uint8_t v)
-		{
-			charMap_.insert(std::pair<std::uint8_t, std::uint8_t>{ k, v });
-		}
+        /**
+        * \brief Helper method to insider values into the charMap.
+        *
+        * \param k	The scancode for the entry.
+        * \param v	The value for the entry.
+        */
+        void CharMapInsert(std::uint8_t k, std::uint8_t v)
+        {
+            charMap_.insert(std::pair<std::uint8_t, std::uint8_t>{k, v});
+        }
 
-		/**
-		* \brief Helper function that provides a default IGfxApi implementation.
-		*
-		* \return A IGfxApi implementation.
-		*/
-		std::shared_ptr<IGfxApi> defaultGfxApi()
-		{
-			return std::make_shared<OpenGLGfxApi>();
-		}
+        /**
+        * \brief Helper function that provides a default IGfxApi implementation.
+        *
+        * \return A IGfxApi implementation.
+        */
+        std::shared_ptr<IGfxApi> defaultGfxApi()
+        {
+            return std::make_shared<OpenGLGfxApi>();
+        }
 
-		/**
-		* \brief Helper function that returns a reference to the currently active SceneGraph.
-		*
-		* \return Reference to the currently active SceneGraph.
-		*/
-		SceneGraph& activeScene()
-		{
-			if (!activeSceneId.empty() && loadedScenes.find(activeSceneId) != loadedScenes.end())
-			{
-				return *loadedScenes.at(activeSceneId);
-			}
+        /**
+        * \brief Helper function that returns a reference to the currently active SceneGraph.
+        *
+        * \return Reference to the currently active SceneGraph.
+        */
+        SceneGraph& activeScene()
+        {
+            if (!activeSceneId.empty() && loadedScenes.find(activeSceneId) != loadedScenes.end())
+            {
+                return *loadedScenes.at(activeSceneId);
+            }
 
-			return invalidScene;
-		}
+            return invalidScene;
+        }
 
-		/**
-		* \brief Helper function that converts publicly exposed enum to private one.
-		* 
-		* \param type	The publicly exposed asset type enum.
-		* 
-		* \return The private, inner asset type enum.
-		*/
-		Asset::Type convertToAssetType(LibraryAsset::Type type)
-		{
-			switch (type)
-			{
-			case LibraryAsset::Type::MODEL_2D:
-				return Asset::Type::MODEL_2D;
-			default:
-				return Asset::Type::UNKNOWN;
-			}
-		}
+        /**
+        * \brief Helper function that converts publicly exposed enum to private one.
+        *
+        * \param type	The publicly exposed asset type enum.
+        *
+        * \return The private, inner asset type enum.
+        */
+        Asset::Type convertToAssetType(LibraryAsset::Type type)
+        {
+            switch (type)
+            {
+                case LibraryAsset::Type::MODEL_2D:
+                    return Asset::Type::MODEL_2D;
+                default:
+                    return Asset::Type::UNKNOWN;
+            }
+        }
 
-		/**
-		* \brief Initializes the char map with the desired mappings of arbitrary key codes to specific ascii characters.
-		*/
-		void Init_CharMap()
-		{
-			CharMapInsert(KEY_1, '1');
-			CharMapInsert(KEY_2, '2');
-			CharMapInsert(KEY_3, '3');
-			CharMapInsert(KEY_4, '4');
-			CharMapInsert(KEY_5, '5');
-			CharMapInsert(KEY_6, '6');
-			CharMapInsert(KEY_7, '7');
-			CharMapInsert(KEY_8, '8');
-			CharMapInsert(KEY_9, '9');
-			CharMapInsert(KEY_0, '0');
+        /**
+        * \brief Initializes the char map with the desired mappings of arbitrary key codes to specific ascii characters.
+        */
+        void Init_CharMap()
+        {
+            CharMapInsert(KEY_1, '1');
+            CharMapInsert(KEY_2, '2');
+            CharMapInsert(KEY_3, '3');
+            CharMapInsert(KEY_4, '4');
+            CharMapInsert(KEY_5, '5');
+            CharMapInsert(KEY_6, '6');
+            CharMapInsert(KEY_7, '7');
+            CharMapInsert(KEY_8, '8');
+            CharMapInsert(KEY_9, '9');
+            CharMapInsert(KEY_0, '0');
 
-			CharMapInsert(KEY_A, 'a');
-			CharMapInsert(KEY_B, 'b');
-			CharMapInsert(KEY_C, 'c');
-			CharMapInsert(KEY_D, 'd');
-			CharMapInsert(KEY_E, 'e');
-			CharMapInsert(KEY_F, 'f');
-			CharMapInsert(KEY_G, 'g');
-			CharMapInsert(KEY_H, 'h');
-			CharMapInsert(KEY_I, 'i');
-			CharMapInsert(KEY_J, 'j');
-			CharMapInsert(KEY_K, 'k');
-			CharMapInsert(KEY_L, 'l');
-			CharMapInsert(KEY_M, 'm');
-			CharMapInsert(KEY_N, 'n');
-			CharMapInsert(KEY_O, 'o');
-			CharMapInsert(KEY_P, 'p');
-			CharMapInsert(KEY_Q, 'q');
-			CharMapInsert(KEY_R, 'r');
-			CharMapInsert(KEY_S, 's');
-			CharMapInsert(KEY_T, 't');
-			CharMapInsert(KEY_U, 'u');
-			CharMapInsert(KEY_V, 'v');
-			CharMapInsert(KEY_W, 'w');
-			CharMapInsert(KEY_X, 'y');
-			CharMapInsert(KEY_Y, 'x');
-			CharMapInsert(KEY_Z, 'z');
-		}
-	}
+            CharMapInsert(KEY_A, 'a');
+            CharMapInsert(KEY_B, 'b');
+            CharMapInsert(KEY_C, 'c');
+            CharMapInsert(KEY_D, 'd');
+            CharMapInsert(KEY_E, 'e');
+            CharMapInsert(KEY_F, 'f');
+            CharMapInsert(KEY_G, 'g');
+            CharMapInsert(KEY_H, 'h');
+            CharMapInsert(KEY_I, 'i');
+            CharMapInsert(KEY_J, 'j');
+            CharMapInsert(KEY_K, 'k');
+            CharMapInsert(KEY_L, 'l');
+            CharMapInsert(KEY_M, 'm');
+            CharMapInsert(KEY_N, 'n');
+            CharMapInsert(KEY_O, 'o');
+            CharMapInsert(KEY_P, 'p');
+            CharMapInsert(KEY_Q, 'q');
+            CharMapInsert(KEY_R, 'r');
+            CharMapInsert(KEY_S, 's');
+            CharMapInsert(KEY_T, 't');
+            CharMapInsert(KEY_U, 'u');
+            CharMapInsert(KEY_V, 'v');
+            CharMapInsert(KEY_W, 'w');
+            CharMapInsert(KEY_X, 'y');
+            CharMapInsert(KEY_Y, 'x');
+            CharMapInsert(KEY_Z, 'z');
+        }
+    }
 
-	void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight)
-	{
-		Init_CharMap();
+    void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight)
+    {
+        Init_CharMap();
 
-		std::shared_ptr<IGfxApi> gfxApi_ = defaultGfxApi();
+        std::shared_ptr<IGfxApi> gfxApi_ = defaultGfxApi();
 
-		// Create hardware Api instance
-		std::shared_ptr<Sdl2InputProcessor> inputProcessor_ = std::make_shared<Sdl2InputProcessor>();
-		std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi_);
+        // Create hardware Api instance
+        std::shared_ptr<Sdl2InputProcessor> inputProcessor_ = std::make_shared<Sdl2InputProcessor>();
+        std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi_);
 
 #ifdef _DEBUG
-		hardwareInitializer_->enableDebugger();
+        hardwareInitializer_->enableDebugger();
 #endif
 
-		if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight))
-		{
-			std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
+        if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight))
+        {
+            std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
 
-			gfxApi = gfxApi_;
-			hardwareInitializer = hardwareInitializer_;
-			inputProcessor = inputProcessor_;
+            gfxApi = gfxApi_;
+            hardwareInitializer = hardwareInitializer_;
+            inputProcessor = inputProcessor_;
 
-			pbInitialized = true;
+            pbInitialized = true;
 
-			assetLibrary = std::make_unique<AssetLibrary>("../", gfxApi);
-			assetLibrary->init();
-		}
-		else
-		{
-			LOGGER_ERROR("Failed to initialize hardware");
-		}
-	}
+            bool error = false;
+            //TODO: Using globally instanced font loader?
+            assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi, &fontLoader);
+            LoadAssetPack("Assets1");
+            //TODO: This needs to go somewhere else, or otherwise not hardcoded with a path.
+            //TODO: Perhaps build a default path for default assets
+            Shader glyphShader = assetLibrary->loadShaderAsset("Assets1/Shaders/UI/Glyph", &error);
 
-	void CreateScene(const std::string& sceneName)
-	{
-		if (loadedScenes.find(sceneName) == loadedScenes.end())
-		{
-			std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputProcessor));
+            if (error)
+            {
+                LOGGER_ERROR("Failed to load glyph shader");
+            }
+            else
+            {
+                LOGGER_DEBUG("Glyph shader loaded");
+                fontLoader = FontLoader{gfxApi_};
+                LOGGER_DEBUG("FontLoader initialized");
+            }
+        }
+        else
+        {
+            LOGGER_ERROR("Failed to initialize hardware");
+        }
+    }
 
-			loadedScenes.insert(
-				std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
-			);
-		}
-		else
-		{
-			LOGGER_ERROR("Scene already exists with this identifier name");
-		}
-	}
+    void CreateScene(const std::string& sceneName)
+    {
+        if (loadedScenes.find(sceneName) == loadedScenes.end())
+        {
+            std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputProcessor));
 
-	void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode)
-	{
-		if (loadedScenes.find(sceneName) != loadedScenes.end())
-		{
-			loadedScenes.at(sceneName)->setCameraMode(mode);
-		}
-		else
-		{
-			LOGGER_ERROR("Scene does not exist with this identifier name");
-		}
-	}
+            loadedScenes.insert(
+                    std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
+            );
+        }
+        else
+        {
+            LOGGER_ERROR("Scene already exists with this identifier name");
+        }
+    }
 
-	void SetActiveScene(const std::string& sceneName)
-	{
-		if (loadedScenes.find(sceneName) != loadedScenes.end())
-		{
-			activeSceneId = sceneName;
-		}
-		else
-		{
-			LOGGER_ERROR("Scene does not exist with this identifier name");
-		}
-	}
+    void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode)
+    {
+        if (loadedScenes.find(sceneName) != loadedScenes.end())
+        {
+            loadedScenes.at(sceneName)->setCameraMode(mode);
+        }
+        else
+        {
+            LOGGER_ERROR("Scene does not exist with this identifier name");
+        }
+    }
 
-	void SetSceneHandler(AbstractSceneHandler* sceneHandler)
-	{
-		activeScene().setSceneHandler(sceneHandler);
-	}
+    void SetActiveScene(const std::string& sceneName)
+    {
+        if (loadedScenes.find(sceneName) != loadedScenes.end())
+        {
+            activeSceneId = sceneName;
+        }
+        else
+        {
+            LOGGER_ERROR("Scene does not exist with this identifier name");
+        }
+    }
 
-	void LoadAssetPack(const std::string& archiveName)
-	{
-		assetLibrary->loadArchive(archiveName);
-	}
+    void SetSceneHandler(AbstractSceneHandler* sceneHandler)
+    {
+        activeScene().setSceneHandler(sceneHandler);
+    }
 
-	bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
-	{
-		if (sceneObject == nullptr)
-		{
-			LOGGER_ERROR("SceneObject must be instantiated prior to invoking CreateSceneObject");
-		}
-		else
-		{
-			if (assetLibrary->loadAsset(assetPath, sceneObject, convertToAssetType(type)))
-			{
-				return true;
-			}
+    bool LoadAssetPack(const std::string& archiveName)
+    {
+        return assetLibrary->loadArchive(archiveName);
+    }
 
-			LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
-		}
+    bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize)
+    {
+        bool error = false;
+        assetLibrary->loadFontAsset(fontPath, fontSize, &error);
+        return !error;
+    }
 
-		return false;
-	}
+    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
+    {
+        if (sceneObject == nullptr)
+        {
+            LOGGER_ERROR("SceneObject must be instantiated prior to invoking CreateSceneObject");
+        }
+        else
+        {
+            if (assetLibrary->loadModelAsset(assetPath, sceneObject, convertToAssetType(type)))
+            {
+                return true;
+            }
 
-	void Run()
-	{
-	    if (pbInitialized) {
+            LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+        }
+
+        return false;
+    }
+
+    IAnimationCatalogue* CreateAnimationCatalogue()
+    {
+        return new AnimationCatalogue(assetLibrary);
+    }
+
+    void Run()
+    {
+        if (pbInitialized)
+        {
             Engine engine{*gfxApi, *hardwareInitializer, *inputProcessor};
 
             engine.setScene(&activeScene());
@@ -243,12 +274,12 @@ namespace PB
 
             engine.shutdown();
         }
-	    else
+        else
         {
             LOGGER_ERROR("PuppetBox context was not initialized, must call PB::Init() before PB::Run()");
-	        hardwareInitializer->destroy();
+            hardwareInitializer->destroy();
         }
-	}
+    }
 
     std::int8_t GetCharFromCode(std::uint8_t code)
     {
@@ -259,5 +290,20 @@ namespace PB
 
         return 0;
     }
+
+    //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
+    UIComponent* CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes)
+    {
+        UIComponent* component{nullptr};
+
+        switch (uiComponentType)
+        {
+            case UI::TEXT_AREA:
+                component = new TextAreaComponent(assetLibrary, gfxApi);
+                component->setAttributes(std::move(attributes));
+                break;
+        }
+
+        return component;
+    }
 }
-#pragma clang diagnostic pop

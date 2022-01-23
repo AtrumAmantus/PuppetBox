@@ -1,7 +1,3 @@
-#pragma warning(disable : 4068) // Unknown pragmas warning
-// OCUnusedGlobalDeclarationInspection - Available to be used when needed.
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 #pragma once
 
 #include <string>
@@ -28,15 +24,15 @@ namespace PB
         * \param fragmentPath   The virtual asset path of the fragment shader asset.
         */
         explicit Shader(
-            std::string  shaderName,
-            std::string  vertexPath = "",
-            std::string  geometryPath = "",
-            std::string  fragmentPath = ""
+                std::string shaderName,
+                std::string vertexPath = "",
+                std::string geometryPath = "",
+                std::string fragmentPath = ""
         ) :
-            shaderName_(std::move(shaderName)),
-            vertexPath_(std::move(vertexPath)),
-            geometryPath_(std::move(geometryPath)),
-            fragmentPath_(std::move(fragmentPath)) {};
+                shaderName_(std::move(shaderName)),
+                vertexPath_(std::move(vertexPath)),
+                geometryPath_(std::move(geometryPath)),
+                fragmentPath_(std::move(fragmentPath)) {};
 
         /**
         * \brief Gets the gfx API specific ID for the shader program.
@@ -205,6 +201,7 @@ namespace PB
         * \param value  The desired value for the uniform variable in the shader.
         */
         void setMat4(const std::string& name, const mat4& mat) const;
+
     private:
         std::string shaderName_;
         std::string vertexPath_;
@@ -216,4 +213,3 @@ namespace PB
         std::uint32_t fragmentShaderId_ = 0;
     };
 }
-#pragma clang diagnostic pop
