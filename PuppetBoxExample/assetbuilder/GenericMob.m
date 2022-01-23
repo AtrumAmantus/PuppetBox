@@ -14,7 +14,7 @@ root:
       offset:
         x: 0
         y: 16 
-        z: 2
+        z: -2
       scale:
         x: 32
         y: 32
@@ -28,7 +28,7 @@ root:
       offset:
         x: 16
         y: 0
-        z: 1
+        z: -1
       scale:
         x: 16
         y: 16
@@ -42,7 +42,7 @@ root:
       offset:
         x: -16
         y: 0
-        z: 1
+        z: -1
       scale:
         x: 16
         y: 16

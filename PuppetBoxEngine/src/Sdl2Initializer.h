@@ -90,6 +90,7 @@ namespace PB
             if (!error)
             {
                 gfxApi_.setRenderDimensions(windowWidth, windowHeight);
+                gfxApi_.setRenderDistance(1000);
 
                 if (gfxApi_.init(SDL_GL_GetProcAddress))
                 {

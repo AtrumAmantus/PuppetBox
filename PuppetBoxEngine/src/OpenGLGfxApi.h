@@ -46,15 +46,19 @@ namespace PB
         */
         void setRenderDimensions(std::uint32_t width, std::uint32_t height) override;
 
+        void setRenderDistance(std::uint32_t distance) override;
+
         /**
         * \brief Get the current render window area's width.
         */
-        std::uint32_t getRenderWidth() override;
+        std::uint32_t getRenderWidth() const override;
 
         /**
         * \brief Get the current render window area's height.
         */
-        std::uint32_t getRenderHeight() override;
+        std::uint32_t getRenderHeight() const override;
+
+        std::uint32_t getRenderDistance() const override;
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.
@@ -96,6 +100,7 @@ namespace PB
     private:
         std::uint32_t width_ = 0;
         std::uint32_t height_ = 0;
+        std::uint32_t distance_ = 0;
         std::uint32_t UBO_ = 0;
         std::uint32_t minimumUBOOffset_ = 0;
     };

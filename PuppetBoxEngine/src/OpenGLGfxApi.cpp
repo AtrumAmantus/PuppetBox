@@ -163,14 +163,24 @@ namespace PB
         height_ = height;
     }
 
-    std::uint32_t OpenGLGfxApi::getRenderWidth()
+    void OpenGLGfxApi::setRenderDistance(std::uint32_t distance)
+    {
+        distance_ = distance;
+    }
+
+    std::uint32_t OpenGLGfxApi::getRenderWidth() const
     {
         return width_;
     }
 
-    std::uint32_t OpenGLGfxApi::getRenderHeight()
+    std::uint32_t OpenGLGfxApi::getRenderHeight() const
     {
         return height_;
+    }
+
+    std::uint32_t OpenGLGfxApi::getRenderDistance() const
+    {
+        return distance_;
     }
 
     ImageReference OpenGLGfxApi::loadImage(ImageData imageData, ImageOptions options) const

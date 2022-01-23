@@ -70,8 +70,8 @@ namespace PB
             sceneHandler_->update(deltaTime);
 
             mat4 view = camera_.calculateViewMatrix(viewMode_);
-            mat4 projection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), viewMode_);
-            mat4 orthoProjection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(),
+            mat4 projection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), gfxApi_->getRenderDistance(), viewMode_);
+            mat4 orthoProjection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), gfxApi_->getRenderDistance(),
                                                        SceneView::ORTHO);
 
             gfxApi_->setTransformUBOData(view, projection, orthoProjection);

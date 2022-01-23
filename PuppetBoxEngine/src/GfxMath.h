@@ -73,13 +73,14 @@ namespace PB::GfxMath
     /**
     * \brief Create a projection transformation matrix.
     *
-    * \param viewWidth	The width of the render window area.
-    * \param viewHeight	The height of the render window area.
-    * \param viewMode	The view mode to use (Perspective/Ortho).
+    * \param viewWidth	    The width of the render window area.
+    * \param viewHeight	    The height of the render window area.
+    * \param viewDistance   The "depth" of the render window area.
+    * \param viewMode	    The view mode to use (Perspective/Ortho).
     *
     * \return The projection transformation matrix (mat4) for the given references.
     */
-    mat4 Projection(std::uint32_t viewWidth, std::uint32_t viewHeight, SceneView::Mode viewMode);
+    mat4 Projection(std::uint32_t viewWidth, std::uint32_t viewHeight, std::uint32_t viewDistance, SceneView::Mode viewMode);
 
     /**
     * \brief Scales the matrix by the given values.

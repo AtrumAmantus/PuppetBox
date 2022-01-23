@@ -70,30 +70,30 @@ namespace PB::GfxMath
                                      {up.x, up.y, up.z}));
     }
 
-    mat4 Projection(std::uint32_t viewWidth, std::uint32_t viewHeight, SceneView::Mode viewMode)
+    mat4 Projection(std::uint32_t viewWidth, std::uint32_t viewHeight, std::uint32_t viewDepth, SceneView::Mode viewMode)
     {
         mat4 projection = mat4::eye();
 
         auto vWidth = static_cast<float>(viewWidth);
         auto vHeight = static_cast<float>(viewHeight);
+        auto vDepth = static_cast<float>(viewDepth);
 
         // Using +/- (dimension / 2) will center the camera on 0,0
         float left = 0;
         float right = vWidth;
         float bottom = 0;
         float top = vHeight;
-
-        float zNear = -1.0f;
-        float zFar = 1.0f;
+        float zNear = 0;
+        float zFar = vDepth;
 
         if (viewMode == SceneView::Mode::ORTHO)
         {
-            projection[0][0] = 2.0f / (right - left); // Normalize x, world center on [0,0]
-            projection[1][1] = 2.0f / (top - bottom); // Normalize y, world center on [0,0], not inverted so +y is "up"
-            projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z, inverted so +z is toward user
+            projection[0][0] = 2.0f / (right - left); // Normalize x
+            projection[1][1] = 2.0f / (top - bottom); // Normalize y, not inverted so +y is "up"
+            projection[2][2] = (2.0f / (zFar - zNear)); // Normalize z, -z is toward user
             projection[3][0] = -((right + left) / (right - left)); // Sets x:0 to left edge
             projection[3][1] = -((top + bottom) / (top - bottom)); // Sets y:0 to top edge
-            projection[3][2] = 0; //-((zFar + zNear) / (zFar - zNear)); //TODO: What are these for?
+            projection[3][2] = -((zFar + zNear) / (zFar - zNear)); // Sets z:0 to screen
         }
         else
         {
@@ -118,7 +118,13 @@ namespace PB::GfxMath
 
     mat4 Translate(mat4 m, vec3 t)
     {
-        m[3] = m[0] * t[0] + m[1] * t[1] + m[2] * t[2] + m[3];
+        m[3] = vec4{
+                m[0][0] * t[0] + m[1][0] * t[1] + m[2][0] * t[2] + m[3][0],
+                m[0][1] * t[0] + m[1][1] * t[1] + m[2][1] * t[2] + m[3][1],
+                m[0][2] * t[0] + m[1][2] * t[1] + m[2][2] * t[2] + m[3][2],
+                m[3][3]
+        };
+
         return m;
     }
 
