@@ -14,19 +14,6 @@
 #include "Entity.h"
 #include "Sprite.h"
 
-namespace
-{
-    void insertIntoMap(
-            const std::string& k,
-            PB::SceneObject* v,
-            std::unordered_map<std::string, PB::SceneObject*>& map)
-    {
-        map.insert(
-                std::pair<std::string, PB::SceneObject*>{k, v}
-        );
-    }
-}
-
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
 public:
@@ -132,6 +119,16 @@ protected:
         if (input()->keyboard.isDown(KEY_RIGHT) || input()->keyboard.isDown(KEY_LEFT))
         {
             moveVec.x = input()->keyboard.isDown(KEY_RIGHT) + (-1 * input()->keyboard.isDown(KEY_LEFT));
+        }
+
+        if (input()->keyboard.isPressed(KEY_PERIOD))
+        {
+            PB::UI::Origin origin = PB::UI::BOTTOM_LEFT;
+            if (uiComponents_.at(0)->getUIntAttribute(PB::UI::ORIGIN).orElse(0) == origin)
+            {
+                origin = PB::UI::TOP_LEFT;
+            }
+            uiComponents_.at(0)->setUIntAttribute(PB::UI::ORIGIN, origin);
         }
 
         getCamera()->move(moveVec);
