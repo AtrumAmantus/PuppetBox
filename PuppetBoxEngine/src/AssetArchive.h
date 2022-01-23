@@ -11,6 +11,7 @@
 
 #include "puppetbox/IAnimationCatalogue.h"
 
+#include "FontLoader.h"
 #include "ImageData.h"
 #include "Logger.h"
 #include "Material.h"
@@ -114,11 +115,49 @@ namespace PB
         */
         ShaderProgram loadShaderAsset(const std::string& assetPath, bool* error);
 
+        /**
+         * \brief Loads a set of animation assets, sets are a collection of animations associated with
+         * a particular skeleton.
+         *
+         * \param assetPath Path to the animation set.
+         * \param map       The map to add the animations of the animation set to.
+         * \return True if the animation set was loaded successfully, False otherwise.
+         */
         bool loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, std::string>& map);
 
+        /**
+         * \brief Loads an individual animation asset.
+         *
+         * \param name      The desired reference name for the animation.
+         * \param assetPath The path to the desired animation.
+         * \param map       The map to add the animation to, using the given name.
+         * \return True if the animation was loaded and added to the map successfully, False otherwise.
+         */
         bool loadAnimationAsset(const std::string& name, const std::string& assetPath,
                                 std::unordered_map<std::string, IAnimation*>& map);
 
+        /**
+         * \brief Load the given font asset.
+         *
+         * <p>On the first load of a font, the given size dictates how large to create it's associated
+         * glyph images.  Future calls used these cached images and the requested size is ignored.</p>
+         *
+         * \param assetPath  The path of the font to load.
+         * \param fontSize   The size to load the font at.
+         * \param fontLoader The {\link FontLoader} to use to load the font with.
+         * \param error      Error flag to indicate if there was an issue loading the font.
+         * \return The {\link Font} object associated with the loaded font.  Returns an uninitialized {\link Font}
+         * object if the font failed to load.
+         */
+        Font loadFontAsset(const std::string& assetPath, std::uint8_t fontSize, FontLoader* fontLoader, bool* error);
+
+        /**
+         * Loads mesh data assets as a {\link std::vector} of {\link Vertex} elements.
+         *
+         * \param assetPath The path to the desired mesh data to load.
+         * \param error     Error flag to indicate if there was an issue loading the mesh data.
+         * \return A {\link std::vector} of {\link Vertex} elements holding the requested mesh data.
+         */
         std::vector<Vertex> loadMeshDataAsset(const std::string& assetPath, bool* error);
 
         /**

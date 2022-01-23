@@ -30,6 +30,22 @@ namespace PB
             assert(i < 2);
             return (&x)[i];
         }
+
+        ivec2 operator*(const int32_t& scalar) const
+        {
+            return {
+                    this->x * scalar,
+                    this->y * scalar
+            };
+        };
+
+        ivec2 operator-(const ivec2& rhv) const
+        {
+            return {
+                    this->x - rhv.x,
+                    this->y - rhv.y
+            };
+        };
     };
 
     struct uivec2
@@ -520,10 +536,46 @@ namespace PB
         Bone bone{};
     };
 
+    /**
+     * \brief Similar to Java's "Optional" class, this is used to indicate if the
+     * response had a result.
+     *
+     * \tparam T The type of data being stored in the result.
+     */
     template<typename T>
     struct Result
     {
         T result;
         bool hasResult;
+
+        /**
+         * \brief Return an optional default value if the result was empty.
+         *
+         * \param defaultValue The default value to return.
+         * \return The result if it was not empty, otherwise returns the given defaulValue.
+         */
+        T orElse(T defaultValue)
+        {
+            if (hasResult)
+            {
+                return result;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        };
+    };
+
+    /**
+     * \brief Simple struct to pass an array and it's size in one object.
+     *
+     * \tparam T The type of data held in the array.
+     */
+    template<typename T>
+    struct SizedArray
+    {
+        T* array;
+        std::uint32_t length;
     };
 }

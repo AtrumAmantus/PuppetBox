@@ -2,8 +2,13 @@
 
 #include <cstdint>
 
+//TODO: This is coupled to the FreeType library and it shouldn't be.
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "puppetbox/DataStructures.h"
 
+#include "Font.h"
 #include "IHardwareInitializer.h"
 #include "ImageData.h"
 #include "ImageOptions.h"
@@ -25,7 +30,7 @@ namespace PB
         *
         * \return True if the GFX API initialization was successful, False otherwise.
         */
-        virtual bool init(const PB::ProcAddress procAddress) = 0;
+        virtual bool init(PB::ProcAddress procAddress) = 0;
 
         /**
         * \brief Used to define GFX API specific commands that must execute before each rendering loop.
@@ -64,6 +69,18 @@ namespace PB
         * \param options	Image loading options to use when loading into memory.
         */
         virtual ImageReference loadImage(ImageData imageData, ImageOptions options) const = 0;
+
+        /**
+         * \brief Generates textures for each glyph of the given font face, adding references to them
+         * within the loaded characters {\link unordered_map}.
+         *
+         * @param face              The font face to generate textures for.
+         * @param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
+         * glyph images.
+         * @return True if the glyph textures were successfully generated and loaded, False otherwise.
+         */
+        virtual bool
+        buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const = 0;
 
         /**
         * \brief Used to execute the GFX API specific commands to load vertex data into GFX memory.

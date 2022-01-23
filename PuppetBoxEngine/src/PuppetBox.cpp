@@ -1,14 +1,17 @@
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <PuppetBox.h>
 
 #include "AnimationCatalogue.h"
 #include "AssetLibrary.h"
 #include "Engine.h"
+#include "FontLoader.h"
 #include "OpenGLGfxApi.h"
 #include "Sdl2Initializer.h"
 #include "Sdl2InputProcessor.h"
+#include "UIComponents.h"
 
 namespace PB
 {
@@ -18,6 +21,7 @@ namespace PB
         std::shared_ptr<IHardwareInitializer> hardwareInitializer{nullptr};
         std::shared_ptr<AbstractInputProcessor> inputProcessor{nullptr};
         std::shared_ptr<IGfxApi> gfxApi{nullptr};
+        FontLoader fontLoader{nullptr};
         std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
         std::shared_ptr<AssetLibrary> assetLibrary{nullptr};
         std::string activeSceneId;
@@ -152,7 +156,24 @@ namespace PB
 
             pbInitialized = true;
 
-            assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi);
+            bool error = false;
+            //TODO: Using globally instanced font loader?
+            assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi, &fontLoader);
+            LoadAssetPack("Assets1");
+            //TODO: This needs to go somewhere else, or otherwise not hardcoded with a path.
+            //TODO: Perhaps build a default path for default assets
+            Shader glyphShader = assetLibrary->loadShaderAsset("Assets1/Shaders/UI/Glyph", &error);
+
+            if (error)
+            {
+                LOGGER_ERROR("Failed to load glyph shader");
+            }
+            else
+            {
+                LOGGER_DEBUG("Glyph shader loaded");
+                fontLoader = FontLoader{gfxApi_};
+                LOGGER_DEBUG("FontLoader initialized");
+            }
         }
         else
         {
@@ -205,9 +226,16 @@ namespace PB
         activeScene().setSceneHandler(sceneHandler);
     }
 
-    void LoadAssetPack(const std::string& archiveName)
+    bool LoadAssetPack(const std::string& archiveName)
     {
-        assetLibrary->loadArchive(archiveName);
+        return assetLibrary->loadArchive(archiveName);
+    }
+
+    bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize)
+    {
+        bool error = false;
+        assetLibrary->loadFontAsset(fontPath, fontSize, &error);
+        return !error;
     }
 
     bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
@@ -261,5 +289,21 @@ namespace PB
         }
 
         return 0;
+    }
+
+    //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
+    UIComponent* CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes)
+    {
+        UIComponent* component{nullptr};
+
+        switch (uiComponentType)
+        {
+            case UI::TEXT_AREA:
+                component = new TextAreaComponent(assetLibrary, gfxApi);
+                component->setAttributes(std::move(attributes));
+                break;
+        }
+
+        return component;
     }
 }

@@ -8,9 +8,10 @@
 
 #include "puppetbox/IModel.h"
 #include "AssetArchive.h"
-#include "Logger.h"
+#include "Font.h"
 #include "IGfxApi.h"
 #include "ImageReference.h"
+#include "Logger.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "RenderedMesh.h"
@@ -45,7 +46,7 @@ namespace PB
         * \param archiveRoot	The root directory that AssetLibrary should look for archives when they are loaded.
         * \param gfxApi			The derived gfxApi that will be used for loading assets.
         */
-        AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi>  gfxApi, FontLoader* fontLoader);
+        AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi, FontLoader* fontLoader);
 
         /**
         * \brief Attempts to load the archive with the given name so that it's contained assets can be used in future
@@ -83,10 +84,41 @@ namespace PB
         */
         Shader loadShaderAsset(const std::string& assetPath, bool* error);
 
+        /**
+         * \brief Loads a set of animation assets, sets are a collection of animations associated with
+         * a particular skeleton.
+         *
+         * \param assetPath Path to the animation set.
+         * \param map       The map to add the animations of the animation set to.
+         * \return True if the animation set was loaded successfully, False otherwise.
+         */
         bool loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map);
 
+        /**
+         * \brief Loads an individual animation asset.
+         *
+         * \param name      The desired reference name for the animation.
+         * \param assetPath The path to the desired animation.
+         * \param map       The map to add the animation to, using the given name.
+         * \return True if the animation was loaded and added to the map successfully, False otherwise.
+         */
         bool loadAnimationAsset(const std::string& animName, const std::string& assetPath,
                                 std::unordered_map<std::string, IAnimation*>& map);
+
+        /**
+         * \brief Load the given font asset.
+         *
+         * <p>On the first load of a font, the given size dictates how large to create it's associated
+         * glyph images.  Future calls used these cached images and the requested size is ignored.</p>
+         *
+         * \param assetPath  The path of the font to load.
+         * \param fontSize   The size to load the font at.
+         * \param fontLoader The {\link FontLoader} to use to load the font with.
+         * \param error      Error flag to indicate if there was an issue loading the font.
+         * \return The {\link Font} object associated with the loaded font.  Returns an uninitialized {\link Font}
+         * object if the font failed to load.
+         */
+        Font loadFontAsset(const std::string& fontPath, std::uint8_t fontSize, bool* error);
 
         /**
         * \brief Loads a Mesh asset given by the provided virtual asset path.
@@ -99,17 +131,6 @@ namespace PB
         */
         Mesh loadMeshAsset(const std::string& assetPath, bool* error);
 
-    private:
-        std::string archiveRoot_;
-        std::shared_ptr<IGfxApi> gfxApi_;
-        std::unordered_map<std::string, AssetArchive> assetArchives_{};
-        std::unordered_map<std::string, Mesh> loadedMeshes_{};
-        std::unordered_map<std::string, Material> loadedMaterials_{};
-        std::unordered_map<std::string, ImageReference> loadedImages_{};
-        std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
-        std::unordered_map<std::string, Shader> loadedShaders_{};
-    private:
-
         /**
         * \brief Loads an ImageReference asset given by the provided virtual asset path.
         *
@@ -121,6 +142,19 @@ namespace PB
         * object if an error occurred loading the asset.
         */
         ImageReference loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error);
+
+    private:
+        std::string archiveRoot_;
+        std::shared_ptr<IGfxApi> gfxApi_;
+        FontLoader* fontLoader_;
+        std::unordered_map<std::string, AssetArchive> assetArchives_{};
+        std::unordered_map<std::string, Mesh> loadedMeshes_{};
+        std::unordered_map<std::string, Material> loadedMaterials_{};
+        std::unordered_map<std::string, ImageReference> loadedImages_{};
+        std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
+        std::unordered_map<std::string, Shader> loadedShaders_{};
+        std::unordered_map<std::string, Font> loadedFonts_{};
+    private:
 
         /**
         * \brief Loads a Material asset given by the provided virtual asset path.

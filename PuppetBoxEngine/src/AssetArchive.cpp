@@ -33,6 +33,29 @@ namespace PB
         }
 
         /**
+         * \brief Maps an input stream to a {\link SizedArray}.
+         *
+         * \param stream The stream to read from.
+         * \return A {\link SizedArray} loaded with the given stream data.
+         */
+        SizedArray<char> mapStreamToByteArray(std::istream* stream)
+        {
+            SizedArray<char> bytes{};
+
+            stream->seekg(0, std::istream::end);
+            bytes.length = stream->tellg();
+            stream->seekg(0, std::istream::beg);
+
+            char* buffer = new char[bytes.length];
+
+            stream->read(buffer, bytes.length);
+
+            bytes.array = buffer;
+
+            return bytes;
+        }
+
+        /**
         * \brief Helper function to return a default value if a given key is not in the given PropertyTree
         *
         * \param propertyName	The key that is expected to referenced the desired data in the PropertyTree.
@@ -752,6 +775,39 @@ namespace PB
         return !error;
     }
 
+    Font AssetArchive::loadFontAsset(
+            const std::string& assetPath,
+            std::uint8_t fontSize,
+            FontLoader* fontLoader,
+            bool* error
+    )
+    {
+        Font font;
+
+        std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
+
+        if (hasAsset(fileName))
+        {
+            std::istream* stream = nullptr;
+
+            *error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
+
+            if (!*error)
+            {
+                SizedArray<char> bytesArray = mapStreamToByteArray(stream);
+
+                font = fontLoader->loadFontFromBytes(bytesArray, fontSize, error);
+            }
+        }
+        else
+        {
+            *error = true;
+            LOGGER_ERROR("Failed to retrieve font asset, '" + assetPath + "'");
+        }
+
+        return font;
+    }
+
     std::vector<Vertex> AssetArchive::loadMeshDataAsset(const std::string& assetPath, bool* error)
     {
         std::vector<Vertex> meshData{};
@@ -774,9 +830,9 @@ namespace PB
                 if (i >= 8)
                 {
                     meshData.push_back(Vertex{
-                        vec3{values[0], values[1], values[2]},
-                        vec3{values[3], values[4], values[5]},
-                        vec2{values[6], values[7]}
+                            vec3{values[0], values[1], values[2]},  // Vertex Coord
+                            vec3{values[3], values[4], values[5]},  // Vertex Normal
+                            vec2{values[6], values[7]}              // UV Coord
                     });
 
                     i = 0;

@@ -7,6 +7,7 @@
 #include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
 #include "puppetbox/TypeDef.h"
+#include "puppetbox/UIComponent.h"
 
 namespace PB
 {
@@ -52,8 +53,20 @@ namespace PB
      * \brief Loads a special PuppetBox format asset package to be utilized in the scene
      *
      * \param archiveName The name of the asset pack to load
+     * \return True if the asset pack was loaded successfully, False otherwise.
      */
-    extern PUPPET_BOX_API void LoadAssetPack(const std::string& archiveName);
+    extern PUPPET_BOX_API bool LoadAssetPack(const std::string& archiveName);
+
+    /**
+     * \brief Loads a font asset from the given fully qualified asset path.
+     *
+     * <p>The given font-size is only considered the first time the font is loaded.
+     *
+     * \param fontPath The fully qualified asset path of the font asset.
+     * \param fontSize The desired fontSize to load the font at.
+     * \return True if the font asset was loaded successfully, False otherwise.
+     */
+    extern PUPPET_BOX_API bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize);
 
     /**
      * \brief Injects the base assets into the given scene object.
@@ -82,4 +95,15 @@ namespace PB
     * \return The int value for the ascii character the key code represents.
     */
     extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code);
+
+    /**
+     * \brief Creates a {\link UIComponent} of the given {\link UI::Type}.
+     *
+     * \param uiComponentType The type of {\link UIComponent} to create.
+     * \param attributes      The {\link UIComponentAttributes} to associate with the created
+     * {\link UIComponent}.
+     * \return The created {\link UIComponent}.
+     */
+    extern PUPPET_BOX_API UIComponent*
+    CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes);
 }

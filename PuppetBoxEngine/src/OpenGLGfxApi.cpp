@@ -230,11 +230,90 @@ namespace PB
         return imageReference;
     }
 
+    bool
+    OpenGLGfxApi::buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const
+    {
+        bool success = true;
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  // Disable byte-alignment restriction
+
+        for (std::uint8_t c = 0; success && c < 128U; ++c)
+        {
+            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            {
+                success = false;
+                LOGGER_ERROR("Failed to load glyph for '" + std::to_string(static_cast<char>(c)) + "'");
+            }
+            else
+            {
+                /*
+                 * OpenGL uses the bottom left corner as the point of origin,
+                 * so we need to invert the "rows" of byte data, since image
+                 * data on the host machine is stored with the origin in the
+                 * top left corner.
+                 */
+                std::uint32_t bitmapWidth = face->glyph->bitmap.width;
+                std::uint32_t bitmapHeight = face->glyph->bitmap.rows;
+
+                for (std::uint32_t row = 0; row < bitmapHeight / 2; ++row)
+                {
+                    for (std::uint32_t pixel = 0; pixel < bitmapWidth; ++pixel)
+                    {
+                        std::uint32_t currentIndex = (bitmapWidth * row) + pixel;
+                        std::uint32_t invertedIndex = (bitmapWidth * (bitmapHeight - row - 1)) + pixel;
+
+                        std::uint8_t tmp = face->glyph->bitmap.buffer[currentIndex];
+                        face->glyph->bitmap.buffer[currentIndex] = face->glyph->bitmap.buffer[invertedIndex];
+                        face->glyph->bitmap.buffer[invertedIndex] = tmp;
+                    }
+                }
+
+                std::uint32_t texture;
+                glGenTextures(1, &texture);
+                glBindTexture(GL_TEXTURE_2D, texture);
+                glTexImage2D(
+                        GL_TEXTURE_2D,
+                        0,
+                        GL_RED,
+                        face->glyph->bitmap.width,
+                        face->glyph->bitmap.rows,
+                        0,
+                        GL_RED,
+                        GL_UNSIGNED_BYTE,
+                        face->glyph->bitmap.buffer
+                );
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                ImageReference imageReference{texture};
+                imageReference.requiresAlphaBlending = true;
+
+                loadedCharacters.insert(
+                        std::pair<int8_t, TypeCharacter>{
+                                c,
+                                TypeCharacter{
+                                        imageReference,
+                                        texture,
+                                        {face->glyph->bitmap.width, face->glyph->bitmap.rows},
+                                        {face->glyph->bitmap_left, face->glyph->bitmap_top},
+                                        static_cast<std::uint32_t>(face->glyph->advance.x)
+                                }
+                        }
+                );
+            }
+        }
+
+        return success;
+    }
+
     Mesh OpenGLGfxApi::loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const
     {
         Mesh mesh{};
 
-        std::uint32_t stride = 3 + 3 + 2 + (3 * vertexData[0].useColour);
+        mesh.stride = 3 + 3 + 2 + (3 * vertexData[0].useColour);
 
         std::vector<Vertex> uniqueVertices{};
         std::vector<std::uint32_t> indices{};
@@ -297,27 +376,19 @@ namespace PB
                      &indices[0], GL_STATIC_DRAW);
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)),
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
                               (void*) 0); // NOLINT(modernize-use-nullptr)
         glEnableVertexAttribArray(0);
 
         // normal attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)),
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
                               (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // texture attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)),
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
                               (void*) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
-
-        if (vertexData[0].useColour)
-        {
-            // colour attribute
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(stride * sizeof(float)),
-                                  (void*) (8 * sizeof(float)));
-            glEnableVertexAttribArray(3);
-        }
 
         // These could be unbound now, because glVertexAttribPointer registers the buffers already
         glBindBuffer(GL_ARRAY_BUFFER, 0);

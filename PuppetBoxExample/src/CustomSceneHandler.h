@@ -37,6 +37,8 @@ public:
 
         PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
 
+        PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
+
         getCamera()->setPosition({-400, -300, 0});
 
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
@@ -52,6 +54,24 @@ public:
             myEntity->playAnimation(anims->get("walk"));
         }
 
+        {
+            auto textBoxAttrs = PB::UIComponent::createUIComponentAttributes();
+            textBoxAttrs->setUIntAttribute(PB::UI::ORIGIN, PB::UI::Origin::TOP_LEFT);
+            textBoxAttrs->setUIntAttribute(PB::UI::POS_X, 0);
+            textBoxAttrs->setUIntAttribute(PB::UI::POS_Y, 300);
+            textBoxAttrs->setUIntAttribute(PB::UI::POS_Z, 1);
+            textBoxAttrs->setUIntAttribute(PB::UI::WIDTH, 200);
+            textBoxAttrs->setUIntAttribute(PB::UI::HEIGHT, 100);
+            textBoxAttrs->setUIntAttribute(PB::UI::FONT_SIZE, 24);
+            textBoxAttrs->setStringAttribute(PB::UI::FONT_TYPE, "Assets1/Fonts/MochiyPop/Regular");
+            textBoxAttrs->setStringAttribute(PB::UI::TEXT_CONTENT, "Why, hello there!");
+
+            auto textBox = std::unique_ptr<PB::UIComponent>(
+                    PB::CreateUIComponent(PB::UI::TEXT_AREA, std::move(textBoxAttrs)));
+
+            moveToUI(textBox);
+        }
+
 //		auto* mySprite = new Sprite{};
 //
 //		if (PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", mySprite, PB::LibraryAsset::Type::MODEL_2D))
@@ -64,12 +84,18 @@ public:
 protected:
     void updates(float deltaTime) override
     {
-        // Nothing yet.
+        for (auto& component: uiComponents_)
+        {
+            component->update(deltaTime);
+        }
     }
 
     void renders() const override
     {
-        // Nothing yet.
+        for (auto& component: uiComponents_)
+        {
+            component->render();
+        }
     }
 
     void processInputs() override
@@ -114,5 +140,13 @@ protected:
         {
             getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
         }
+    }
+
+private:
+    std::vector<std::unique_ptr<PB::UIComponent>> uiComponents_{};
+private:
+    void moveToUI(std::unique_ptr<PB::UIComponent>& component)
+    {
+        uiComponents_.push_back(std::move(component));
     }
 };

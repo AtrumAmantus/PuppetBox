@@ -17,7 +17,7 @@ namespace PB
         }
 
         material_.shader.use();
-        material_.diffuseMap.use(GL_TEXTURE0);
+        material_.diffuseMap.use(0);
         material_.shader.setInt("material.diffuseMap", 0);
 
         vec4 diffuseUvAdjust{
@@ -32,6 +32,7 @@ namespace PB
 
         mat4 model = mat4::eye();
         model = GfxMath::Translate(model, transform[0]);
+        //TODO: Revisit this logic, it's not correct
         model = GfxMath::Scale(model, transform[2]);
         model = GfxMath::Scale(model, mesh_.scale);
         model = GfxMath::Rotate(model, transform[1]);
@@ -54,7 +55,7 @@ namespace PB
         // Unset VAO for next render
         glBindVertexArray(0);
 
-        material_.diffuseMap.unuse(GL_TEXTURE0);
+        material_.diffuseMap.unuse(0);
         material_.shader.unuse();
         glDisable(GL_BLEND);
     }

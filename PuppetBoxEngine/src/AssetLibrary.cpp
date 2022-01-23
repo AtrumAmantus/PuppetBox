@@ -104,8 +104,8 @@ namespace PB
         }
     }
 
-    AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi) : archiveRoot_(
-            std::move(archiveRoot)), gfxApi_(std::move(gfxApi))
+    AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi, FontLoader* fontLoader)
+            : archiveRoot_(std::move(archiveRoot)), gfxApi_(std::move(gfxApi)), fontLoader_(fontLoader)
     {
 
     }
@@ -174,9 +174,20 @@ namespace PB
                 std::string geometryCode;
                 std::string fragmentCode;
 
-                if (!*error) vertexCode = loadShaderCode(program.vertexShaderPath, assetArchives_, error);
-                if (!*error) geometryCode = loadShaderCode(program.geometryShaderPath, assetArchives_, error);
-                if (!*error) fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
+                if (!*error)
+                {
+                    vertexCode = loadShaderCode(program.vertexShaderPath, assetArchives_, error);
+                }
+
+                if (!*error)
+                {
+                    geometryCode = loadShaderCode(program.geometryShaderPath, assetArchives_, error);
+                }
+
+                if (!*error)
+                {
+                    fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
+                }
 
                 shader = Shader{assetPath, program.vertexShaderPath, program.geometryShaderPath,
                                 program.fragmentShaderPath};
@@ -268,7 +279,51 @@ namespace PB
         return !error;
     }
 
-    Mesh AssetLibrary::loadMeshAsset(const std::string &assetPath, bool *error)
+    Font AssetLibrary::loadFontAsset(const std::string& fontPath, std::uint8_t fontSize, bool* error)
+    {
+        /**
+         * TODO: Currently, the fontSize attribute only applies to the first time the font is loaded,
+         * then it is ignored, since it's pulled from cache.  Maybe revisit this.
+         */
+        Font font;
+
+        if (loadedFonts_.find(fontPath) == loadedFonts_.end())
+        {
+            AssetStruct asset = parseAssetPath(fontPath, error);
+
+            if (!*error)
+            {
+                font = assetArchives_
+                        .at(asset.archiveName)
+                        .loadFontAsset(asset.assetName, fontSize, fontLoader_, error);
+
+                if (!*error)
+                {
+                    loadedFonts_.insert(
+                            std::pair<std::string, Font>(fontPath, font)
+                    );
+                }
+                else
+                {
+                    *error = true;
+                    LOGGER_ERROR("Failed to load font asset, '" + fontPath + "'");
+                }
+            }
+            else
+            {
+                *error = true;
+                LOGGER_ERROR("Invalid font asset, '" + fontPath + "'");
+            }
+        }
+        else
+        {
+            font = loadedFonts_.at(fontPath);
+        }
+
+        return font;
+    }
+
+    Mesh AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
     {
         Mesh mesh{};
 

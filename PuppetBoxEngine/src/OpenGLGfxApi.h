@@ -31,7 +31,7 @@ namespace PB
         *
         * \return True if the OpenGL API initialization was successful, False otherwise.
         */
-        bool init(const PB::ProcAddress procAddress) override;
+        bool init(PB::ProcAddress procAddress) override;
 
         /**
         * \brief Used to define OpenGL API specific commands that must execute before each rendering loop.
@@ -67,6 +67,18 @@ namespace PB
         * \param options	Image loading options to use when loading into memory.
         */
         ImageReference loadImage(ImageData imageData, ImageOptions options) const override;
+
+        /**
+         * \brief Generates textures for each glyph of the given font face, adding references to them
+         * within the loaded characters {\link unordered_map}.
+         *
+         * @param face              The font face to generate textures for.
+         * @param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
+         * glyph images.
+         * @return True if the glyph textures were successfully generated and loaded, False otherwise.
+         */
+        bool
+        buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const override;
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load vertex data into GFX memory.

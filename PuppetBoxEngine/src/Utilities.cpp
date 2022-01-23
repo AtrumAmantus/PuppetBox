@@ -446,14 +446,17 @@ namespace PB
         {
             bool success = false;
 
+            // Open zip archive
             struct zip_t* zip = zip_open(archivePath.c_str(), 0, 'r');
             {
                 if (zip != nullptr)
                 {
+                    // Open compressed file within archive
                     zip_entry_open(zip, filePath.c_str());
                     {
                         if (zip != nullptr)
                         {
+                            // Read file contents to buffer
                             if (zip_entry_read(zip, (void**) buffer, bufferSize) >= 0)
                             {
                                 success = true;

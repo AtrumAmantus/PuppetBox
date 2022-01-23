@@ -6,6 +6,29 @@
 
 namespace PB
 {
+    namespace
+    {
+        /**
+         * \brief Maps generic texture ID references to OpenGL specific identifiers.
+         *
+         * \param locationId The generic texture location ID reference.
+         * \return The OpenGL specific texture location ID reference.
+         */
+        std::int32_t mapToGLLocation(std::int32_t locationId)
+        {
+            std::int32_t glLocation = 0;
+
+            switch(locationId)
+            {
+                case 0:
+                    glLocation = GL_TEXTURE0;
+                    break;
+            }
+
+            return glLocation;
+        }
+    }
+
     /**
     * \brief OpenGL API specific implementation for ImageReference data used to reference stored image data.
     */
@@ -27,8 +50,14 @@ namespace PB
         */
         void use(std::int32_t locationId) const
         {
+            std::int32_t glLocation = mapToGLLocation(locationId);
+
             // Bind for use in current render
-            glActiveTexture(locationId);
+            if (requiresAlphaBlending)
+            {
+                glEnable(GL_BLEND);
+            }
+            glActiveTexture(glLocation);
             glBindTexture(GL_TEXTURE_2D, referenceId_);
         };
 
@@ -42,8 +71,13 @@ namespace PB
         // Keeping this non static for consistency with ImageReference#use()
         void unuse(std::int32_t locationId) const // NOLINT(readability-convert-member-functions-to-static)
         {
+            std::int32_t glLocation = mapToGLLocation(locationId);
+
             // Unbind after use in current render
-            glActiveTexture(locationId);
+            glDisable(GL_BLEND);
+            glActiveTexture(glLocation);
+
+            // Unbind texture at glLocation
             glBindTexture(GL_TEXTURE_2D, 0);
         };
 
