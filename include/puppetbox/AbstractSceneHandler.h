@@ -54,6 +54,8 @@ namespace PB
             {
                 e.second->render();
             }
+
+            renders();
         };
 
         /**
@@ -98,6 +100,11 @@ namespace PB
          * \param deltaTime The time (in milliseconds) that has passed since the last update().
          */
         virtual void updates(float deltaTime) {};
+
+        /**
+         * \brief Defined by child class for additional custom rendering logic.
+         */
+        virtual void renders() const {};
 
         /**
          * \brief Add an object to the scene, allowing engine level handling of object events.

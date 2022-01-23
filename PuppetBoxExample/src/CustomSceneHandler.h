@@ -67,6 +67,11 @@ protected:
         // Nothing yet.
     }
 
+    void renders() const override
+    {
+        // Nothing yet.
+    }
+
     void processInputs() override
     {
         if (input()->keyboard.isPressed(KEY_ESCAPE))
