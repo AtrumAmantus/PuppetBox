@@ -546,7 +546,7 @@ namespace PB
     struct Result
     {
         T result;
-        bool hasResult;
+        bool hasResult = false;
 
         /**
          * \brief Return an optional default value if the result was empty.
