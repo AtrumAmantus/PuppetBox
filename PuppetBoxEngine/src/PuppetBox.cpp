@@ -292,7 +292,8 @@ namespace PB
     }
 
     //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
-    UIComponent* CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes)
+    UIComponent*
+    CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes, bool* error)
     {
         UIComponent* component{nullptr};
 
@@ -303,6 +304,8 @@ namespace PB
                 component->setAttributes(std::move(attributes));
                 break;
         }
+
+        *error = component == nullptr || !component->init();
 
         return component;
     }
