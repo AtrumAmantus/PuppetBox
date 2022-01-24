@@ -96,6 +96,34 @@ namespace PB
         };
     };
 
+    struct uivec3
+    {
+        union
+        {
+            std::uint32_t x, r, s = 0;
+        };
+        union
+        {
+            std::uint32_t y, g, t = 0;
+        };
+        union
+        {
+            std::uint32_t z, b, p = 0;
+        };
+
+        std::uint32_t& operator[](std::uint32_t i)
+        {
+            assert(i < 3);
+            return (&x)[i];
+        }
+
+        const std::uint32_t& operator[](std::uint32_t i) const
+        {
+            assert(i < 3);
+            return (&x)[i];
+        }
+    };
+
     struct vec3
     {
         union

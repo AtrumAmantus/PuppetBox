@@ -56,4 +56,16 @@ namespace PB
         std::vector<Glyph> glyphs{};
         Font font_{};
     };
+
+    class GroupComponent : public GfxUIComponent
+    {
+    public:
+        void update(float deltaTime) override;
+
+        void render() const override;
+
+        bool addComponent(std::unique_ptr<UIComponent> component) override;
+    private:
+        std::vector<std::unique_ptr<UIComponent>> components_;
+    };
 }

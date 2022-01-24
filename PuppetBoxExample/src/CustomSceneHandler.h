@@ -46,8 +46,8 @@ public:
         {
             auto builder = UIAttributeBuilder{}
                     .origin(PB::UI::Origin::TOP_LEFT)
-                    .position({0, 300, 1})
-                    .dimensions({200, 100})
+                    .position({0, 400, 1})
+                    .dimensions({300, 200})
                     .fontSize(24)
                     .fontType(Constants::Font::MochiyPop);
 

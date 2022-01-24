@@ -1,6 +1,7 @@
 #include <unordered_map>
 
 #include "puppetbox/UIComponent.h"
+#include "Logger.h"
 
 namespace PB
 {
@@ -95,6 +96,17 @@ namespace PB
         return std::make_unique<SimpleUIComponentAttributes>();
     }
 
+    bool UIComponent::init()
+    {
+        return true;
+    }
+
+    bool UIComponent::addComponent(std::unique_ptr<UIComponent> component)
+    {
+        LOGGER_ERROR("addComponent not implemented for this UI Component.");
+        return false;
+    }
+
     void UIComponent::setAttributes(std::unique_ptr<UIComponentAttributes> attributes)
     {
         attributes_ = std::move(attributes);
@@ -103,30 +115,30 @@ namespace PB
     void UIComponent::setUIntAttribute(UI::Attribute attributeName, std::uint32_t value)
     {
         attributes_->setUIntAttribute(attributeName, value);
-    };
+    }
 
     Result<std::uint32_t> UIComponent::getUIntAttribute(UI::Attribute attributeName) const
     {
         return attributes_->getUIntAttribute(attributeName);
-    };
+    }
 
     void UIComponent::setIntAttribute(UI::Attribute attributeName, std::int32_t value)
     {
         attributes_->setIntAttribute(attributeName, value);
-    };
+    }
 
     Result<std::int32_t> UIComponent::getIntAttribute(UI::Attribute attributeName) const
     {
         return attributes_->getIntAttribute(attributeName);
-    };
+    }
 
     void UIComponent::setStringAttribute(UI::Attribute attributeName, const std::string& value)
     {
         attributes_->setStringAttribute(attributeName, value);
-    };
+    }
 
     Result<std::string> UIComponent::getStringAttribute(UI::Attribute attributeName) const
     {
         return attributes_->getStringAttribute(attributeName);
-    };
+    }
 }

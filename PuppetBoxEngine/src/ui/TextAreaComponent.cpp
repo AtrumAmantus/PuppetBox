@@ -106,14 +106,12 @@ namespace PB
         //TODO: Abstract the OpenGL calls/logic away
         bool error = false;
 
-        struct Component
+        struct
         {
             std::uint32_t origin = 0;
-            vec3 position{};
-            vec2 dimension{};
-        };
-
-        Component component{};
+            uivec3 position{};
+            uivec2 dimension{};
+        } component;
 
         component.origin = UIComponent::getUIntAttribute(UI::ORIGIN).orElse(UI::Origin::BOTTOM_LEFT);
 

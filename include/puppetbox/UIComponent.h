@@ -16,9 +16,13 @@ namespace PB
         enum Type
         {
             /**
+             * Defines a {\link UIComponent} that groups several components together.
+             */
+            GROUP,
+            /**
              * Defines a {\link UIComponent} that renders text on the screen.
              */
-            TEXT_AREA
+            TEXT_AREA,
         };
 
         /**
@@ -48,6 +52,14 @@ namespace PB
              * <p>Expected type: UInt</p>
              */
             HEIGHT,
+            /**
+             * \brief The layout direction for the component.
+             *
+             * <p>Expected type: UInt (enum)</p>
+             *
+             * \see PB:UI:Layout
+             */
+            LAYOUT,
             /**
              * \brief The location from which POS_X, POS_Y are set by.
              *
@@ -104,6 +116,15 @@ namespace PB
             TOP_RIGHT,
             BOTTOM_RIGHT,
         };
+
+        /**
+         * Allowed values for the Layout {\link PB::UI::Attribute}.
+         */
+        enum Layout
+        {
+            HORIZONTAL,
+            VERTICAL,
+        };
     }
 
     class PUPPET_BOX_API UIComponentAttributes
@@ -143,7 +164,7 @@ namespace PB
          * @return True if the UI component successfully initialized and is ready to use, False
          * otherwise.
          */
-        virtual bool init() = 0;
+        virtual bool init();
 
         /**
          * \brief The "Update" phase is where checks should be done to see if the component's
@@ -160,6 +181,8 @@ namespace PB
          * and calculations should be at a bare minimum, preferably none.
          */
         virtual void render() const = 0;
+
+        virtual bool addComponent(std::unique_ptr<UIComponent> component);
 
         void setAttributes(std::unique_ptr<UIComponentAttributes> attributes);
 
