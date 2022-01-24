@@ -575,7 +575,7 @@ namespace PB
     template<typename T>
     struct SizedArray
     {
-        T* array;
-        std::uint32_t length;
+        T* array = nullptr;
+        std::uint32_t length = 0;
     };
 }
