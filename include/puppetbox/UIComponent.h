@@ -138,6 +138,14 @@ namespace PB
         static std::unique_ptr<UIComponentAttributes> createUIComponentAttributes();
 
         /**
+         * \brief Invoked to initialize the state of a component and esnure functionality.
+         *
+         * @return True if the UI component successfully initialized and is ready to use, False
+         * otherwise.
+         */
+        virtual bool init() = 0;
+
+        /**
          * \brief The "Update" phase is where checks should be done to see if the component's
          * attributes have been changed, and update it's state.
          *

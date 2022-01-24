@@ -51,10 +51,17 @@ public:
             textBoxAttrs->setUIntAttribute(PB::UI::HEIGHT, 100);
             textBoxAttrs->setUIntAttribute(PB::UI::FONT_SIZE, 24);
             textBoxAttrs->setStringAttribute(PB::UI::FONT_TYPE, "Assets1/Fonts/MochiyPop/Regular");
-            textBoxAttrs->setStringAttribute(PB::UI::TEXT_CONTENT, "Why, hello there!");
+            textBoxAttrs->setStringAttribute(PB::UI::TEXT_CONTENT, "This is a long sentence that should wrap to the next line.");
+
+            bool error = false;
 
             auto textBox = std::unique_ptr<PB::UIComponent>(
-                    PB::CreateUIComponent(PB::UI::TEXT_AREA, std::move(textBoxAttrs)));
+                    PB::CreateUIComponent(
+                            PB::UI::TEXT_AREA,
+                            std::move(textBoxAttrs),
+                            &error
+                    )
+            );
 
             moveToUI(textBox);
         }

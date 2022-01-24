@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
+#include "puppetbox/DataStructures.h"
 #include "AssetLibrary.h"
 #include "GfxUIComponent.h"
 #include "IGfxApi.h"
@@ -12,6 +14,17 @@
  */
 namespace PB
 {
+    /**
+     * Container to store individual glyph placement data calculated in
+     * the Update phase, and used in the Render phase.
+     */
+    struct Glyph
+    {
+        vec3 position{};
+        vec2 dimensions{};
+        std::int8_t character = '\0';
+    };
+
     /**
      * Basic component for rendering text.
      *
@@ -32,11 +45,15 @@ namespace PB
     public:
         TextAreaComponent(const std::shared_ptr<AssetLibrary>& assetLibrary, const std::shared_ptr<IGfxApi>& gfxApi);
 
+        bool init() override;
+
         void update(float deltaTime) override;
 
         void render() const override;
 
     private:
-        Font font_;
+        Shader shader_{""};
+        std::vector<Glyph> glyphs{};
+        Font font_{};
     };
 }
