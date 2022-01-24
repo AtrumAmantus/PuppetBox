@@ -132,6 +132,11 @@ protected:
                 {
                     userInput_.append(PB::GetCharFromCode(k));
                 }
+
+                if (input()->keyboard.isReleased(KEY_BACKSPACE))
+                {
+                    userInput_.removeBeforeCursor();
+                }
             }
         }
         else

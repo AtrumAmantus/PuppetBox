@@ -11,6 +11,15 @@ public:
         input_.insert(input_.begin() + cursorPosition_++, c);
     };
 
+    void removeBeforeCursor()
+    {
+        if (cursorPosition_ > 0)
+        {
+            input_.erase(input_.begin() + cursorPosition_ - 1);
+            cursorPosition_--;
+        }
+    }
+
     std::string read() const
     {
         std::vector<char> copy = input_;
