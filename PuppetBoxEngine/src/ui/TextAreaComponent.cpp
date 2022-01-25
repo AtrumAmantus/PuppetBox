@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../UIComponents.h"
 
 namespace PB
@@ -43,7 +41,6 @@ namespace PB
                 componentPosition.z = UIComponent::getUIntAttribute(UI::POS_Z).orElse(0);
                 std::int32_t fontSize = UIComponent::getUIntAttribute(UI::FONT_SIZE).orElse(0);
                 std::string fontPath = UIComponent::getStringAttribute(UI::FONT_TYPE).orElse("");
-                std::uint32_t origin = UIComponent::getUIntAttribute(UI::ORIGIN).orElse(UI::Origin::BOTTOM_LEFT);
                 std::uint32_t componentWidth = UIComponent::getUIntAttribute(UI::WIDTH).orElse(0);
                 std::uint32_t componentHeight = UIComponent::getUIntAttribute(UI::HEIGHT).orElse(0);
                 float scale = (float) fontSize / font_.fontSize();

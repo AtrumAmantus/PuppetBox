@@ -2,12 +2,21 @@
 
 namespace PB
 {
+    GroupComponent::GroupComponent(
+            const std::shared_ptr<AssetLibrary>& assetLibrary,
+            const std::shared_ptr<IGfxApi>& gfxApi
+    ) : GfxUIComponent(assetLibrary, gfxApi)
+    {
+
+    }
+
     void GroupComponent::update(float deltaTime)
     {
         PB::UI::Layout layoutDir = (PB::UI::Layout) UIComponent::getUIntAttribute(PB::UI::Attribute::LAYOUT)
                 .orElse(PB::UI::Layout::HORIZONTAL);
 
-        struct {
+        struct
+        {
             uivec3 position{};
             std::uint32_t origin = 0;
         } group;
@@ -18,31 +27,59 @@ namespace PB
 
         group.origin = UIComponent::getUIntAttribute(UI::ORIGIN).orElse(0);
 
-        uivec2 offsets {
-            group.position.x,
-            group.position.y
+        uivec2 offsets{
+                group.position.x,
+                group.position.y
         };
 
-        for (auto& c : components_)
+        bool originBottom = group.origin == UI::Origin::BOTTOM_LEFT || group.origin == UI::Origin::BOTTOM_RIGHT;
+        bool originRight = group.origin == UI::Origin::TOP_RIGHT || group.origin == UI::Origin::BOTTOM_RIGHT;
+
+        //TODO: Remove branches
+        std::int32_t inc;
+        std::int32_t start;
+
+        if ((layoutDir == UI::HORIZONTAL && originRight) || (layoutDir == UI::VERTICAL && originBottom))
         {
-            c->setUIntAttribute(UI::ORIGIN, UI::Origin::TOP_LEFT);
-            c->setUIntAttribute(UI::POS_X, offsets.x);
-            c->setUIntAttribute(UI::POS_Y, offsets.y);
-            std::uint32_t childWidth = c->getUIntAttribute(UI::WIDTH).orElse(0);
-            std::uint32_t childHeight = c->getUIntAttribute(UI::HEIGHT).orElse(0);
-            offsets.x += (childWidth - (childWidth * layoutDir));
-            offsets.y += (childHeight * layoutDir);
-            c->update(deltaTime);
+            inc = -1;
+            start = 0;
+        }
+        else
+        {
+            inc = 1;
+            start = components_.size() - 1;
+        }
+
+        // Iterate forwards or backwards depending on layoutDir
+        for (std::int32_t i = start; (i * inc) < (components_.size() - start); i += inc)
+        {
+            // Set child's absolute location using parent's data
+            components_.at(i)->setUIntAttribute(UI::ORIGIN, group.origin);
+            components_.at(i)->setUIntAttribute(UI::POS_X, offsets.x);
+            components_.at(i)->setUIntAttribute(UI::POS_Y, offsets.y);
+
+            // Calculate next child's location
+            std::uint32_t childWidth = components_.at(i)->getUIntAttribute(UI::WIDTH).orElse(0);
+            std::uint32_t childHeight = components_.at(i)->getUIntAttribute(UI::HEIGHT).orElse(0);
+            offsets.x += ((childWidth - (childWidth * layoutDir)) - (2 * (childWidth - (childWidth * layoutDir)) * originRight));
+            offsets.y -= (childHeight * layoutDir) + (2 * (childHeight * layoutDir) * originBottom);
+
+            // Execute child's update logic
+            components_.at(i)->update(deltaTime);
         }
     }
 
     void GroupComponent::render() const
     {
-
+        for (auto& c: components_)
+        {
+            c->render();
+        }
     }
 
-    bool GroupComponent::addComponent(std::unique_ptr<UIComponent> component)
+    bool GroupComponent::addComponent(std::shared_ptr<UIComponent> component)
     {
         components_.push_back(component);
+        return true;
     }
 }

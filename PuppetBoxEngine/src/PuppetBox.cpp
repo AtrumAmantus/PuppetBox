@@ -301,6 +301,12 @@ namespace PB
                 component = new TextAreaComponent(assetLibrary, gfxApi);
                 component->setAttributes(std::move(attributes));
                 break;
+            case UI::GROUP:
+                component = new GroupComponent(assetLibrary, gfxApi);
+                component->setAttributes(std::move(attributes));
+                break;
+            default:
+                LOGGER_ERROR("Unrecognized component type: " + uiComponentType);
         }
 
         *error = component == nullptr || !component->init();

@@ -182,7 +182,7 @@ namespace PB
          */
         virtual void render() const = 0;
 
-        virtual bool addComponent(std::unique_ptr<UIComponent> component);
+        virtual bool addComponent(std::shared_ptr<UIComponent> component);
 
         void setAttributes(std::unique_ptr<UIComponentAttributes> attributes);
 

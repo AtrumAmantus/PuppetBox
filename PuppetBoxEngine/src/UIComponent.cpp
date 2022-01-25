@@ -101,7 +101,7 @@ namespace PB
         return true;
     }
 
-    bool UIComponent::addComponent(std::unique_ptr<UIComponent> component)
+    bool UIComponent::addComponent(std::shared_ptr<UIComponent> component)
     {
         LOGGER_ERROR("addComponent not implemented for this UI Component.");
         return false;

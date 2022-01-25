@@ -60,12 +60,14 @@ namespace PB
     class GroupComponent : public GfxUIComponent
     {
     public:
+        GroupComponent(const std::shared_ptr<AssetLibrary>& assetLibrary, const std::shared_ptr<IGfxApi>& gfxApi);
+
         void update(float deltaTime) override;
 
         void render() const override;
 
-        bool addComponent(std::unique_ptr<UIComponent> component) override;
+        bool addComponent(std::shared_ptr<UIComponent> component) override;
     private:
-        std::vector<std::unique_ptr<UIComponent>> components_;
+        std::vector<std::shared_ptr<UIComponent>> components_;
     };
 }
