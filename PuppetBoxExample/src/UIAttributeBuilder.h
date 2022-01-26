@@ -12,6 +12,13 @@ public:
         return *this;
     }
 
+    UIAttributeBuilder& layout(PB::UI::Layout layout)
+    {
+        layout_.result = layout;
+        layout_.hasResult = true;
+        return *this;
+    }
+
     UIAttributeBuilder& position(PB::vec3 position)
     {
         position_.result = position;
@@ -49,6 +56,11 @@ public:
             attributes->setUIntAttribute(PB::UI::ORIGIN, origin_.result);
         }
 
+        if (layout_.hasResult)
+        {
+            attributes->setUIntAttribute(PB::UI::LAYOUT, layout_.result);
+        }
+
         if (position_.hasResult)
         {
             attributes->setUIntAttribute(PB::UI::POS_X, position_.result.x);
@@ -80,7 +92,8 @@ public:
         return std::move(attributes);
     }
 private:
-    PB::Result<std::uint32_t> origin_{0, false};
+    PB::Result<PB::UI::Origin> origin_{PB::UI::Origin::BOTTOM_LEFT, false};
+    PB::Result<PB::UI::Layout> layout_{PB::UI::Layout::HORIZONTAL, false};
     PB::Result<PB::vec3> position_{{}, false};
     PB::Result<PB::vec2> dimensions_{{}, false};
     PB::Result<std::uint32_t> fontSize_{0, false};

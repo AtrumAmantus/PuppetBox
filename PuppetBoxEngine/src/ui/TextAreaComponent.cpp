@@ -35,24 +35,31 @@ namespace PB
             {
                 font_ = library()->loadFontAsset(fontName.result, 0, &error);
 
-                vec3 componentPosition{};
-                componentPosition.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
-                componentPosition.y = UIComponent::getUIntAttribute(UI::POS_Y).orElse(0);
-                componentPosition.z = UIComponent::getUIntAttribute(UI::POS_Z).orElse(0);
-                std::int32_t fontSize = UIComponent::getUIntAttribute(UI::FONT_SIZE).orElse(0);
-                std::string fontPath = UIComponent::getStringAttribute(UI::FONT_TYPE).orElse("");
-                std::uint32_t componentWidth = UIComponent::getUIntAttribute(UI::WIDTH).orElse(0);
-                std::uint32_t componentHeight = UIComponent::getUIntAttribute(UI::HEIGHT).orElse(0);
-                float scale = (float) fontSize / font_.fontSize();
+                struct {
+                    uivec3 position{};
+                    uivec2 dimensions{};
+                    std::string fontPath;
+                    std::uint32_t fontSize;
+                } component;
+
+                component.position.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
+                component.position.y = UIComponent::getUIntAttribute(UI::POS_Y).orElse(0);
+                component.position.z = UIComponent::getUIntAttribute(UI::POS_Z).orElse(0);
+                component.dimensions.x = UIComponent::getUIntAttribute(UI::WIDTH).orElse(0);
+                component.dimensions.y = UIComponent::getUIntAttribute(UI::HEIGHT).orElse(0);
+                component.fontSize = UIComponent::getUIntAttribute(UI::FONT_SIZE).orElse(0);
+                component.fontPath = UIComponent::getStringAttribute(UI::FONT_TYPE).orElse("");
+
+                float scale = (float) component.fontSize / font_.fontSize();
 
                 std::string::const_iterator c;
                 vec3 localPosition{};
 
-                float deltaY = fontSize + 2;
+                float deltaY = component.fontSize + 2;
 
                 c = text.begin();
-                // y increments "down", so invert before comparing
-                while (-(localPosition.y + deltaY) < componentHeight && c != text.end())
+                // localPosition.y decrements, so invert before comparing
+                while (-(localPosition.y - deltaY + 2) <= component.dimensions.y && c != text.end())
                 {
                     if (*c == '\n')
                     {
@@ -76,7 +83,7 @@ namespace PB
 
                         glyph.character = *c;
 
-                        if (localPosition.x + glyph.dimensions.x > componentWidth)
+                        if (localPosition.x + glyph.dimensions.x > component.dimensions.x)
                         {
                             localPosition.x = 0;
                             //TODO: Check if we're breaking a word and move it down if we are.
@@ -105,12 +112,12 @@ namespace PB
 
         struct
         {
-            std::uint32_t origin = 0;
+            UI::Origin origin = UI::BOTTOM_LEFT;
             uivec3 position{};
             uivec2 dimension{};
         } component;
 
-        component.origin = UIComponent::getUIntAttribute(UI::ORIGIN).orElse(UI::Origin::BOTTOM_LEFT);
+        component.origin = (UI::Origin) UIComponent::getUIntAttribute(UI::ORIGIN).orElse(UI::Origin::BOTTOM_LEFT);
 
         component.position.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
         component.position.y = UIComponent::getUIntAttribute(UI::POS_Y).orElse(0);

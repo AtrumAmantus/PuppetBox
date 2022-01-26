@@ -62,9 +62,7 @@ public:
             );
 
             textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                        "This is a long sentence that should wrap to the next line.");
-
-            addToUI(textBox);
+                                        "This is a long sentence that should wrap to the next line, followed by some additional words to check to see how big the bounding box is, and if it is properly clipping the text.");
 
             auto inputBox = std::shared_ptr<PB::UIComponent>(
                     PB::CreateUIComponent(
@@ -80,7 +78,23 @@ public:
 
             userInput_.targetComponent(inputBox);
 
-            addToUI(inputBox);
+            auto groupComponent = std::shared_ptr<PB::UIComponent>(
+                    PB::CreateUIComponent(
+                            PB::UI::GROUP,
+                            std::move(UIAttributeBuilder{}
+                                              .origin(PB::UI::Origin::BOTTOM_LEFT)
+                                              .position(PB::vec3{10, 10, 1})
+                                              .layout(PB::UI::Layout::VERTICAL)
+                                              .build()
+                            ),
+                            &error
+                    )
+            );
+
+            groupComponent->addComponent(textBox);
+            groupComponent->addComponent(inputBox);
+
+            addToUI(groupComponent);
         }
     }
 
@@ -93,6 +107,15 @@ protected:
             userInput_.clear();
 
             std::cout << "You typed: " << input << std::endl;
+
+            if (input == "/horizontal")
+            {
+                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+            }
+            else if (input == "/vertical")
+            {
+                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+            }
         }
         else
         {
