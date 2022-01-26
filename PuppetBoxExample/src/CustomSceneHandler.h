@@ -146,8 +146,10 @@ protected:
             }
             else
             {
+                // TODO: Still need to account for shift values
                 bool shiftDown = input()->keyboard.isDown(KEY_LEFT_SHIFT) || input()->keyboard.isDown(KEY_RIGHT_SHIFT);
 
+                // TODO: This can probably be better
                 std::vector<std::uint8_t> releasedKeys = input()->keyboard
                         .areReleased(Constants::Input::inputKeys, Constants::Input::inputKeyCount);
 
