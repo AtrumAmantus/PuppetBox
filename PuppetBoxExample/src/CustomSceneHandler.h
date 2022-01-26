@@ -11,15 +11,17 @@
 #include <puppetbox/KeyCode.h>
 #include <puppetbox/SceneObject.h>
 
+#include "Constants.h"
 #include "Entity.h"
 #include "Sprite.h"
+#include "UIAttributeBuilder.h"
+#include "UserInput.h"
 
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
 public:
     void setUp() override
     {
-
         auto* myEntity = new Entity{};
 
         PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
@@ -42,42 +44,84 @@ public:
         }
 
         {
-            auto textBoxAttrs = PB::UIComponent::createUIComponentAttributes();
-            textBoxAttrs->setUIntAttribute(PB::UI::ORIGIN, PB::UI::Origin::TOP_LEFT);
-            textBoxAttrs->setUIntAttribute(PB::UI::POS_X, 0);
-            textBoxAttrs->setUIntAttribute(PB::UI::POS_Y, 300);
-            textBoxAttrs->setUIntAttribute(PB::UI::POS_Z, 1);
-            textBoxAttrs->setUIntAttribute(PB::UI::WIDTH, 200);
-            textBoxAttrs->setUIntAttribute(PB::UI::HEIGHT, 100);
-            textBoxAttrs->setUIntAttribute(PB::UI::FONT_SIZE, 24);
-            textBoxAttrs->setStringAttribute(PB::UI::FONT_TYPE, "Assets1/Fonts/MochiyPop/Regular");
-            textBoxAttrs->setStringAttribute(PB::UI::TEXT_CONTENT, "This is a long sentence that should wrap to the next line.");
+            auto builder = UIAttributeBuilder{}
+                    .origin(PB::UI::Origin::TOP_LEFT)
+                    .position({0, 400, 1})
+                    .dimensions({300, 200})
+                    .fontSize(24)
+                    .fontType(Constants::Font::MochiyPop);
 
             bool error = false;
 
-            auto textBox = std::unique_ptr<PB::UIComponent>(
+            auto textBox = std::shared_ptr<PB::UIComponent>(
                     PB::CreateUIComponent(
                             PB::UI::TEXT_AREA,
-                            std::move(textBoxAttrs),
+                            std::move(builder.build()),
                             &error
                     )
             );
 
-            moveToUI(textBox);
-        }
+            textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
+                                        "This is a long sentence that should wrap to the next line, followed by some additional words to check to see how big the bounding box is, and if it is properly clipping the text.");
 
-//		auto* mySprite = new Sprite{};
-//
-//		if (PB::CreateSceneObject("Assets1/Sprites/Event/Click/Generic", mySprite, PB::LibraryAsset::Type::MODEL_2D))
-//		{
-//			mySprite->id = "click";
-//			mySprite->position = PB::vec2{-100.0f, 50.0f};
-//			insertIntoMap(mySprite->id, mySprite, renderLast_);
-//		}
-    };
+            auto inputBox = std::shared_ptr<PB::UIComponent>(
+                    PB::CreateUIComponent(
+                            PB::UI::TEXT_AREA,
+                            std::move(builder.build()),
+                            &error
+                    )
+            );
+
+            inputBox->setUIntAttribute(PB::UI::ORIGIN, PB::UI::Origin::BOTTOM_LEFT);
+            inputBox->setUIntAttribute(PB::UI::POS_Y, 200 - 24);
+            inputBox->setUIntAttribute(PB::UI::HEIGHT, 24);
+
+            userInput_.targetComponent(inputBox);
+
+            auto groupComponent = std::shared_ptr<PB::UIComponent>(
+                    PB::CreateUIComponent(
+                            PB::UI::GROUP,
+                            std::move(UIAttributeBuilder{}
+                                              .origin(PB::UI::Origin::BOTTOM_LEFT)
+                                              .position(PB::vec3{10, 10, 1})
+                                              .layout(PB::UI::Layout::VERTICAL)
+                                              .build()
+                            ),
+                            &error
+                    )
+            );
+
+            groupComponent->addComponent(textBox);
+            groupComponent->addComponent(inputBox);
+
+            addToUI(groupComponent);
+        }
+    }
+
 protected:
     void updates(float deltaTime) override
     {
+        if (!userInput_.isReading() && !userInput_.isEmpty())
+        {
+            std::string input = userInput_.read();
+            userInput_.clear();
+
+            std::cout << "You typed: " << input << std::endl;
+
+            if (input == "/horizontal")
+            {
+                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+            }
+            else if (input == "/vertical")
+            {
+                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+            }
+        }
+        else
+        {
+            userInput_.component()->setStringAttribute(PB::UI::TEXT_CONTENT, userInput_.read());
+        }
+
         for (auto& component: uiComponents_)
         {
             component->update(deltaTime);
@@ -94,20 +138,59 @@ protected:
 
     void processInputs() override
     {
-        if (input()->keyboard.isPressed(KEY_ESCAPE))
+        if (userInput_.isReading())
         {
-            input()->window.windowClose = true;
-        }
+            if (input()->keyboard.isReleased(KEY_ENTER))
+            {
+                userInput_.stopReading();
+            }
+            else
+            {
+                // TODO: Still need to account for shift values
+                bool shiftDown = input()->keyboard.isDown(KEY_LEFT_SHIFT) || input()->keyboard.isDown(KEY_RIGHT_SHIFT);
 
-        if (input()->keyboard.isPressed(KEY_W))
-        {
-            std::cout << "'w' key is pressed" << std::endl;
-        }
+                // TODO: This can probably be better
+                std::vector<std::uint8_t> releasedKeys = input()->keyboard
+                        .areReleased(Constants::Input::inputKeys, Constants::Input::inputKeyCount);
 
-        if (input()->mouse.deltaX != 0 || input()->mouse.deltaY != 0)
+                for (auto k : releasedKeys)
+                {
+                    userInput_.append(PB::GetCharFromCode(k));
+                }
+
+                if (input()->keyboard.isReleased(KEY_BACKSPACE))
+                {
+                    userInput_.removeBeforeCursor();
+                }
+            }
+        }
+        else
         {
-//            std::cout << "Mouse Delta: " << std::to_string(input()->mouse.deltaX) << ", " << std::to_string(input()->mouse.deltaY) << std::endl;
-//            std::cout << "Mouse Coords: " << std::to_string(input()->mouse.x) << ", " << std::to_string(input()->mouse.y) << std::endl;
+            if (input()->keyboard.isReleased(KEY_ENTER))
+            {
+                userInput_.startReading();
+            }
+            else
+            {
+                if (input()->keyboard.isReleased(KEY_ESCAPE))
+                {
+                    input()->window.windowClose = true;
+                }
+
+                PB::vec3 moveVec{};
+
+                if (input()->keyboard.isDown(KEY_UP) || input()->keyboard.isDown(KEY_DOWN))
+                {
+                    moveVec.y = input()->keyboard.isDown(KEY_UP) + (-1 * input()->keyboard.isDown(KEY_DOWN));
+                }
+
+                if (input()->keyboard.isDown(KEY_RIGHT) || input()->keyboard.isDown(KEY_LEFT))
+                {
+                    moveVec.x = input()->keyboard.isDown(KEY_RIGHT) + (-1 * input()->keyboard.isDown(KEY_LEFT));
+                }
+
+                getCamera()->move(moveVec);
+            }
         }
 
         if (input()->window.newWidth != 0 || input()->window.newHeight != 0)
@@ -116,30 +199,6 @@ protected:
                       << std::to_string(input()->window.newHeight) << std::endl;
         }
 
-        PB::vec3 moveVec{};
-
-        if (input()->keyboard.isDown(KEY_UP) || input()->keyboard.isDown(KEY_DOWN))
-        {
-            moveVec.y = input()->keyboard.isDown(KEY_UP) + (-1 * input()->keyboard.isDown(KEY_DOWN));
-        }
-
-        if (input()->keyboard.isDown(KEY_RIGHT) || input()->keyboard.isDown(KEY_LEFT))
-        {
-            moveVec.x = input()->keyboard.isDown(KEY_RIGHT) + (-1 * input()->keyboard.isDown(KEY_LEFT));
-        }
-
-        if (input()->keyboard.isPressed(KEY_PERIOD))
-        {
-            PB::UI::Origin origin = PB::UI::BOTTOM_LEFT;
-            if (uiComponents_.at(0)->getUIntAttribute(PB::UI::ORIGIN).orElse(0) == origin)
-            {
-                origin = PB::UI::TOP_LEFT;
-            }
-            uiComponents_.at(0)->setUIntAttribute(PB::UI::ORIGIN, origin);
-        }
-
-        getCamera()->move(moveVec);
-
         if (input()->mouse.wheelYDir != 0)
         {
             getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
@@ -147,9 +206,10 @@ protected:
     }
 
 private:
-    std::vector<std::unique_ptr<PB::UIComponent>> uiComponents_{};
+    std::vector<std::shared_ptr<PB::UIComponent>> uiComponents_{};
+    UserInput userInput_{};
 private:
-    void moveToUI(std::unique_ptr<PB::UIComponent>& component)
+    void addToUI(std::shared_ptr<PB::UIComponent> component)
     {
         uiComponents_.push_back(std::move(component));
     }

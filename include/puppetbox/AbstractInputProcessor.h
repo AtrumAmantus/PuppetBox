@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <vector>
+
 #include "KeyCode.h"
 #include "TypeDef.h"
 
@@ -26,12 +28,16 @@ namespace PB
         */
         bool isDown(std::uint16_t key) const;
 
+        std::vector<std::uint8_t> areDown(std::uint8_t* btns, std::uint32_t btnCount) const;
+
         /**
         * \brief Used to determine if a key is currently up.
         *
         * \return True if the key is currently up, False otheriwse.
         */
         bool isUp(std::uint16_t key) const;
+
+        std::vector<std::uint8_t> areUp(std::uint8_t* btns, std::uint32_t btnCount) const;
 
         /**
         * \brief Used to determine if a key was just pushed down.
@@ -40,12 +46,16 @@ namespace PB
         */
         bool isPressed(std::uint16_t key) const;
 
+        std::vector<std::uint8_t> arePressed(std::uint8_t* btns, std::uint32_t btnCount) const;
+
         /**
         * \brief Used to determine if a key was just released.
         *
         * \return True if the key just switched from being down to being up, False otheriwse.
         */
         bool isReleased(std::uint16_t key) const;
+
+        std::vector<std::uint8_t> areReleased(std::uint8_t* btns, std::uint32_t btnCount) const;
     };
 
     /**

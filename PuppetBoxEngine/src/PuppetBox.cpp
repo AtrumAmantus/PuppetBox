@@ -283,12 +283,10 @@ namespace PB
 
     std::int8_t GetCharFromCode(std::uint8_t code)
     {
-        if (charMap_.find(code) != charMap_.end())
-        {
-            return charMap_.at(code);
-        }
+        //TODO: Need a fallback
+        SDL_Keycode k = SDL_GetKeyFromScancode((SDL_Scancode)code);
 
-        return 0;
+        return k;
     }
 
     //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
@@ -303,6 +301,12 @@ namespace PB
                 component = new TextAreaComponent(assetLibrary, gfxApi);
                 component->setAttributes(std::move(attributes));
                 break;
+            case UI::GROUP:
+                component = new GroupComponent(assetLibrary, gfxApi);
+                component->setAttributes(std::move(attributes));
+                break;
+            default:
+                LOGGER_ERROR("Unrecognized component type: " + uiComponentType);
         }
 
         *error = component == nullptr || !component->init();
