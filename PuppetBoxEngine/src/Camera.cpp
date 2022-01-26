@@ -12,7 +12,7 @@ namespace PB
 
     void Camera::update(float deltaTime)
     {
-        position_ += (moveVector_ * (cameraSpeed_ * deltaTime));
+        position_ += moveVector_ * deltaTime;
         currentZoom_ = targetZoom_;
     }
 

@@ -81,6 +81,5 @@ namespace PB
         float targetZoom_ = 100.0f;
         float minZoom_ = 50.0f;
         float maxZoom_ = 150.0f;
-        float cameraSpeed_ = 100.0f;
     };
 }

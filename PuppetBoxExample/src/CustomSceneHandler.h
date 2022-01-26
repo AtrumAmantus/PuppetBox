@@ -12,6 +12,7 @@
 #include <puppetbox/SceneObject.h>
 
 #include "Constants.h"
+#include "Controls.h"
 #include "Entity.h"
 #include "Sprite.h"
 #include "UIAttributeBuilder.h"
@@ -22,6 +23,21 @@ class CustomSceneHandler : public PB::AbstractSceneHandler
 public:
     void setUp() override
     {
+        controls_ = Controls{input()};
+
+        controls_.registerCommand(Controls::FORWARD, KEY_UP);
+        controls_.registerCommand(Controls::FORWARD, KEY_W);
+        controls_.registerCommand(Controls::BACKWARD, KEY_DOWN);
+        controls_.registerCommand(Controls::BACKWARD, KEY_S);
+        controls_.registerCommand(Controls::LEFT, KEY_LEFT);
+        controls_.registerCommand(Controls::LEFT, KEY_A);
+        controls_.registerCommand(Controls::RIGHT, KEY_RIGHT);
+        controls_.registerCommand(Controls::RIGHT, KEY_D);
+        controls_.registerCommand(Controls::QUIT, KEY_ESCAPE);
+
+        controls_.setMoveSpeed(200.0f);
+        controls_.setZoomSpeed(2.0f);
+
         auto* myEntity = new Entity{};
 
         PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
@@ -172,21 +188,27 @@ protected:
             }
             else
             {
-                if (input()->keyboard.isReleased(KEY_ESCAPE))
+                if (controls_.isCommandReleased(Controls::QUIT))
                 {
                     input()->window.windowClose = true;
                 }
 
                 PB::vec3 moveVec{};
 
-                if (input()->keyboard.isDown(KEY_UP) || input()->keyboard.isDown(KEY_DOWN))
+                if (controls_.isCommandActive(Controls::FORWARD) || controls_.isCommandActive(Controls::BACKWARD))
                 {
-                    moveVec.y = input()->keyboard.isDown(KEY_UP) + (-1 * input()->keyboard.isDown(KEY_DOWN));
+                    moveVec.y = (
+                                        controls_.isCommandActive(Controls::FORWARD)
+                                        + (-1 * controls_.isCommandActive(Controls::BACKWARD))
+                                ) * controls_.getMoveSpeed();
                 }
 
-                if (input()->keyboard.isDown(KEY_RIGHT) || input()->keyboard.isDown(KEY_LEFT))
+                if (controls_.isCommandActive(Controls::RIGHT) || controls_.isCommandActive(Controls::LEFT))
                 {
-                    moveVec.x = input()->keyboard.isDown(KEY_RIGHT) + (-1 * input()->keyboard.isDown(KEY_LEFT));
+                    moveVec.x = (
+                                        controls_.isCommandActive(Controls::RIGHT)
+                                        + (-1 * controls_.isCommandActive(Controls::LEFT))
+                                ) * controls_.getMoveSpeed();
                 }
 
                 getCamera()->move(moveVec);
@@ -201,13 +223,14 @@ protected:
 
         if (input()->mouse.wheelYDir != 0)
         {
-            getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
+            getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir) * controls_.getZoomSpeed());
         }
     }
 
 private:
     std::vector<std::shared_ptr<PB::UIComponent>> uiComponents_{};
     UserInput userInput_{};
+    Controls controls_{nullptr};
 private:
     void addToUI(std::shared_ptr<PB::UIComponent> component)
     {
