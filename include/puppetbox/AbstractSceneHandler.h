@@ -37,12 +37,13 @@ namespace PB
             processInput();
             camera_->update(deltaTime);
 
+            // Update implementing application first in case new objects were added.
+            updates(deltaTime);
+
             for (auto& e: sceneObjects_)
             {
                 e.second->update(deltaTime);
             }
-
-            updates(deltaTime);
         };
 
         /**
