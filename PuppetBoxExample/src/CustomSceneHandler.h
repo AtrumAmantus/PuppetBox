@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <unordered_map>
 
@@ -16,7 +17,28 @@
 #include "Entity.h"
 #include "Sprite.h"
 #include "UIAttributeBuilder.h"
+#include "UIController.h"
 #include "UserInput.h"
+
+#define INPUT_BOX 0
+#define FPS_BOX 1
+
+namespace
+{
+    std::uint8_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
+    {
+        float sum = 0;
+
+        for (std::uint8_t i = 0; i < frameCount; ++i)
+        {
+            sum += frameTimes[i];
+        }
+
+        float average = sum / frameCount;
+
+        return 1000.0f / average;
+    }
+}
 
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
@@ -59,20 +81,18 @@ public:
             myEntity->playAnimation(anims->get("walk"));
         }
 
+        bool error = false;
+
         {
-            auto builder = UIAttributeBuilder{}
-                    .origin(PB::UI::Origin::TOP_LEFT)
-                    .position({0, 400, 1})
-                    .dimensions({300, 200})
-                    .fontSize(24)
-                    .fontType(Constants::Font::MochiyPop);
-
-            bool error = false;
-
             auto textBox = std::shared_ptr<PB::UIComponent>(
                     PB::CreateUIComponent(
                             PB::UI::TEXT_AREA,
-                            std::move(builder.build()),
+                            std::move(UIAttributeBuilder{}
+                                              .dimensions({300, 200})
+                                              .fontSize(24)
+                                              .fontType(Constants::Font::MochiyPop)
+                                              .build()
+                            ),
                             &error
                     )
             );
@@ -83,14 +103,15 @@ public:
             auto inputBox = std::shared_ptr<PB::UIComponent>(
                     PB::CreateUIComponent(
                             PB::UI::TEXT_AREA,
-                            std::move(builder.build()),
+                            std::move(UIAttributeBuilder{}
+                                              .dimensions({200, 24})
+                                              .fontSize(24)
+                                              .fontType(Constants::Font::MochiyPop)
+                                              .build()
+                            ),
                             &error
                     )
             );
-
-            inputBox->setUIntAttribute(PB::UI::ORIGIN, PB::UI::Origin::BOTTOM_LEFT);
-            inputBox->setUIntAttribute(PB::UI::POS_Y, 200 - 24);
-            inputBox->setUIntAttribute(PB::UI::HEIGHT, 24);
 
             userInput_.targetComponent(inputBox);
 
@@ -110,13 +131,41 @@ public:
             groupComponent->addComponent(textBox);
             groupComponent->addComponent(inputBox);
 
-            addToUI(groupComponent);
+            uiController_.addComponent(groupComponent, INPUT_BOX);
+        }
+
+        {
+            auto fpsCounter = std::shared_ptr<PB::UIComponent>(
+                    PB::CreateUIComponent(
+                            PB::UI::TEXT_AREA,
+                            std::move(UIAttributeBuilder{}
+                                              .origin(PB::UI::Origin::TOP_LEFT)
+                                              .fontSize(18)
+                                              .fontType(Constants::Font::MochiyPop)
+                                              .dimensions(PB::vec2{100, 24})
+                                              .position(PB::vec3{10, 590, 1})
+                                              .build()),
+                            &error
+                    )
+            );
+
+            uiController_.addComponent(fpsCounter, FPS_BOX);
         }
     }
 
 protected:
     void updates(float deltaTime) override
     {
+        bool error = false;
+
+        frameRates_[(frameIndex_++ % 60)] = deltaTime;
+        std::uint8_t averageFps = calculateAverageFps(frameRates_, 60);
+        if (frameIndex_ % 20 == 0)
+        {
+            uiController_.getComponent(FPS_BOX, &error)->setStringAttribute(PB::UI::TEXT_CONTENT,
+                                                                      std::to_string(averageFps) + " FPS");
+        }
+
         if (!userInput_.isReading() && !userInput_.isEmpty())
         {
             std::string input = userInput_.read();
@@ -126,11 +175,11 @@ protected:
 
             if (input == "/horizontal")
             {
-                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
             }
             else if (input == "/vertical")
             {
-                uiComponents_.at(0)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
             }
         }
         else
@@ -138,18 +187,12 @@ protected:
             userInput_.component()->setStringAttribute(PB::UI::TEXT_CONTENT, userInput_.read());
         }
 
-        for (auto& component: uiComponents_)
-        {
-            component->update(deltaTime);
-        }
+        uiController_.update(deltaTime);
     }
 
     void renders() const override
     {
-        for (auto& component: uiComponents_)
-        {
-            component->render();
-        }
+        uiController_.render();
     }
 
     void processInputs() override
@@ -228,12 +271,9 @@ protected:
     }
 
 private:
-    std::vector<std::shared_ptr<PB::UIComponent>> uiComponents_{};
+    UIController uiController_{};
     UserInput userInput_{};
     Controls controls_{nullptr};
-private:
-    void addToUI(std::shared_ptr<PB::UIComponent> component)
-    {
-        uiComponents_.push_back(std::move(component));
-    }
+    float frameRates_[60];
+    std::uint8_t frameIndex_ = 0;
 };
