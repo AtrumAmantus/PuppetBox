@@ -36,8 +36,8 @@ namespace PB
                 font_ = library()->loadFontAsset(fontName.result, 0, &error);
 
                 struct {
-                    uivec3 position{};
-                    uivec2 dimensions{};
+                    uivec3 position;
+                    uivec2 dimensions;
                     std::string fontPath;
                     std::uint32_t fontSize;
                 } component;
@@ -112,9 +112,9 @@ namespace PB
 
         struct
         {
-            UI::Origin origin = UI::BOTTOM_LEFT;
-            uivec3 position{};
-            uivec2 dimension{};
+            UI::Origin origin;
+            uivec3 position;
+            uivec2 dimension;
         } component;
 
         component.origin = (UI::Origin) UIComponent::getUIntAttribute(UI::ORIGIN).orElse(UI::Origin::BOTTOM_LEFT);
@@ -143,8 +143,12 @@ namespace PB
             vec3 containerOffset{};
             containerOffset.x = component.position.x - (component.dimension.x * originRight);
             containerOffset.y = component.position.y
-                                + (component.dimension.y - fontHeight) // Raises up if origin is bottom
-                                - (component.dimension.y * originTop); // Brings back down if origin is top
+                                // Raises up if origin is bottom
+                                // NOTE: Glyph vertices are drawn with origin in bottom left, so adjust for font height
+                                // when raising up.
+                                + (component.dimension.y - fontHeight)
+                                // Brings back down if origin is top
+                                - (component.dimension.y * originTop);
 
             //TODO: This may need to be reworked to support "floating" text in 3d space.
             float vertices[4][8] = {
@@ -154,7 +158,7 @@ namespace PB
                             g.position.z,
 
                             0.0f, 0.0f, 1.0f,   // Normals don't change
-                            0.0f, 1.0f          // UV coords don't change
+                            0.0f, 1.0f              // UV coords don't change
                     },
                     {
                             g.position.x + containerOffset.x,

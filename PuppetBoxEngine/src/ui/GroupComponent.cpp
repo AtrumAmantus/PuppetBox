@@ -17,23 +17,23 @@ namespace PB
 
         struct
         {
-            ivec3 position{};
-            UI::Origin origin = UI::BOTTOM_LEFT;
-        } group;
+            ivec3 position;
+            UI::Origin origin;
+        } component;
 
-        group.position.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
-        group.position.y = UIComponent::getUIntAttribute(UI::POS_Y).orElse(0);
-        group.position.z = UIComponent::getUIntAttribute(UI::POS_Z).orElse(0);
+        component.position.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
+        component.position.y = UIComponent::getUIntAttribute(UI::POS_Y).orElse(0);
+        component.position.z = UIComponent::getUIntAttribute(UI::POS_Z).orElse(0);
 
-        group.origin = (UI::Origin) UIComponent::getUIntAttribute(UI::ORIGIN).orElse(0);
+        component.origin = (UI::Origin) UIComponent::getUIntAttribute(UI::ORIGIN).orElse(0);
 
         ivec2 offsets{
-                group.position.x,
-                group.position.y
+                component.position.x,
+                component.position.y
         };
 
-        bool originBottom = group.origin == UI::Origin::BOTTOM_LEFT || group.origin == UI::Origin::BOTTOM_RIGHT;
-        bool originRight = group.origin == UI::Origin::TOP_RIGHT || group.origin == UI::Origin::BOTTOM_RIGHT;
+        bool originBottom = component.origin == UI::Origin::BOTTOM_LEFT || component.origin == UI::Origin::BOTTOM_RIGHT;
+        bool originRight = component.origin == UI::Origin::TOP_RIGHT || component.origin == UI::Origin::BOTTOM_RIGHT;
 
         //TODO: Remove branches
         std::int32_t inc;
@@ -54,7 +54,7 @@ namespace PB
         for (std::int32_t i = start; (i * inc) < (std::int32_t)(components_.size() - start); i += inc)
         {
             // Set child's absolute location using parent's data
-            components_.at(i)->setUIntAttribute(UI::ORIGIN, group.origin);
+            components_.at(i)->setUIntAttribute(UI::ORIGIN, component.origin);
             components_.at(i)->setUIntAttribute(UI::POS_X, offsets.x);
             components_.at(i)->setUIntAttribute(UI::POS_Y, offsets.y);
 
