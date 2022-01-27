@@ -22,14 +22,15 @@ namespace PB
     {
         updates(deltaTime);
 
-        if (model_ != nullptr)
-        {
-            model_->update(deltaTime);
-        }
-
+        // Behaviors might alter animations, etc, so need to run updates on those first.
         if (behavior_ != nullptr)
         {
             behavior_->update(this, deltaTime);
+        }
+
+        if (model_ != nullptr)
+        {
+            model_->update(deltaTime);
         }
     }
 
@@ -57,9 +58,20 @@ namespace PB
         behavior_ = std::move(behavior);
     }
 
-    void SceneObject::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
+    void SceneObject::setAnimationCatalogue(IAnimationCatalogue* animationCatalogue)
     {
+        animationCatalogue_ = animationCatalogue;
+    }
+
+    void SceneObject::playAnimation(const std::string& animationName, std::uint32_t startFrame)
+    {
+        std::unique_ptr<IAnimator> animator = animationName.empty() ? nullptr : animationCatalogue_->get(animationName);
         model_->playAnimation(std::move(animator), startFrame);
+    }
+
+    bool SceneObject::isAnimating() const
+    {
+        return model_->isAnimating();
     }
 
     vec3 SceneObject::actualScale() const

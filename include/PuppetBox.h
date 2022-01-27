@@ -80,7 +80,13 @@ namespace PB
     extern PUPPET_BOX_API bool
     CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
 
-    extern PUPPET_BOX_API IAnimationCatalogue* CreateAnimationCatalogue();
+    /**
+     * \brief Loads the animations associated with the given asset path.
+     *
+     * \param assetPath The path to the animation assets to load.
+     * \return True if the animation asset was loaded successfully, False otherwise.
+     */
+    extern PUPPET_BOX_API bool LoadAnimationsPack(const std::string& assetPath);
 
     /**
      * \brief Initiates start of core engine, input processors, and render loops.

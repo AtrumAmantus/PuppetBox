@@ -31,6 +31,11 @@ namespace PB
         }
     }
 
+    bool OpenGLModel::isAnimating() const
+    {
+        return animator_ != nullptr;
+    }
+
     void OpenGLModel::update(float deltaTime)
     {
         if (animator_ != nullptr)

@@ -22,7 +22,7 @@ namespace PB
             {
                 if (GfxMath::BasicallyEqual(sceneObject->position, targetPosition_))
                 {
-                    sceneObject->playAnimation(nullptr, 0);
+                    sceneObject->playAnimation("", 0);
 
                     waitTime_ = ((3 * RandomUtils::pseudoRand()) + 1);
 
@@ -42,6 +42,11 @@ namespace PB
                 }
                 else
                 {
+                    if (!sceneObject->isAnimating())
+                    {
+                        sceneObject->playAnimation("walk", 0);
+                    }
+
                     vec3 positionDelta = targetPosition_ - sceneObject->position;
                     float deltaSpeed = sceneObject->speed * deltaTime;
 

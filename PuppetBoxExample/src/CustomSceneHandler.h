@@ -64,7 +64,10 @@ public:
 
         auto* myEntity = new Entity{};
 
-        animationCatalogue_ = PB::CreateAnimationCatalogue();
+        if (!PB::LoadAnimationsPack("Assets1/Animations/BasicHuman"))
+        {
+            std::cout << "Failed to load animation pack" << std::endl;
+        }
 
         PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
 
@@ -78,11 +81,7 @@ public:
             addSceneObject(myEntity);
         }
 
-        if (animationCatalogue_->load("Assets1/Animations/BasicHuman"))
-        {
-            auto a = animationCatalogue_->getFactory("walk");
-            myEntity->playAnimation(animationCatalogue_->get("walk"), 0);
-        }
+        myEntity->playAnimation("walk", 0);
 
         bool error = false;
 
@@ -285,5 +284,4 @@ private:
     Controls controls_{nullptr};
     float frameRates_[60];
     std::uint8_t frameIndex_ = 0;
-    PB::IAnimationCatalogue* animationCatalogue_ = nullptr;
 };
