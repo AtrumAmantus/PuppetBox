@@ -32,7 +32,20 @@ namespace PB
         OpenGLModel(std::unordered_map<std::string, BoneMap> bones, std::unique_ptr<IAnimator> animator,
                     std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
 
+        /**
+         * \brief Sets the animation of the Model to the one held by the given animator.
+         *
+         * \param animator   {\link Animator} holding the desired @{link Animation}.
+         * \param startFrame The frame that the animation will start playing from.
+         */
         void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
+
+        /**
+         * \brief Checks if the {\link IModel} currently has an attached animation.
+         *
+         * \return True if there is currently an attached animation, False otherwise.
+         */
+        bool isAnimating() const override;
 
         /**
          * \brief Updates the object's state prior to the render() call.

@@ -22,6 +22,7 @@ namespace PB
         std::shared_ptr<AbstractInputProcessor> inputProcessor{nullptr};
         std::shared_ptr<IGfxApi> gfxApi{nullptr};
         FontLoader fontLoader{nullptr};
+        AnimationCatalogue animationCatalogue{nullptr};
         std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
         std::shared_ptr<AssetLibrary> assetLibrary{nullptr};
         std::string activeSceneId;
@@ -159,6 +160,7 @@ namespace PB
             bool error = false;
             //TODO: Using globally instanced font loader?
             assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi, &fontLoader);
+            animationCatalogue = AnimationCatalogue(assetLibrary);
             LoadAssetPack("Assets1");
             //TODO: This needs to go somewhere else, or otherwise not hardcoded with a path.
             //TODO: Perhaps build a default path for default assets
@@ -240,26 +242,25 @@ namespace PB
 
     bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
     {
+        bool success;
+
         if (sceneObject == nullptr)
         {
+            success = false;
             LOGGER_ERROR("SceneObject must be instantiated prior to invoking CreateSceneObject");
         }
         else
         {
-            if (assetLibrary->loadModelAsset(assetPath, sceneObject, convertToAssetType(type)))
-            {
-                return true;
-            }
-
-            LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+            success = assetLibrary->loadModelAsset(assetPath, sceneObject, convertToAssetType(type));
+            sceneObject->setAnimationCatalogue(&animationCatalogue);
         }
 
-        return false;
+        return success;
     }
 
-    IAnimationCatalogue* CreateAnimationCatalogue()
+    bool LoadAnimationsPack(const std::string& assetPath)
     {
-        return new AnimationCatalogue(assetLibrary);
+        return animationCatalogue.load(assetPath);
     }
 
     void Run()

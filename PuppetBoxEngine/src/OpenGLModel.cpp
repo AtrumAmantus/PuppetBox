@@ -24,7 +24,16 @@ namespace PB
     void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
     {
         animator_ = std::move(animator);
-        animator_->setCurrentFrame(startFrame);
+
+        if (animator_ != nullptr)
+        {
+            animator_->setCurrentFrame(startFrame);
+        }
+    }
+
+    bool OpenGLModel::isAnimating() const
+    {
+        return animator_ != nullptr;
     }
 
     void OpenGLModel::update(float deltaTime)

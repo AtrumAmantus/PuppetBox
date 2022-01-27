@@ -64,7 +64,10 @@ public:
 
         auto* myEntity = new Entity{};
 
-        animationCatalogue_ = PB::CreateAnimationCatalogue();
+        if (!PB::LoadAnimationsPack("Assets1/Animations/BasicHuman"))
+        {
+            std::cout << "Failed to load animation pack" << std::endl;
+        }
 
         PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
 
@@ -78,10 +81,7 @@ public:
             addSceneObject(myEntity);
         }
 
-        if (animationCatalogue_->load("Assets1/Animations/BasicHuman"))
-        {
-            myEntity->playAnimation(animationCatalogue_->get("walk"), 0);
-        }
+        myEntity->playAnimation("walk", 0);
 
         bool error = false;
 
@@ -169,7 +169,7 @@ protected:
             timeSinceFpsCheck -= 0.25f;
             std::uint32_t averageFps = calculateAverageFps(frameRates_, 60);
             uiController_.getComponent(FPS_BOX, &error)->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                                                      std::to_string(averageFps) + " FPS");
+                                                                            std::to_string(averageFps) + " FPS");
         }
 
         if (!userInput_.isReading() && !userInput_.isEmpty())
@@ -181,11 +181,13 @@ protected:
 
             if (input == "/horizontal")
             {
-                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+                uiController_.getComponent(INPUT_BOX, &error)
+                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
             }
             else if (input == "/vertical")
             {
-                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+                uiController_.getComponent(INPUT_BOX, &error)
+                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
             }
         }
         else
@@ -282,5 +284,4 @@ private:
     Controls controls_{nullptr};
     float frameRates_[60];
     std::uint8_t frameIndex_ = 0;
-    PB::IAnimationCatalogue* animationCatalogue_ = nullptr;
 };

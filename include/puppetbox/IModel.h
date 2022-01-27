@@ -22,6 +22,13 @@ namespace PB
         virtual void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) = 0;
 
         /**
+         * \brief Checks if the {\link IModel} currently has an attached animation.
+         *
+         * \return True if there is currently an attached animation, False otherwise.
+         */
+        virtual bool isAnimating() const = 0;
+
+        /**
          * \brief Method used by application logic to update the state of the model prior to the render()
          * call.
          *

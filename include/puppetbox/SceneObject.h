@@ -92,14 +92,30 @@ namespace PB
         void setBehavior(std::unique_ptr<IBehavior> behavior);
 
         /**
+         * \brief Sets the {\link IAnimationCatalogue} that will be used to load animations.
+         *
+         * <p>Called automatically by the {\link SceneObject} creation calls.</p>
+         *
+         * \param animationCatalogue The {\link IAnimationCatalogue} to use for loading/playing animations.
+         */
+        void setAnimationCatalogue(IAnimationCatalogue* animationCatalogue);
+
+        /**
          * \brief Applies the given animation to the {\link IModel} associated with this
          * {\link SceneObject} beginning start frame, looping endlessly as long as it is
          * attached.
          *
-         * \param animator   The animation to play.
-         * \param startFrame The frame of the animation to start playing at.
+         * \param animationName The name of the animation to play.
+         * \param startFrame    The frame of the animation to start playing at.
          */
-        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame);
+        void playAnimation(const std::string& animationName, std::uint32_t startFrame);
+
+        /**
+         * Checks if the {\link SceneObject} has an attached animation.
+         *
+         * @return True if there is currently an attached animation, False otherwise.
+         */
+        bool isAnimating() const;
 
         /**
         * \brief Returns the actual scale of the object, which is the product of the
@@ -125,6 +141,7 @@ namespace PB
     private:
         std::string id_;
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
+        IAnimationCatalogue* animationCatalogue_ = nullptr;
         IModel* model_ = nullptr;
         std::unique_ptr<IBehavior> behavior_{nullptr};
     };
