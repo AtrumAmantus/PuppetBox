@@ -752,7 +752,14 @@ namespace PB
                     {
                         map.insert(
                                 std::pair<std::string, IAnimation*>(name,
-                                                                    new Animation(boneMap, fps, length, keyframes))
+                                                                    new Animation(
+                                                                            this->archiveName_ + "/" + assetPath,
+                                                                            boneMap,
+                                                                            fps,
+                                                                            length,
+                                                                            keyframes
+                                                                    )
+                                )
                         );
                     }
                 }

@@ -25,7 +25,9 @@
 
 namespace
 {
-    std::uint8_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
+    float timeSinceFpsCheck = 0.0f;
+
+    std::uint32_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
     {
         float sum = 0;
 
@@ -36,7 +38,7 @@ namespace
 
         float average = sum / frameCount;
 
-        return 1000.0f / average;
+        return 1.0f / average;
     }
 }
 
@@ -62,7 +64,7 @@ public:
 
         auto* myEntity = new Entity{};
 
-        PB::IAnimationCatalogue* anims = PB::CreateAnimationCatalogue();
+        animationCatalogue_ = PB::CreateAnimationCatalogue();
 
         PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
 
@@ -76,9 +78,9 @@ public:
             addSceneObject(myEntity);
         }
 
-        if (anims->load("Assets1/Animations/BasicHuman"))
+        if (animationCatalogue_->load("Assets1/Animations/BasicHuman"))
         {
-            myEntity->playAnimation(anims->get("walk"));
+            myEntity->playAnimation(animationCatalogue_->get("walk"), 0);
         }
 
         bool error = false;
@@ -158,10 +160,14 @@ protected:
     {
         bool error = false;
 
-        frameRates_[(frameIndex_++ % 60)] = deltaTime;
-        std::uint8_t averageFps = calculateAverageFps(frameRates_, 60);
-        if (frameIndex_ % 20 == 0)
+        frameRates_[frameIndex_] = deltaTime;
+        timeSinceFpsCheck += deltaTime;
+        frameIndex_ = (frameIndex_ + 1) % 60;
+
+        if (timeSinceFpsCheck > 0.1)
         {
+            timeSinceFpsCheck -= 0.25f;
+            std::uint32_t averageFps = calculateAverageFps(frameRates_, 60);
             uiController_.getComponent(FPS_BOX, &error)->setStringAttribute(PB::UI::TEXT_CONTENT,
                                                                       std::to_string(averageFps) + " FPS");
         }
@@ -276,4 +282,5 @@ private:
     Controls controls_{nullptr};
     float frameRates_[60];
     std::uint8_t frameIndex_ = 0;
+    PB::IAnimationCatalogue* animationCatalogue_ = nullptr;
 };

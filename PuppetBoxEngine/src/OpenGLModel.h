@@ -32,7 +32,7 @@ namespace PB
         OpenGLModel(std::unordered_map<std::string, BoneMap> bones, std::unique_ptr<IAnimator> animator,
                     std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
 
-        void playAnimation(std::unique_ptr<IAnimator> animator) override;
+        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
 
         /**
          * \brief Updates the object's state prior to the render() call.

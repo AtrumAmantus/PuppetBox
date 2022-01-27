@@ -91,7 +91,15 @@ namespace PB
         */
         void setBehavior(std::unique_ptr<IBehavior> behavior);
 
-        void playAnimation(std::unique_ptr<IAnimator> animator);
+        /**
+         * \brief Applies the given animation to the {\link IModel} associated with this
+         * {\link SceneObject} beginning start frame, looping endlessly as long as it is
+         * attached.
+         *
+         * \param animator   The animation to play.
+         * \param startFrame The frame of the animation to start playing at.
+         */
+        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame);
 
         /**
         * \brief Returns the actual scale of the object, which is the product of the

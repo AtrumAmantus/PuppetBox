@@ -57,9 +57,9 @@ namespace PB
         behavior_ = std::move(behavior);
     }
 
-    void SceneObject::playAnimation(std::unique_ptr<IAnimator> animator)
+    void SceneObject::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
     {
-        model_->playAnimation(std::move(animator));
+        model_->playAnimation(std::move(animator), startFrame);
     }
 
     vec3 SceneObject::actualScale() const

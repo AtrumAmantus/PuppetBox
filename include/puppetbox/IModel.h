@@ -16,9 +16,10 @@ namespace PB
         /**
          * \brief Sets the animation of the Model to the one held by the given animator.
          *
-         * @param animator {@link Animator} holding the desired @{link Animation}.
+         * \param animator   {\link Animator} holding the desired @{link Animation}.
+         * \param startFrame The frame that the animation will start playing from.
          */
-        virtual void playAnimation(std::unique_ptr<IAnimator> animator) = 0;
+        virtual void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) = 0;
 
         /**
          * \brief Method used by application logic to update the state of the model prior to the render()

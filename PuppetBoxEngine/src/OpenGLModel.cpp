@@ -21,9 +21,10 @@ namespace PB
 
     }
 
-    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator)
+    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
     {
         animator_ = std::move(animator);
+        animator_->setCurrentFrame(startFrame);
     }
 
     void OpenGLModel::update(float deltaTime)

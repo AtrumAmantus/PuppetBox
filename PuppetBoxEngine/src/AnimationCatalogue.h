@@ -13,6 +13,7 @@ namespace PB
     {
     public:
         Animation(
+                std::string animationPath,
                 std::unordered_map<std::string, BoneMap> boneMap,
                 std::uint8_t fps,
                 std::uint8_t length,
@@ -27,9 +28,10 @@ namespace PB
         std::uint8_t getLength() const override;
 
     private:
+        const std::string animationPath_;
         const std::unordered_map<std::string, BoneMap> boneMap_{};
         const std::uint8_t fps_;
-        const std::uint8_t length_;
+        const std::uint8_t frameLength_;
         /**
          * Keyframes are stored as separate scale/rotation/transform vectors
          */
@@ -43,6 +45,8 @@ namespace PB
         explicit Animator(IAnimation* animation);
 
         void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) override;
+
+        void setCurrentFrame(std::uint32_t frame) override;
 
         std::unordered_map<std::string, mat4> getBoneTransformations() const override;
 

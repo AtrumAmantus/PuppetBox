@@ -51,6 +51,8 @@ namespace PB
     public:
         virtual void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) = 0;
 
+        virtual void setCurrentFrame(std::uint32_t frame) = 0;
+
         virtual std::unordered_map<std::string, mat4> getBoneTransformations() const = 0;
     };
 
