@@ -56,18 +56,10 @@ namespace PB
         virtual std::unordered_map<std::string, mat4> getBoneTransformations() const = 0;
     };
 
-    class PUPPET_BOX_API IAnimatorFactory
-    {
-    public:
-        virtual std::unique_ptr<IAnimator> create() const = 0;
-    };
-
     class PUPPET_BOX_API IAnimationCatalogue
     {
     public:
         virtual bool load(const std::string& assetPath) = 0;
-
-        virtual std::unique_ptr<IAnimatorFactory> getFactory(const std::string& animationName) const = 0;
 
         virtual std::unique_ptr<IAnimator> get(const std::string& animationName) const = 0;
     };

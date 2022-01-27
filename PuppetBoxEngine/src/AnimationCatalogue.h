@@ -58,26 +58,12 @@ namespace PB
         std::unordered_map<std::string, mat4> boneTransformations_;
     };
 
-    class AnimatorFactory : public IAnimatorFactory
-    {
-    public:
-        AnimatorFactory(const std::string& animationName, std::unordered_map<std::string, IAnimation*> animations);
-
-        std::unique_ptr<IAnimator> create() const override;
-
-    private:
-        const std::string& animationName_;
-        std::unordered_map<std::string, IAnimation*> animations_{};
-    };
-
     class AnimationCatalogue : public IAnimationCatalogue
     {
     public:
         explicit AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary);
 
         bool load(const std::string& assetPath) override;
-
-        std::unique_ptr<IAnimatorFactory> getFactory(const std::string& animationName) const override;
 
         std::unique_ptr<IAnimator> get(const std::string& animationName) const override;
 
