@@ -144,10 +144,29 @@ namespace PB::GfxMath
 
     mat4 Rotate(mat4 m, vec3 angles)
     {
-        m = Rotate(m, angles.x, {1.0f, 0.0f, 0.0f});
-        m = Rotate(m, angles.y, {0.0f, 1.0f, 0.0f});
-        m = Rotate(m, angles.z, {0.0f, 0.0f, 1.0f});
+        glm::mat4 gM{
+                m[0][0], m[0][1], m[0][2], m[0][3],
+                m[1][0], m[1][1], m[1][2], m[1][3],
+                m[2][0], m[2][1], m[2][2], m[2][3],
+                m[3][0], m[3][1], m[3][2], m[3][3]
+        };
 
-        return m;
+        //TODO: Lets make our own later
+        gM = glm::rotate(gM, angles.x, {1.0f, 0.0f, 0.0f});
+        gM = glm::rotate(gM, angles.y, {0.0f, 1.0f, 0.0f});
+        gM = glm::rotate(gM, angles.z, {0.0f, 0.0f, 1.0f});
+
+        return glmToMat4(gM);
+    }
+
+    mat4 CreateTransformation(vec4 rotation, vec4 scale, vec4 position)
+    {
+        mat4 r = Rotate(mat4::eye(), {rotation.x, rotation.y, rotation.z});
+
+        mat4 p = Translate(mat4::eye(), {position.x, position.y, position.z});
+
+        mat4 s = Scale(mat4::eye(), {scale.x, scale.y, scale.z});
+
+        return p * r * s;
     }
 }

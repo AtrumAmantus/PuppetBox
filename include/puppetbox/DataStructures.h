@@ -487,7 +487,7 @@ namespace PB
             return this->values_[i];
         };
 
-        mat4& operator*=(mat4 const& rhv)
+        mat4 operator*(mat4 const& rhv)
         {
             mat4 newMatrix{};
 
@@ -517,6 +517,23 @@ namespace PB
                              (this->values_[2].z * rhv.values_[2].z) + (this->values_[3].z * rhv.values_[2].w);
             newMatrix[3].z = (this->values_[0].z * rhv.values_[3].x) + (this->values_[1].z * rhv.values_[3].y) +
                              (this->values_[2].z * rhv.values_[3].z) + (this->values_[3].z * rhv.values_[3].w);
+
+            //TODO: Should this be hardcoded to just {0, 0, 0, 1}?
+            newMatrix[0].w = (this->values_[0].w * rhv.values_[0].x) + (this->values_[1].w * rhv.values_[0].y) +
+                             (this->values_[2].w * rhv.values_[0].z) + (this->values_[3].w * rhv.values_[0].w);
+            newMatrix[1].w = (this->values_[0].w * rhv.values_[1].x) + (this->values_[1].w * rhv.values_[1].y) +
+                             (this->values_[2].w * rhv.values_[1].z) + (this->values_[3].w * rhv.values_[1].w);
+            newMatrix[2].w = (this->values_[0].w * rhv.values_[2].x) + (this->values_[1].w * rhv.values_[2].y) +
+                             (this->values_[2].w * rhv.values_[2].z) + (this->values_[3].w * rhv.values_[2].w);
+            newMatrix[3].w = (this->values_[0].w * rhv.values_[3].x) + (this->values_[1].w * rhv.values_[3].y) +
+                             (this->values_[2].w * rhv.values_[3].z) + (this->values_[3].w * rhv.values_[3].w);
+
+            return newMatrix;
+        };
+
+        mat4& operator*=(mat4 const& rhv)
+        {
+            mat4 newMatrix = *this * rhv;
 
             this->values_[0].x = newMatrix[0].x;
             this->values_[1].x = newMatrix[1].x;
@@ -568,18 +585,17 @@ namespace PB
 
         Bone(vec4 offset, vec4 scale, vec4 rotation) : offset(offset), scale(scale), rotation(rotation) {};
 
-        union
+        //TODO: This structure seems confusing, revisit
+        mat4 translation{};
+
+        struct
         {
-            mat4 translation{};
-            struct
+            vec4 rotation;
+            vec4 scale;
+            vec4 unused;
+            union
             {
-                vec4 rotation;
-                vec4 scale;
-                vec4 unused;
-                union
-                {
-                    vec4 position, offset;
-                };
+                vec4 position, offset;
             };
         };
     };

@@ -50,7 +50,5 @@ namespace PB
         std::unordered_map<std::string, BoneMap> bones_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
         std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};
-    private:
-        Bone* buildBoneArray(const std::string& boneName, const std::vector<BoneMap>& boneTransforms) const;
     };
 }

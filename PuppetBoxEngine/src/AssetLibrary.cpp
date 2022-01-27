@@ -3,6 +3,7 @@
 
 #include <utility>
 
+#include "GfxMath.h"
 #include "OpenGLModel.h"
 #include "Rendered2DMesh.h"
 #include "Utilities.h"
@@ -547,12 +548,18 @@ namespace PB
                             modelData.name,
                             std::move(parent),
                             depth,
-                            {
+                            Bone{
                                     {modelData.offset.x, modelData.offset.y, modelData.offset.z},
-                                    {modelData.scale.x, modelData.scale.y, 1},
+                                    {modelData.scale.x,  modelData.scale.y,  1},
                                     {}
                             }
                     };
+
+                    boneMap.bone.translation = GfxMath::CreateTransformation(
+                            boneMap.bone.rotation,
+                            boneMap.bone.scale,
+                            boneMap.bone.position
+                    );
 
                     bones.insert(
                             std::pair<std::string, BoneMap>{modelData.name, boneMap}
@@ -564,8 +571,12 @@ namespace PB
 
                     for (auto itr = modelData.children.begin(); !error && itr != modelData.children.end(); ++itr)
                     {
-                        error = !buildMeshAndBones(modelData.children.at(itr->first), modelData.name, depth + 1, bones,
-                                                   meshes);
+                        error = !buildMeshAndBones(
+                                modelData.children.at(itr->first),
+                                modelData.name,
+                                depth + 1, bones,
+                                meshes
+                        );
                     }
                 }
                 else

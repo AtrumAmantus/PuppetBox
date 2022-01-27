@@ -6,6 +6,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <utility>
 
+#include "GfxMath.h"
+
 namespace PB
 {
     namespace
@@ -73,10 +75,12 @@ namespace PB
      *
      * TODO: This is not correctly tweening for transformations where the pos/scale/rot are on different frames.
      *
-     * @param currentFrame The frame to get the transformation matrix for on each bone.
-     * @return An {@link std::unordered_map} of {@link Keyframe}s holding transformation matrices for every bone
+     * \param currentFrame The frame to get the transformation matrix for on each bone.
+     * \param bones        The {\link BoneMap} provided by the model, with accurate offsets.
+     * \return An {\link std::unordered_map} of {\link Keyframe}s holding transformation matrices for every bone
      * for the given frame.
      */
+     //TODO: bones vs boneMap_ is confusing, plus BoneMap structure is wacky, revisit
     std::unordered_map<std::string, Keyframe>
     Animation::getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const
     {
@@ -100,7 +104,7 @@ namespace PB
             Keyframe nextKey{};
 
             // Map frame values for each bone for the current frame
-            for (const auto& bone: boneMap_)
+            for (const auto& bone: bones)
             {
                 bool mappedKey = false;
                 prevKey.boneName = "";
@@ -233,21 +237,19 @@ namespace PB
                     }
                 }
 
-                //
                 if (!mappedKey)
                 {
-                    glm::mat4 rot = rotVecToMat4(glm::mat4(1.0), transformVectors.rotation);
-                    glm::mat4 pos = glm::translate(glm::mat4(1.0),
-                                                   {transformVectors.position.x, transformVectors.position.y,
-                                                    transformVectors.position.z});
-                    glm::mat4 sca = glm::scale(glm::mat4(1.0), {transformVectors.scale.x, transformVectors.scale.y,
-                                                                transformVectors.scale.z});
-
-                    glm::mat4 transformation = pos * rot * sca;
+                    mat4 transformation = GfxMath::CreateTransformation(
+                            transformVectors.rotation,
+                            transformVectors.scale,
+                            transformVectors.position
+                    );
 
                     keyframeTransformationMatrixMap.insert(
-                            std::pair<std::string, Keyframe>(bone.first,
-                                                             {currentFrame, bone.first, mat4{&transformation[0][0]}})
+                            std::pair<std::string, Keyframe>(
+                                    bone.first,
+                                    {currentFrame, bone.first, transformation}
+                            )
                     );
                 }
             }
@@ -256,29 +258,44 @@ namespace PB
             // we add in the bone offsets to complete the transformation values.
             for (auto& entry: keyframeTransformationMatrixMap)
             {
-                auto bone = boneMap_.at(entry.first);
+                auto bone = bones.at(entry.first);
 
-                while (!bone.parent.empty())
+                while (!bone.name.empty())
                 {
-                    // For each bone that is not the root (having no defined parent),
-                    // add the bone's offset.
-                    entry.second.position += bone.bone.offset;
-                    bone = boneMap_.at(bone.parent);
+                    // Current bone's offsets were already applied, skip
+                    if (bone.name != entry.second.boneName)
+                    {
+                        // Add offset of parent bone
+                        mat4 m = mat4::eye();
+                        m[3] = bone.bone.offset;
+                        m[3][3] = 1;
+                        entry.second.translation *= m;
+                    }
+
+                    if (bones.find(bone.parent) != bones.end())
+                    {
+                        bone = bones.at(bone.parent);
+                    }
+                    else
+                    {
+                        bone.name = "";
+                    }
                 }
             }
 
             if (!animationCached)
             {
                 CACHED_KEYFRAMES.insert(
-                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>>{animationPath_, std::unordered_map<std::uint32_t, std::vector<Keyframe>>{}}
-                        );
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>>{animationPath_,
+                                                                                                         std::unordered_map<std::uint32_t, std::vector<Keyframe>>{}}
+                );
             }
 
             CACHED_KEYFRAMES.at(animationPath_).insert(
                     std::pair<std::uint32_t, std::vector<Keyframe>>{currentFrame, std::vector<Keyframe>{}}
-                    );
+            );
 
-            for (auto k : keyframeTransformationMatrixMap)
+            for (auto k: keyframeTransformationMatrixMap)
             {
                 CACHED_KEYFRAMES.at(animationPath_).at(currentFrame).push_back(k.second);
             }

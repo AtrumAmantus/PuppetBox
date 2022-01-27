@@ -39,7 +39,7 @@ namespace PB
     {
         for (auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
         {
-            Bone* bones = nullptr;
+            Bone* bones;
 
             if (animator_ != nullptr)
             {
@@ -50,29 +50,14 @@ namespace PB
             }
             else
             {
+                // If there is no animation running, just use default "T-Pose" coordinates.
                 Bone bone{};
                 bone.translation = mat4::eye();
                 bones = new Bone[]{bone};
+                bones[0].translation = bones_.at(itr->first).bone.translation;
             }
 
             itr->second->render(transform, bones, 1);
         }
-    }
-
-    Bone* OpenGLModel::buildBoneArray(const std::string& boneName, const std::vector<BoneMap>& boneTransforms) const
-    {
-        std::string currentBone = boneName;
-
-        std::int32_t lastIndex = bones_.at(boneName).depth + 1;
-
-        Bone* bones = new Bone[lastIndex--];
-
-        while (lastIndex >= 0)
-        {
-            bones[lastIndex--] = bones_.at(currentBone).bone;
-            currentBone = bones_.at(currentBone).parent;
-        }
-
-        return bones;
     }
 }

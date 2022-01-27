@@ -122,4 +122,15 @@ namespace PB::GfxMath
     * \return The matrix after it has been rotated.
     */
     mat4 Rotate(mat4 m, vec3 angles);
+
+    /**
+     * \brief Converts Rotation, Scale, and Position vectors into a single transformation
+     * matrix.
+     *
+     * \param rotation  The rotation values to use for each axis.
+     * \param scale     The scaling values to use for each axis.
+     * \param position  The position values to use for each axis.
+     * \return The generated transformation matrix.
+     */
+    mat4 CreateTransformation(vec4 rotation, vec4 scale, vec4 position);
 }

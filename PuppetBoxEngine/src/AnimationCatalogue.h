@@ -29,6 +29,7 @@ namespace PB
 
     private:
         const std::string animationPath_;
+        // TODO: This should be only used to verify the animation's BoneMap matches the model's
         const std::unordered_map<std::string, BoneMap> boneMap_{};
         const std::uint8_t fps_;
         const std::uint8_t frameLength_;
