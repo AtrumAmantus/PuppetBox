@@ -55,6 +55,10 @@ namespace PB
                 bone.translation = mat4::eye();
                 bones = new Bone[]{bone};
                 bones[0].translation = bones_.at(itr->first).bone.translation;
+                // TODO: Scaling happens later, this is really messy, fix
+                bones[0].translation[0][0] = 1;
+                bones[0].translation[1][1] = 1;
+                bones[0].translation[2][2] = 1;
             }
 
             itr->second->render(transform, bones, 1);
