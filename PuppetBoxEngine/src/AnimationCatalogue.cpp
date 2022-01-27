@@ -356,6 +356,19 @@ namespace PB
         return boneTransformations_;
     }
 
+    AnimatorFactory::AnimatorFactory(
+            const std::string& animationName,
+            std::unordered_map<std::string, IAnimation*> animations
+            ) : animationName_(animationName), animations_(animations)
+    {
+
+    }
+
+    std::unique_ptr<IAnimator> AnimatorFactory::create() const
+    {
+        return std::make_unique<Animator>(animations_.at(animationName_));
+    }
+
     AnimationCatalogue::AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary)
             : assetLibrary_(std::move(assetLibrary))
     {
@@ -365,6 +378,16 @@ namespace PB
     bool AnimationCatalogue::load(const std::string& assetPath)
     {
         return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
+    }
+
+    std::unique_ptr<IAnimatorFactory> AnimationCatalogue::getFactory(const std::string& animationName) const
+    {
+        if (animations_.find(animationName) != animations_.end())
+        {
+            return std::make_unique<AnimatorFactory>(animationName, animations_);
+        }
+
+        return nullptr;
     }
 
     std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationName) const

@@ -22,6 +22,8 @@ namespace PB
             {
                 if (GfxMath::BasicallyEqual(sceneObject->position, targetPosition_))
                 {
+                    sceneObject->playAnimation(nullptr, 0);
+
                     waitTime_ = ((3 * RandomUtils::pseudoRand()) + 1);
 
                     float randX = (128 * RandomUtils::pseudoRand()) - 64;

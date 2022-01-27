@@ -80,6 +80,7 @@ public:
 
         if (animationCatalogue_->load("Assets1/Animations/BasicHuman"))
         {
+            auto a = animationCatalogue_->getFactory("walk");
             myEntity->playAnimation(animationCatalogue_->get("walk"), 0);
         }
 
@@ -169,7 +170,7 @@ protected:
             timeSinceFpsCheck -= 0.25f;
             std::uint32_t averageFps = calculateAverageFps(frameRates_, 60);
             uiController_.getComponent(FPS_BOX, &error)->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                                                      std::to_string(averageFps) + " FPS");
+                                                                            std::to_string(averageFps) + " FPS");
         }
 
         if (!userInput_.isReading() && !userInput_.isEmpty())
@@ -181,11 +182,13 @@ protected:
 
             if (input == "/horizontal")
             {
-                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+                uiController_.getComponent(INPUT_BOX, &error)
+                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
             }
             else if (input == "/vertical")
             {
-                uiController_.getComponent(INPUT_BOX, &error)->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+                uiController_.getComponent(INPUT_BOX, &error)
+                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
             }
         }
         else
