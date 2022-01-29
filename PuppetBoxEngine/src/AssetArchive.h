@@ -69,8 +69,8 @@ namespace PB
         * \param archiveName	The name of the desired archive to load.
         * \param archiveRoot	The root directory to look in for the archive.
         */
-        AssetArchive(std::string archiveName, std::string archiveRoot) : archiveName_(std::move(archiveName)),
-                                                                         archiveRoot_(std::move(archiveRoot)) {};
+        AssetArchive(std::string archiveName, std::string archiveRoot)
+                : archiveName_(std::move(archiveName)), archiveRoot_(std::move(archiveRoot)) {};
 
         /**
         * \brief Initializes the AssetArchive's initial configurations.  This is needed before any other AssetArchive
@@ -130,11 +130,11 @@ namespace PB
          *
          * \param name      The desired reference name for the animation.
          * \param assetPath The path to the desired animation.
-         * \param map       The map to add the animation to, using the given name.
-         * \return True if the animation was loaded and added to the map successfully, False otherwise.
+         * \param animationMap       The animationMap to add the animation to, using the given name.
+         * \return True if the animation was loaded and added to the animationMap successfully, False otherwise.
          */
         bool loadAnimationAsset(const std::string& name, const std::string& assetPath,
-                                std::unordered_map<std::string, IAnimation*>& map);
+                                std::unordered_map<std::string, IAnimation*>& animationMap);
 
         /**
          * \brief Load the given font asset.

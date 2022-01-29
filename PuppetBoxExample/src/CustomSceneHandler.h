@@ -81,8 +81,6 @@ public:
             addSceneObject(myEntity);
         }
 
-        myEntity->playAnimation("walk", 0);
-
         bool error = false;
 
         {

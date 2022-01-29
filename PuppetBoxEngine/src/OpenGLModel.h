@@ -35,10 +35,17 @@ namespace PB
         /**
          * \brief Sets the animation of the Model to the one held by the given animator.
          *
-         * \param animator   {\link Animator} holding the desired @{link Animation}.
+         * \param animator   The {\link Animator} holding the desired {\link Animation}.
          * \param startFrame The frame that the animation will start playing from.
          */
-        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
+        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint8_t mode, std::uint32_t startFrame) override;
+
+        /**
+         * \brief Removes any attached animators with the given animation path reference.
+         *
+         * \param animationPath The path reference to remove animators by.
+         */
+        void stopAnimation(const std::string& animationPath) override;
 
         /**
          * \brief Checks if the {\link IModel} currently has an attached animation.

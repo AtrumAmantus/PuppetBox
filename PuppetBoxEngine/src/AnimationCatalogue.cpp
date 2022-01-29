@@ -41,9 +41,12 @@ namespace PB
             std::string animationPath,
             std::unordered_map<std::string, BoneMap> boneMap,
             std::uint8_t fps,
-            std::uint8_t length,
+            std::uint8_t frameCount,
             std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes
-    ) : animationPath_(animationPath), boneMap_(std::move(boneMap)), fps_(fps), frameLength_(length),
+    ) : animationPath_(animationPath),
+        boneMap_(std::move(boneMap)),
+        fps_(fps),
+        frameCount_(frameCount),
         keyframes_(std::move(keyframes))
     {
         for (auto& i: keyframes_)
@@ -52,12 +55,6 @@ namespace PB
         }
 
         std::sort(keyframeIndexes_.begin(), keyframeIndexes_.end());
-    }
-
-    Animator::Animator(IAnimation* animation) : animation_(animation),
-                                                sequenceDuration_((float) animation->getLength() / animation->getFps())
-    {
-
     }
 
     /**
@@ -80,18 +77,18 @@ namespace PB
      * \return An {\link std::unordered_map} of {\link Keyframe}s holding transformation matrices for every bone
      * for the given frame.
      */
-     //TODO: bones vs boneMap_ is confusing, plus BoneMap structure is wacky, revisit
+    //TODO: bones vs boneMap_ is confusing, plus BoneMap structure is wacky, revisit
     std::unordered_map<std::string, Keyframe>
     Animation::getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const
     {
         std::unordered_map<std::string, Keyframe> keyframeTransformationMatrixMap{};
 
-        bool animationCached = CACHED_KEYFRAMES.find(animationPath_) != CACHED_KEYFRAMES.end();
+        bool animationCached = CACHED_KEYFRAMES.find(getPath()) != CACHED_KEYFRAMES.end();
 
         if (animationCached &&
-            CACHED_KEYFRAMES.at(animationPath_).find(currentFrame) != CACHED_KEYFRAMES.at(animationPath_).end())
+            CACHED_KEYFRAMES.at(getPath()).find(currentFrame) != CACHED_KEYFRAMES.at(getPath()).end())
         {
-            for (auto& k: CACHED_KEYFRAMES.at(animationPath_).at(currentFrame))
+            for (auto& k: CACHED_KEYFRAMES.at(getPath()).at(currentFrame))
             {
                 keyframeTransformationMatrixMap.insert(
                         std::pair<std::string, Keyframe>{k.boneName, k}
@@ -196,9 +193,9 @@ namespace PB
                         else
                         {
                             // Otherwise, complex tweening logic...
-                            const uint8_t prevToEnd = frameLength_ - prevKey.frameIndex;
+                            const uint8_t prevToEnd = getFrameCount() - prevKey.frameIndex;
                             const uint8_t prevToNext =
-                                    ((nextKey.frameIndex - prevKey.frameIndex) + frameLength_) % frameLength_;
+                                    ((nextKey.frameIndex - prevKey.frameIndex) + getFrameCount()) % getFrameCount();
                             const uint8_t prevToCurr =
                                     currentFrame < prevKey.frameIndex ? prevToEnd + currentFrame : currentFrame -
                                                                                                    prevKey.frameIndex;
@@ -286,18 +283,18 @@ namespace PB
             if (!animationCached)
             {
                 CACHED_KEYFRAMES.insert(
-                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>>{animationPath_,
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>>{getPath(),
                                                                                                          std::unordered_map<std::uint32_t, std::vector<Keyframe>>{}}
                 );
             }
 
-            CACHED_KEYFRAMES.at(animationPath_).insert(
+            CACHED_KEYFRAMES.at(getPath()).insert(
                     std::pair<std::uint32_t, std::vector<Keyframe>>{currentFrame, std::vector<Keyframe>{}}
             );
 
             for (auto k: keyframeTransformationMatrixMap)
             {
-                CACHED_KEYFRAMES.at(animationPath_).at(currentFrame).push_back(k.second);
+                CACHED_KEYFRAMES.at(getPath()).at(currentFrame).push_back(k.second);
             }
         }
 
@@ -305,14 +302,35 @@ namespace PB
         return keyframeTransformationMatrixMap;
     }
 
+    std::string Animation::getPath() const
+    {
+        return animationPath_;
+    }
+
     std::uint8_t Animation::getFps() const
     {
         return fps_;
     }
 
-    std::uint8_t Animation::getLength() const
+    std::uint8_t Animation::getFrameCount() const
     {
-        return frameLength_;
+        return frameCount_;
+    }
+
+    Animator::Animator(IAnimation* animation)
+            : animation_(animation), sequenceDuration_((float) animation->getFrameCount() / animation->getFps())
+    {
+
+    }
+
+    std::string Animator::getAnimationName() const
+    {
+        return animation_->getPath();
+    }
+
+    void Animator::setMode(std::uint8_t mode)
+    {
+        mode_ = mode;
     }
 
     void Animator::update(float deltaTime, std::unordered_map<std::string, BoneMap> bones)
@@ -320,33 +338,47 @@ namespace PB
         sequenceTime_ += deltaTime;
         sequenceTime_ = fmod(sequenceTime_, sequenceDuration_);
 
-        std::uint8_t currentFrame = (sequenceTime_ / sequenceDuration_) * animation_->getLength();
+        std::uint8_t currentFrame = (sequenceTime_ / sequenceDuration_) * animation_->getFrameCount();
 
-        auto currentKeyframes = animation_->getFrames(currentFrame, bones);
-
-        boneTransformations_.clear();
-
-        for (auto& keyFrame: currentKeyframes)
+        if (playedOneFrame_ && currentFrame == 0)
         {
-            mat4 matrix = mat4::eye();
-
-            BoneMap currentBone = {"", keyFrame.first};
-
-            do
-            {
-                currentBone = bones.at(currentBone.parent);
-                matrix *= currentKeyframes.at(currentBone.name).translation;
-            } while (!currentBone.parent.empty());
-
-            boneTransformations_.insert(
-                    std::pair<std::string, mat4>{keyFrame.first, matrix}
-            );
+            animationFinished_ = true;
         }
+        else
+        {
+            playedOneFrame_ = playedOneFrame_ || currentFrame > 1;
+
+            auto currentKeyframes = animation_->getFrames(currentFrame, bones);
+
+            boneTransformations_.clear();
+
+            for (auto& keyFrame: currentKeyframes)
+            {
+                mat4 matrix = mat4::eye();
+
+                BoneMap currentBone = {"", keyFrame.first};
+
+                do
+                {
+                    currentBone = bones.at(currentBone.parent);
+                    matrix *= currentKeyframes.at(currentBone.name).translation;
+                } while (!currentBone.parent.empty());
+
+                boneTransformations_.insert(
+                        std::pair<std::string, mat4>{keyFrame.first, matrix}
+                );
+            }
+        }
+    }
+
+    bool Animator::finished() const
+    {
+        return animationFinished_;
     }
 
     void Animator::setCurrentFrame(std::uint32_t frame)
     {
-        frame %= animation_->getLength();
+        frame %= animation_->getFrameCount();
         sequenceTime_ = (static_cast<float>(frame) / animation_->getFps());
         sequenceTime_ = fmod(sequenceTime_, sequenceDuration_);
     }
@@ -367,11 +399,11 @@ namespace PB
         return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
     }
 
-    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationName) const
+    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationPath) const
     {
-        if (animations_.find(animationName) != animations_.end())
+        if (animations_.find(animationPath) != animations_.end())
         {
-            return std::make_unique<Animator>(animations_.at(animationName));
+            return std::make_unique<Animator>(animations_.at(animationPath));
         }
 
         return nullptr;

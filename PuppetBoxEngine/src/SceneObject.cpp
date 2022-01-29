@@ -53,7 +53,7 @@ namespace PB
         }
     }
 
-    void SceneObject::setBehavior(std::unique_ptr<IBehavior> behavior)
+    void SceneObject::setBehavior(std::unique_ptr<AbstractBehavior> behavior)
     {
         behavior_ = std::move(behavior);
     }
@@ -63,10 +63,15 @@ namespace PB
         animationCatalogue_ = animationCatalogue;
     }
 
-    void SceneObject::playAnimation(const std::string& animationName, std::uint32_t startFrame)
+    void SceneObject::playAnimation(const std::string& animationPath, std::uint8_t mode, std::uint32_t startFrame)
     {
-        std::unique_ptr<IAnimator> animator = animationName.empty() ? nullptr : animationCatalogue_->get(animationName);
-        model_->playAnimation(std::move(animator), startFrame);
+        std::unique_ptr<IAnimator> animator = animationPath.empty() ? nullptr : animationCatalogue_->get(animationPath);
+        model_->playAnimation(std::move(animator), mode, startFrame);
+    }
+
+    void SceneObject::stopAnimation(const std::string& animationPath)
+    {
+        model_->stopAnimation(animationPath);
     }
 
     bool SceneObject::isAnimating() const

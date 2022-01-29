@@ -4,10 +4,10 @@
 
 #include <memory>
 
+#include "AbstractBehavior.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "IAnimationCatalogue.h"
-#include "IBehavior.h"
 #include "IModel.h"
 #include "TypeDef.h"
 
@@ -21,6 +21,8 @@ namespace PB
      */
     class PUPPET_BOX_API SceneObject
     {
+        friend class AbstractBehavior;
+
     public:
 
         /**
@@ -76,7 +78,7 @@ namespace PB
         void render();
 
         /**
-        * \brief Set a predefined behavior on the object. IBehavior#init() is called
+        * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called
         * immediately after being added to the SceneObject.
         *
         * \param behavior	The predefined behavior to set.
@@ -84,12 +86,12 @@ namespace PB
         void setBehavior(AI::Behavior behavior);
 
         /**
-        * \brief Set a custom derived behavior on the object. IBehavior#init() is never
+        * \brief Set a custom derived behavior on the object. AbstractBehavior#init() is never
         * called, and must be invoked manually.
         *
         * \param behavior	The custom derived behavior to set.
         */
-        void setBehavior(std::unique_ptr<IBehavior> behavior);
+        void setBehavior(std::unique_ptr<AbstractBehavior> behavior);
 
         /**
          * \brief Sets the {\link IAnimationCatalogue} that will be used to load animations.
@@ -105,10 +107,17 @@ namespace PB
          * {\link SceneObject} beginning start frame, looping endlessly as long as it is
          * attached.
          *
-         * \param animationName The name of the animation to play.
+         * \param animationPath The path associated with the animation to play.
          * \param startFrame    The frame of the animation to start playing at.
          */
-        void playAnimation(const std::string& animationName, std::uint32_t startFrame);
+        void playAnimation(const std::string& animationPath, std::uint8_t mode, std::uint32_t startFrame);
+
+        /**
+         * \brief Removes any attached animation with the given path reference.
+         *
+         * \param animationPath The path associated with the desired animation to stop.
+         */
+        void stopAnimation(const std::string& animationPath);
 
         /**
          * Checks if the {\link SceneObject} has an attached animation.
@@ -137,12 +146,24 @@ namespace PB
         *
         * \param deltaTime	The time passed (in Milliseconds) since the last update.
         */
-        virtual void updates(float deltaTime) {};
+        virtual void updates(float deltaTime)
+        {};
+
+        /**
+         * \brief Triggered by behaviors with behavior specified event types.
+         *
+         * <p>Implementing classes can define event based logic to alter object state.</p>
+         *
+         * \param behaviorName  The name of the behavior that triggered the event.
+         * \param behaviorEvent The event the behavior sent out.
+         */
+        virtual void behaviorEvent(std::string behaviorName, std::string behaviorEvent) {};
+
     private:
         std::string id_;
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         IAnimationCatalogue* animationCatalogue_ = nullptr;
         IModel* model_ = nullptr;
-        std::unique_ptr<IBehavior> behavior_{nullptr};
+        std::unique_ptr<AbstractBehavior> behavior_{nullptr};
     };
 }

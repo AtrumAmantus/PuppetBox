@@ -17,3 +17,4 @@ Shaders/UI/Glyph/Fragment ui.glyph.fragment.shader
 Shaders/UI/Glyph ui.glyph.program.shader
 Animations/BasicHuman BasicHuman.anims
 Animations/BasicHuman/Walk BasicHuman_Walk.anim
+Animations/BasicHuman/Idle_0 BasicHuman_Idle0.anim

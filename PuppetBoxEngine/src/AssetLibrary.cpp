@@ -226,8 +226,10 @@ namespace PB
         return shader;
     }
 
-    bool AssetLibrary::loadAnimationSetAsset(const std::string& assetPath,
-                                             std::unordered_map<std::string, IAnimation*>& map)
+    bool AssetLibrary::loadAnimationSetAsset(
+            const std::string& assetPath,
+            std::unordered_map<std::string, IAnimation*>& animationMap
+    )
     {
         bool error = false;
 
@@ -244,7 +246,7 @@ namespace PB
             {
                 for (const auto& entry: animMap)
                 {
-                    error = error || !loadAnimationAsset(entry.first, entry.second, map);
+                    error = error || !loadAnimationAsset(entry.first, entry.second, animationMap);
                 }
             }
             else
@@ -261,8 +263,11 @@ namespace PB
         return !error;
     }
 
-    bool AssetLibrary::loadAnimationAsset(const std::string& animName, const std::string& assetPath,
-                                          std::unordered_map<std::string, IAnimation*>& map)
+    bool AssetLibrary::loadAnimationAsset(
+            const std::string& animName,
+            const std::string& assetPath,
+            std::unordered_map<std::string, IAnimation*>& animationMap
+    )
     {
         bool error = false;
 
@@ -270,7 +275,8 @@ namespace PB
 
         if (!error)
         {
-            error = error || !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, map);
+            error = error ||
+                    !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, animationMap);
         }
         else
         {

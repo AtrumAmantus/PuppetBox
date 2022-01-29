@@ -1,6 +1,6 @@
 #pragma once
 
-#include "puppetbox/IBehavior.h"
+#include "puppetbox/AbstractBehavior.h"
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/SceneObject.h"
 #include "GfxMath.h"
@@ -8,9 +8,11 @@
 
 namespace PB
 {
-    class WanderBehavior : public IBehavior
+    class WanderBehavior : public AbstractBehavior
     {
     public:
+        WanderBehavior() : AbstractBehavior("wander") {};
+
         void init(SceneObject* sceneObject) override
         {
             targetPosition_ = sceneObject->position;
@@ -22,7 +24,7 @@ namespace PB
             {
                 if (GfxMath::BasicallyEqual(sceneObject->position, targetPosition_))
                 {
-                    sceneObject->playAnimation("", 0);
+                    AbstractBehavior::triggerBehaviorEvent(sceneObject, "stop");
 
                     waitTime_ = ((3 * RandomUtils::pseudoRand()) + 1);
 
@@ -44,7 +46,7 @@ namespace PB
                 {
                     if (!sceneObject->isAnimating())
                     {
-                        sceneObject->playAnimation("walk", 0);
+                        AbstractBehavior::triggerBehaviorEvent(sceneObject, "start");
                     }
 
                     vec3 positionDelta = targetPosition_ - sceneObject->position;

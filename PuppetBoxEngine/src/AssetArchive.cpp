@@ -718,7 +718,7 @@ namespace PB
     }
 
     bool AssetArchive::loadAnimationAsset(const std::string& name, const std::string& assetPath,
-                                          std::unordered_map<std::string, IAnimation*>& map)
+                                          std::unordered_map<std::string, IAnimation*>& animationMap)
     {
         bool error;
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
@@ -740,7 +740,8 @@ namespace PB
                 std::unordered_map<std::string, BoneMap> boneMap = mapToBones(skeleton->get("root"), "", &error);
 
                 std::uint8_t fps = NumberUtils::parseValue(propertyData.get("fps")->value().c_str(), 0, &error);
-                std::uint8_t length = NumberUtils::parseValue(propertyData.get("length")->value().c_str(), 0, &error);
+                std::uint8_t frameCount = NumberUtils::parseValue(propertyData.get("length")->value().c_str(), 0,
+                                                                  &error);
 
                 if (!error)
                 {
@@ -750,13 +751,13 @@ namespace PB
 
                     if (!error)
                     {
-                        map.insert(
-                                std::pair<std::string, IAnimation*>(name,
+                        animationMap.insert(
+                                std::pair<std::string, IAnimation*>(archiveName_ + "/" + assetPath,
                                                                     new Animation(
                                                                             this->archiveName_ + "/" + assetPath,
                                                                             boneMap,
                                                                             fps,
-                                                                            length,
+                                                                            frameCount,
                                                                             keyframes
                                                                     )
                                 )

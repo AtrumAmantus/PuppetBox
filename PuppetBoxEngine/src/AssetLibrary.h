@@ -88,22 +88,28 @@ namespace PB
          * \brief Loads a set of animation assets, sets are a collection of animations associated with
          * a particular skeleton.
          *
-         * \param assetPath Path to the animation set.
-         * \param map       The map to add the animations of the animation set to.
+         * \param assetPath     Path to the animation set.
+         * \param animationMap  The animationMap to add the animations of the animation set to.
          * \return True if the animation set was loaded successfully, False otherwise.
          */
-        bool loadAnimationSetAsset(const std::string& assetPath, std::unordered_map<std::string, IAnimation*>& map);
+        bool loadAnimationSetAsset(
+                const std::string& assetPath,
+                std::unordered_map<std::string, IAnimation*>& animationMap
+        );
 
         /**
          * \brief Loads an individual animation asset.
          *
-         * \param name      The desired reference name for the animation.
-         * \param assetPath The path to the desired animation.
-         * \param map       The map to add the animation to, using the given name.
-         * \return True if the animation was loaded and added to the map successfully, False otherwise.
+         * \param name          The desired reference name for the animation.
+         * \param assetPath     The path to the desired animation.
+         * \param animationMap  The animationMap to add the animation to, using the given name.
+         * \return True if the animation was loaded and added to the animationMap successfully, False otherwise.
          */
-        bool loadAnimationAsset(const std::string& animName, const std::string& assetPath,
-                                std::unordered_map<std::string, IAnimation*>& map);
+        bool loadAnimationAsset(
+                const std::string& animName,
+                const std::string& assetPath,
+                std::unordered_map<std::string, IAnimation*>& animationMap
+        );
 
         /**
          * \brief Load the given font asset.

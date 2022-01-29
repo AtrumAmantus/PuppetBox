@@ -14,7 +14,7 @@ root:
       offset:
         x: 0
         y: 16 
-        z: -2
+        z: -1
       scale:
         x: 32
         y: 32
@@ -24,11 +24,11 @@ root:
           x: -16
           y: 16
         material: Assets1/Materials/TestHead
-    leftHand:
+    left_hand:
       offset:
         x: 16
         y: 0
-        z: -1
+        z: -2
       scale:
         x: 16
         y: 16
@@ -38,11 +38,11 @@ root:
           x: -8
           y: 8
         material: Assets1/Materials/TestHand
-    rightHand:
+    right_hand:
       offset:
         x: -16
         y: 0
-        z: -1
+        z: -2
       scale:
         x: 16
         y: 16

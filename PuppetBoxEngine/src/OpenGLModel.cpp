@@ -21,13 +21,23 @@ namespace PB
 
     }
 
-    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
+    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint8_t mode, std::uint32_t startFrame)
     {
         animator_ = std::move(animator);
+
+        animator_->setMode(mode);
 
         if (animator_ != nullptr)
         {
             animator_->setCurrentFrame(startFrame);
+        }
+    }
+
+    void OpenGLModel::stopAnimation(const std::string& animationPath)
+    {
+        if (animator_ && animator_->getAnimationName() == animationPath)
+        {
+            animator_ = nullptr;
         }
     }
 
@@ -41,6 +51,11 @@ namespace PB
         if (animator_ != nullptr)
         {
             animator_->update(deltaTime, bones_);
+
+            if (animator_->finished())
+            {
+                animator_ = nullptr;
+            }
         }
     }
 
