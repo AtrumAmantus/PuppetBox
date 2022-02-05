@@ -16,7 +16,7 @@ namespace PB
 
         explicit PropertyTree(std::string name, PropertyTree* parent = nullptr);
 
-        PropertyTree* get(const std::string& parameterName);
+        Result<PropertyTree*> get(const std::string& parameterName);
 
         std::string name();
 

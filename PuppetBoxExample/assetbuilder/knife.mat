@@ -1,0 +1,7 @@
+diffuse:
+  image: Assets1/Textures/Weapons/Knife
+  width: 8
+  height: 30
+  xOffset: 0
+  yOffset: 0
+shader: Assets1/Shaders/Basic

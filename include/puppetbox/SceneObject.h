@@ -66,6 +66,24 @@ namespace PB
         SceneObject(std::string id, vec3 baseScale, IModel* model);
 
         /**
+         * \brief Attaches the object to another object, causing it to use it's transformation
+         * matrices instead, creating the effect of it occupying the space space.
+         *
+         * \param sceneObject The object to attach to.
+         * \param attachPoint The bone to attach to on the target object.
+         */
+        void attachTo(SceneObject* sceneObject, const std::string& attachPoint);
+
+        /**
+         * \brief Gets the transformation matrix to position something exactly where
+         * the bone associated with the given boneName is.
+         *
+         * \param boneName The name associated to the desired bone.
+         * \return A transformation matrix for positioning on the same spot as the bone.
+         */
+        mat4 getAbsolutePositionForBone(const std::string& boneName) const;
+
+        /**
         * \brief Calls updates() and updates model matrices.
         *
         * \param deltaTime	The time passed (in Milliseconds) since the last update.
@@ -110,7 +128,7 @@ namespace PB
          * \param animationPath The path associated with the animation to play.
          * \param startFrame    The frame of the animation to start playing at.
          */
-        void playAnimation(const std::string& animationPath, std::uint8_t mode, std::uint32_t startFrame);
+        void playAnimation(const std::string& animationPath, std::uint32_t startFrame);
 
         /**
          * \brief Removes any attached animation with the given path reference.
@@ -146,8 +164,7 @@ namespace PB
         *
         * \param deltaTime	The time passed (in Milliseconds) since the last update.
         */
-        virtual void updates(float deltaTime)
-        {};
+        virtual void updates(float deltaTime) {};
 
         /**
          * \brief Triggered by behaviors with behavior specified event types.
@@ -157,13 +174,16 @@ namespace PB
          * \param behaviorName  The name of the behavior that triggered the event.
          * \param behaviorEvent The event the behavior sent out.
          */
-        virtual void behaviorEvent(std::string behaviorName, std::string behaviorEvent) {};
+        virtual void behaviorEvent(std::string behaviorName, std::uint32_t behaviorEvent) {};
 
     private:
         std::string id_;
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
+        mat4 transform_{};
         IAnimationCatalogue* animationCatalogue_ = nullptr;
         IModel* model_ = nullptr;
         std::unique_ptr<AbstractBehavior> behavior_{nullptr};
+        SceneObject* attachedTo_ = nullptr;
+        std::string attachPoint_ = "";
     };
 }

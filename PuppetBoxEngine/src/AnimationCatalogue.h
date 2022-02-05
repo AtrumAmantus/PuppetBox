@@ -17,10 +17,10 @@ namespace PB
                 std::unordered_map<std::string, BoneMap> boneMap,
                 std::uint8_t fps,
                 std::uint8_t frameCount,
-                std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes
+                std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes
         );
 
-        std::unordered_map<std::string, Keyframe>
+        std::unordered_map<std::string, TransformKeyframe>
         getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const override;
 
         std::string getPath() const;
@@ -38,7 +38,7 @@ namespace PB
         /**
          * Keyframes are stored as separate scale/rotation/transform vectors
          */
-        const std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes_{};
+        const std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes_{};
         std::vector<std::uint8_t> keyframeIndexes_{};
     };
 
@@ -48,8 +48,6 @@ namespace PB
         explicit Animator(IAnimation* animation);
 
         std::string getAnimationName() const override;
-
-        void setMode(std::uint8_t mode) override;
 
         void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) override;
 
@@ -63,7 +61,6 @@ namespace PB
         IAnimation* animation_;
         bool playedOneFrame_ = false;
         bool animationFinished_ = false;
-        std::uint8_t mode_ = 0;
         float sequenceTime_ = 0;
         float sequenceDuration_;
         std::unordered_map<std::string, mat4> boneTransformations_;

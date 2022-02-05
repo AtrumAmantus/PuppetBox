@@ -12,27 +12,6 @@ namespace PB
     namespace
     {
         /**
-        * \brief Helper function to return a default value if a given key is not in the given unordered_map.
-        *
-        * \param propertyName	The key that is expected to referenced the desired data in the map.
-        * \param properties		The unordered_map from which the key will be used to acquire data.
-        * \param defaultValue	The default value to use if the given unordered_map does not contain the given key.
-        *
-        * \return Either the value from the map referenced with the given key, or the given default value if the key did not exist.
-        */
-        std::string
-        defaultIfNotInMap(const std::string& propertyName, std::unordered_map<std::string, std::string> properties,
-                          std::string defaultValue)
-        {
-            if (properties.find(propertyName) != properties.end())
-            {
-                return properties.at(propertyName);
-            }
-
-            return defaultValue;
-        }
-
-        /**
          * \brief Maps an input stream to a {\link SizedArray}.
          *
          * \param stream The stream to read from.
@@ -56,30 +35,63 @@ namespace PB
         }
 
         /**
-        * \brief Helper function to return a default value if a given key is not in the given PropertyTree
-        *
-        * \param propertyName	The key that is expected to referenced the desired data in the PropertyTree.
-        * \param properties		The PropertyTree from which the key will be used to acquire data.
-        * \param defaultValue	The default value to use if the given PropertyTree does not contain the given key.
-        *
-        * \return Either the value from the PropertyTree referenced with the given key, or the given default value if the key did not exist.
-        */
-        std::string defaultIfNotInTree(const std::string& propertyName, PropertyTree& pTree, std::string defaultValue)
+         * Checks the given {\link PropertyTree} for the given node, returning it's value
+         * in a {\link Result} object (or an empty {\link Result} if not found).
+         *
+         * @param nodeName  The name of the property to search for.
+         * @param pTree     The {\link PropertyTree} to search through for the node.
+         * @return A {\link Result} object with the property node's value, or an empty
+         * {\link Result} if the node wasn't found, or had no value.
+         */
+        Result<std::string> getStringResultAtNode(const std::string& nodeName, PropertyTree& pTree)
         {
-            std::string value;
-            PropertyTree* childNode = pTree.get(propertyName);
+            Result<std::string> result;
 
-            if (childNode != nullptr)
+            auto propertyNode = pTree.get(nodeName);
+
+            if (propertyNode.hasResult && !propertyNode.result->value().empty())
             {
-                value = childNode->value();
-
-                if (value.empty())
-                {
-                    return defaultValue;
-                }
+                result = {propertyNode.result->value(), true};
+            }
+            else
+            {
+                result = {"", false};
             }
 
-            return value;
+            return result;
+        }
+
+        /**
+         * \brief Gets the parsed float value of the node associated with the given name if it exists,
+         * returning a {\link Result<T>} object to indicate if it was found.
+         *
+         * \param nodeName The name associated with the desired node value.
+         * \param pTree    The tree to search on for the node associated with the given name.
+         * \return A {\link Result<T>} that possibly contains the requested node object.
+         */
+        template<typename T>
+        Result<T> getNumericResultAtNode(const std::string& nodeName, PropertyTree& pTree, bool* error)
+        {
+            Result<T> result;
+            auto propertyNode = pTree.get(nodeName);
+
+            if (propertyNode.hasResult && !propertyNode.result->value().empty())
+            {
+                T value = NumberUtils::parseValue(propertyNode.result->value().c_str(), (T) 0, error);
+
+                if (*error)
+                {
+                    LOGGER_ERROR("Could not parse value '" + propertyNode.result->value() + "' as float");
+                }
+
+                result = {value, !*error};
+            }
+            else
+            {
+                result = {(T) 0, false};
+            }
+
+            return result;
         }
 
         /**
@@ -94,48 +106,56 @@ namespace PB
         {
             ModelData2D model{};
 
-            if (rootProperties.has("scale"))
+            auto scaleNode = rootProperties.get("scale");
+
+            if (scaleNode.hasResult)
             {
-                PropertyTree* scaleProperties = rootProperties.get("scale");
-                model.scale.x = NumberUtils::parseValue(defaultIfNotInTree("x", *scaleProperties, "0").c_str(), 0.0f,
-                                                        error);
-                model.scale.y = NumberUtils::parseValue(defaultIfNotInTree("y", *scaleProperties, "0").c_str(), 0.0f,
-                                                        error);
+                PropertyTree* scaleProperties = scaleNode.result;
+
+                model.scale.x = getNumericResultAtNode<float>("x", *scaleProperties, error).orElse(1.0f);
+                model.scale.y = getNumericResultAtNode<float>("y", *scaleProperties, error).orElse(1.0f);
             }
 
-            if (rootProperties.has("offset"))
+            auto offsetNode = rootProperties.get("offset");
+
+            if (offsetNode.hasResult)
             {
-                PropertyTree* offsetProperties = rootProperties.get("offset");
-                model.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *offsetProperties, "0").c_str(), 0.0f,
-                                                         error);
-                model.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *offsetProperties, "0").c_str(), 0.0f,
-                                                         error);
-                model.offset.z = NumberUtils::parseValue(defaultIfNotInTree("z", *offsetProperties, "0").c_str(), 0.0f,
-                                                         error);
+                PropertyTree* offsetProperties = offsetNode.result;
+
+                model.offset.x = getNumericResultAtNode<float>("x", *offsetProperties, error).orElse(0.0f);
+                model.offset.y = getNumericResultAtNode<float>("y", *offsetProperties, error).orElse(0.0f);
+                model.offset.z = getNumericResultAtNode<float>("z", *offsetProperties, error).orElse(0.0f);
+
                 //TODO: Fix this hack
                 model.offset.z *= 0.1;
             }
 
-            PropertyTree* meshProperties = rootProperties.get("mesh");
+            PropertyTree* meshProperties = rootProperties.get("mesh").result;
             //TODO: Make this not hardcoded.
             model.mesh.type = SPRITE;
-            model.mesh.materialPath = meshProperties->get("material")->value();
+            model.mesh.materialPath = meshProperties->get("material").result->value();
 
-            PropertyTree* meshOffsetProperties = meshProperties->get("offset");
-            model.mesh.offset.x = NumberUtils::parseValue(defaultIfNotInTree("x", *meshOffsetProperties, "0").c_str(),
-                                                          0.0f, error);
-            model.mesh.offset.y = NumberUtils::parseValue(defaultIfNotInTree("y", *meshOffsetProperties, "0").c_str(),
-                                                          0.0f, error);
+            auto meshOffsetNode = meshProperties->get("offset");
+
+            if (meshOffsetNode.hasResult)
+            {
+                PropertyTree* meshOffsetProperties = meshOffsetNode.result;
+
+                model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
+                model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
+            }
 
             model.name = rootProperties.name();
 
-            if (rootProperties.has("children"))
+            auto rootChildrenNode = rootProperties.get("children");
+
+            if (rootChildrenNode.hasResult)
             {
-                PropertyTree* childrenProperties = rootProperties.get("children");
+                PropertyTree* childrenProperties = rootChildrenNode.result;
 
                 for (auto& childName: childrenProperties->children())
                 {
-                    ModelData2D child = mapToModel2D(*childrenProperties->get(childName), error);
+                    ModelData2D child = mapToModel2D(*childrenProperties->get(childName).result, error);
 
                     model.children[childName] = child;
                 }
@@ -162,32 +182,34 @@ namespace PB
         {
             Material material;
 
-            PropertyTree* diffuseProperties = materialProperties.get("diffuse");
-            std::string image = defaultIfNotInTree("image", *diffuseProperties, "");
-            std::uint32_t width = NumberUtils::parseValue(defaultIfNotInTree("width", *diffuseProperties, "0").c_str(),
-                                                          0, error);
-            std::uint32_t height = NumberUtils::parseValue(
-                    defaultIfNotInTree("height", *diffuseProperties, "0").c_str(), 0, error);
-            std::uint32_t xOffset = NumberUtils::parseValue(
-                    defaultIfNotInTree("xOffset", *diffuseProperties, "0").c_str(), 0, error);
-            std::uint32_t yOffset = NumberUtils::parseValue(
-                    defaultIfNotInTree("yOffset", *diffuseProperties, "0").c_str(), 0, error);
+            auto diffuseNode = materialProperties.get("diffuse");
 
-            std::string shader = defaultIfNotInTree("shader", materialProperties, "");
-
-            if (*error)
+            if (diffuseNode.hasResult)
             {
-                LOGGER_ERROR("Failed to parse values for Material Asset");
-                return {};
+                PropertyTree* diffuseProperties = diffuseNode.result;
+
+                std::string image = getStringResultAtNode("image", *diffuseProperties).orElse("");
+                std::uint32_t width = getNumericResultAtNode<std::uint32_t>("width", *diffuseProperties, error).orElse(
+                        0);
+                std::uint32_t height = getNumericResultAtNode<std::uint32_t>("height", *diffuseProperties,
+                                                                             error).orElse(0);
+                std::uint32_t xOffset = getNumericResultAtNode<std::uint32_t>("xOffset", *diffuseProperties,
+                                                                              error).orElse(0);
+                std::uint32_t yOffset = getNumericResultAtNode<std::uint32_t>("yOffset", *diffuseProperties,
+                                                                              error).orElse(0);
+                std::string shader = getStringResultAtNode("shader", *diffuseProperties).orElse("");
+
+                material.diffuseData = {
+                        image,
+                        width,
+                        height,
+                        xOffset,
+                        yOffset
+                };
             }
 
-            material.diffuseData = {
-                    image,
-                    width,
-                    height,
-                    xOffset,
-                    yOffset
-            };
+            std::string shader = getStringResultAtNode("shader", materialProperties).orElse("");
+
             material.shaderId = shader;
 
             return material;
@@ -202,7 +224,7 @@ namespace PB
             {
                 for (auto& p: pTree->children())
                 {
-                    auto childMap = mapToBones(pTree->get(p), pTree->name(), error);
+                    auto childMap = mapToBones(pTree->get(p).result, pTree->name(), error);
                     boneMap.insert(childMap.begin(), childMap.end());
                 }
             }
@@ -213,79 +235,66 @@ namespace PB
             return boneMap;
         }
 
-        Keyframe mapToKeyframe(PropertyTree* pTree, bool* error)
+        RawKeyframe mapToKeyframe(PropertyTree* pTree, bool* error)
         {
-            Keyframe keyframe{};
+            RawKeyframe keyframe{};
 
             keyframe.boneName = pTree->name();
 
-            if (pTree->has("position"))
+            auto positionNode = pTree->get("position");
+
+            if (positionNode.hasResult)
             {
-                auto position = pTree->get("position");
-                keyframe.position.x = NumberUtils::parseValue(
-                        defaultIfNotInTree("x", *position, "0").c_str(),
-                        0.0f, error
-                );
-                keyframe.position.y = NumberUtils::parseValue(
-                        defaultIfNotInTree("y", *position, "0").c_str(),
-                        0.0f, error
-                );
-                keyframe.position.z = NumberUtils::parseValue(
-                        defaultIfNotInTree("z", *position, "0").c_str(),
-                        0.0f, error
-                );
+                PropertyTree* position = positionNode.result;
+
+                keyframe.position.x = getNumericResultAtNode<float>("x", *position, error);
+                keyframe.position.y = getNumericResultAtNode<float>("y", *position, error);
+                keyframe.position.z = getNumericResultAtNode<float>("z", *position, error);
             }
 
-            if (pTree->has("rotation"))
+            auto rotationNode = pTree->get("rotation");
+
+            if (rotationNode.hasResult)
             {
-                auto rotation = pTree->get("rotation");
-                keyframe.rotation.x = NumberUtils::parseValue(
-                        defaultIfNotInTree("x", *rotation, "0").c_str(),
-                        0.0f, error
-                );
-                keyframe.rotation.y = NumberUtils::parseValue(
-                        defaultIfNotInTree("y", *rotation, "0").c_str(),
-                        0.0f, error
-                );
-                keyframe.rotation.z = NumberUtils::parseValue(
-                        defaultIfNotInTree("z", *rotation, "0").c_str(),
-                        0.0f, error
-                );
+                auto rotation = rotationNode.result;
+
+                keyframe.rotation.x = getNumericResultAtNode<float>("x", *rotation, error);
+                keyframe.rotation.y = getNumericResultAtNode<float>("y", *rotation, error);
+                keyframe.rotation.z = getNumericResultAtNode<float>("z", *rotation, error);
             }
 
-            if (pTree->has("scale"))
+            auto scaleNode = pTree->get("scale");
+
+            if (scaleNode.hasResult)
             {
-                auto scale = pTree->get("scale");
-                keyframe.scale.x = NumberUtils::parseValue(
-                        defaultIfNotInTree("x", *scale, "1").c_str(),
-                        1.0f, error
-                );
-                keyframe.scale.y = NumberUtils::parseValue(
-                        defaultIfNotInTree("y", *scale, "1").c_str(),
-                        1.0f, error
-                );
-                keyframe.scale.z = NumberUtils::parseValue(
-                        defaultIfNotInTree("z", *scale, "1").c_str(),
-                        1.0f, error
-                );
+                auto scale = scaleNode.result;
+
+                keyframe.scale.x = getNumericResultAtNode<float>("x", *scale, error);
+                keyframe.scale.y = getNumericResultAtNode<float>("y", *scale, error);
+                keyframe.scale.z = getNumericResultAtNode<float>("z", *scale, error);
             }
             else
             {
-                keyframe.scale = {1, 1, 1};
+                keyframe.scale = {
+                        {1, true},
+                        {1, true},
+                        {1, true},
+                        {1, true}
+                };
             }
 
             return keyframe;
         }
 
-        std::vector<Keyframe> mapToKeyframeVector(PropertyTree* pTree, const std::uint8_t frameIndex, bool* error)
+        std::vector<RawKeyframe> mapToKeyframeVector(PropertyTree* pTree, const std::uint8_t frameIndex, bool* error)
         {
-            std::vector<Keyframe> keyframes{};
+            std::vector<RawKeyframe> keyframes{};
 
             for (auto& childName: pTree->children())
             {
                 if (!*error)
                 {
-                    Keyframe keyframe = mapToKeyframe(pTree->get(childName), error);
+                    RawKeyframe keyframe = mapToKeyframe(pTree->get(childName).result, error);
 
                     keyframe.frameIndex = frameIndex;
 
@@ -303,9 +312,9 @@ namespace PB
             return keyframes;
         }
 
-        std::unordered_map<std::uint8_t, std::vector<Keyframe>> mapToKeyframes(PropertyTree* pTree, bool* error)
+        std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> mapToKeyframes(PropertyTree* pTree, bool* error)
         {
-            std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes{};
+            std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes{};
 
             if (!pTree->children().empty())
             {
@@ -317,9 +326,9 @@ namespace PB
 
                         if (!*error)
                         {
-                            auto keyframeVector = mapToKeyframeVector(pTree->get(childName), frameIndex, error);
+                            auto keyframeVector = mapToKeyframeVector(pTree->get(childName).result, frameIndex, error);
                             keyframes.insert(
-                                    std::pair<std::uint8_t, std::vector<Keyframe>>{frameIndex, keyframeVector}
+                                    std::pair<std::uint8_t, std::vector<RawKeyframe>>{frameIndex, keyframeVector}
                             );
                         }
                         else
@@ -350,9 +359,9 @@ namespace PB
         {
             ShaderProgram shaderProgram{};
 
-            shaderProgram.vertexShaderPath = defaultIfNotInTree("vertex", shaderProperties, "");
-            shaderProgram.fragmentShaderPath = defaultIfNotInTree("fragment", shaderProperties, "");
-            shaderProgram.geometryShaderPath = defaultIfNotInTree("geometry", shaderProperties, "");
+            shaderProgram.vertexShaderPath = getStringResultAtNode("vertex", shaderProperties).orElse("");
+            shaderProgram.fragmentShaderPath = getStringResultAtNode("fragment", shaderProperties).orElse("");
+            shaderProgram.geometryShaderPath = getStringResultAtNode("geometry", shaderProperties).orElse("");
 
             if (shaderProgram.vertexShaderPath.empty() || shaderProgram.fragmentShaderPath.empty())
             {
@@ -465,7 +474,7 @@ namespace PB
         * \param stream		The stream of data to parse.
         * \param root		The root of the PropertyTree to parse the data into.
         *
-        * \return True if the data was successfully parsed, False otheriwse.
+        * \return True if the data was successfully parsed, False otherwise.
         */
         bool getPropertyTreeFromStream(std::istream* stream, PropertyTree* root)
         {
@@ -542,7 +551,7 @@ namespace PB
 
                                         if (currentNode->add(splitValues[0]))
                                         {
-                                            currentNode = currentNode->get(splitValues[0]);
+                                            currentNode = currentNode->get(splitValues[0]).result;
                                         }
                                     }
                                     else
@@ -552,7 +561,7 @@ namespace PB
 
                                         if (currentNode->add(splitValues[0]))
                                         {
-                                            currentNode->get(splitValues[0])->add(splitValues[1]);
+                                            currentNode->get(splitValues[0]).result->add(splitValues[1]);
                                         }
                                         else
                                         {
@@ -699,7 +708,7 @@ namespace PB
                 for (auto& childName: propertyData.children())
                 {
                     map.insert(
-                            std::pair<std::string, std::string>(childName, propertyData.get(childName)->value())
+                            std::pair<std::string, std::string>(childName, propertyData.get(childName).result->value())
                     );
                 }
             }
@@ -717,8 +726,11 @@ namespace PB
         return !error;
     }
 
-    bool AssetArchive::loadAnimationAsset(const std::string& name, const std::string& assetPath,
-                                          std::unordered_map<std::string, IAnimation*>& animationMap)
+    bool AssetArchive::loadAnimationAsset(
+            const std::string& name,
+            const std::string& assetPath,
+            std::unordered_map<std::string, IAnimation*>& animationMap
+    )
     {
         bool error;
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
@@ -736,37 +748,84 @@ namespace PB
 
             if (!error)
             {
-                auto skeleton = propertyData.get("skeleton");
-                std::unordered_map<std::string, BoneMap> boneMap = mapToBones(skeleton->get("root"), "", &error);
+                auto skeletonNode = propertyData.get("skeleton");
 
-                std::uint8_t fps = NumberUtils::parseValue(propertyData.get("fps")->value().c_str(), 0, &error);
-                std::uint8_t frameCount = NumberUtils::parseValue(propertyData.get("length")->value().c_str(), 0,
-                                                                  &error);
-
-                if (!error)
+                if (skeletonNode.hasResult)
                 {
-                    std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes = mapToKeyframes(
-                            propertyData.get("keyframes"),
-                            &error);
+                    auto rootNode = skeletonNode.result->get("root");
 
-                    if (!error)
+                    if (rootNode.hasResult)
                     {
-                        animationMap.insert(
-                                std::pair<std::string, IAnimation*>(archiveName_ + "/" + assetPath,
-                                                                    new Animation(
-                                                                            this->archiveName_ + "/" + assetPath,
-                                                                            boneMap,
-                                                                            fps,
-                                                                            frameCount,
-                                                                            keyframes
-                                                                    )
-                                )
-                        );
+                        std::unordered_map<std::string, BoneMap> boneMap = mapToBones(rootNode.result, "", &error);
+
+                        auto fpsNode = propertyData.get("fps");
+
+                        if (fpsNode.hasResult)
+                        {
+                            std::uint8_t fps = NumberUtils::parseValue(fpsNode.result->value().c_str(), 0, &error);
+
+                            auto lengthNode = propertyData.get("length");
+
+                            if (lengthNode.hasResult)
+                            {
+                                std::uint8_t frameCount = NumberUtils::parseValue(
+                                        lengthNode.result->value().c_str(),
+                                        0,
+                                        &error
+                                );
+
+                                auto keyframesNode = propertyData.get("keyframes");
+
+                                if (keyframesNode.hasResult)
+                                {
+                                    std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes = mapToKeyframes(
+                                            keyframesNode.result,
+                                            &error);
+
+                                    if (!error)
+                                    {
+                                        animationMap.insert(
+                                                std::pair<std::string, IAnimation*>(archiveName_ + "/" + assetPath,
+                                                                                    new Animation(
+                                                                                            this->archiveName_ + "/" +
+                                                                                            assetPath,
+                                                                                            boneMap,
+                                                                                            fps,
+                                                                                            frameCount,
+                                                                                            keyframes
+                                                                                    )
+                                                )
+                                        );
+                                    }
+                                }
+                                else
+                                {
+                                    error = true;
+                                    LOGGER_ERROR("No keyframes defined in the loaded animation.");
+                                }
+                            }
+                            else
+                            {
+                                error = true;
+                                LOGGER_ERROR("No length defined in the loaded animatino.");
+                            }
+                        }
+                        else
+                        {
+                            error = true;
+                            LOGGER_ERROR("No FPS defined in the loaded animation.");
+                        }
+                    }
+                    else
+                    {
+                        error = true;
+                        LOGGER_ERROR("No root node defined in the loaded animation skeleton.");
                     }
                 }
                 else
                 {
-                    LOGGER_ERROR("Invalid/missing fps attribute for animation asset '" + assetPath + "'");
+                    error = true;
+                    LOGGER_ERROR("No skeleton defined in the loaded animation.");
                 }
             }
             else
@@ -952,9 +1011,11 @@ namespace PB
             {
                 ModelData2D model{};
 
-                if (propertyData.has("root"))
+                auto rootNode = propertyData.get("root");
+
+                if (rootNode.hasResult)
                 {
-                    model = mapToModel2D(*propertyData.get("root"), error);
+                    model = mapToModel2D(*rootNode.result, error);
                 }
                 else
                 {

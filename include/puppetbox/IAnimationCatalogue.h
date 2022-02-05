@@ -10,23 +10,30 @@
 
 namespace PB
 {
-    struct Keyframe
+    struct RawKeyframe
     {
         std::uint8_t frameIndex;
         std::string boneName;
-        union
-        {
-            mat4 translation{};
-            struct
-            {
-                vec4 rotation;
-                vec4 scale;
-                vec4 unused;
-                vec4 position;
-            };
-        };
+        Vec4 rotation;
+        Vec4 scale;
+        Vec4 position;
 
-        bool operator==(const Keyframe& rhs) const
+        bool operator==(const RawKeyframe& rhs) const
+        {
+            // If the frame index and bone name are the same, it should be the same
+            // keyframe, or something really wrong happened.
+            return this->frameIndex == rhs.frameIndex
+                   && this->boneName == rhs.boneName;
+        }
+    };
+
+    struct TransformKeyframe
+    {
+        std::uint8_t frameIndex;
+        std::string boneName;
+        mat4 transform;
+
+        bool operator==(const TransformKeyframe& rhs) const
         {
             // If the frame index and bone name are the same, it should be the same
             // keyframe, or something really wrong happened.
@@ -47,7 +54,7 @@ namespace PB
          * \param bones        The bones to get keyframes for.
          * \return A map of the keyframes for the given bones, keyed per bone.
          */
-        virtual std::unordered_map<std::string, Keyframe>
+        virtual std::unordered_map<std::string, TransformKeyframe>
         getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const = 0;
 
         /**
@@ -83,18 +90,6 @@ namespace PB
          * \return Path name for the attached animation.
          */
         virtual std::string getAnimationName() const = 0;
-
-        /**
-         * \brief Sets the play mode for the animation.
-         *
-         * <ul>
-         * <li>0 -> Endless</li>
-         * <li>1 -> Single loop</li>
-         * </ul>
-         *
-         * \param mode The desired mode for the animation.
-         */
-        virtual void setMode(std::uint8_t mode) = 0;
 
         /**
          * \brief Update the state of the current animator.

@@ -17,14 +17,9 @@ namespace PB
          * \brief Sets the animation of the Model to the one held by the given animator.
          *
          * \param animator   {\link Animator} holding the desired {\link Animation}.
-         * \param mode       The MODE for the animation to play with.
          * \param startFrame The frame that the animation will start playing from.
          */
-        virtual void playAnimation(
-                std::unique_ptr<IAnimator> animator,
-                std::uint8_t mode,
-                std::uint32_t startFrame
-        ) = 0;
+        virtual void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) = 0;
 
         /**
          * \brief Removes any attached animators that reference the given animation path.
@@ -41,6 +36,15 @@ namespace PB
         virtual bool isAnimating() const = 0;
 
         /**
+         * \brief Gets the transformation matrix to position something exactly where
+         * the bone associated with the given boneName is.
+         *
+         * \param boneName The name associated to the desired bone.
+         * \return A transformation matrix for positioning on the same spot as the bone.
+         */
+        virtual mat4 getAbsolutePositionForBone(const std::string& boneName) const = 0;
+
+        /**
          * \brief Method used by application logic to update the state of the model prior to the render()
          * call.
          *
@@ -52,6 +56,6 @@ namespace PB
         * \brief Method used by application logic to render an object using the GFX API invocations of
         * the derived implementation.
         */
-        virtual void render(mat3 transform) const = 0;
+        virtual void render(mat4 transform) const = 0;
     };
 }

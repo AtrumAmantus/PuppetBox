@@ -546,7 +546,7 @@ namespace PB
             {
                 Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
 
-                mesh.scale = modelData.scale;
+                mesh.scale = vec3{modelData.scale.x, modelData.scale.y, 1.0f};
 
                 if (!error)
                 {
@@ -555,9 +555,14 @@ namespace PB
                             std::move(parent),
                             depth,
                             Bone{
-                                    {modelData.offset.x, modelData.offset.y, modelData.offset.z},
-                                    {modelData.scale.x,  modelData.scale.y,  1},
-                                    {}
+                                    vec4{
+                                        modelData.offset.x + modelData.mesh.offset.x,
+                                        modelData.offset.y + modelData.mesh.offset.y,
+                                        modelData.offset.z,
+                                        0.0f
+                                        },
+                                    vec4{modelData.scale.x,  modelData.scale.y,  1.0f, 1.0f},
+                                    vec4{}
                             }
                     };
 

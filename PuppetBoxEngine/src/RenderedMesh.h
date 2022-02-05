@@ -13,6 +13,6 @@ namespace PB
         /**
         * \brief Renders the object with OpenGL specific invocations.
         */
-        virtual void render(mat3 transform, Bone* bones, std::uint32_t boneCount) const = 0;
+        virtual void render(mat4 transform, Bone* bones, std::uint32_t boneCount) const = 0;
     };
 }

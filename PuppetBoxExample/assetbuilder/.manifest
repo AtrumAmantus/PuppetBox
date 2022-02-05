@@ -2,11 +2,14 @@ Fonts/MochiyPop/Regular MochiyPopPOne-Regular.ttf
 Textures/TestBody TestBody.png
 Textures/TestHand TestHand.png
 Textures/TestHead TestHead.png
+Textures/Weapons/Knife knife.png
 SpriteSheet SpriteSheet1.png
 Sprites/GenericMob GenericMob.m
+Sprites/Weapons/Knife knife.m
 Materials/TestBody TestBody.mat
 Materials/TestHand TestHand.mat
 Materials/TestHead TestHead.mat
+Materials/Weapons/Knife knife.mat
 Mesh/Sprite sprite.mesh
 Mesh/Glyph glyph.mesh
 Shaders/Basic/Vertex basic.vertex.shader

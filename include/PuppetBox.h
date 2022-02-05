@@ -4,7 +4,6 @@
 
 #include "puppetbox/AbstractSceneHandler.h"
 #include "puppetbox/Constants.h"
-#include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/SceneObject.h"
 #include "puppetbox/TypeDef.h"
 #include "puppetbox/UIComponent.h"

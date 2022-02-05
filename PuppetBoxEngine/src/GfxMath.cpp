@@ -159,13 +159,13 @@ namespace PB::GfxMath
         return glmToMat4(gM);
     }
 
-    mat4 CreateTransformation(vec4 rotation, vec4 scale, vec4 position)
+    mat4 CreateTransformation(vec3 rotation, vec3 scale, vec3 position)
     {
-        mat4 r = Rotate(mat4::eye(), {rotation.x, rotation.y, rotation.z});
+        mat4 r = Rotate(mat4::eye(), rotation);
 
-        mat4 p = Translate(mat4::eye(), {position.x, position.y, position.z});
+        mat4 p = Translate(mat4::eye(), position);
 
-        mat4 s = Scale(mat4::eye(), {scale.x, scale.y, scale.z});
+        mat4 s = Scale(mat4::eye(), scale);
 
         return p * r * s;
     }

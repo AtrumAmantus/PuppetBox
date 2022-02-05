@@ -9,7 +9,7 @@ namespace PB
 
     }
 
-    void Rendered2DMesh::render(mat3 transform, Bone* bones, std::uint32_t boneCount) const
+    void Rendered2DMesh::render(mat4 transform, Bone* bones, std::uint32_t boneCount) const
     {
         if (material_.requiresAlphaBlending)
         {
@@ -30,12 +30,13 @@ namespace PB
         material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
         material_.shader.setMat4("boneTransform", bones[0].translation);
 
-        mat4 model = mat4::eye();
-        model = GfxMath::Translate(model, transform[0]);
-        //TODO: Revisit this logic, it's not correct
-        model = GfxMath::Scale(model, transform[2]);
-        model = GfxMath::Scale(model, mesh_.scale);
-        model = GfxMath::Rotate(model, transform[1]);
+        mat4 model = transform;
+
+        // TODO: Applying this late does it doesn't affect other calculations, but this
+        // doesn't seem right.
+        model[0][0] *= mesh_.scale[0];
+        model[1][1] *= mesh_.scale[1];
+        model[2][2] *= mesh_.scale[2];
 
         material_.shader.setMat4("model", model);
 

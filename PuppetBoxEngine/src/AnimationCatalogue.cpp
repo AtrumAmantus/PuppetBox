@@ -1,9 +1,8 @@
 #include "AnimationCatalogue.h"
 
 #include <algorithm>
+#include <functional>
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <utility>
 
 #include "GfxMath.h"
@@ -12,28 +11,180 @@ namespace PB
 {
     namespace
     {
-        std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>> CACHED_KEYFRAMES{};
+        std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::vector<TransformKeyframe>>> CACHED_KEYFRAMES{};
 
-        inline Result<Keyframe> findKeyframeForBone(const std::string& boneName, const std::vector<Keyframe>& keyframes)
+        inline Result<RawKeyframe> findExplicitKeyframe(
+                const std::string& boneName,
+                std::uint8_t frameIndexToCheck,
+                std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes
+        )
         {
-            for (const auto& keyframe: keyframes)
+            Result<RawKeyframe> result{};
+
+            if (keyframes.find(frameIndexToCheck) != keyframes.end())
             {
-                if (keyframe.boneName == boneName)
+                auto& boneKeyframes = keyframes.at(frameIndexToCheck);
+
+                auto iter = boneKeyframes.begin();
+
+                while (!result.hasResult && iter < boneKeyframes.end())
                 {
-                    return {keyframe, true};
+                    if (iter->boneName == boneName)
+                    {
+                        result.result = *iter;
+                        result.hasResult = true;
+                    }
+
+                    ++iter;
                 }
             }
 
-            return {Keyframe{}, false};
+            return result;
         }
 
-        inline glm::mat4 rotVecToMat4(glm::mat4 initialMatrix, vec4 rotVec)
+        inline Result<float> findValueAtExplicitKeyframe(
+                const std::string& boneName,
+                std::uint8_t frameIndexToCheck,
+                std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes,
+                std::function<Vec4&(RawKeyframe&)> pullVec4,
+                std::function<Result<float>(Vec4&)> pullResult
+        )
         {
-            initialMatrix = glm::rotate(initialMatrix, rotVec.x, glm::vec3(1.0f, 0.0f, 0.0f));
-            initialMatrix = glm::rotate(initialMatrix, rotVec.y, glm::vec3(0.0f, 1.0f, 0.0f));
-            initialMatrix = glm::rotate(initialMatrix, rotVec.z, glm::vec3(0.0f, 0.0f, 1.0f));
+            Result<float> result{};
 
-            return initialMatrix;
+            Result<RawKeyframe> keyframeResult = findExplicitKeyframe(boneName, frameIndexToCheck, keyframes);
+
+            if (keyframeResult.hasResult)
+            {
+                result = pullResult(pullVec4(keyframeResult.result));
+            }
+
+            return result;
+        }
+
+        inline Result<RawKeyframe> findAdjacentKeyframe(
+                std::int8_t direction,
+                const std::string& boneName,
+                std::uint8_t currentFrame,
+                std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes,
+                std::vector<std::uint8_t> keyframeIndexes,
+                std::function<Vec4&(RawKeyframe&)> pullVec4,
+                std::function<Result<float>(Vec4&)> pullResult
+        )
+        {
+            Result<RawKeyframe> result;
+
+            std::vector<std::uint8_t> keyframesToSearch{};
+
+            std::uint8_t startingPoint = 0;
+
+            {
+                auto itr = keyframeIndexes.begin();
+
+                // Find which index in keyframeIndexes we start looking with
+                while (itr < keyframeIndexes.end() && *itr <= currentFrame)
+                {
+                    ++startingPoint;
+                    ++itr;
+                }
+            }
+
+            // If startingPoint is still 0, the currentframe is less than every keyframe, so start from the last one
+            if (startingPoint == 0)
+            {
+                startingPoint = keyframeIndexes.size() - 1;
+            }
+            else
+            {
+                // Adjust back one due to prior iteration logic "overshooting"
+                --startingPoint;
+            }
+
+            // Now, given the starting point, identify all keyframe indexes to search
+            std::vector<std::uint8_t> indexesToSearch{};
+            indexesToSearch.push_back(keyframeIndexes.at(startingPoint));
+
+            for (
+                    std::int32_t i = (((std::int32_t) startingPoint + direction) + keyframeIndexes.size())
+                                     % keyframeIndexes.size();
+                    i != startingPoint;
+                    i = ((i + direction) + keyframeIndexes.size()) % keyframeIndexes.size())
+            {
+                indexesToSearch.push_back(keyframeIndexes.at(i));
+            }
+
+            {
+                // Now we have the order in which we need to search, so start searching
+                auto itr = indexesToSearch.begin();
+
+                while (itr < indexesToSearch.end() && !result.hasResult)
+                {
+                    Result<RawKeyframe> keyframeResult = findExplicitKeyframe(boneName, *itr, keyframes);
+
+                    // If it's the right keyframe, and has a value for the desired attribute, this is what we want.
+                    if (keyframeResult.hasResult && pullResult(pullVec4(keyframeResult.result)).hasResult)
+                    {
+                        result = keyframeResult;
+                    }
+
+                    ++itr;
+                }
+            }
+
+            return result;
+        }
+
+        inline Result<float> getValueForKeyframe(
+                const std::string& boneName,
+                std::uint8_t currentFrame,
+                std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes,
+                std::vector<std::uint8_t> keyframeIndexes,
+                std::unordered_map<std::string, BoneMap> bones,
+                std::function<Vec4&(RawKeyframe&)> pullVec4,
+                std::function<Result<float>(Vec4&)> pullResult,
+                std::function<float(RawKeyframe, RawKeyframe)> tweenTransform
+        )
+        {
+            Result<float> result = findValueAtExplicitKeyframe(boneName, currentFrame, keyframes, pullVec4, pullResult);
+
+            if (!result.hasResult)
+            {
+                Result<RawKeyframe> prevKeyframe = findAdjacentKeyframe(
+                        -1,
+                        boneName,
+                        currentFrame,
+                        keyframes,
+                        keyframeIndexes,
+                        pullVec4,
+                        pullResult
+                );
+
+                if (prevKeyframe.hasResult)
+                {
+                    Result<RawKeyframe> nextKeyframe = findAdjacentKeyframe(
+                            1,
+                            boneName,
+                            currentFrame,
+                            keyframes,
+                            keyframeIndexes,
+                            pullVec4,
+                            pullResult
+                    );
+
+                    if (prevKeyframe.result.frameIndex == nextKeyframe.result.frameIndex)
+                    {
+                        // It's the same keyframe, just use its value
+                        result = pullResult(pullVec4(prevKeyframe.result));
+                    }
+                    else
+                    {
+                        result.result = tweenTransform(prevKeyframe.result, nextKeyframe.result);
+                        result.hasResult = true;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 
@@ -42,7 +193,7 @@ namespace PB
             std::unordered_map<std::string, BoneMap> boneMap,
             std::uint8_t fps,
             std::uint8_t frameCount,
-            std::unordered_map<std::uint8_t, std::vector<Keyframe>> keyframes
+            std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes
     ) : animationPath_(animationPath),
         boneMap_(std::move(boneMap)),
         fps_(fps),
@@ -78,178 +229,131 @@ namespace PB
      * for the given frame.
      */
     //TODO: bones vs boneMap_ is confusing, plus BoneMap structure is wacky, revisit
-    std::unordered_map<std::string, Keyframe>
+    std::unordered_map<std::string, TransformKeyframe>
     Animation::getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const
     {
-        std::unordered_map<std::string, Keyframe> keyframeTransformationMatrixMap{};
+        //TODO: This is slow as fuck now, need to pre-load animations.
+        std::unordered_map<std::string, TransformKeyframe> keyframeTransformationMatrixMap{};
 
         bool animationCached = CACHED_KEYFRAMES.find(getPath()) != CACHED_KEYFRAMES.end();
 
         if (animationCached &&
             CACHED_KEYFRAMES.at(getPath()).find(currentFrame) != CACHED_KEYFRAMES.at(getPath()).end())
         {
+            // We already computed this before, awesome, use the cached values.
             for (auto& k: CACHED_KEYFRAMES.at(getPath()).at(currentFrame))
             {
                 keyframeTransformationMatrixMap.insert(
-                        std::pair<std::string, Keyframe>{k.boneName, k}
+                        std::pair<std::string, TransformKeyframe>{k.boneName, k}
                 );
             }
         }
         else
         {
-            Keyframe prevKey{};
-            Keyframe nextKey{};
+            const auto totalFrameCount = getFrameCount();
 
-            // Map frame values for each bone for the current frame
+            std::function<Vec4&(RawKeyframe&)> getVec4[] = {
+                    [](RawKeyframe& k) -> Vec4& { return k.position; },
+                    [](RawKeyframe& k) -> Vec4& { return k.scale; },
+                    [](RawKeyframe& k) -> Vec4& { return k.rotation; }
+            };
+            std::function<void(Vec4&, Result<float>)> setResult[] = {
+                    [](Vec4& v, Result<float> r) -> void { v.x = r; },
+                    [](Vec4& v, Result<float> r) -> void { v.y = r; },
+                    [](Vec4& v, Result<float> r) -> void { v.z = r; }
+            };
+            std::function<Result<float>(Vec4&)> getResult[] = {
+                    [](Vec4& v) -> Result<float> { return v.x; },
+                    [](Vec4& v) -> Result<float> { return v.y; },
+                    [](Vec4& v) -> Result<float> { return v.z; }
+            };
+            std::function < float(RawKeyframe, RawKeyframe) > tweenTransform;
+
+            std::function<float(float, float, float)> transformAlgo[] = {
+                    [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
+                    [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
+                    [](float prev, float next, float blend) -> float {
+                        float coef = next > prev ? -1 : 1;
+                        float offset = abs(next - prev) > 180 ? 360 : 0;
+                        float delta = ((next - prev) + (offset * coef)) * blend;
+                        return fmod(prev + delta + 360, 360);
+                    }
+            };
+
             for (const auto& bone: bones)
             {
-                bool mappedKey = false;
-                prevKey.boneName = "";
-                nextKey.boneName = "";
+                RawKeyframe currentKey{};
 
-                Keyframe transformVectors{};
-
-                Result<Keyframe> result{};
-
-                // If it has a keyframe for this frame, just store its values
-                if (
-                        keyframes_.find(currentFrame) != keyframes_.end()
-                        && (result = findKeyframeForBone(bone.first, keyframes_.at(currentFrame))).hasResult
-                        )
+                // TODO: Rotations currently disabled
+                for (std::uint8_t v4 = 0; v4 < 2; ++v4)
                 {
-                    transformVectors = result.result;
-                }
-                else
-                {
-                    // If we didn't find a keyframe, we tween it (if possible)
-                    Keyframe firstKey{};
-                    Keyframe lastKey{};
-
-                    // Search every keyframe we have
-                    for (const auto& index: keyframeIndexes_)
+                    for (std::uint8_t r = 0; r < 3; ++r)
                     {
-                        // Don't check the requested frame, we already know it's not there
-                        if (index != currentFrame)
-                        {
-                            // Try to find keyframe for given bone
-                            Result<Keyframe> keyframe = findKeyframeForBone(bone.first, keyframes_.at(index));
-
-                            // If this keyframe includes the current bone...
-                            if (keyframe.hasResult)
-                            {
-                                if (index < currentFrame)
-                                {
-                                    // Save the firstKey with this bone in case this "wraps around"
-                                    if (firstKey.boneName.empty())
-                                    {
-                                        firstKey = keyframe.result;
-                                    }
-
-                                    prevKey = keyframe.result;
-                                }
-                                else
-                                {
-                                    // nextKey should be the first matching result after the target frame
-                                    if (nextKey.boneName.empty())
-                                    {
-                                        nextKey = keyframe.result;
-                                    }
-
-                                    // Save the lastKey with this bone in case this "wraps around"
-                                    lastKey = keyframe.result;
-                                }
-                            }
-                        }
-                    }
-
-                    if (prevKey.boneName.empty() && nextKey.boneName.empty())
-                    {
-                        // If both are null, the bone is not defined in this animation, set default transformations
-                        transformVectors.position = bones.at(bone.first).bone.offset;
-                        transformVectors.scale = {1, 1, 1};
-                        transformVectors.rotation = {0, 0, 0};
-                        transformVectors.unused = {0, 0, 0};
-                    }
-                    else
-                    {
-                        if (nextKey.boneName.empty())
-                        {
-                            // If we never found a nextKey, it probably wraps around to the front
-                            nextKey = std::move(firstKey);
-                        }
-
-                        if (prevKey.boneName.empty())
-                        {
-                            // If we never found a prevKey, it probably wrapped around from the end
-                            prevKey = std::move(lastKey);
-                        }
-
-                        if (prevKey.frameIndex == nextKey.frameIndex)
-                        {
-                            // If they are the same keyframe, then the bone isn't animated, just set
-                            // its values to whatever that frame has them at.
-                            transformVectors = prevKey;
-                        }
-                        else
-                        {
-                            // Otherwise, complex tweening logic...
-                            const uint8_t prevToEnd = getFrameCount() - prevKey.frameIndex;
+                        tweenTransform = [totalFrameCount, currentFrame, getResult, transformAlgo, getVec4, v4, r](
+                                RawKeyframe prev, RawKeyframe next) -> float {
+                            const uint8_t prevToEnd = totalFrameCount - prev.frameIndex;
                             const uint8_t prevToNext =
-                                    ((nextKey.frameIndex - prevKey.frameIndex) + getFrameCount()) % getFrameCount();
+                                    ((next.frameIndex - prev.frameIndex) + totalFrameCount) % totalFrameCount;
                             const uint8_t prevToCurr =
-                                    currentFrame < prevKey.frameIndex ? prevToEnd + currentFrame : currentFrame -
-                                                                                                   prevKey.frameIndex;
+                                    currentFrame < prev.frameIndex ? prevToEnd + currentFrame : currentFrame -
+                                                                                                prev.frameIndex;
                             const float blendValue = prevToCurr / (float) prevToNext;
 
-                            const vec4 position =
-                                    prevKey.position + ((nextKey.position - prevKey.position) * blendValue);
-                            const vec4 scale = prevKey.scale + ((prevKey.scale - nextKey.scale) * blendValue);
+                            float prevValue = getResult[r](getVec4[v4](prev)).result;
+                            float nextValue = getResult[r](getVec4[v4](next)).result;
 
-                            glm::mat4 prevRot = glm::mat4{1.0f};
-                            prevRot = rotVecToMat4(prevRot, prevKey.rotation);
+                            return transformAlgo[v4](prevValue, nextValue, blendValue);
+                        };
 
-                            glm::mat4 nextRot = glm::mat4{1.0f};
-                            nextRot = rotVecToMat4(nextRot, prevKey.rotation);
+                        Result<float> result = getValueForKeyframe(
+                                bone.first,
+                                currentFrame,
+                                keyframes_,
+                                keyframeIndexes_,
+                                bones,
+                                getVec4[v4],
+                                getResult[r],
+                                tweenTransform
+                        );
 
-                            glm::quat fromQuat = glm::quat_cast(prevRot);
-                            glm::quat toQuat = glm::quat_cast(nextRot);
-
-                            glm::quat quatRot = glm::slerp(fromQuat, toQuat, blendValue);
-
-                            glm::mat4 rot = glm::mat4_cast(quatRot);
-                            glm::mat4 pos = glm::translate(glm::mat4(1.0), {position.x, position.y, position.z});
-                            glm::mat4 sca = glm::scale(glm::mat4(1.0), {scale.x, scale.y, scale.z});
-
-                            glm::mat4 transformation = pos * rot * sca;
-
-                            // Store the tween values for this frame.
-                            keyframeTransformationMatrixMap.insert(
-                                    std::pair<std::string, Keyframe>(bone.first,
-                                                                     {currentFrame, bone.first,
-                                                                      mat4{&transformation[0][0]}})
-                            );
-
-                            mappedKey = true;
-                        }
+                        setResult[r](getVec4[v4](currentKey), result);
                     }
                 }
 
-                if (!mappedKey)
-                {
-                    mat4 transformation = GfxMath::CreateTransformation(
-                            transformVectors.rotation,
-                            transformVectors.scale,
-                            transformVectors.position
-                    );
+                Bone tModelValues = bones.at(bone.first).bone;
 
-                    keyframeTransformationMatrixMap.insert(
-                            std::pair<std::string, Keyframe>(
-                                    bone.first,
-                                    {currentFrame, bone.first, transformation}
-                            )
-                    );
-                }
+                // TODO: Position changes on bones is awful, this needs to be removed
+                vec3 position = {
+                        currentKey.position.x.orElse(tModelValues.position.x),
+                        currentKey.position.y.orElse(tModelValues.position.y),
+                        currentKey.position.z.orElse(tModelValues.position.z)
+                };
+
+                // TODO: Scaling comes later, this is a bit messy
+                vec3 scale = {
+                        currentKey.scale.x.orElse(1.0f),
+                        currentKey.scale.y.orElse(1.0f),
+                        currentKey.scale.z.orElse(1.0f)
+                };
+
+                // TODO: Rotations not working yet
+                vec3 rotation = {0, 0, 0};//= {
+//                        currentKey.rotation.x.orElse(tModelValues.rotation.x),
+//                        currentKey.rotation.y.orElse(tModelValues.rotation.y),
+//                        currentKey.rotation.z.orElse(tModelValues.rotation.z)
+//                };
+
+                mat4 transformation = GfxMath::CreateTransformation(rotation, scale, position);
+
+                keyframeTransformationMatrixMap.insert(
+                        std::pair<std::string, TransformKeyframe>(
+                                bone.first,
+                                {currentFrame, bone.first, transformation}
+                        )
+                );
             }
+
+            auto originalKeyframeTransformationMatrixMap = keyframeTransformationMatrixMap;
 
             // Transformations are defined as relative to original position, so now
             // we add in the bone offsets to complete the transformation values.
@@ -262,11 +366,7 @@ namespace PB
                     // Current bone's offsets were already applied, skip
                     if (bone.name != entry.second.boneName)
                     {
-                        // Add offset of parent bone
-                        mat4 m = mat4::eye();
-                        m[3] = bone.bone.offset;
-                        m[3][3] = 1;
-                        entry.second.translation *= m;
+                        entry.second.transform *= originalKeyframeTransformationMatrixMap.at(bone.name).transform;
                     }
 
                     if (bones.find(bone.parent) != bones.end())
@@ -283,13 +383,18 @@ namespace PB
             if (!animationCached)
             {
                 CACHED_KEYFRAMES.insert(
-                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<Keyframe>>>{getPath(),
-                                                                                                         std::unordered_map<std::uint32_t, std::vector<Keyframe>>{}}
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::vector<TransformKeyframe>>>(
+                                getPath(),
+                                std::unordered_map<std::uint32_t, std::vector<TransformKeyframe>>{}
+                        )
                 );
             }
 
             CACHED_KEYFRAMES.at(getPath()).insert(
-                    std::pair<std::uint32_t, std::vector<Keyframe>>{currentFrame, std::vector<Keyframe>{}}
+                    std::pair<std::uint32_t, std::vector<TransformKeyframe>>(
+                            currentFrame,
+                            std::vector<TransformKeyframe>{}
+                    )
             );
 
             for (auto k: keyframeTransformationMatrixMap)
@@ -328,11 +433,6 @@ namespace PB
         return animation_->getPath();
     }
 
-    void Animator::setMode(std::uint8_t mode)
-    {
-        mode_ = mode;
-    }
-
     void Animator::update(float deltaTime, std::unordered_map<std::string, BoneMap> bones)
     {
         sequenceTime_ += deltaTime;
@@ -361,7 +461,7 @@ namespace PB
                 do
                 {
                     currentBone = bones.at(currentBone.parent);
-                    matrix *= currentKeyframes.at(currentBone.name).translation;
+                    matrix *= currentKeyframes.at(currentBone.name).transform;
                 } while (!currentBone.parent.empty());
 
                 boneTransformations_.insert(

@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "GfxMath.h"
+
 namespace PB
 {
     OpenGLModel::OpenGLModel(
@@ -21,11 +23,9 @@ namespace PB
 
     }
 
-    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint8_t mode, std::uint32_t startFrame)
+    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
     {
         animator_ = std::move(animator);
-
-        animator_->setMode(mode);
 
         if (animator_ != nullptr)
         {
@@ -46,6 +46,23 @@ namespace PB
         return animator_ != nullptr;
     }
 
+    mat4 OpenGLModel::getAbsolutePositionForBone(const std::string& boneName) const
+    {
+        mat4 transformation;
+
+        if (animator_ == nullptr)
+        {
+            Bone bone = bones_.at(boneName).bone;
+            transformation = GfxMath::CreateTransformation(bone.rotation, bone.scale, bone.position);
+        }
+        else
+        {
+            transformation = animator_->getBoneTransformations().at(boneName);
+        }
+
+        return transformation;
+    }
+
     void OpenGLModel::update(float deltaTime)
     {
         if (animator_ != nullptr)
@@ -59,7 +76,7 @@ namespace PB
         }
     }
 
-    void OpenGLModel::render(mat3 transform) const
+    void OpenGLModel::render(mat4 transform) const
     {
         for (auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
         {

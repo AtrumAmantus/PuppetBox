@@ -37,7 +37,7 @@ namespace PB
          * @param sceneObject   The {\link SceneObject} to trigger the behavior event on.
          * @param behaviorEvent The type of behavior event to trigger.
          */
-        void triggerBehaviorEvent(SceneObject* sceneObject, std::string behaviorEvent);
+        void triggerBehaviorEvent(SceneObject* sceneObject, std::uint32_t behaviorEvent);
 
     private:
         std::string behaviorName_;

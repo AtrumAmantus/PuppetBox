@@ -132,5 +132,5 @@ namespace PB::GfxMath
      * \param position  The position values to use for each axis.
      * \return The generated transformation matrix.
      */
-    mat4 CreateTransformation(vec4 rotation, vec4 scale, vec4 position);
+    mat4 CreateTransformation(vec3 rotation, vec3 scale, vec3 position);
 }

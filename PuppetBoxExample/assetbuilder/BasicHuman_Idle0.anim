@@ -17,6 +17,8 @@ keyframes:
         x: -16.00
         y: 0.00
         z: -1
+      rotation:
+        z: -5
   1:
     head:
       position:
@@ -127,89 +129,53 @@ keyframes:
         x: -4.15
         y: 29.34
         z: -1
+      rotation:
+        z: 45
   11:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -4.75
         y: 28.51
         z: -1
   12:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -6.83
         y: 26.64
         z: -1
   13:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -10.25
         y: 23.68
         z: -1
   14:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -14.82
         y: 19.61
         z: -1
   15:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -18.57
         y: 16.59
         z: -1
   16:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -19.81
         y: 16.35
         z: -1
+      rotation:
+        z: 12
   17:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -18.89
         y: 18.19
         z: -1
   18:
-    head:
-      position:
-        x: 1.375
-        y: 21
-        z: -1
     right_hand:
       position:
         x: -16.16
@@ -259,6 +225,8 @@ keyframes:
         x: 2.58
         y: 33.65
         z: -1
+      rotation:
+        z: 55
   23:
     head:
       position:

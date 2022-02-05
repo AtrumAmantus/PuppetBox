@@ -3,6 +3,7 @@
 #include <string>
 
 #include "puppetbox/SceneObject.h"
+#include "puppetbox/WanderBehavior.h"
 
 class Entity : public PB::SceneObject
 {
@@ -15,21 +16,21 @@ protected:
 
     };
 
-    void behaviorEvent(std::string behaviorName, std::string behaviorEvent) override
+    void behaviorEvent(std::string behaviorName, std::uint32_t behaviorEvent) override
     {
         if (behaviorName == "wander")
         {
-            if (behaviorEvent == "start")
+            if (behaviorEvent == PB::WanderBehavior::Events::START)
             {
-                this->playAnimation("Assets1/Animations/BasicHuman/Walk", 0, 0);
+                this->playAnimation("Assets1/Animations/BasicHuman/Walk", 0);
             }
-            else if (behaviorEvent == "stop")
+            else if (behaviorEvent == PB::WanderBehavior::Events::STOP)
             {
                 this->stopAnimation("Assets1/Animations/BasicHuman/Walk");
 
                 if (rand() % 3 == 1)
                 {
-                    this->playAnimation("Assets1/Animations/BasicHuman/Idle_0", 0, 0);
+                    this->playAnimation("Assets1/Animations/BasicHuman/Idle_0", 0);
                 }
             }
         }

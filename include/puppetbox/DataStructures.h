@@ -8,6 +8,38 @@
 
 namespace PB
 {
+
+    /**
+     * \brief Similar to Java's "Optional" class, this is used to indicate if the
+     * response had a result.
+     *
+     * \tparam T The type of data being stored in the result.
+     */
+    template<typename T>
+    struct Result
+    {
+        T result;
+        bool hasResult = false;
+
+        /**
+         * \brief Return an optional default value if the result was empty.
+         *
+         * \param defaultValue The default value to return.
+         * \return The result if it was not empty, otherwise returns the given defaulValue.
+         */
+        T orElse(T defaultValue)
+        {
+            if (hasResult)
+            {
+                return result;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        };
+    };
+
     struct ivec2
     {
         union
@@ -156,16 +188,30 @@ namespace PB
     {
         union
         {
-            float x, r, s = 0;
+            float x, r, s;
         };
         union
         {
-            float y, g, t = 0;
+            float y, g, t;
         };
         union
         {
-            float z, b, p = 0;
+            float z, b, p;
         };
+
+        vec3()
+        {
+            this->x = 0.0f;
+            this->y = 0.0f;
+            this->z = 0.0f;
+        }
+
+        vec3(float x, float y, float z)
+        {
+            this->x = x;
+            this->y = y;
+            this->z = z;
+        }
 
         float& operator[](std::uint32_t i)
         {
@@ -179,25 +225,11 @@ namespace PB
             return (&x)[i];
         };
 
-        vec3& operator=(const vec2& rhv)
-        {
-            this->x = rhv.x;
-            this->y = rhv.y;
-            return *this;
-        };
-
         vec3& operator+=(vec3 const& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
             this->z += rhv.z;
-            return *this;
-        };
-
-        vec3& operator+=(vec2 const& rhv)
-        {
-            this->x += rhv.x;
-            this->y += rhv.y;
             return *this;
         };
 
@@ -249,20 +281,44 @@ namespace PB
     {
         union
         {
-            float x, r, s = 0;
+            float x, r, s;
         };
         union
         {
-            float y, g, t = 0;
+            float y, g, t;
         };
         union
         {
-            float z, b, p = 0;
+            float z, b, p;
         };
         union
         {
-            float w, a, q = 0;
+            float w, a, q;
         };
+
+        vec4()
+        {
+            this->x = 0.0f;
+            this->y = 0.0f;
+            this->z = 0.0f;
+            this->w = 0.0f;
+        }
+
+        vec4(float x, float y, float z, float w)
+        {
+            this->x = x;
+            this->y = y;
+            this->z = z;
+            this->w = w;
+        }
+
+        vec4(vec3 v, float w)
+        {
+            this->x = v[0];
+            this->y = v[1];
+            this->z = v[2];
+            this->w = w;
+        }
 
         float& operator[](std::uint32_t i)
         {
@@ -274,6 +330,15 @@ namespace PB
         {
             assert(i < 4);
             return (&x)[i];
+        };
+
+        operator vec3() const
+        {
+            return {
+                this->x,
+                this->y,
+                this->z
+            };
         };
 
         vec4 operator*(float scalar) const
@@ -325,20 +390,67 @@ namespace PB
             return *this;
         };
 
-        vec4& operator+=(vec3 const& rhv)
-        {
-            this->x += rhv.x;
-            this->y += rhv.y;
-            this->z += rhv.z;
-            return *this;
-        };
-
         bool operator==(const vec4& rhs) const
         {
             return this->x == rhs.x
                    && this->y == rhs.y
                    && this->z == rhs.z
                    && this->w == rhs.w;
+        };
+    };
+
+    struct Vec4 {
+        union
+        {
+            Result<float> x, r, s;
+        };
+
+        union
+        {
+            Result<float> y, g, t;
+        };
+
+        union
+        {
+            Result<float> z, b, p;
+        };
+
+        union
+        {
+            Result<float> w, a, q;
+        };
+
+        Vec4()
+        {
+            x = {0.0f, false};
+            y = {0.0f, false};
+            z = {0.0f, false};
+            w = {0.0f, false};
+        }
+
+        Vec4(float x, float y, float z, float w)
+        {
+            this->x = {x, true};
+            this->y = {y, true};
+            this->z = {z, true};
+            this->w = {w, true};
+        }
+
+        Vec4(Result<float> x, Result<float> y, Result<float> z, Result<float> w)
+        {
+            this->x = x;
+            this->y = y;
+            this->z = z;
+            this->w = w;
+        }
+
+        Vec4& operator=(const vec4& rhv)
+        {
+            this->x = {rhv.x, true};
+            this->y = {rhv.y, true};
+            this->z = {rhv.z, true};
+            this->w = {rhv.w, true};
+            return *this;
         };
     };
 
@@ -606,37 +718,6 @@ namespace PB
         std::string parent;
         std::uint32_t depth;
         Bone bone{};
-    };
-
-    /**
-     * \brief Similar to Java's "Optional" class, this is used to indicate if the
-     * response had a result.
-     *
-     * \tparam T The type of data being stored in the result.
-     */
-    template<typename T>
-    struct Result
-    {
-        T result;
-        bool hasResult = false;
-
-        /**
-         * \brief Return an optional default value if the result was empty.
-         *
-         * \param defaultValue The default value to return.
-         * \return The result if it was not empty, otherwise returns the given defaulValue.
-         */
-        T orElse(T defaultValue)
-        {
-            if (hasResult)
-            {
-                return result;
-            }
-            else
-            {
-                return defaultValue;
-            }
-        };
     };
 
     /**

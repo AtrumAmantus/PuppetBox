@@ -23,7 +23,7 @@ namespace PB
         /**
         * \brief Renders the object with OpenGL specific invocations.
         */
-        void render(mat3 transform, Bone* bones, std::uint32_t boneCount) const;
+        void render(mat4 transform, Bone* bones, std::uint32_t boneCount) const;
 
     private:
         Mesh mesh_;

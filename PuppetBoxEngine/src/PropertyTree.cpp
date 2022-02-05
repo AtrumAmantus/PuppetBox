@@ -16,14 +16,14 @@ namespace PB
 
     }
 
-    PropertyTree* PropertyTree::get(const std::string& parameterName)
+    Result<PropertyTree*> PropertyTree::get(const std::string& parameterName)
     {
         if (children_.find(parameterName) != children_.end())
         {
-            return &(*children_.at(parameterName));
+            return {&(*children_.at(parameterName)), true};
         }
 
-        return nullptr;
+        return {nullptr, false};
     }
 
     std::string PropertyTree::name()

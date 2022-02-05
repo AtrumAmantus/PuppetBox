@@ -9,7 +9,7 @@ namespace PB
 
     }
 
-    void AbstractBehavior::triggerBehaviorEvent(SceneObject* sceneObject, std::string behaviorEvent)
+    void AbstractBehavior::triggerBehaviorEvent(SceneObject* sceneObject, std::uint32_t behaviorEvent)
     {
         sceneObject->behaviorEvent(behaviorName_, behaviorEvent);
     }

@@ -38,7 +38,7 @@ namespace PB
          * \param animator   The {\link Animator} holding the desired {\link Animation}.
          * \param startFrame The frame that the animation will start playing from.
          */
-        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint8_t mode, std::uint32_t startFrame) override;
+        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
 
         /**
          * \brief Removes any attached animators with the given animation path reference.
@@ -55,6 +55,15 @@ namespace PB
         bool isAnimating() const override;
 
         /**
+         * \brief Gets the transformation matrix to position something exactly where
+         * the bone associated with the given boneName is.
+         *
+         * \param boneName The name associated to the desired bone.
+         * \return A transformation matrix for positioning on the same spot as the bone.
+         */
+        mat4 getAbsolutePositionForBone(const std::string& boneName) const override;
+
+        /**
          * \brief Updates the object's state prior to the render() call.
          *
          * @param deltaTime The time passed since the last update().
@@ -64,7 +73,7 @@ namespace PB
         /**
         * \brief Renders the object with OpenGL specific invocations.
         */
-        void render(mat3 transform) const override;
+        void render(mat4 transform) const override;
 
     private:
         std::unordered_map<std::string, BoneMap> bones_{};
