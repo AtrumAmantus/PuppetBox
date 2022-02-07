@@ -56,3 +56,7 @@ root:
           x: 16
           y: 16
         material: Assets1/Materials/TestHand
+      children:
+        weapon_attach_right:
+          offset:
+            z: -1

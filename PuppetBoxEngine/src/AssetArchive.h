@@ -21,12 +21,13 @@ namespace PB
 {
     enum MeshType
     {
-        SPRITE
+        SPRITE,
+        UNDEFINED
     };
 
     struct MeshData
     {
-        MeshType type = SPRITE;
+        MeshType type = UNDEFINED;
         vec3 offset{0.0f, 0.0f, 0.0f};
         vec3 scale{1.0f, 1.0f, 1.0f};
         std::string materialPath;

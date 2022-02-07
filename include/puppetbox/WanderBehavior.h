@@ -20,8 +20,11 @@ namespace PB
 
         void update(SceneObject* sceneObject, float deltaTime) override;
 
+        vec3 getTargetPosition() const override;
+
     private:
         vec3 targetPosition_{};
+        bool behaviorStarted_ = false;
         float waitTime_ = 0;
     };
 }

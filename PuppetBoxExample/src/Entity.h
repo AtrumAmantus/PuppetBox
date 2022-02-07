@@ -23,6 +23,15 @@ protected:
             if (behaviorEvent == PB::WanderBehavior::Events::START)
             {
                 this->playAnimation("Assets1/Animations/BasicHuman/Walk", 0);
+
+                if (this->getBehavior()->getTargetPosition().y > position.y)
+                {
+                    rotation.y = 180;
+                }
+                else
+                {
+                    rotation.y = 0;
+                }
             }
             else if (behaviorEvent == PB::WanderBehavior::Events::STOP)
             {

@@ -536,83 +536,89 @@ namespace PB
     {
         bool error = false;
 
-        Material material = loadMaterialAsset(modelData.mesh.materialPath, &error);
+        BoneMap boneMap = BoneMap{
+                modelData.name,
+                std::move(parent),
+                depth,
+                Bone{
+                        vec4{
+                                modelData.offset.x,
+                                modelData.offset.y,
+                                modelData.offset.z,
+                                0.0f
+                        },
+                        vec4{modelData.scale.x, modelData.scale.y, modelData.scale.z, 1.0f},
+                        vec4{modelData.rotation.x, modelData.rotation.y, modelData.rotation.z, 0.0f}
+                }
+        };
 
-        if (!error)
+        boneMap.bone.transform = GfxMath::CreateTransformation(
+                boneMap.bone.rotation,
+                boneMap.bone.scale,
+                boneMap.bone.position
+        );
+
+        bones.insert(
+                std::pair<std::string, BoneMap>{modelData.name, boneMap}
+        );
+
+        if (modelData.mesh.type != UNDEFINED)
         {
-            material.shader = loadShaderAsset(material.shaderId, &error);
+            Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
 
             if (!error)
             {
-                Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
-
-                mesh.scale = vec3{modelData.mesh.scale.x, modelData.mesh.scale.y, modelData.mesh.scale.z};
-                mesh.offset = vec3{modelData.mesh.offset.x, modelData.mesh.offset.y, modelData.mesh.offset.z};
-
-                mat4 meshOffset = mat4::eye();
-                meshOffset[3] = vec4{mesh.offset.x, mesh.offset.y, mesh.offset.z, 1.0f};
-                mat4 meshScale = mat4::eye();
-                meshScale[0][0] = mesh.scale.x;
-                meshScale[1][1] = mesh.scale.y;
-                meshScale[2][2] = mesh.scale.z;
-
-                mesh.transform = meshOffset * meshScale;
+                Material material = loadMaterialAsset(modelData.mesh.materialPath, &error);
 
                 if (!error)
                 {
-                    BoneMap boneMap = BoneMap{
-                            modelData.name,
-                            std::move(parent),
-                            depth,
-                            Bone{
-                                    vec4{
-                                        modelData.offset.x,
-                                        modelData.offset.y,
-                                        modelData.offset.z,
-                                        0.0f
-                                        },
-                                    vec4{modelData.scale.x,  modelData.scale.y,  modelData.scale.z, 1.0f},
-                                    vec4{modelData.rotation.x, modelData.rotation.y, modelData.rotation.z, 0.0f}
-                            }
-                    };
+                    material.shader = loadShaderAsset(material.shaderId, &error);
 
-                    boneMap.bone.transform = GfxMath::CreateTransformation(
-                            boneMap.bone.rotation,
-                            boneMap.bone.scale,
-                            boneMap.bone.position
-                    );
-
-                    bones.insert(
-                            std::pair<std::string, BoneMap>{modelData.name, boneMap}
-                    );
-
-                    meshes.insert(
-                            std::pair<std::string, RenderedMesh*>{modelData.name, new Rendered2DMesh(mesh, material)}
-                    );
-
-                    for (auto itr = modelData.children.begin(); !error && itr != modelData.children.end(); ++itr)
+                    if (!error)
                     {
-                        error = !buildMeshAndBones(
-                                modelData.children.at(itr->first),
-                                modelData.name,
-                                depth + 1, bones,
-                                meshes
+                        mesh.scale = vec3{modelData.mesh.scale.x, modelData.mesh.scale.y,
+                                          modelData.mesh.scale.z};
+                        mesh.offset = vec3{modelData.mesh.offset.x, modelData.mesh.offset.y,
+                                           modelData.mesh.offset.z};
+
+                        mat4 meshOffset = mat4::eye();
+                        meshOffset[3] = vec4{mesh.offset.x, mesh.offset.y, mesh.offset.z, 1.0f};
+                        mat4 meshScale = mat4::eye();
+                        meshScale[0][0] = mesh.scale.x;
+                        meshScale[1][1] = mesh.scale.y;
+                        meshScale[2][2] = mesh.scale.z;
+
+                        mesh.transform = meshOffset * meshScale;
+
+                        meshes.insert(
+                                std::pair<std::string, RenderedMesh*>{modelData.name,
+                                                                      new Rendered2DMesh(mesh, material)}
                         );
+                    }
+                    else
+                    {
+                        LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset");
                     }
                 }
                 else
                 {
-                    LOGGER_ERROR("Could not load mesh 'sprite' for model asset");
+                    LOGGER_ERROR("Could not load material '" + modelData.mesh.materialPath + "' for model asset");
                 }
             }
             else
             {
-                LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset");
+                LOGGER_ERROR("Could not load mesh 'sprite' for model asset");
             }
         }
-        else
+
+        for (auto itr = modelData.children.begin(); !error && itr != modelData.children.end(); ++itr)
         {
-            LOGGER_ERROR("Could not load material '" + modelData.mesh.materialPath + "' for model asset");
+            error = !buildMeshAndBones(
+                    modelData.children.at(itr->first),
+                    modelData.name,
+                    depth + 1, bones,
+                    meshes
+            );
         }
 
         return !error;

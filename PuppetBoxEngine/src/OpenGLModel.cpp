@@ -48,19 +48,7 @@ namespace PB
 
     mat4 OpenGLModel::getAbsolutePositionForBone(const std::string& boneName) const
     {
-        mat4 transformation;
-
-        if (animator_ == nullptr)
-        {
-            Bone bone = bones_.at(boneName).bone;
-            transformation = GfxMath::CreateTransformation(bone.rotation, bone.scale, bone.position);
-        }
-        else
-        {
-            transformation = animator_->getBoneTransformations().at(boneName);
-        }
-
-        return transformation;
+        return boneTransformations_.at(boneName);
     }
 
     void OpenGLModel::update(float deltaTime)

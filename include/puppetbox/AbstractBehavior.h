@@ -1,5 +1,6 @@
 #pragma once
 
+#include "puppetbox/DataStructures.h"
 #include "SceneObject.h"
 
 namespace PB
@@ -25,6 +26,14 @@ namespace PB
         * \param deltaTime		The amount of time (in Milliseconds) that have elapsed since the last update.
         */
         virtual void update(SceneObject* sceneObject, float deltaTime) = 0;
+
+        /**
+         * \brief Returns the target position of the currently running behavior.  This is
+         * a behavior specific value with behavior specific meaning.
+         *
+         * \return A {\link vec3} of the current behavior's target position.
+         */
+        virtual vec3 getTargetPosition() const = 0;
 
     protected:
         /**

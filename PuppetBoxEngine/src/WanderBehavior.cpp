@@ -22,6 +22,7 @@ namespace PB
             if (GfxMath::BasicallyEqual(sceneObject->position, targetPosition_))
             {
                 AbstractBehavior::triggerBehaviorEvent(sceneObject, STOP);
+                behaviorStarted_ = false;
 
                 waitTime_ = ((3 * RandomUtils::pseudoRand()) + 1);
 
@@ -41,9 +42,10 @@ namespace PB
             }
             else
             {
-                if (!sceneObject->isAnimating())
+                if (!behaviorStarted_)
                 {
                     AbstractBehavior::triggerBehaviorEvent(sceneObject, START);
+                    behaviorStarted_ = true;
                 }
 
                 vec3 positionDelta = targetPosition_ - sceneObject->position;
@@ -51,14 +53,12 @@ namespace PB
 
                 if (GfxMath::Dot(positionDelta, positionDelta) < deltaSpeed)
                 {
-                    sceneObject->
-                            position = targetPosition_;
+                    sceneObject->position = targetPosition_;
                 }
                 else
                 {
                     vec3 deltaMove = GfxMath::Normalize(positionDelta) * deltaSpeed;
-                    sceneObject->position +=
-                            deltaMove;
+                    sceneObject->position += deltaMove;
                 }
             }
         }
@@ -66,5 +66,10 @@ namespace PB
         {
             waitTime_ -= deltaTime;
         }
+    }
+
+    vec3 WanderBehavior::getTargetPosition() const
+    {
+        return targetPosition_;
     }
 }

@@ -112,6 +112,13 @@ namespace PB
         void setBehavior(std::unique_ptr<AbstractBehavior> behavior);
 
         /**
+         * \brief Returns a reference to the current {\link AbstractBehavior} of the {\link SceneObject}.
+         *
+         * \return Reference to the current {\link AbstractBehavior}.
+         */
+        const AbstractBehavior* getBehavior() const;
+
+        /**
          * \brief Sets the {\link IAnimationCatalogue} that will be used to load animations.
          *
          * <p>Called automatically by the {\link SceneObject} creation calls.</p>

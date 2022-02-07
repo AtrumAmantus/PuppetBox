@@ -332,6 +332,21 @@ namespace PB
             };
             return ss.str();
         }
+
+        std::string toLowerCase(const std::string& original)
+        {
+            char *chars = new char[original.length() + 1]{'\0'};
+
+            for (std::uint32_t i = 0; i < original.length(); ++i)
+            {
+                chars[i] = tolower(original.at(i));
+            }
+
+            std::string lowercaseString = std::string(chars);
+            delete[] chars;
+
+            return lowercaseString;
+        }
     }
 
     namespace RandomUtils

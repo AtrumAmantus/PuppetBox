@@ -186,9 +186,17 @@ namespace PB
         /**
          * \brief Generates a Universally Unique Identifier
          *
-         * @return A UUID string.
+         * \return A UUID string.
          */
         std::string uuid();
+
+        /**
+         * \brief Generates a new string with all characters transformed to lowercase.
+         *
+         * \param original The original string to transform.
+         * \return The new string with all characters transformed to lower case equivalents.
+         */
+        std::string toLowerCase(const std::string& original);
     }
 
     /**

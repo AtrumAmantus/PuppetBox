@@ -88,7 +88,7 @@ public:
             weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
-            weapon->attachTo(myEntity, "right_hand");
+            weapon->attachTo(myEntity, "weapon_attach_right");
         }
 
         bool error = false;

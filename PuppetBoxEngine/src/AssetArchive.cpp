@@ -95,6 +95,29 @@ namespace PB
         }
 
         /**
+         * \brief Parses a {\link MeshType} from the given property tree node's value.
+         *
+         * \param pTree The property tree node to parse from.
+         * \return The {\link MeshType} parsed from the tree node value.
+         */
+        MeshType meshTypeFromNode(PropertyTree& pTree)
+        {
+            MeshType type;
+
+            if (StringUtils::toLowerCase(pTree.value()) == "sprite")
+            {
+                type = SPRITE;
+            }
+            else
+            {
+                LOGGER_WARN("Unrecognized mesh type specified: '" + pTree.value() + "'");
+                type = UNDEFINED;
+            }
+
+            return type;
+        }
+
+        /**
         * \brief Helper function to map a properties map to a Model2D object.
         *
         * \param properties	The properties map to use to map to a Model2D object.
@@ -148,30 +171,39 @@ namespace PB
             {
                 PropertyTree* meshProperties = meshNode.result;
 
-                //TODO: Make this not hardcoded.
-                model.mesh.type = SPRITE;
-                model.mesh.materialPath = meshProperties->get("material").result->value();
+                auto typeNode = meshProperties->get("type");
 
-                auto meshOffsetNode = meshProperties->get("offset");
-
-                if (meshOffsetNode.hasResult)
+                if (typeNode.hasResult)
                 {
-                    PropertyTree* meshOffsetProperties = meshOffsetNode.result;
+                    //TODO: Make this not hardcoded.
+                    model.mesh.type = meshTypeFromNode(*typeNode.result);
+                    model.mesh.materialPath = meshProperties->get("material").result->value();
 
-                    model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
-                    model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
-                    model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties, error).orElse(0.0f);
+                    auto meshOffsetNode = meshProperties->get("offset");
+
+                    if (meshOffsetNode.hasResult)
+                    {
+                        PropertyTree* meshOffsetProperties = meshOffsetNode.result;
+
+                        model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
+                        model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
+                        model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties, error).orElse(0.0f);
+                    }
+
+                    auto meshScaleNode = meshProperties->get("scale");
+
+                    if (meshScaleNode.hasResult)
+                    {
+                        PropertyTree* meshScaleProperties = meshScaleNode.result;
+
+                        model.mesh.scale.x = getNumericResultAtNode<float>("x", *meshScaleProperties, error).orElse(1.0f);
+                        model.mesh.scale.y = getNumericResultAtNode<float>("y", *meshScaleProperties, error).orElse(1.0f);
+                        model.mesh.scale.z = getNumericResultAtNode<float>("z", *meshScaleProperties, error).orElse(1.0f);
+                    }
                 }
-
-                auto meshScaleNode = meshProperties->get("scale");
-
-                if (meshScaleNode.hasResult)
-                {
-                    PropertyTree* meshScaleProperties = meshScaleNode.result;
-
-                    model.mesh.scale.x = getNumericResultAtNode<float>("x", *meshScaleProperties, error).orElse(1.0f);
-                    model.mesh.scale.y = getNumericResultAtNode<float>("y", *meshScaleProperties, error).orElse(1.0f);
-                    model.mesh.scale.z = getNumericResultAtNode<float>("z", *meshScaleProperties, error).orElse(1.0f);
+                else {
+                    LOGGER_DEBUG("No mesh type defined, skipping mesh initialization.");
+                    model.mesh.type = UNDEFINED;
                 }
             }
 

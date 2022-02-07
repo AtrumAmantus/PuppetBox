@@ -42,10 +42,7 @@ namespace PB
 
         if (attachedTo_ != nullptr)
         {
-            //TODO: Excessively hacky
             transform_ = attachedTo_->getAbsolutePositionForBone(attachPoint_);
-            //TODO: Z-axis offset is a hack, base it off bone z-axis
-            transform_[3].z = attachedTo_->position.z - 5;
         }
         else
         {
@@ -79,6 +76,11 @@ namespace PB
     void SceneObject::setBehavior(std::unique_ptr<AbstractBehavior> behavior)
     {
         behavior_ = std::move(behavior);
+    }
+
+    const AbstractBehavior* SceneObject::getBehavior() const
+    {
+        return &(*behavior_);
     }
 
     void SceneObject::setAnimationCatalogue(IAnimationCatalogue* animationCatalogue)
