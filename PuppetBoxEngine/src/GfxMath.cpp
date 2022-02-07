@@ -19,10 +19,10 @@ namespace PB::GfxMath
         mat4 glmToMat4(glm::mat4 m)
         {
             vec4 v[4] = {
-                    {m[0][0], m[0][1], m[0][2], m[0][3]},
-                    {m[1][0], m[1][1], m[1][2], m[1][3]},
-                    {m[2][0], m[2][1], m[2][2], m[2][3]},
-                    {m[3][0], m[3][1], m[3][2], m[3][3]}
+                    {m[0].x, m[0].y, m[0].z, m[0].w},
+                    {m[1].x, m[1].y, m[1].z, m[1].w},
+                    {m[2].x, m[2].y, m[2].z, m[2].w},
+                    {m[3].x, m[3].y, m[3].z, m[3].w}
             };
 
             return mat4{v};
@@ -107,9 +107,9 @@ namespace PB::GfxMath
     mat4 Scale(mat4 m, vec3 s)
     {
         vec4 v[4] = {
-                m[0] * s[0],
-                m[1] * s[1],
-                m[2] * s[2],
+                m[0] * s.x,
+                m[1] * s.y,
+                m[2] * s.z,
                 m[3]
         };
 
@@ -119,10 +119,10 @@ namespace PB::GfxMath
     mat4 Translate(mat4 m, vec3 t)
     {
         m[3] = vec4{
-                m[0][0] * t[0] + m[1][0] * t[1] + m[2][0] * t[2] + m[3][0],
-                m[0][1] * t[0] + m[1][1] * t[1] + m[2][1] * t[2] + m[3][1],
-                m[0][2] * t[0] + m[1][2] * t[1] + m[2][2] * t[2] + m[3][2],
-                m[3][3]
+                m[0].x * t.x + m[1].x * t.y + m[2].x * t.z + m[3].x,
+                m[0].y * t.x + m[1].y * t.y + m[2].y * t.z + m[3].y,
+                m[0].z * t.x + m[1].z * t.y + m[2].z * t.z + m[3].z,
+                m[3].w
         };
 
         return m;
@@ -145,10 +145,10 @@ namespace PB::GfxMath
     mat4 Rotate(mat4 m, vec3 angles)
     {
         glm::mat4 gM{
-                m[0][0], m[0][1], m[0][2], m[0][3],
-                m[1][0], m[1][1], m[1][2], m[1][3],
-                m[2][0], m[2][1], m[2][2], m[2][3],
-                m[3][0], m[3][1], m[3][2], m[3][3]
+                m[0].x, m[0].y, m[0].z, m[0].w,
+                m[1].x, m[1].y, m[1].z, m[1].w,
+                m[2].x, m[2].y, m[2].z, m[2].w,
+                m[3].x, m[3].y, m[3].z, m[3].w
         };
 
         //TODO: Lets make our own later
