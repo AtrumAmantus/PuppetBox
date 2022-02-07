@@ -107,16 +107,6 @@ namespace PB
         virtual void setCurrentFrame(std::uint32_t frame) = 0;
 
         /**
-         * \brief Indicates if the animation has finished playing.
-         *
-         * <p>An animation is finished if it's MODE is set to 1 (singe loop), and
-         * it has already completed one cycle back to the first frame again.
-         *
-         * \return True if the animation has completed one cycle, False otherwise.
-         */
-        virtual bool finished() const = 0;
-
-        /**
          * \brief Gets the previously calculated bone transformation matrices
          * for the attached animation.
          *

@@ -114,6 +114,7 @@ namespace PB
 
                 model.scale.x = getNumericResultAtNode<float>("x", *scaleProperties, error).orElse(1.0f);
                 model.scale.y = getNumericResultAtNode<float>("y", *scaleProperties, error).orElse(1.0f);
+                model.scale.z = getNumericResultAtNode<float>("z", *scaleProperties, error).orElse(1.0f);
             }
 
             auto offsetNode = rootProperties.get("offset");
@@ -130,19 +131,48 @@ namespace PB
                 model.offset.z *= 0.1;
             }
 
-            PropertyTree* meshProperties = rootProperties.get("mesh").result;
-            //TODO: Make this not hardcoded.
-            model.mesh.type = SPRITE;
-            model.mesh.materialPath = meshProperties->get("material").result->value();
+            auto rotationNode = rootProperties.get("rotation");
 
-            auto meshOffsetNode = meshProperties->get("offset");
-
-            if (meshOffsetNode.hasResult)
+            if (rotationNode.hasResult)
             {
-                PropertyTree* meshOffsetProperties = meshOffsetNode.result;
+                PropertyTree* rotationProperties = rotationNode.result;
 
-                model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
-                model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
+                model.rotation.x = getNumericResultAtNode<float>("x", *rotationProperties, error).orElse(0.0f);
+                model.rotation.y = getNumericResultAtNode<float>("y", *rotationProperties, error).orElse(0.0f);
+                model.rotation.z = getNumericResultAtNode<float>("z", *rotationProperties, error).orElse(0.0f);
+            }
+
+            auto meshNode = rootProperties.get("mesh");
+
+            if (meshNode.hasResult)
+            {
+                PropertyTree* meshProperties = meshNode.result;
+
+                //TODO: Make this not hardcoded.
+                model.mesh.type = SPRITE;
+                model.mesh.materialPath = meshProperties->get("material").result->value();
+
+                auto meshOffsetNode = meshProperties->get("offset");
+
+                if (meshOffsetNode.hasResult)
+                {
+                    PropertyTree* meshOffsetProperties = meshOffsetNode.result;
+
+                    model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
+                    model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
+                    model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties, error).orElse(0.0f);
+                }
+
+                auto meshScaleNode = meshProperties->get("scale");
+
+                if (meshScaleNode.hasResult)
+                {
+                    PropertyTree* meshScaleProperties = meshScaleNode.result;
+
+                    model.mesh.scale.x = getNumericResultAtNode<float>("x", *meshScaleProperties, error).orElse(1.0f);
+                    model.mesh.scale.y = getNumericResultAtNode<float>("y", *meshScaleProperties, error).orElse(1.0f);
+                    model.mesh.scale.z = getNumericResultAtNode<float>("z", *meshScaleProperties, error).orElse(1.0f);
+                }
             }
 
             model.name = rootProperties.name();

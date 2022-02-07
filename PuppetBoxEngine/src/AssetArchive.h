@@ -27,7 +27,8 @@ namespace PB
     struct MeshData
     {
         MeshType type = SPRITE;
-        vec2 offset{0, 0};
+        vec3 offset{0.0f, 0.0f, 0.0f};
+        vec3 scale{1.0f, 1.0f, 1.0f};
         std::string materialPath;
     };
 
@@ -36,9 +37,9 @@ namespace PB
     */
     struct ModelData2D
     {
-        vec3 offset{0, 0, 0};
-        vec2 baseScale{1, 1};
-        vec2 scale{1, 1};
+        vec3 offset{0.0f, 0.0f, 0.0f};
+        vec3 rotation{0.0f, 0.0f, 0.0f};
+        vec3 scale{1.0f, 1.0f, 1.0f};
         MeshData mesh{};
         std::string name;
         std::unordered_map<std::string, ModelData2D> children{};

@@ -221,8 +221,6 @@ namespace PB
      *
      * <p>If no transformations are defined anywhere for the bone, a default identity matrix is used.</p>
      *
-     * TODO: This is not correctly tweening for transformations where the pos/scale/rot are on different frames.
-     *
      * \param currentFrame The frame to get the transformation matrix for on each bone.
      * \param bones        The {\link BoneMap} provided by the model, with accurate offsets.
      * \return An {\link std::unordered_map} of {\link Keyframe}s holding transformation matrices for every bone
@@ -284,8 +282,7 @@ namespace PB
             {
                 RawKeyframe currentKey{};
 
-                // TODO: Rotations currently disabled
-                for (std::uint8_t v4 = 0; v4 < 2; ++v4)
+                for (std::uint8_t v4 = 0; v4 < 3; ++v4)
                 {
                     for (std::uint8_t r = 0; r < 3; ++r)
                     {
@@ -336,12 +333,11 @@ namespace PB
                         currentKey.scale.z.orElse(1.0f)
                 };
 
-                // TODO: Rotations not working yet
-                vec3 rotation = {0, 0, 0};//= {
-//                        currentKey.rotation.x.orElse(tModelValues.rotation.x),
-//                        currentKey.rotation.y.orElse(tModelValues.rotation.y),
-//                        currentKey.rotation.z.orElse(tModelValues.rotation.z)
-//                };
+                vec3 rotation = {
+                        currentKey.rotation.x.orElse(tModelValues.rotation.x),
+                        currentKey.rotation.y.orElse(tModelValues.rotation.y),
+                        currentKey.rotation.z.orElse(tModelValues.rotation.z)
+                };
 
                 mat4 transformation = GfxMath::CreateTransformation(rotation, scale, position);
 
@@ -435,45 +431,22 @@ namespace PB
 
     void Animator::update(float deltaTime, std::unordered_map<std::string, BoneMap> bones)
     {
+        //TODO: Animations never stop, need to create an animation event.
         sequenceTime_ += deltaTime;
         sequenceTime_ = fmod(sequenceTime_, sequenceDuration_);
 
         std::uint8_t currentFrame = (sequenceTime_ / sequenceDuration_) * animation_->getFrameCount();
 
-        if (playedOneFrame_ && currentFrame == 0)
+        auto currentKeyframes = animation_->getFrames(currentFrame, bones);
+
+        boneTransformations_.clear();
+
+        for (auto& keyFrame: currentKeyframes)
         {
-            animationFinished_ = true;
+            boneTransformations_.insert(
+                    std::pair<std::string, mat4>{keyFrame.first, keyFrame.second.transform}
+            );
         }
-        else
-        {
-            playedOneFrame_ = playedOneFrame_ || currentFrame > 1;
-
-            auto currentKeyframes = animation_->getFrames(currentFrame, bones);
-
-            boneTransformations_.clear();
-
-            for (auto& keyFrame: currentKeyframes)
-            {
-                mat4 matrix = mat4::eye();
-
-                BoneMap currentBone = {"", keyFrame.first};
-
-                do
-                {
-                    currentBone = bones.at(currentBone.parent);
-                    matrix *= currentKeyframes.at(currentBone.name).transform;
-                } while (!currentBone.parent.empty());
-
-                boneTransformations_.insert(
-                        std::pair<std::string, mat4>{keyFrame.first, matrix}
-                );
-            }
-        }
-    }
-
-    bool Animator::finished() const
-    {
-        return animationFinished_;
     }
 
     void Animator::setCurrentFrame(std::uint32_t frame)

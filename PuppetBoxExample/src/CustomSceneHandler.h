@@ -76,7 +76,7 @@ public:
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
         {
             myEntity->name = "Fred";
-            myEntity->position = PB::vec3{0.0f, 0.0f, 50.0f};
+            myEntity->position = PB::vec3{150.0f, 50.0f, 50.0f};
             myEntity->setBehavior(PB::AI::Behavior::WANDER);
             addSceneObject(myEntity);
         }
@@ -85,6 +85,7 @@ public:
 
         if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon, PB::LibraryAsset::Type::MODEL_2D))
         {
+            weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
             weapon->attachTo(myEntity, "right_hand");

@@ -505,8 +505,8 @@ namespace PB
                 float speed = sceneObject->speed;
                 vec3 velocity = sceneObject->velocity;
 
-                *sceneObject = SceneObject{StringUtils::uuid(),
-                                           vec3{modelData2D.baseScale.x, modelData2D.baseScale.y, 1.0f}, model};
+                //TODO: Revisit "base scale"
+                *sceneObject = SceneObject{StringUtils::uuid(), vec3{1.0f, 1.0f, 1.0f}, model};
                 sceneObject->position = position;
                 sceneObject->rotation = rotation;
                 sceneObject->scale = scale;
@@ -546,7 +546,17 @@ namespace PB
             {
                 Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
 
-                mesh.scale = vec3{modelData.scale.x, modelData.scale.y, 1.0f};
+                mesh.scale = vec3{modelData.mesh.scale.x, modelData.mesh.scale.y, modelData.mesh.scale.z};
+                mesh.offset = vec3{modelData.mesh.offset.x, modelData.mesh.offset.y, modelData.mesh.offset.z};
+
+                mat4 meshOffset = mat4::eye();
+                meshOffset[3] = vec4{mesh.offset.x, mesh.offset.y, mesh.offset.z, 1.0f};
+                mat4 meshScale = mat4::eye();
+                meshScale[0][0] = mesh.scale.x;
+                meshScale[1][1] = mesh.scale.y;
+                meshScale[2][2] = mesh.scale.z;
+
+                mesh.transform = meshOffset * meshScale;
 
                 if (!error)
                 {
@@ -556,17 +566,17 @@ namespace PB
                             depth,
                             Bone{
                                     vec4{
-                                        modelData.offset.x + modelData.mesh.offset.x,
-                                        modelData.offset.y + modelData.mesh.offset.y,
+                                        modelData.offset.x,
+                                        modelData.offset.y,
                                         modelData.offset.z,
                                         0.0f
                                         },
-                                    vec4{modelData.scale.x,  modelData.scale.y,  1.0f, 1.0f},
-                                    vec4{}
+                                    vec4{modelData.scale.x,  modelData.scale.y,  modelData.scale.z, 1.0f},
+                                    vec4{modelData.rotation.x, modelData.rotation.y, modelData.rotation.z, 0.0f}
                             }
                     };
 
-                    boneMap.bone.translation = GfxMath::CreateTransformation(
+                    boneMap.bone.transform = GfxMath::CreateTransformation(
                             boneMap.bone.rotation,
                             boneMap.bone.scale,
                             boneMap.bone.position

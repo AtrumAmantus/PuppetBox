@@ -51,16 +51,12 @@ namespace PB
 
         void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) override;
 
-        bool finished() const override;
-
         void setCurrentFrame(std::uint32_t frame) override;
 
         std::unordered_map<std::string, mat4> getBoneTransformations() const override;
 
     private:
         IAnimation* animation_;
-        bool playedOneFrame_ = false;
-        bool animationFinished_ = false;
         float sequenceTime_ = 0;
         float sequenceDuration_;
         std::unordered_map<std::string, mat4> boneTransformations_;

@@ -103,17 +103,6 @@ namespace PB::GfxMath
     mat4 Translate(mat4 m, vec3 t);
 
     /**
-    * \brief Rotates the matrix by the given values.
-    *
-    * \param m      The matrix of values to rotate.
-    * \param angle  The angle to rotate by.
-    * \param axies  The axis weight to apply to the rotation value.
-    *
-    * \return The matrix after it has been rotated.
-    */
-    mat4 Rotate(mat4 m, float angle, vec3 axies);
-
-    /**
     * \brief Rotates the matrix on each axis by the respective given value in order: x, y, z.
     *
     * \param m      The matrix of values to rotate.

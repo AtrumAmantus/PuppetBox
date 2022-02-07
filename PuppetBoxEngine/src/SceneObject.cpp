@@ -27,11 +27,7 @@ namespace PB
 
     mat4 SceneObject::getAbsolutePositionForBone(const std::string& boneName) const
     {
-        return GfxMath::CreateTransformation(
-                vec4(rotation, 1.0f),
-                vec4(scale, 1.0f),
-                vec4(position, 1.0f)
-        ) * model_->getAbsolutePositionForBone(boneName);
+        return GfxMath::CreateTransformation(rotation, scale, position) * model_->getAbsolutePositionForBone(boneName);
     }
 
     void SceneObject::update(float deltaTime)
@@ -48,18 +44,12 @@ namespace PB
         {
             //TODO: Excessively hacky
             transform_ = attachedTo_->getAbsolutePositionForBone(attachPoint_);
-            transform_[0][0] = attachedTo_->scale.x;
-            transform_[1][1] = attachedTo_->scale.y;
-            transform_[2][2] = attachedTo_->scale.z;
+            //TODO: Z-axis offset is a hack, base it off bone z-axis
             transform_[3].z = attachedTo_->position.z - 5;
         }
         else
         {
-            transform_ = GfxMath::CreateTransformation(
-                    vec4(rotation, 1.0f),
-                    vec4(actualScale(), 1.0f),
-                    vec4(position, 1.0f)
-            );
+            transform_ = GfxMath::CreateTransformation(rotation, scale, position);
         }
 
         if (model_ != nullptr)
@@ -68,7 +58,7 @@ namespace PB
         }
     }
 
-    void SceneObject::render()
+    void SceneObject::render() const
     {
         model_->render(transform_);
     }
@@ -114,6 +104,7 @@ namespace PB
 
     vec3 SceneObject::actualScale() const
     {
+        //TODO: check "base scale" implementation, this should be model asset dependent.
         return vec3{
                 scale.x * baseScale_.x,
                 scale.y * baseScale_.y,

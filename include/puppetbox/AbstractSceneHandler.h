@@ -32,7 +32,7 @@ namespace PB
         *
         * \param deltaTime The time in milliseconds since the last frame was run.
         */
-        //TODO: Think about breaking this out into differe update phases
+        //TODO: Think about breaking this out into different update phases
         // OutOfFrameUpdates, InFrameUpdates, PausedUpdates, etc.
         virtual void update(const float deltaTime)
         {

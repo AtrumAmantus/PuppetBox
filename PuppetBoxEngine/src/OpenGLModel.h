@@ -77,6 +77,7 @@ namespace PB
 
     private:
         std::unordered_map<std::string, BoneMap> bones_{};
+        std::unordered_map<std::string, mat4> boneTransformations_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
         std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};
     };

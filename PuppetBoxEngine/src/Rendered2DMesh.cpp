@@ -28,17 +28,9 @@ namespace PB
         };
 
         material_.shader.setVec4("diffuseUvAdjust", diffuseUvAdjust);
-        material_.shader.setMat4("boneTransform", bones[0].translation);
-
-        mat4 model = transform;
-
-        // TODO: Applying this late does it doesn't affect other calculations, but this
-        // doesn't seem right.
-        model[0][0] *= mesh_.scale[0];
-        model[1][1] *= mesh_.scale[1];
-        model[2][2] *= mesh_.scale[2];
-
-        material_.shader.setMat4("model", model);
+        material_.shader.setMat4("boneTransform", bones[0].transform);
+        material_.shader.setMat4("meshTransform", mesh_.transform);
+        material_.shader.setMat4("model", transform);
 
         glBindVertexArray(mesh_.VAO);
 

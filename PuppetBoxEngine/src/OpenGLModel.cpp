@@ -69,9 +69,40 @@ namespace PB
         {
             animator_->update(deltaTime, bones_);
 
-            if (animator_->finished())
+            boneTransformations_ = animator_->getBoneTransformations();
+        }
+        else
+        {
+            //TODO: not supporting mix animations atm
+
+            // Update T-Pose local bone transforms
+            for (auto itr = bones_.begin(); itr != bones_.end(); ++itr)
             {
-                animator_ = nullptr;
+                itr->second.bone.transform = GfxMath::CreateTransformation(
+                        itr->second.bone.rotation,
+                        itr->second.bone.scale,
+                        itr->second.bone.position
+                );
+            }
+
+            boneTransformations_.clear();
+
+            // Calculate T-Pose final bone transforms
+            for (auto itr = bones_.begin(); itr != bones_.end(); ++itr)
+            {
+                mat4 transform = itr->second.bone.transform;
+
+                std::string parentName = itr->second.parent;
+
+                while (!parentName.empty())
+                {
+                    transform *= bones_.at(parentName).bone.transform;
+                    parentName = bones_.at(parentName).parent;
+                }
+
+                boneTransformations_.insert(
+                        std::pair<std::string, mat4>(itr->first, transform)
+                );
             }
         }
     }
@@ -80,29 +111,12 @@ namespace PB
     {
         for (auto itr = renderedMeshes_.begin(); itr != renderedMeshes_.end(); ++itr)
         {
-            Bone* bones;
-
-            if (animator_ != nullptr)
-            {
-                //TODO: This won't work for all models, need support for meshes with multiple bones
-                bones = new Bone[1];
-                auto boneTransformations = animator_->getBoneTransformations();
-                bones[0].translation = boneTransformations.at(itr->first);
-            }
-            else
-            {
-                // If there is no animation running, just use default "T-Pose" coordinates.
-                Bone bone{};
-                bone.translation = mat4::eye();
-                bones = new Bone[]{bone};
-                bones[0].translation = bones_.at(itr->first).bone.translation;
-                // TODO: Scaling happens later, this is really messy, fix
-                bones[0].translation[0][0] = 1;
-                bones[0].translation[1][1] = 1;
-                bones[0].translation[2][2] = 1;
-            }
+            Bone* bones = new Bone[1];
+            bones[0].transform = boneTransformations_.at(itr->first);
 
             itr->second->render(transform, bones, 1);
+
+            delete[] bones;
         }
     }
 }

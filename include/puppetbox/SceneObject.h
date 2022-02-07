@@ -93,7 +93,7 @@ namespace PB
         /**
         * \brief Executes GFX API specific render calls on injected assets.
         */
-        void render();
+        void render() const;
 
         /**
         * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called

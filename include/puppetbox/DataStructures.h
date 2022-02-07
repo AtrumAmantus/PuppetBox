@@ -698,7 +698,7 @@ namespace PB
         Bone(vec4 offset, vec4 scale, vec4 rotation) : offset(offset), scale(scale), rotation(rotation) {};
 
         //TODO: This structure seems confusing, revisit
-        mat4 translation{};
+        mat4 transform{};
 
         struct
         {
