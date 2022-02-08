@@ -41,7 +41,7 @@ namespace PB
         vec3 scale{1.0f, 1.0f, 1.0f};
 
         /**
-        * \brief The current move forces being applied to the object.
+        * \brief The current move forces being applied to the object in units per second.
         */
         vec3 velocity{0.0f, 0.0f, 0.0f};
 
@@ -49,6 +49,8 @@ namespace PB
         * \brief The max speed of the object.
         */
         float speed = 64.0f;
+
+        bool isUpdated = false;
     public:
         /**
         * \brief Default constructor that is typically called by a derived class to create
@@ -75,6 +77,20 @@ namespace PB
         void attachTo(SceneObject* sceneObject, const std::string& attachPoint);
 
         /**
+         * \brief Denotes if this {\link SceneObject} is attached to another one.
+         *
+         * \return True if this object is attached to another, False otherwise.
+         */
+        bool isAttached() const;
+
+        /**
+         * \brief Returns a constant reference to the {\link SceneObject} that this object is attached to.
+         *
+         * \return The {\link SceneObject} tha this object is attached to.
+         */
+        const SceneObject& getAttached() const;
+
+        /**
          * \brief Gets the transformation matrix to position something exactly where
          * the bone associated with the given boneName is.
          *
@@ -93,7 +109,7 @@ namespace PB
         /**
         * \brief Executes GFX API specific render calls on injected assets.
         */
-        void render() const;
+        void render();
 
         /**
         * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called
@@ -159,6 +175,11 @@ namespace PB
         */
         vec3 actualScale() const;
 
+        /**
+         * \brief Get the UUID associated with this {\link SceneObject}.
+         *
+         * \return The UUID associated with this {\link SceneObject}.
+         */
         std::string getId() const;
 
         bool operator==(const SceneObject& rhs) const;

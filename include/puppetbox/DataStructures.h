@@ -731,4 +731,65 @@ namespace PB
         T* array = nullptr;
         std::uint32_t length = 0;
     };
+
+    template<typename T>
+    struct DoubleLinkedNode
+    {
+        T value;
+        DoubleLinkedNode* next;
+        DoubleLinkedNode* prev;
+    };
+
+    template <typename T>
+    class Queue
+    {
+    public:
+        void add(T item)
+        {
+            DoubleLinkedNode<T>* node = new DoubleLinkedNode<T>{item};
+
+            if (tail_ == nullptr)
+            {
+                tail_ = node;
+                head_ = tail_;
+            }
+            else
+            {
+                tail_->next = node;
+                tail_ = tail_->next;
+            }
+
+            ++size_;
+        };
+
+        T pop()
+        {
+            T value;
+
+            if (head_ != nullptr)
+            {
+                DoubleLinkedNode<T>* tmp = head_;
+                value = tmp->value;
+                head_ = head_->next;
+                delete tmp;
+                --size_;
+            }
+
+            return value;
+        };
+
+        std::uint32_t size()
+        {
+            return size_;
+        }
+
+        bool isEmpty()
+        {
+            return size_ == 0;
+        }
+    private:
+        DoubleLinkedNode<T>* head_ = nullptr;
+        DoubleLinkedNode<T>* tail_ = nullptr;
+        std::uint32_t size_ = 0;
+    };
 }

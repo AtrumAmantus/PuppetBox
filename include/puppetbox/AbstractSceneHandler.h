@@ -18,12 +18,12 @@ namespace PB
     public:
         AbstractSceneHandler() = default;
 
-        explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor) : inputProcessor_(inputProcessor) {};
+        explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor);
 
         /**
         * \brief Runs only once, when the scene first loads
         */
-        virtual void setUp() {};
+        virtual void setUp();
 
         /**
         * \brief Runs once per frame, after input processing, but before rendering.
@@ -34,114 +34,75 @@ namespace PB
         */
         //TODO: Think about breaking this out into different update phases
         // OutOfFrameUpdates, InFrameUpdates, PausedUpdates, etc.
-        virtual void update(const float deltaTime)
-        {
-            processInput();
-            camera_->update(deltaTime);
-
-            // Update implementing application first in case new objects were added.
-            updates(deltaTime);
-
-            for (auto& e: sceneObjects_)
-            {
-                e.second->update(deltaTime);
-            }
-        };
+        virtual void update(const float deltaTime);
 
         /**
         * \brief Runs once per frame, after updates
         */
-        virtual void render()
-        {
-            for (auto& e: sceneObjects_)
-            {
-                e.second->render();
-            }
-
-            renders();
-        };
+        virtual void render();
 
         /**
          * \brief Sets the camera to be associated with the current scene.
          *
-         * @param camera Pointer to the current camera.
+         * \param camera Pointer to the current camera.
          */
-        void setCamera(Camera* camera)
-        {
-            this->camera_ = camera;
-        }
+        void setCamera(Camera* camera);
 
         /**
          * \brief Returns a pointer to the {@link Camera} associated to the current scene.
          *
-         * @return Pointer to the {@link Camera} associated to the current scene.
+         * \return Pointer to the {@link Camera} associated to the current scene.
          */
-        Camera* getCamera()
-        {
-            return this->camera_;
-        }
+        Camera* getCamera();
 
     protected:
         /**
          * \brief Provides access to input state to the child class.
          *
-         * @return Pointer to the current input processor holding input state.
+         * \return Pointer to the current input processor holding input state.
          */
-        AbstractInputProcessor* input() const
-        {
-            return inputProcessor_;
-        };
+        AbstractInputProcessor* input() const;
 
         /**
          * \brief Defined by child class for additional customized input processing.
          */
-        virtual void processInputs() {};
+        virtual void processInputs();
 
         /**
          * \brief Defined by child class for additional custom frame update logic.
          *
          * \param deltaTime The time (in milliseconds) that has passed since the last update().
          */
-        virtual void updates(float deltaTime) {};
+        virtual void updates(float deltaTime);
 
         /**
          * \brief Defined by child class for additional custom rendering logic.
          */
-        virtual void renders() const {};
+        virtual void renders() const;
 
         /**
          * \brief Add an object to the scene, allowing engine level handling of object events.
          *
-         * @param sceneObject The object to add to the scene.
+         * \param sceneObject The object to add to the scene.
          */
-        void addSceneObject(SceneObject* sceneObject)
-        {
-            sceneObjects_.insert(
-                    std::pair<std::string, SceneObject*>{sceneObject->getId(), sceneObject}
-            );
-        }
+        void addSceneObject(SceneObject* sceneObject);
 
         /**
          * \brief Remove a {@link SceneObject} from the scene, preventing engine level handling of the object's events.
          *
-         * @param sceneObject The {@link SceneObject} to remove.
+         * \param sceneObject The {@link SceneObject} to remove.
          */
-        void removeSceneObject(SceneObject* sceneObject)
-        {
-            sceneObjects_.erase(sceneObject->getId());
-        }
+        void removeSceneObject(SceneObject* sceneObject);
 
     private:
         AbstractInputProcessor* inputProcessor_ = nullptr;
         std::unordered_map<std::string, SceneObject*> sceneObjects_{};
         Camera* camera_ = nullptr;
+        Queue<SceneObject*> processLater_{};
     private:
         /**
          * \brief Base engine input processing logic, followed by user defined input processing.
          */
-        void processInput()
-        {
-            processInputs();
-        }
+        void processInput();
     };
 }

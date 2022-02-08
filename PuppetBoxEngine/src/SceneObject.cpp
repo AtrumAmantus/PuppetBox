@@ -25,6 +25,16 @@ namespace PB
         attachPoint_ = attachPoint;
     }
 
+    bool SceneObject::isAttached() const
+    {
+        return attachedTo_ != nullptr;
+    }
+
+    const SceneObject& SceneObject::getAttached() const
+    {
+        return *attachedTo_;
+    }
+
     mat4 SceneObject::getAbsolutePositionForBone(const std::string& boneName) const
     {
         return GfxMath::CreateTransformation(rotation, scale, position) * model_->getAbsolutePositionForBone(boneName);
@@ -53,11 +63,14 @@ namespace PB
         {
             model_->update(deltaTime);
         }
+
+        isUpdated = true;
     }
 
-    void SceneObject::render() const
+    void SceneObject::render()
     {
         model_->render(transform_);
+        isUpdated = false;
     }
 
     void SceneObject::setBehavior(AI::Behavior behavior)
