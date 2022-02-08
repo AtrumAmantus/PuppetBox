@@ -13,7 +13,14 @@ public:
 protected:
     void updates(float deltaTime) override
     {
-
+        if (moveVector.y > 0)
+        {
+            rotation.y = 180;
+        }
+        else
+        {
+            rotation.y = 0;
+        }
     };
 
     void behaviorEvent(std::string behaviorName, std::uint32_t behaviorEvent) override

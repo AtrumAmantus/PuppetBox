@@ -11,12 +11,10 @@ keyframes:
       position:
         x: 0.00
         y: 16.00
-        z: -1
     right_hand:
       position:
         x: -16.00
         y: 0.00
-        z: -2
       rotation:
         z: -5
   1:
@@ -24,111 +22,91 @@ keyframes:
       position:
         x: 0.03
         y: 16.63
-        z: -1
     right_hand:
       position:
         x: -17.39
         y: 0.60
-        z: -2
   2:
     head:
       position:
         x: 0.11
         y: 17.29
-        z: -1
     right_hand:
       position:
         x: -18.96
         y: 3.35
-        z: -2
   3:
     head:
       position:
         x: 0.23
         y: 17.96
-        z: -1
     right_hand:
       position:
         x: -20.25
         y: 7.58
-        z: -2
   4:
     head:
       position:
         x: 0.38
         y: 18.62
-        z: -1
     right_hand:
       position:
         x: -20.77
         y: 12.62
-        z: -2
   5:
     head:
       position:
         x: 0.55
         y: 19.25
-        z: -1
     right_hand:
       position:
         x: -20.05
         y: 17.79
-        z: -2
   6:
     head:
       position:
         x: 0.73
         y: 19.82
-        z: -1
     right_hand:
       position:
         x: -17.60
         y: 22.42
-        z: -2
   7:
     head:
       position:
         x: 0.91
         y: 20.30
-        z: -1
     right_hand:
       position:
         x: -12.95
         y: 25.84
-        z: -2
   8:
     head:
       position:
         x: 1.09
         y: 20.67
-        z: -1
     right_hand:
       position:
         x: -8.09
         y: 27.96
-        z: -2
   9:
     head:
       position:
         x: 1.25
         y: 20.91
-        z: -1
     right_hand:
       position:
         x: -5.21
         y: 29.14
-        z: -2
   10:
     head:
       position:
         x: 1.375
         y: 21
-        z: -1
     right_hand:
       position:
         x: -4.15
         y: 29.34
-        z: -2
       rotation:
         z: 45
   11:
@@ -136,37 +114,31 @@ keyframes:
       position:
         x: -4.75
         y: 28.51
-        z: -2
   12:
     right_hand:
       position:
         x: -6.83
         y: 26.64
-        z: -2
   13:
     right_hand:
       position:
         x: -10.25
         y: 23.68
-        z: -2
   14:
     right_hand:
       position:
         x: -14.82
         y: 19.61
-        z: -2
   15:
     right_hand:
       position:
         x: -18.57
         y: 16.59
-        z: -2
   16:
     right_hand:
       position:
         x: -19.81
         y: 16.35
-        z: -2
       rotation:
         z: 12
   17:
@@ -174,57 +146,47 @@ keyframes:
       position:
         x: -18.89
         y: 18.19
-        z: -2
   18:
     right_hand:
       position:
         x: -16.16
         y: 21.39
-        z: -2
   19:
     head:
       position:
         x: 1.375
         y: 21
-        z: -1
     right_hand:
       position:
         x: -11.95
         y: 25.25
-        z: -2
   20:
     head:
       position:
         x: 1.25
         y: 20.91
-        z: -1
     right_hand:
       position:
         x: -6.62
         y: 29.05
-        z: -2
   21:
     head:
       position:
         x: 1.09
         y: 20.67
-        z: -1
     right_hand:
       position:
         x: -0.48
         y: 32.07
-        z: -2
   22:
     head:
       position:
         x: 0.91
         y: 20.30
-        z: -1
     right_hand:
       position:
         x: 2.58
         y: 33.65
-        z: -2
       rotation:
         z: 55
   23:
@@ -232,53 +194,43 @@ keyframes:
       position:
         x: 0.73
         y: 19.82
-        z: -1
     right_hand:
       position:
         x: 0.35
         y: 33.45
-        z: -2
   24:
     head:
       position:
         x: 0.55
         y: 19.25
-        z: -1
     right_hand:
       position:
         x: -5.04
         y: 31.31
-        z: -2
   25:
     head:
       position:
         x: 0.38
         y: 18.62
-        z: -1
     right_hand:
       position:
         x: -11.49
         y: 27.07
-        z: -2
   26:
     head:
       position:
         x: 0.23
         y: 17.96
-        z: -1
     right_hand:
       position:
         x: -16.88
         y: 20.55
-        z: -2
   27:
     head:
       position:
         x: 0.11
         y: 17.29
-        z: -1
     right_hand:
       position:
         x: -19.09
         y: 11.58
-        z: -2

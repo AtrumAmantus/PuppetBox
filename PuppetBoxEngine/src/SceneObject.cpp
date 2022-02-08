@@ -44,6 +44,9 @@ namespace PB
     {
         updates(deltaTime);
 
+        vec3 finalVelocity = velocity + (moveVector * speed);
+        position += (finalVelocity * deltaTime);
+
         // Behaviors might alter animations, etc, so need to run updates on those first.
         if (behavior_ != nullptr)
         {

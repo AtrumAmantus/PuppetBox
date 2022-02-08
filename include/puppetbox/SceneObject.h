@@ -46,6 +46,11 @@ namespace PB
         vec3 velocity{0.0f, 0.0f, 0.0f};
 
         /**
+         * \brief The unit's intended vector of movement.
+         */
+        vec3 moveVector{0.0f, 0.0f, 0.0f};
+
+        /**
         * \brief The max speed of the object.
         */
         float speed = 64.0f;

@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "puppetbox/AbstractSceneHandler.h"
+#include "puppetbox/Camera.h"
 #include "puppetbox/Constants.h"
 #include "puppetbox/DataStructures.h"
-
-#include "puppetbox/Camera.h"
+#include "puppetbox/IRenderWindow.h"
 #include "GfxMath.h"
 #include "Logger.h"
+#include "RenderWindowImplementation.h"
 #include "TypeDef.h"
 
 namespace PB
@@ -28,8 +29,11 @@ namespace PB
         *
         * \return The unique name this scene should be referenced by later.
         */
-        SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputProcessor* inputProcessor) :
-                id_(std::move(sceneName)), gfxApi_(gfxApi), inputProcessor_(inputProcessor) {};
+        SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputProcessor* inputProcessor)
+                : id_(std::move(sceneName)), gfxApi_(gfxApi), inputProcessor_(inputProcessor)
+        {
+            camera_ = Camera{std::make_unique<RenderWindowImplementation>(gfxApi_)};
+        };
 
         /**
         * \brief Sets a SceneHandler for this scene.
@@ -70,9 +74,18 @@ namespace PB
             sceneHandler_->update(deltaTime);
 
             mat4 view = camera_.calculateViewMatrix(viewMode_);
-            mat4 projection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), gfxApi_->getRenderDistance(), viewMode_);
-            mat4 orthoProjection = GfxMath::Projection(gfxApi_->getRenderWidth(), gfxApi_->getRenderHeight(), gfxApi_->getRenderDistance(),
-                                                       SceneView::ORTHO);
+            mat4 projection = GfxMath::Projection(
+                    gfxApi_->getRenderWidth(),
+                    gfxApi_->getRenderHeight(),
+                    gfxApi_->getRenderDistance(),
+                    viewMode_
+            );
+            mat4 orthoProjection = GfxMath::Projection(
+                    gfxApi_->getRenderWidth(),
+                    gfxApi_->getRenderHeight(),
+                    gfxApi_->getRenderDistance(),
+                    SceneView::ORTHO
+            );
 
             gfxApi_->setTransformUBOData(view, projection, orthoProjection);
         }
@@ -88,7 +101,7 @@ namespace PB
 
     private:
         std::string id_;
-        Camera camera_{};
+        Camera camera_{nullptr};
         SceneView::Mode viewMode_ = SceneView::Mode::ORTHO;
         IGfxApi* gfxApi_;
         AbstractInputProcessor* inputProcessor_;

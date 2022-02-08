@@ -106,13 +106,26 @@ namespace PB
 
     struct vec2
     {
+        vec2()
+        {
+            this->x = 0;
+            this->y = 0;
+        }
+
+        vec2(float x, float y)
+        {
+            this->x = x;
+            this->y = y;
+        }
+
         union
         {
-            float x, r, s = 0;
+            float x, r, s;
         };
+
         union
         {
-            float y, g, t = 0;
+            float y, g, t;
         };
 
         float& operator[](std::uint32_t i)
@@ -240,6 +253,14 @@ namespace PB
                     this->y + rhv.y,
                     this->z + rhv.z
             };
+        };
+
+        vec3& operator-=(vec3 const& rhv)
+        {
+            this->x -= rhv.x;
+            this->y -= rhv.y;
+            this->z -= rhv.z;
+            return *this;
         };
 
         vec3 operator-(const vec3& rhv) const
