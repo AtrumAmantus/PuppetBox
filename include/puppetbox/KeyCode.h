@@ -164,4 +164,9 @@
 #define KEY_MEDIA_REFRESH        0xfa    // 250
 #define KEY_MEDIA_CALC            0xfb    // 251
 
+#define BTN_LEFT                0x01    // 1
+#define BTN_MIDDLE              0x02    // 2
+#define BTN_RIGHT               0x03    // 3
+
 #define KEY_LAST                KEY_MEDIA_CALC
+#define BTN_LAST                BTN_RIGHT

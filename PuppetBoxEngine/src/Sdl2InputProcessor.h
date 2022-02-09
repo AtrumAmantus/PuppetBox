@@ -24,6 +24,11 @@ namespace PB
                 keyboard.previousKeyState[i] = keyboard.keyState[i];
             }
 
+            for (std::uint32_t i = 0; i < BTN_LAST + 1; ++i)
+            {
+                mouse.previousMouseState[i] = mouse.mouseState[i];
+            }
+
             mouse.deltaX = 0;
             mouse.deltaY = 0;
             mouse.wheelXDir = 0;

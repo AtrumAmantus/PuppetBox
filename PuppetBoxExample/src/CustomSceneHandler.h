@@ -215,6 +215,11 @@ protected:
 
     void processInputs() override
     {
+        if (input()->mouse.isReleased(BTN_LEFT))
+        {
+            std::cout << "Clicked at: " << input()->mouse.x << ", " << input()->mouse.y << std::endl;
+        }
+
         if (userInput_.isReading())
         {
             if (input()->keyboard.isReleased(KEY_ENTER))

@@ -9,12 +9,12 @@ class Controls
 {
 public:
     enum Command {
-        CAMERA_FORWARD,
         CAMERA_BACKWARD,
+        CAMERA_FORWARD,
         CAMERA_LEFT,
         CAMERA_RIGHT,
-        FORWARD,
         BACKWARD,
+        FORWARD,
         LEFT,
         RIGHT,
         QUIT,
