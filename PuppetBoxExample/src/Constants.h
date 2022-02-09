@@ -8,7 +8,18 @@ namespace Constants
 {
     namespace Font
     {
-        std::string MochiyPop = "Assets1/Fonts/MochiyPop/Regular";
+        std::string kMochiyPop = "Assets1/Fonts/MochiyPop/Regular";
+    }
+
+    namespace Animation
+    {
+        namespace Pack
+        {
+            std::string kBasicHuman = "Assets1/Animations/BasicHuman";
+        }
+
+        std::string kWalk = Pack::kBasicHuman + "/Walk";
+        std::string kIdle0 = Pack::kBasicHuman + "/Idle_0";
     }
 
     namespace Input

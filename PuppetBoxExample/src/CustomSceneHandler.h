@@ -64,12 +64,12 @@ public:
 
         auto* myEntity = new Entity{};
 
-        if (!PB::LoadAnimationsPack("Assets1/Animations/BasicHuman"))
+        if (!PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
         {
             std::cout << "Failed to load animation pack" << std::endl;
         }
 
-        PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
+        PB::LoadFontAsset(Constants::Font::kMochiyPop, 72);
 
         getCamera()->centerOn({0.0f, 0.0f, 0.0f});
 
@@ -102,7 +102,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .dimensions({300, 200})
                                               .fontSize(24)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .build()
                             ),
                             &error
@@ -118,7 +118,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .dimensions({200, 24})
                                               .fontSize(24)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .build()
                             ),
                             &error
@@ -153,7 +153,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .origin(PB::UI::Origin::TOP_LEFT)
                                               .fontSize(18)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .dimensions(PB::vec2{100, 24})
                                               .position(PB::vec3{10, 590, 1})
                                               .build()),
