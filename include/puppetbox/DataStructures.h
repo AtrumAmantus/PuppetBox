@@ -106,13 +106,26 @@ namespace PB
 
     struct vec2
     {
+        vec2()
+        {
+            this->x = 0;
+            this->y = 0;
+        }
+
+        vec2(float x, float y)
+        {
+            this->x = x;
+            this->y = y;
+        }
+
         union
         {
-            float x, r, s = 0;
+            float x, r, s;
         };
+
         union
         {
-            float y, g, t = 0;
+            float y, g, t;
         };
 
         float& operator[](std::uint32_t i)
@@ -240,6 +253,14 @@ namespace PB
                     this->y + rhv.y,
                     this->z + rhv.z
             };
+        };
+
+        vec3& operator-=(vec3 const& rhv)
+        {
+            this->x -= rhv.x;
+            this->y -= rhv.y;
+            this->z -= rhv.z;
+            return *this;
         };
 
         vec3 operator-(const vec3& rhv) const
@@ -730,5 +751,66 @@ namespace PB
     {
         T* array = nullptr;
         std::uint32_t length = 0;
+    };
+
+    template<typename T>
+    struct DoubleLinkedNode
+    {
+        T value;
+        DoubleLinkedNode* next;
+        DoubleLinkedNode* prev;
+    };
+
+    template <typename T>
+    class Queue
+    {
+    public:
+        void add(T item)
+        {
+            DoubleLinkedNode<T>* node = new DoubleLinkedNode<T>{item};
+
+            if (tail_ == nullptr)
+            {
+                tail_ = node;
+                head_ = tail_;
+            }
+            else
+            {
+                tail_->next = node;
+                tail_ = tail_->next;
+            }
+
+            ++size_;
+        };
+
+        T pop()
+        {
+            T value;
+
+            if (head_ != nullptr)
+            {
+                DoubleLinkedNode<T>* tmp = head_;
+                value = tmp->value;
+                head_ = head_->next;
+                delete tmp;
+                --size_;
+            }
+
+            return value;
+        };
+
+        std::uint32_t size()
+        {
+            return size_;
+        }
+
+        bool isEmpty()
+        {
+            return size_ == 0;
+        }
+    private:
+        DoubleLinkedNode<T>* head_ = nullptr;
+        DoubleLinkedNode<T>* tail_ = nullptr;
+        std::uint32_t size_ = 0;
     };
 }

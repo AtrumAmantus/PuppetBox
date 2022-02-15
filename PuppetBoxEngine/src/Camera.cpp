@@ -3,9 +3,7 @@
 
 namespace PB
 {
-    Camera::Camera() = default;
-
-    Camera::Camera(vec3 position, vec3 direction) : position_(position), direction_(direction)
+    Camera::Camera(std::unique_ptr<IRenderWindow> renderWindow) : renderWindow_(std::move(renderWindow))
     {
 
     }
@@ -21,9 +19,44 @@ namespace PB
         moveVector_ = vector;
     }
 
-    void Camera::setPosition(vec3 position)
+    void Camera::centerOn(vec3 position)
     {
-        position_ = position;
+        vec2 dimensions = renderWindow_->getDimensions();
+
+        position_ = position - vec3(dimensions.x / 2.0f, dimensions.y / 2.0f, 0.0f);
+    }
+
+    void Camera::centerNear(vec3 position, vec3 offset)
+    {
+        vec2 dimensions = renderWindow_->getDimensions();
+        position -= vec3(dimensions.x / 2.0f, dimensions.y / 2.0f, 0.0f);
+
+        if (position_.x < position.x - offset.x)
+        {
+            position_.x = position.x - offset.x;
+        }
+        else if (position_.x > position.x + offset.x)
+        {
+            position_.x = position.x + offset.x;
+        }
+
+        if (position_.y < position.y - offset.y)
+        {
+            position_.y = position.y - offset.y;
+        }
+        else if (position_.y > position.y + offset.y)
+        {
+            position_.y = position.y + offset.y;
+        }
+
+        if (position_.z < position.z - offset.z)
+        {
+            position_.z = position.z - offset.z;
+        }
+        else if (position_.z > position.z + offset.z)
+        {
+            position_.z = position.z + offset.z;
+        }
     }
 
     void Camera::rotate(vec3 rotation)

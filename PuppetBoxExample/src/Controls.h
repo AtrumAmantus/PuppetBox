@@ -9,8 +9,12 @@ class Controls
 {
 public:
     enum Command {
-        FORWARD,
+        CAMERA_BACKWARD,
+        CAMERA_FORWARD,
+        CAMERA_LEFT,
+        CAMERA_RIGHT,
         BACKWARD,
+        FORWARD,
         LEFT,
         RIGHT,
         QUIT,
@@ -76,14 +80,14 @@ public:
         return zoomSpeed_;
     };
 
-    void setMoveSpeed(float moveSpeed)
+    void setPanSpeed(float moveSpeed)
     {
-        moveSpeed_ = moveSpeed;
+        panSpeed_ = moveSpeed;
     };
 
-    float getMoveSpeed()
+    float getPanSpeed()
     {
-        return moveSpeed_;
+        return panSpeed_;
     };
 
 private:
@@ -91,5 +95,5 @@ private:
     std::unordered_map<Command, std::vector<std::int8_t>> bindings_;
 private:
     float zoomSpeed_ = 1.0f;
-    float moveSpeed_ = 1.0f;
+    float panSpeed_ = 1.0f;
 };

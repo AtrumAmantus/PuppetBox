@@ -13,7 +13,31 @@ public:
 protected:
     void updates(float deltaTime) override
     {
+        if (moveVector.y > 0)
+        {
+            rotation.y = 180;
+        }
+        else
+        {
+            rotation.y = 0;
+        }
 
+        if (moveVector.x != 0 || moveVector.y != 0)
+        {
+            if (!isMoving)
+            {
+                isMoving = true;
+                this->playAnimation(Constants::Animation::kWalk, 0);
+            }
+        }
+        else
+        {
+            if (isMoving)
+            {
+                isMoving = false;
+                this->stopAnimation(Constants::Animation::kWalk);
+            }
+        }
     };
 
     void behaviorEvent(std::string behaviorName, std::uint32_t behaviorEvent) override
@@ -22,7 +46,7 @@ protected:
         {
             if (behaviorEvent == PB::WanderBehavior::Events::START)
             {
-                this->playAnimation("Assets1/Animations/BasicHuman/Walk", 0);
+                this->playAnimation(Constants::Animation::kWalk, 0);
 
                 if (this->getBehavior()->getTargetPosition().y > position.y)
                 {
@@ -35,13 +59,15 @@ protected:
             }
             else if (behaviorEvent == PB::WanderBehavior::Events::STOP)
             {
-                this->stopAnimation("Assets1/Animations/BasicHuman/Walk");
+                this->stopAnimation(Constants::Animation::kWalk);
 
                 if (rand() % 3 == 1)
                 {
-                    this->playAnimation("Assets1/Animations/BasicHuman/Idle_0", 0);
+                    this->playAnimation(Constants::Animation::kIdle0, 0);
                 }
             }
         }
     };
+private:
+    bool isMoving = false;
 };

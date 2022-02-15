@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+
+#include "puppetbox/IRenderWindow.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "TypeDef.h"
@@ -15,15 +18,7 @@ namespace PB
         /**
         * \brief Create a default instance.
         */
-        Camera();
-
-        /**
-        * \brief Create an instance with initial position & direction.
-        *
-        * \param position	The initial position of the camera.
-        * \param direction	The initial direction of the camera.
-        */
-        Camera(vec3 position, vec3 direction);
+        Camera(std::unique_ptr<IRenderWindow> renderWindow);
 
         /**
          * \brief Update the current state of the camera based on current input.
@@ -45,7 +40,15 @@ namespace PB
         *
         * \param vector	A vector containing position values for x, y, and z axis.
         */
-        void setPosition(vec3 vector);
+        void centerOn(vec3 position);
+
+        /**
+         * \brief Instantly set the current position of the camera to one "near" the target position.
+         *
+         * \param position The position the camera should be centered "near".
+         * \param offset   The minimum distance the camera can be from the target position.
+         */
+        void centerNear(vec3 position, vec3 offset);
 
         /**
         * \brief Set the rotation of the camera.
@@ -81,5 +84,6 @@ namespace PB
         float targetZoom_ = 100.0f;
         float minZoom_ = 50.0f;
         float maxZoom_ = 150.0f;
+        std::unique_ptr<IRenderWindow> renderWindow_{nullptr};
     };
 }

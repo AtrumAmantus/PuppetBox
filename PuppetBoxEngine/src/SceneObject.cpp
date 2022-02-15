@@ -25,6 +25,16 @@ namespace PB
         attachPoint_ = attachPoint;
     }
 
+    bool SceneObject::isAttached() const
+    {
+        return attachedTo_ != nullptr;
+    }
+
+    const SceneObject& SceneObject::getAttached() const
+    {
+        return *attachedTo_;
+    }
+
     mat4 SceneObject::getAbsolutePositionForBone(const std::string& boneName) const
     {
         return GfxMath::CreateTransformation(rotation, scale, position) * model_->getAbsolutePositionForBone(boneName);
@@ -33,6 +43,9 @@ namespace PB
     void SceneObject::update(float deltaTime)
     {
         updates(deltaTime);
+
+        vec3 finalVelocity = velocity + (moveVector * speed);
+        position += (finalVelocity * deltaTime);
 
         // Behaviors might alter animations, etc, so need to run updates on those first.
         if (behavior_ != nullptr)
@@ -53,11 +66,14 @@ namespace PB
         {
             model_->update(deltaTime);
         }
+
+        isUpdated = true;
     }
 
-    void SceneObject::render() const
+    void SceneObject::render()
     {
         model_->render(transform_);
+        isUpdated = false;
     }
 
     void SceneObject::setBehavior(AI::Behavior behavior)

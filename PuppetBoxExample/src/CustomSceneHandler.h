@@ -49,37 +49,39 @@ public:
     {
         controls_ = Controls{input()};
 
-        controls_.registerCommand(Controls::FORWARD, KEY_UP);
+        controls_.registerCommand(Controls::CAMERA_FORWARD, KEY_UP);
         controls_.registerCommand(Controls::FORWARD, KEY_W);
-        controls_.registerCommand(Controls::BACKWARD, KEY_DOWN);
+        controls_.registerCommand(Controls::CAMERA_BACKWARD, KEY_DOWN);
         controls_.registerCommand(Controls::BACKWARD, KEY_S);
-        controls_.registerCommand(Controls::LEFT, KEY_LEFT);
+        controls_.registerCommand(Controls::CAMERA_LEFT, KEY_LEFT);
         controls_.registerCommand(Controls::LEFT, KEY_A);
-        controls_.registerCommand(Controls::RIGHT, KEY_RIGHT);
+        controls_.registerCommand(Controls::CAMERA_RIGHT, KEY_RIGHT);
         controls_.registerCommand(Controls::RIGHT, KEY_D);
         controls_.registerCommand(Controls::QUIT, KEY_ESCAPE);
 
-        controls_.setMoveSpeed(200.0f);
+        controls_.setPanSpeed(200.0f);
         controls_.setZoomSpeed(2.0f);
 
         auto* myEntity = new Entity{};
 
-        if (!PB::LoadAnimationsPack("Assets1/Animations/BasicHuman"))
+        if (!PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
         {
             std::cout << "Failed to load animation pack" << std::endl;
         }
 
-        PB::LoadFontAsset("Assets1/Fonts/MochiyPop/Regular", 72);
+        PB::LoadFontAsset(Constants::Font::kMochiyPop, 72);
 
-        getCamera()->setPosition({-400, -300, 0});
+        getCamera()->centerOn({0.0f, 0.0f, 0.0f});
 
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
         {
             myEntity->name = "Fred";
             myEntity->position = PB::vec3{150.0f, 50.0f, 50.0f};
-            myEntity->setBehavior(PB::AI::Behavior::WANDER);
+//            myEntity->setBehavior(PB::AI::Behavior::WANDER);
             addSceneObject(myEntity);
         }
+
+        player = myEntity;
 
         auto* weapon = new Entity();
 
@@ -100,7 +102,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .dimensions({300, 200})
                                               .fontSize(24)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .build()
                             ),
                             &error
@@ -116,7 +118,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .dimensions({200, 24})
                                               .fontSize(24)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .build()
                             ),
                             &error
@@ -151,7 +153,7 @@ public:
                             std::move(UIAttributeBuilder{}
                                               .origin(PB::UI::Origin::TOP_LEFT)
                                               .fontSize(18)
-                                              .fontType(Constants::Font::MochiyPop)
+                                              .fontType(Constants::Font::kMochiyPop)
                                               .dimensions(PB::vec2{100, 24})
                                               .position(PB::vec3{10, 590, 1})
                                               .build()),
@@ -213,6 +215,11 @@ protected:
 
     void processInputs() override
     {
+        if (input()->mouse.isReleased(BTN_LEFT))
+        {
+            std::cout << "Clicked at: " << input()->mouse.x << ", " << input()->mouse.y << std::endl;
+        }
+
         if (userInput_.isReading())
         {
             if (input()->keyboard.isReleased(KEY_ENTER))
@@ -254,23 +261,37 @@ protected:
 
                 PB::vec3 moveVec{};
 
+                bool snapCamera = false;
+
                 if (controls_.isCommandActive(Controls::FORWARD) || controls_.isCommandActive(Controls::BACKWARD))
                 {
                     moveVec.y = (
-                                        controls_.isCommandActive(Controls::FORWARD)
-                                        + (-1 * controls_.isCommandActive(Controls::BACKWARD))
-                                ) * controls_.getMoveSpeed();
+                            controls_.isCommandActive(Controls::FORWARD)
+                            + (-1 * controls_.isCommandActive(Controls::BACKWARD))
+                    );
+
+                    snapCamera = true;
                 }
 
                 if (controls_.isCommandActive(Controls::RIGHT) || controls_.isCommandActive(Controls::LEFT))
                 {
                     moveVec.x = (
-                                        controls_.isCommandActive(Controls::RIGHT)
-                                        + (-1 * controls_.isCommandActive(Controls::LEFT))
-                                ) * controls_.getMoveSpeed();
+                            controls_.isCommandActive(Controls::RIGHT)
+                            + (-1 * controls_.isCommandActive(Controls::LEFT))
+                    );
+
+                    snapCamera = true;
                 }
 
-                getCamera()->move(moveVec);
+                player->moveVector = moveVec;
+
+                if (snapCamera)
+                {
+                    getCamera()->centerNear(
+                            {player->position.x, player->position.y, 0.0f},
+                            {100.0f, 100.0f, 0.0f}
+                    );
+                }
             }
         }
 
@@ -292,4 +313,5 @@ private:
     Controls controls_{nullptr};
     float frameRates_[60];
     std::uint8_t frameIndex_ = 0;
+    Entity* player = nullptr;
 };
