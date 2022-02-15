@@ -422,7 +422,7 @@ namespace PB
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    void OpenGLGfxApi::setTransformUBOData(mat4 view, mat4 projection, mat4 orthoProjection) const
+    void OpenGLGfxApi::setTransformUBOData(mat4 view, mat4 projection, mat4 uiProjection) const
     {
         glBindBuffer(GL_UNIFORM_BUFFER, UBO_);
 
@@ -437,7 +437,7 @@ namespace PB
 //		std::uint32_t bufferSize = firstLightOffset + sizeOfLights;
         //                                    v-- Size of data
         //              v-- Type           v-- Offset (bytes)    v-- Data
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeOfMat4, &orthoProjection[0][0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeOfMat4, &uiProjection[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, sizeOfMat4, sizeOfMat4, &projection[0][0]);
         glBufferSubData(GL_UNIFORM_BUFFER, sizeOfMat4 * 2, sizeOfMat4, &view[0][0]);
 

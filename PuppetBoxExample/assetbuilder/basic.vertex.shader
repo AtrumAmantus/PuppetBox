@@ -10,7 +10,7 @@ out VS_OUT
 
 layout(std140) uniform Transforms
 {
-	mat4 orthoProjection;
+	mat4 uiProjection;
 	mat4 projection;
 	mat4 view;
 };

@@ -546,27 +546,32 @@ namespace PB
     {
         mat4() = default;
 
-        explicit mat4(vec4 v[4])
+        explicit mat4(vec4 v1, vec4 v2, vec4 v3, vec4 v4)
         {
-            values_[0].x = v[0].x;
-            values_[0].y = v[0].y;
-            values_[0].z = v[0].z;
-            values_[0].w = v[0].w;
+            values_[0].x = v1.x;
+            values_[0].y = v1.y;
+            values_[0].z = v1.z;
+            values_[0].w = v1.w;
 
-            values_[1].x = v[1].x;
-            values_[1].y = v[1].y;
-            values_[1].z = v[1].z;
-            values_[1].w = v[1].w;
+            values_[1].x = v2.x;
+            values_[1].y = v2.y;
+            values_[1].z = v2.z;
+            values_[1].w = v2.w;
 
-            values_[2].x = v[2].x;
-            values_[2].y = v[2].y;
-            values_[2].z = v[2].z;
-            values_[2].w = v[2].w;
+            values_[2].x = v3.x;
+            values_[2].y = v3.y;
+            values_[2].z = v3.z;
+            values_[2].w = v3.w;
 
-            values_[3].x = v[3].x;
-            values_[3].y = v[3].y;
-            values_[3].z = v[3].z;
-            values_[3].w = v[3].w;
+            values_[3].x = v4.x;
+            values_[3].y = v4.y;
+            values_[3].z = v4.z;
+            values_[3].w = v4.w;
+        }
+
+        explicit mat4(vec4 v[4]) : mat4(v[0], v[1], v[2], v[3])
+        {
+
         };
 
         explicit mat4(const float* mat4)

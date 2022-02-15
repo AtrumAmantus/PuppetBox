@@ -2,8 +2,8 @@
 
 namespace PB
 {
-    AbstractSceneHandler::AbstractSceneHandler(AbstractInputProcessor* inputProcessor)
-            : inputProcessor_(inputProcessor)
+    AbstractSceneHandler::AbstractSceneHandler(AbstractInputProcessor* inputProcessor, SceneView::Mode mode)
+            : inputProcessor_(inputProcessor), viewMode_(mode)
     {
 
     }
@@ -76,9 +76,20 @@ namespace PB
         this->camera_ = camera;
     }
 
-    Camera* AbstractSceneHandler::getCamera()
+    Camera& AbstractSceneHandler::getCamera()
     {
-        return this->camera_;
+        return *this->camera_;
+    }
+
+    SceneView::Mode AbstractSceneHandler::getViewMode() const
+    {
+        return viewMode_;
+    }
+
+    void AbstractSceneHandler::processInput()
+    {
+        // This can contain some engine specified checks, but right now I have nothing...
+        processInputs();
     }
 
     AbstractInputProcessor* AbstractSceneHandler::input() const
@@ -113,9 +124,8 @@ namespace PB
         sceneObjects_.erase(sceneObject->getId());
     }
 
-    void AbstractSceneHandler::processInput()
+    void AbstractSceneHandler::setViewMode(SceneView::Mode mode)
     {
-        // This can contain some engine specified checks, but right now I have nothing...
-        processInputs();
+        viewMode_ = mode;
     }
 }

@@ -149,9 +149,6 @@ namespace PB
                 model.offset.x = getNumericResultAtNode<float>("x", *offsetProperties, error).orElse(0.0f);
                 model.offset.y = getNumericResultAtNode<float>("y", *offsetProperties, error).orElse(0.0f);
                 model.offset.z = getNumericResultAtNode<float>("z", *offsetProperties, error).orElse(0.0f);
-
-                //TODO: Fix this hack
-                model.offset.z *= 0.1;
             }
 
             auto rotationNode = rootProperties.get("rotation");

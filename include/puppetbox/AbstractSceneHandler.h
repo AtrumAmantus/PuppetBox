@@ -18,7 +18,7 @@ namespace PB
     public:
         AbstractSceneHandler() = default;
 
-        explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor);
+        explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor, SceneView::Mode mode);
 
         /**
         * \brief Runs only once, when the scene first loads
@@ -49,11 +49,18 @@ namespace PB
         void setCamera(Camera* camera);
 
         /**
-         * \brief Returns a pointer to the {@link Camera} associated to the current scene.
+         * \brief Returns a pointer to the {\link Camera} associated to the current scene.
          *
-         * \return Pointer to the {@link Camera} associated to the current scene.
+         * \return Pointer to the {\link Camera} associated to the current scene.
          */
-        Camera* getCamera();
+        Camera& getCamera();
+
+        /**
+         * \brief Returns the currently {\link SceneView::Mode} for the scene.
+         *
+         * \return The currently set {\link SceneView::Mode}.
+         */
+        SceneView::Mode getViewMode() const;
 
         /**
          * \brief Base engine input processing logic, followed by user defined input processing.
@@ -99,8 +106,16 @@ namespace PB
          */
         void removeSceneObject(SceneObject* sceneObject);
 
+        /**
+         * \brief Sets the view mode of the scene
+         *
+         * \param mode The desired {\link SceneView::Mode} for the scene.
+         */
+        void setViewMode(SceneView::Mode mode);
+
     private:
         AbstractInputProcessor* inputProcessor_ = nullptr;
+        SceneView::Mode viewMode_ = SceneView::ORTHO;
         std::unordered_map<std::string, SceneObject*> sceneObjects_{};
         Camera* camera_ = nullptr;
         Queue<SceneObject*> processLater_{};

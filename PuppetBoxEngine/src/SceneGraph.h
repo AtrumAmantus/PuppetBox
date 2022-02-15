@@ -47,20 +47,10 @@ namespace PB
                 sceneHandler_->setCamera(nullptr);
             }
 
-            *sceneHandler = AbstractSceneHandler{inputProcessor_};
+            *sceneHandler = AbstractSceneHandler{inputProcessor_, SceneView::ORTHO};
             sceneHandler_ = sceneHandler;
             sceneHandler_->setCamera(&camera_);
             sceneHandler_->setUp();
-        };
-
-        /**
-        * \brief Sets the projection mode for the scene.
-        *
-        * \param mode	The projection mode for the scene.
-        */
-        void setCameraMode(SceneView::Mode mode)
-        {
-            viewMode_ = mode;
         };
 
         /**
@@ -73,21 +63,25 @@ namespace PB
         {
             sceneHandler_->update(deltaTime);
 
-            mat4 view = camera_.calculateViewMatrix(viewMode_);
+            SceneView::Mode viewMode = sceneHandler_->getViewMode();
+
+            mat4 view = camera_.calculateViewMatrix(viewMode);
+
             mat4 projection = GfxMath::Projection(
                     gfxApi_->getRenderWidth(),
                     gfxApi_->getRenderHeight(),
                     gfxApi_->getRenderDistance(),
-                    viewMode_
+                    viewMode
             );
-            mat4 orthoProjection = GfxMath::Projection(
+
+            mat4 uiProjection = GfxMath::Projection(
                     gfxApi_->getRenderWidth(),
                     gfxApi_->getRenderHeight(),
                     gfxApi_->getRenderDistance(),
-                    SceneView::ORTHO
+                    SceneView::UI
             );
 
-            gfxApi_->setTransformUBOData(view, projection, orthoProjection);
+            gfxApi_->setTransformUBOData(view, projection, uiProjection);
         };
 
         /**
@@ -110,7 +104,6 @@ namespace PB
     private:
         std::string id_;
         Camera camera_{nullptr};
-        SceneView::Mode viewMode_ = SceneView::Mode::ORTHO;
         IGfxApi* gfxApi_;
         AbstractInputProcessor* inputProcessor_;
         AbstractSceneHandler* sceneHandler_ = nullptr;

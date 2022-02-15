@@ -6,13 +6,13 @@ out vec2 TexCoords;
 
 layout(std140) uniform Transforms
 {
-    mat4 orthoProjection;
+    mat4 uiProjection;
     mat4 projection;
     mat4 view;
 };
 
 void main()
 {
-    gl_Position = orthoProjection * vec4(position.xyz, 1.0);
+    gl_Position = uiProjection * vec4(position.xyz, 1.0);
     TexCoords = uv;
 }

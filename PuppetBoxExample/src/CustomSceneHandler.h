@@ -46,15 +46,17 @@ class CustomSceneHandler : public PB::AbstractSceneHandler
 public:
     void setUp() override
     {
+        setViewMode(PB::SceneView::ORTHO);
+
         controls_ = Controls{input()};
 
-        controls_.registerCommand(Controls::CAMERA_FORWARD, KEY_UP);
-        controls_.registerCommand(Controls::FORWARD, KEY_W);
-        controls_.registerCommand(Controls::CAMERA_BACKWARD, KEY_DOWN);
-        controls_.registerCommand(Controls::BACKWARD, KEY_S);
+        controls_.registerCommand(Controls::CAMERA_UP, KEY_UP);
+        controls_.registerCommand(Controls::CAMERA_DOWN, KEY_DOWN);
         controls_.registerCommand(Controls::CAMERA_LEFT, KEY_LEFT);
-        controls_.registerCommand(Controls::LEFT, KEY_A);
         controls_.registerCommand(Controls::CAMERA_RIGHT, KEY_RIGHT);
+        controls_.registerCommand(Controls::FORWARD, KEY_W);
+        controls_.registerCommand(Controls::BACKWARD, KEY_S);
+        controls_.registerCommand(Controls::LEFT, KEY_A);
         controls_.registerCommand(Controls::RIGHT, KEY_D);
         controls_.registerCommand(Controls::QUIT, KEY_ESCAPE);
 
@@ -70,12 +72,12 @@ public:
 
         PB::LoadFontAsset(Constants::Font::kMochiyPop, 72);
 
-        getCamera()->centerOn({0.0f, 0.0f, 0.0f});
+        getCamera().moveTo({0.0f, 0.0f, 0.0f});
 
         if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
         {
             myEntity->name = "Fred";
-            myEntity->position = PB::vec3{150.0f, 50.0f, 50.0f};
+            myEntity->position = PB::vec3{150.0f, 50.0f, -50.0f};
 //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
             addSceneObject(myEntity);
         }
@@ -97,7 +99,7 @@ public:
         if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain, PB::LibraryAsset::Type::MODEL_2D))
         {
             chain->name = "chain";
-            chain->position = {0.0f, 0.0f, 40.0f};
+            chain->position = {0.0f, 0.0f, -40.0f};
             addSceneObject(chain);
         }
 
@@ -207,6 +209,14 @@ protected:
                 uiController_.getComponent(INPUT_BOX, &error)
                         ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
             }
+            else if (input == "/ortho")
+            {
+                setViewMode(PB::SceneView::ORTHO);
+            }
+            else if (input == "/perspective" || input == "/persp")
+            {
+                setViewMode(PB::SceneView::PERSPECTIVE);
+            }
         }
         else
         {
@@ -268,6 +278,7 @@ protected:
                 }
 
                 PB::vec3 moveVec{};
+                PB::vec3 cameraMoveVec{};
 
                 bool snapCamera = false;
 
@@ -291,14 +302,42 @@ protected:
                     snapCamera = true;
                 }
 
-                player->moveVector = moveVec;
-
-                if (snapCamera)
+                if (controls_.isCommandActive(Controls::CAMERA_UP) || controls_.isCommandActive(Controls::CAMERA_DOWN))
                 {
-                    getCamera()->centerNear(
-                            {player->position.x, player->position.y, 0.0f},
-                            {100.0f, 100.0f, 0.0f}
+                    cameraMoveVec.y = (
+                            controls_.isCommandActive(Controls::CAMERA_UP)
+                            + (-1 * controls_.isCommandActive(Controls::CAMERA_DOWN))
                     );
+                }
+
+                if (controls_.isCommandActive(Controls::CAMERA_LEFT) || controls_.isCommandActive(Controls::CAMERA_RIGHT))
+                {
+                    cameraMoveVec.x = (
+                            controls_.isCommandActive(Controls::CAMERA_RIGHT)
+                            + (-1 * controls_.isCommandActive(Controls::CAMERA_LEFT))
+                    );
+                }
+
+                if (getViewMode() == PB::SceneView::ORTHO)
+                {
+                    player->moveVector = moveVec;
+
+                    getCamera().move(cameraMoveVec * controls_.getPanSpeed());
+
+                    if (snapCamera)
+                    {
+                        getCamera().moveNear(
+                                {player->position.x, player->position.y, 0.0f},
+                                {100.0f, 100.0f, 0.0f}
+                        );
+                    }
+                }
+                else
+                {
+                    // +forward would be backwards since +z is toward user, so invert it
+                    getCamera().directionalMove({moveVec.x, 0.0f, -moveVec.y});
+                    // +yaw = turning left, so invert x value
+                    getCamera().rotate(PB::vec3{cameraMoveVec.y, -cameraMoveVec.x, 0.0f});
                 }
             }
         }
@@ -311,7 +350,7 @@ protected:
 
         if (input()->mouse.wheelYDir != 0)
         {
-            getCamera()->zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir) * controls_.getZoomSpeed());
+            getCamera().zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir) * controls_.getZoomSpeed());
         }
     }
 

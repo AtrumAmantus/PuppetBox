@@ -98,11 +98,11 @@ namespace PB
         /**
         * \brief Sets view/projection matrices in the UBO.  Must initializeUBORanges() before use.
         *
-        * \param view		        The View Matrix to set.
-        * \param projection	        The Projection Matrix to set.
-        * \param orthoProjection    The orthographic projection matrix to set.
+        * \param view		     The View Matrix to set.
+        * \param projection	     The Projection Matrix to set.
+        * \param uiProjection    The UI orthographic projection matrix to set.
         */
-        virtual void setTransformUBOData(mat4 view, mat4 projection, mat4 orthoProjection) const = 0;
+        virtual void setTransformUBOData(mat4 view, mat4 projection, mat4 uiProjection) const = 0;
 
         /**
         * \brief Enables GFX API Debugging if it has one.

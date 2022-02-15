@@ -308,18 +308,6 @@ namespace PB
         }
     }
 
-    void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode)
-    {
-        if (loadedScenes.find(sceneName) != loadedScenes.end())
-        {
-            loadedScenes.at(sceneName)->setCameraMode(mode);
-        }
-        else
-        {
-            LOGGER_ERROR("Scene does not exist with this identifier name");
-        }
-    }
-
     void SetActiveScene(const std::string& sceneName)
     {
         if (loadedScenes.find(sceneName) != loadedScenes.end())

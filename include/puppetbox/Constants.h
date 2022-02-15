@@ -21,7 +21,9 @@ namespace PB
         */
         enum Mode
         {
-            ORTHO
+            ORTHO,
+            PERSPECTIVE,
+            UI
         };
     }
 

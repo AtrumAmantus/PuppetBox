@@ -29,18 +29,28 @@ namespace PB
 
         /**
         * \brief Set the move vector for the camera that will be used to calculate position changes during
-        * update() calls.
+        * update() calls.  This calculates axis based movement along X, Y, and Z axis, without regard to
+        * camera orientation.
         *
         * \param vector	A vector containing movement values along x, y, and z axis.
         */
         void move(vec3 vector);
 
         /**
+        * \brief Set the move vector for the camera that will be used to calculate position changes during
+        * update() calls.  This calculates direction based movement with X representing left / right,
+         * Y representing up / down, and Z representing forward / backward.
+        *
+        * \param vector	A vector containing directional movement data.
+        */
+        void directionalMove(vec3 vector);
+
+        /**
         * \brief Instantly set the current position of the camera.
         *
         * \param vector	A vector containing position values for x, y, and z axis.
         */
-        void centerOn(vec3 position);
+        void moveTo(vec3 position);
 
         /**
          * \brief Instantly set the current position of the camera to one "near" the target position.
@@ -48,7 +58,7 @@ namespace PB
          * \param position The position the camera should be centered "near".
          * \param offset   The minimum distance the camera can be from the target position.
          */
-        void centerNear(vec3 position, vec3 offset);
+        void moveNear(vec3 position, vec3 offset);
 
         /**
         * \brief Set the rotation of the camera.
@@ -74,12 +84,23 @@ namespace PB
         */
         mat4 calculateViewMatrix(SceneView::Mode mode) const;
 
+        /**
+         * Returns the current position of the camera in X, Y, and Z coordinate values.
+         *
+         * \return The position of the camera in X, Y, and Z coordinate values.
+         */
+        vec3 getPosition() const;
+
     private:
         vec3 position_{};
-        vec3 direction_{};
-        vec3 up_{};
-        vec3 right_{};
+        vec3 pyr_{};
+        vec3 back_{0, 0, 1};
+        vec3 up_{0, 1, 0};
+        vec3 right_{1, 0, 0};
         vec3 moveVector_{};
+        vec3 directionalMoveVector_{};
+        float panSpeed_ = 5.0f;
+        float zoomSpeed_ = 1.0f;
         float currentZoom_ = 100.0f;
         float targetZoom_ = 100.0f;
         float minZoom_ = 50.0f;

@@ -4,8 +4,12 @@
 
 #include "puppetbox/DataStructures.h"
 
+#define PI 3.1415926
+
 namespace PB::GfxMath
 {
+    const float RADS_PER_DEGREE = PI / 180;
+
     /**
     * \brief Compares two vec2 objects to see if they are "basically" equal.  Comparisons use a
     * defined threshold for equality.
@@ -48,6 +52,17 @@ namespace PB::GfxMath
     * \return The dot product of the two vectors.
     */
     float Dot(vec3 v1, vec3 v2);
+
+    /**
+     * \brief Calculates the cross products of the given vectors, which will produce
+     * a new vector perpendicular to both given vectors.
+     *
+     * \param v1 The first vector.
+     * \param v2 The second vector.
+     * \return Returns the cross product of the vectors, resulting in a vector
+     * perpendicular to the two given vectors.
+     */
+    vec3 Cross(vec3 v1, vec3 v2);
 
     /**
     * \brief Normalizes the vector.

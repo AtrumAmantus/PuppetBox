@@ -1,10 +1,6 @@
 root:
   mesh:
     type: sprite
-    offset:
-      x: 0
-      y: 0
-      z: 0
     scale:
       x: 32
       y: 32
@@ -14,12 +10,9 @@ root:
       offset:
         x: 0
         y: 16
-        z: -1
+        z: 1
       mesh:
         type: sprite
-        offset:
-          x: 0
-          y: 0
         scale:
           x: 32
           y: 32
@@ -28,14 +21,11 @@ root:
       offset:
         x: 16
         y: 0
-        z: -2
+        z: 2
       rotation:
         z: 5
       mesh:
         type: sprite
-        offset:
-          x: 0
-          y: 0
         scale:
           x: 16
           y: 16
@@ -44,14 +34,11 @@ root:
       offset:
         x: -16
         y: 0
-        z: -2
+        z: 2
       rotation:
         z: -5
       mesh:
         type: sprite
-        offset:
-          x: 0
-          y: 0
         scale:
           x: 16
           y: 16
@@ -59,4 +46,4 @@ root:
       children:
         weapon_attach_right:
           offset:
-            z: -1
+            z: 1

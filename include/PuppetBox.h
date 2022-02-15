@@ -27,14 +27,6 @@ namespace PB
     extern PUPPET_BOX_API void CreateScene(const std::string& sceneName);
 
     /**
-    * \brief Set the camera mode for the scene associated to the given reference.
-    *
-    * \param sceneName	The reference name of the scene to affect.
-    * \param mode		The camera mode to apply to the referenced scene.
-    */
-    extern PUPPET_BOX_API void SetSceneCameraMode(const std::string& sceneName, SceneView::Mode mode);
-
-    /**
      * \brief Set the currently active scene
      *
      * \param sceneName The name referencing the specified scene
