@@ -125,7 +125,7 @@ namespace PB
     /**
     * \brief Common interface to be used by app logic for checking and loading hardware input state.
     */
-    class PUPPET_BOX_API AbstractInputProcessor
+    class PUPPET_BOX_API AbstractInputReader
     {
     public:
         KeyboardInput keyboard;

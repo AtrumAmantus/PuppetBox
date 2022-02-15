@@ -2,8 +2,8 @@
 
 namespace PB
 {
-    AbstractSceneHandler::AbstractSceneHandler(AbstractInputProcessor* inputProcessor, SceneView::Mode mode)
-            : inputProcessor_(inputProcessor), viewMode_(mode)
+    AbstractSceneHandler::AbstractSceneHandler(AbstractInputReader* inputReader, SceneView::Mode mode)
+            : inputReader_(inputReader), viewMode_(mode)
     {
 
     }
@@ -92,9 +92,9 @@ namespace PB
         processInputs();
     }
 
-    AbstractInputProcessor* AbstractSceneHandler::input() const
+    AbstractInputReader* AbstractSceneHandler::input() const
     {
-        return inputProcessor_;
+        return inputReader_;
     }
 
     void AbstractSceneHandler::processInputs()

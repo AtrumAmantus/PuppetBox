@@ -29,8 +29,8 @@ namespace PB
         *
         * \return The unique name this scene should be referenced by later.
         */
-        SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputProcessor* inputProcessor)
-                : id_(std::move(sceneName)), gfxApi_(gfxApi), inputProcessor_(inputProcessor)
+        SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputReader* inputReader)
+                : id_(std::move(sceneName)), gfxApi_(gfxApi), inputReader_(inputReader)
         {
             camera_ = Camera{std::make_unique<RenderWindowImplementation>(gfxApi_)};
         };
@@ -47,7 +47,7 @@ namespace PB
                 sceneHandler_->setCamera(nullptr);
             }
 
-            *sceneHandler = AbstractSceneHandler{inputProcessor_, SceneView::ORTHO};
+            *sceneHandler = AbstractSceneHandler{inputReader_, SceneView::ORTHO};
             sceneHandler_ = sceneHandler;
             sceneHandler_->setCamera(&camera_);
             sceneHandler_->setUp();
@@ -105,7 +105,7 @@ namespace PB
         std::string id_;
         Camera camera_{nullptr};
         IGfxApi* gfxApi_;
-        AbstractInputProcessor* inputProcessor_;
+        AbstractInputReader* inputReader_;
         AbstractSceneHandler* sceneHandler_ = nullptr;
     };
 }

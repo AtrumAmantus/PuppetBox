@@ -1,4 +1,4 @@
-#include "puppetbox/AbstractInputProcessor.h"
+#include "puppetbox/AbstractInputReader.h"
 
 #define KEY_IS_DOWN    1
 

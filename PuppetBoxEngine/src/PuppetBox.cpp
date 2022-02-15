@@ -10,7 +10,7 @@
 #include "FontLoader.h"
 #include "OpenGLGfxApi.h"
 #include "Sdl2Initializer.h"
-#include "Sdl2InputProcessor.h"
+#include "Sdl2InputReader.h"
 #include "UIComponents.h"
 
 namespace PB
@@ -19,7 +19,7 @@ namespace PB
     {
         // Engine context variables
         std::shared_ptr<IHardwareInitializer> hardwareInitializer{nullptr};
-        std::shared_ptr<AbstractInputProcessor> inputProcessor{nullptr};
+        std::shared_ptr<AbstractInputReader> inputReader{nullptr};
         std::shared_ptr<IGfxApi> gfxApi{nullptr};
         FontLoader fontLoader{nullptr};
         AnimationCatalogue animationCatalogue{nullptr};
@@ -246,11 +246,11 @@ namespace PB
     {
         Init_CharMap();
 
-        std::shared_ptr<IGfxApi> gfxApi_ = defaultGfxApi();
+        gfxApi = defaultGfxApi();
 
         // Create hardware Api instance
-        std::shared_ptr<Sdl2InputProcessor> inputProcessor_ = std::make_shared<Sdl2InputProcessor>();
-        std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi_);
+        inputReader = std::make_shared<Sdl2InputReader>();
+        std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi);
 
 #ifdef _DEBUG
         hardwareInitializer_->enableDebugger();
@@ -260,9 +260,7 @@ namespace PB
         {
             std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
 
-            gfxApi = gfxApi_;
             hardwareInitializer = hardwareInitializer_;
-            inputProcessor = inputProcessor_;
 
             pbInitialized = true;
 
@@ -282,7 +280,7 @@ namespace PB
             else
             {
                 LOGGER_DEBUG("Glyph shader loaded");
-                fontLoader = FontLoader{gfxApi_};
+                fontLoader = FontLoader{gfxApi};
                 LOGGER_DEBUG("FontLoader initialized");
             }
         }
@@ -296,7 +294,7 @@ namespace PB
     {
         if (loadedScenes.find(sceneName) == loadedScenes.end())
         {
-            std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputProcessor));
+            std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputReader));
 
             loadedScenes.insert(
                     std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
@@ -364,7 +362,7 @@ namespace PB
     {
         if (pbInitialized)
         {
-            Engine engine{*gfxApi, *hardwareInitializer, *inputProcessor};
+            Engine engine{*gfxApi, *hardwareInitializer, *inputReader};
 
             engine.setScene(&activeScene());
 

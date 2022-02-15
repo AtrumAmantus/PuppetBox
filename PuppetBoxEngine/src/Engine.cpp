@@ -6,7 +6,7 @@ namespace PB
     {
         hardwareInitializer_.initializeGameTime();
 
-        while (!inputProcessor_.window.windowClose)
+        while (!inputReader_.window.windowClose)
         {
             float deltaTime = hardwareInitializer_.updateElapsedTime();
 
@@ -33,11 +33,11 @@ namespace PB
 
     void Engine::processInput()
     {
-        inputProcessor_.loadCurrentState();
+        inputReader_.loadCurrentState();
 
-        if (inputProcessor_.window.newWidth != 0 || inputProcessor_.window.newHeight != 0)
+        if (inputReader_.window.newWidth != 0 || inputReader_.window.newHeight != 0)
         {
-            gfxApi_.setRenderDimensions(inputProcessor_.window.newWidth, inputProcessor_.window.newHeight);
+            gfxApi_.setRenderDimensions(inputReader_.window.newWidth, inputReader_.window.newHeight);
         }
 
         scene_->processInput();

@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "AbstractInputProcessor.h"
+#include "AbstractInputReader.h"
 #include "Camera.h"
 #include "SceneObject.h"
 #include "TypeDef.h"
@@ -18,7 +18,7 @@ namespace PB
     public:
         AbstractSceneHandler() = default;
 
-        explicit AbstractSceneHandler(AbstractInputProcessor* inputProcessor, SceneView::Mode mode);
+        AbstractSceneHandler(AbstractInputReader* inputReader, SceneView::Mode mode);
 
         /**
         * \brief Runs only once, when the scene first loads
@@ -73,7 +73,7 @@ namespace PB
          *
          * \return Pointer to the current input processor holding input state.
          */
-        AbstractInputProcessor* input() const;
+        AbstractInputReader* input() const;
 
         /**
          * \brief Defined by child class for additional customized input processing.
@@ -114,7 +114,7 @@ namespace PB
         void setViewMode(SceneView::Mode mode);
 
     private:
-        AbstractInputProcessor* inputProcessor_ = nullptr;
+        AbstractInputReader* inputReader_ = nullptr;
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         std::unordered_map<std::string, SceneObject*> sceneObjects_{};
         Camera* camera_ = nullptr;

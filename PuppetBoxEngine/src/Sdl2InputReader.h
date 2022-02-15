@@ -2,16 +2,16 @@
 
 #include <sdl2/SDL.h>
 
-#include "puppetbox/AbstractInputProcessor.h"
+#include "puppetbox/AbstractInputReader.h"
 #include "puppetbox/KeyCode.h"
 #include "Logger.h"
 
 namespace PB
 {
     /**
-    * \brief SDL2 specific InputProcessor implementation for reading hardware input.
+    * \brief SDL2 specific {\link AbstractInputReader} implementation for reading hardware input.
     */
-    class Sdl2InputProcessor : public AbstractInputProcessor
+    class Sdl2InputReader : public AbstractInputReader
     {
     public:
         /**

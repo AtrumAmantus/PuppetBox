@@ -26,7 +26,7 @@ namespace
 {
     float timeSinceFpsCheck = 0.0f;
 
-    std::uint32_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
+    inline std::uint32_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
     {
         float sum = 0;
 

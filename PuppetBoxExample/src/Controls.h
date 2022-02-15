@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <puppetbox/AbstractInputProcessor.h>
+#include <puppetbox/AbstractInputReader.h>
 
 class Controls
 {
@@ -20,7 +20,7 @@ public:
         QUIT,
     };
 public:
-    Controls(PB::AbstractInputProcessor* input) : input_(input) {};
+    Controls(PB::AbstractInputReader* inputReader) : inputReader_(inputReader) {};
 
     bool isCommandActive(Command commandName)
     {
@@ -32,7 +32,7 @@ public:
 
             for (std::size_t i = 0; !isStarted && i < vec.size(); ++i)
             {
-                isStarted = input_->keyboard.isDown(vec.at(i));
+                isStarted = inputReader_->keyboard.isDown(vec.at(i));
             }
         }
 
@@ -49,7 +49,7 @@ public:
 
             for (std::size_t i = 0; !isStarted && i < vec.size(); ++i)
             {
-                isStarted = input_->keyboard.isReleased(vec.at(i));
+                isStarted = inputReader_->keyboard.isReleased(vec.at(i));
             }
         }
 
@@ -91,8 +91,8 @@ public:
     };
 
 private:
-    PB::AbstractInputProcessor* input_;
-    std::unordered_map<Command, std::vector<std::int8_t>> bindings_;
+    PB::AbstractInputReader* inputReader_ = nullptr;
+    std::unordered_map<Command, std::vector<std::int8_t>> bindings_{};
 private:
     float zoomSpeed_ = 1.0f;
     float panSpeed_ = 1.0f;
