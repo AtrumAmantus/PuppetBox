@@ -8,9 +8,9 @@ namespace PB
 
     }
 
-    void AbstractSceneHandler::setUp()
+    bool AbstractSceneHandler::setUp()
     {
-
+        return true;
     }
 
     void AbstractSceneHandler::update(const float deltaTime)

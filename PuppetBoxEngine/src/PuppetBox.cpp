@@ -84,24 +84,6 @@ namespace PB
         }
 
         /**
-        * \brief Helper function that converts publicly exposed enum to private one.
-        *
-        * \param type	The publicly exposed asset type enum.
-        *
-        * \return The private, inner asset type enum.
-        */
-        Asset::Type convertToAssetType(LibraryAsset::Type type)
-        {
-            switch (type)
-            {
-                case LibraryAsset::Type::MODEL_2D:
-                    return Asset::Type::MODEL_2D;
-                default:
-                    return Asset::Type::UNKNOWN;
-            }
-        }
-
-        /**
         * \brief Initializes the char map with the desired mappings of arbitrary key codes to specific ascii characters.
         */
         void Init_CharMap()
@@ -318,9 +300,9 @@ namespace PB
         }
     }
 
-    void SetSceneHandler(AbstractSceneHandler* sceneHandler)
+    bool SetSceneHandler(AbstractSceneHandler* sceneHandler)
     {
-        activeScene().setSceneHandler(sceneHandler);
+        return activeScene().setSceneHandler(sceneHandler);
     }
 
     bool LoadAssetPack(const std::string& archiveName)
@@ -335,7 +317,7 @@ namespace PB
         return !error;
     }
 
-    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type)
+    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject)
     {
         bool success;
 
@@ -346,7 +328,7 @@ namespace PB
         }
         else
         {
-            success = assetLibrary->loadModelAsset(assetPath, sceneObject, convertToAssetType(type));
+            success = assetLibrary->loadSceneObject(assetPath, sceneObject);
             sceneObject->setAnimationCatalogue(&animationCatalogue);
         }
 

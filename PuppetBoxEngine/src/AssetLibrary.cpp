@@ -140,25 +140,6 @@ namespace PB
         return !error;
     }
 
-    bool AssetLibrary::loadModelAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type)
-    {
-        bool error = false;
-
-        switch (type)
-        {
-            case Asset::Type::MODEL_2D:
-                if (!load2DSceneObject(assetPath, sceneObject))
-                {
-                    LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
-                }
-                break;
-            default:
-                LOGGER_ERROR("Can not load asset '" + assetPath + "' of undefined type");
-        }
-
-        return !error;
-    }
-
     Shader AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
     {
         Shader shader{assetPath};
@@ -452,17 +433,17 @@ namespace PB
         return material;
     }
 
-    ModelData2D AssetLibrary::loadModelData2DAsset(const std::string& assetPath, bool* error)
+    ModelData AssetLibrary::loadModelDataAsset(const std::string& assetPath, bool* error)
     {
-        ModelData2D data;
+        ModelData data;
 
-        if (loadedModelData2D_.find(assetPath) == loadedModelData2D_.end())
+        if (loadedModelData_.find(assetPath) == loadedModelData_.end())
         {
             AssetStruct asset = parseAssetPath(assetPath, error);
 
             if (!*error)
             {
-                data = assetArchives_.at(asset.archiveName).load2DModelAsset(asset.assetName, error);
+                data = assetArchives_.at(asset.archiveName).loadModelAsset(asset.assetName, error);
             }
             else
             {
@@ -471,17 +452,17 @@ namespace PB
         }
         else
         {
-            data = loadedModelData2D_.at(assetPath);
+            data = loadedModelData_.at(assetPath);
         }
 
         return data;
     }
 
-    bool AssetLibrary::load2DSceneObject(const std::string& assetPath, SceneObject* sceneObject)
+    bool AssetLibrary::loadSceneObject(const std::string& assetPath, SceneObject* sceneObject)
     {
         bool error = false;
 
-        ModelData2D modelData2D = loadModelData2DAsset(assetPath, &error);
+        ModelData modelData = loadModelDataAsset(assetPath, &error);
 
         if (!error)
         {
@@ -489,7 +470,7 @@ namespace PB
 
             std::unordered_map<std::string, RenderedMesh*> meshes{};
             std::unordered_map<std::string, BoneMap> bones{};
-            error = !buildMeshAndBones(modelData2D, "", 0, bones, meshes);
+            error = !buildMeshAndBones(modelData, "", 0, bones, meshes);
 
             if (!error)
             {
@@ -527,7 +508,7 @@ namespace PB
     }
 
     bool AssetLibrary::buildMeshAndBones(
-            ModelData2D modelData,
+            ModelData modelData,
             std::string parent,
             std::uint32_t depth,
             std::unordered_map<std::string, BoneMap>& bones,
@@ -562,52 +543,55 @@ namespace PB
                 std::pair<std::string, BoneMap>{modelData.name, boneMap}
         );
 
-        if (modelData.mesh.type != UNDEFINED)
+        if (!modelData.mesh.dataPath.empty())
         {
-            Mesh mesh = loadMeshAsset("Assets1/Mesh/Sprite", &error);
+            Mesh mesh = loadMeshAsset(modelData.mesh.dataPath, &error);
 
             if (!error)
             {
-                Material material = loadMaterialAsset(modelData.mesh.materialPath, &error);
-
-                if (!error)
+                if (!modelData.mesh.materialPath.empty())
                 {
-                    material.shader = loadShaderAsset(material.shaderId, &error);
+                    Material material = loadMaterialAsset(modelData.mesh.materialPath, &error);
 
                     if (!error)
                     {
-                        mesh.scale = vec3{modelData.mesh.scale.x, modelData.mesh.scale.y,
-                                          modelData.mesh.scale.z};
-                        mesh.offset = vec3{modelData.mesh.offset.x, modelData.mesh.offset.y,
-                                           modelData.mesh.offset.z};
+                        material.shader = loadShaderAsset(material.shaderId, &error);
 
-                        mat4 meshOffset = mat4::eye();
-                        meshOffset[3] = vec4{mesh.offset.x, mesh.offset.y, mesh.offset.z, 1.0f};
-                        mat4 meshScale = mat4::eye();
-                        meshScale[0][0] = mesh.scale.x;
-                        meshScale[1][1] = mesh.scale.y;
-                        meshScale[2][2] = mesh.scale.z;
+                        if (!error)
+                        {
+                            mesh.scale = vec3{modelData.mesh.scale.x, modelData.mesh.scale.y,
+                                              modelData.mesh.scale.z};
+                            mesh.offset = vec3{modelData.mesh.offset.x, modelData.mesh.offset.y,
+                                               modelData.mesh.offset.z};
 
-                        mesh.transform = meshOffset * meshScale;
+                            mat4 meshOffset = mat4::eye();
+                            meshOffset[3] = vec4{mesh.offset.x, mesh.offset.y, mesh.offset.z, 1.0f};
+                            mat4 meshScale = mat4::eye();
+                            meshScale[0][0] = mesh.scale.x;
+                            meshScale[1][1] = mesh.scale.y;
+                            meshScale[2][2] = mesh.scale.z;
 
-                        meshes.insert(
-                                std::pair<std::string, RenderedMesh*>{modelData.name,
-                                                                      new Rendered2DMesh(mesh, material)}
-                        );
+                            mesh.transform = meshOffset * meshScale;
+
+                            meshes.insert(
+                                    std::pair<std::string, RenderedMesh*>{modelData.name,
+                                                                          new Rendered2DMesh(mesh, material)}
+                            );
+                        }
+                        else
+                        {
+                            LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset");
+                        }
                     }
                     else
                     {
-                        LOGGER_ERROR("Could not load shader '" + material.shaderId + "' for model asset");
+                        LOGGER_ERROR("Could not load material '" + modelData.mesh.materialPath + "' for model asset");
                     }
-                }
-                else
-                {
-                    LOGGER_ERROR("Could not load material '" + modelData.mesh.materialPath + "' for model asset");
                 }
             }
             else
             {
-                LOGGER_ERROR("Could not load mesh 'sprite' for model asset");
+                LOGGER_ERROR("Could not load mesh '" + modelData.mesh.dataPath + "' for model asset");
             }
         }
 

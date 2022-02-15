@@ -44,7 +44,7 @@ namespace
 class CustomSceneHandler : public PB::AbstractSceneHandler
 {
 public:
-    void setUp() override
+    bool setUp() override
     {
         setViewMode(PB::SceneView::ORTHO);
 
@@ -63,8 +63,6 @@ public:
         controls_.setPanSpeed(200.0f);
         controls_.setZoomSpeed(2.0f);
 
-        auto* myEntity = new Entity{};
-
         if (!PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
         {
             std::cout << "Failed to load animation pack" << std::endl;
@@ -74,29 +72,29 @@ public:
 
         getCamera().moveTo({0.0f, 0.0f, 0.0f});
 
-        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", myEntity, PB::LibraryAsset::Type::MODEL_2D))
-        {
-            myEntity->name = "Fred";
-            myEntity->position = PB::vec3{150.0f, 50.0f, -50.0f};
-//            myEntity->setBehavior(PB::AI::Behavior::WANDER);
-            addSceneObject(myEntity);
-        }
+        player = new Entity{};
 
-        player = myEntity;
+        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", player))
+        {
+            player->name = "Fred";
+            player->position = PB::vec3{150.0f, 50.0f, -50.0f};
+//            myEntity->setBehavior(PB::AI::Behavior::WANDER);
+            addSceneObject(player);
+        }
 
         auto* weapon = new Entity();
 
-        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon, PB::LibraryAsset::Type::MODEL_2D))
+        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
         {
             weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
-            weapon->attachTo(myEntity, "weapon_attach_right");
+            weapon->attachTo(player, "weapon_attach_right");
         }
 
         auto* chain = new Entity();
 
-        if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain, PB::LibraryAsset::Type::MODEL_2D))
+        if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain))
         {
             chain->name = "chain";
             chain->position = {0.0f, 0.0f, -40.0f};
@@ -173,6 +171,8 @@ public:
 
             uiController_.addComponent(fpsCounter, FPS_BOX);
         }
+
+        return !error;
     }
 
 protected:
@@ -216,6 +216,72 @@ protected:
             else if (input == "/perspective" || input == "/persp")
             {
                 setViewMode(PB::SceneView::PERSPECTIVE);
+            }
+            else if (input == "/play walk")
+            {
+                player->playAnimation(Constants::Animation::kWalk, 0);
+            }
+            else if (input == "/play idle0")
+            {
+                player->playAnimation(Constants::Animation::kIdle0, 0);
+            }
+            else if (input == "/stop")
+            {
+                player->stopAnimation();
+            }
+            else if (input.substr(0, 5) == "/bone")
+            {
+                std::uint32_t i = 6;
+                std::string boneName = "";
+
+                PB::vec3 rotation{};
+
+                while (i < input.size() && input.c_str()[i] != ' ')
+                {
+                    boneName += input.c_str()[i++];
+                }
+
+                i++;
+
+                std::string value = "";
+
+                while(i < input.size() && input.c_str()[i] != ' ')
+                {
+                    value += input.c_str()[i++];
+                }
+
+                i++;
+
+                if (!value.empty())
+                {
+                    rotation.x = std::stof(value);
+                    value = "";
+
+                    while(i < input.size() && input.c_str()[i] != ' ')
+                    {
+                        value += input.c_str()[i++];
+                    }
+
+                    i++;
+
+                    if (!value.empty())
+                    {
+                        rotation.y = std::stof(value);
+                        value = "";
+
+                        while(i < input.size() && input.c_str()[i] != ' ')
+                        {
+                            value += input.c_str()[i++];
+                        }
+
+                        if (!value.empty())
+                        {
+                            rotation.z = std::stof(value);
+                        }
+                    }
+                }
+
+                player->rotateBone(boneName, rotation);
             }
         }
         else

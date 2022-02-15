@@ -75,7 +75,7 @@ public:
         zoomSpeed_ = zoomSpeed;
     };
 
-    float getZoomSpeed()
+    float getZoomSpeed() const
     {
         return zoomSpeed_;
     };
@@ -85,7 +85,7 @@ public:
         panSpeed_ = moveSpeed;
     };
 
-    float getPanSpeed()
+    float getPanSpeed() const
     {
         return panSpeed_;
     };

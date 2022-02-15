@@ -95,29 +95,6 @@ namespace PB
         }
 
         /**
-         * \brief Parses a {\link MeshType} from the given property tree node's value.
-         *
-         * \param pTree The property tree node to parse from.
-         * \return The {\link MeshType} parsed from the tree node value.
-         */
-        MeshType meshTypeFromNode(PropertyTree& pTree)
-        {
-            MeshType type;
-
-            if (StringUtils::toLowerCase(pTree.value()) == "sprite")
-            {
-                type = SPRITE;
-            }
-            else
-            {
-                LOGGER_WARN("Unrecognized mesh type specified: '" + pTree.value() + "'");
-                type = UNDEFINED;
-            }
-
-            return type;
-        }
-
-        /**
         * \brief Helper function to map a properties map to a Model2D object.
         *
         * \param properties	The properties map to use to map to a Model2D object.
@@ -125,9 +102,9 @@ namespace PB
         *
         * \return The Model2D object built from the given properties map.
         */
-        ModelData2D mapToModel2D(PropertyTree& rootProperties, bool* error)
+        ModelData mapToModelData(PropertyTree& rootProperties, bool* error)
         {
-            ModelData2D model{};
+            ModelData model{};
 
             auto scaleNode = rootProperties.get("scale");
 
@@ -168,13 +145,18 @@ namespace PB
             {
                 PropertyTree* meshProperties = meshNode.result;
 
-                auto typeNode = meshProperties->get("type");
+                auto dataNode = meshProperties->get("data");
 
-                if (typeNode.hasResult)
+                if (dataNode.hasResult)
                 {
-                    //TODO: Make this not hardcoded.
-                    model.mesh.type = meshTypeFromNode(*typeNode.result);
-                    model.mesh.materialPath = meshProperties->get("material").result->value();
+                    model.mesh.dataPath = dataNode.result->value();
+                }
+
+                auto materialNode = meshProperties->get("material");
+
+                if (materialNode.hasResult)
+                {
+                    model.mesh.materialPath = materialNode.result->value();
 
                     auto meshOffsetNode = meshProperties->get("offset");
 
@@ -182,9 +164,15 @@ namespace PB
                     {
                         PropertyTree* meshOffsetProperties = meshOffsetNode.result;
 
-                        model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties, error).orElse(0.0f);
-                        model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties, error).orElse(0.0f);
-                        model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties, error).orElse(0.0f);
+                        model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties,
+                                                                            error).orElse(
+                                0.0f);
+                        model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties,
+                                                                            error).orElse(
+                                0.0f);
+                        model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties,
+                                                                            error).orElse(
+                                0.0f);
                     }
 
                     auto meshScaleNode = meshProperties->get("scale");
@@ -193,14 +181,20 @@ namespace PB
                     {
                         PropertyTree* meshScaleProperties = meshScaleNode.result;
 
-                        model.mesh.scale.x = getNumericResultAtNode<float>("x", *meshScaleProperties, error).orElse(1.0f);
-                        model.mesh.scale.y = getNumericResultAtNode<float>("y", *meshScaleProperties, error).orElse(1.0f);
-                        model.mesh.scale.z = getNumericResultAtNode<float>("z", *meshScaleProperties, error).orElse(1.0f);
+                        model.mesh.scale.x = getNumericResultAtNode<float>(
+                                "x",
+                                *meshScaleProperties, error).orElse(1.0f);
+                        model.mesh.scale.y = getNumericResultAtNode<float>(
+                                "y",
+                                *meshScaleProperties, error).orElse(1.0f);
+                        model.mesh.scale.z = getNumericResultAtNode<float>(
+                                "z",
+                                *meshScaleProperties, error).orElse(1.0f);
                     }
                 }
-                else {
-                    LOGGER_DEBUG("No mesh type defined, skipping mesh initialization.");
-                    model.mesh.type = UNDEFINED;
+                else
+                {
+                    LOGGER_WARN("No material specified for asset");
                 }
             }
 
@@ -214,7 +208,7 @@ namespace PB
 
                 for (auto& childName: childrenProperties->children())
                 {
-                    ModelData2D child = mapToModel2D(*childrenProperties->get(childName).result, error);
+                    ModelData child = mapToModelData(*childrenProperties->get(childName).result, error);
 
                     model.children[childName] = child;
                 }
@@ -1052,7 +1046,7 @@ namespace PB
         return {};
     }
 
-    ModelData2D AssetArchive::load2DModelAsset(const std::string& assetPath, bool* error)
+    ModelData AssetArchive::loadModelAsset(const std::string& assetPath, bool* error)
     {
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
@@ -1068,13 +1062,13 @@ namespace PB
             delete stream;
             if (!*error)
             {
-                ModelData2D model{};
+                ModelData model{};
 
                 auto rootNode = propertyData.get("root");
 
                 if (rootNode.hasResult)
                 {
-                    model = mapToModel2D(*rootNode.result, error);
+                    model = mapToModelData(*rootNode.result, error);
                 }
                 else
                 {

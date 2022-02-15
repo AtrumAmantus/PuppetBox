@@ -19,15 +19,6 @@
 
 namespace PB
 {
-    namespace Asset
-    {
-        enum Type
-        {
-            UNKNOWN,
-            MODEL_2D
-        };
-    }
-
     class IAnimation;
 
     /**
@@ -59,19 +50,14 @@ namespace PB
         bool loadArchive(const std::string& archiveName);
 
         /**
-        * \brief Attempts to load the given asset into the provided SceneObject.  This logic handles loading the mesh,
-        * textures, animations, etc. for the given SceneObject.
+        * \brief Loads the given scene object with asset data.
         *
-        * The path is a virtual path to the asset, beginning with the actual AssetArchive name.
+        * \param assetPath		Virtual path to the requested asset.
+        * \param sceneObject	The instantiated scene object to load with asset data.
         *
-        * \param assetPath		Virtual path to the asset, beginning with actual AssetArchive name.
-        * \param sceneObject	Pointer to the SceneObject that will be impregnated with the requested asset references.
-        * \param type			The type of asset to be loaded, which will dictate asset loading configurations.  Currently
-        * only supports MODEL_2D.
-        *
-        * \return True if the asset was loaded successfully, False otherwise.
+        * \return True if the scene object was successfully loaded with assets, False otherwise.
         */
-        bool loadModelAsset(const std::string& assetPath, SceneObject* sceneObject, Asset::Type type);
+        bool loadSceneObject(const std::string& assetPath, SceneObject* sceneObject);
 
         /**
         * \brief Loads a Shader asset given by the provided virtual asset path.
@@ -157,7 +143,7 @@ namespace PB
         std::unordered_map<std::string, Mesh> loadedMeshes_{};
         std::unordered_map<std::string, Material> loadedMaterials_{};
         std::unordered_map<std::string, ImageReference> loadedImages_{};
-        std::unordered_map<std::string, ModelData2D> loadedModelData2D_{};
+        std::unordered_map<std::string, ModelData> loadedModelData_{};
         std::unordered_map<std::string, Shader> loadedShaders_{};
         std::unordered_map<std::string, Font> loadedFonts_{};
     private:
@@ -182,20 +168,13 @@ namespace PB
         * \return The loaded ModelData2D object for the respective virtual asset path, or an empty
         * object if an error occurred loading the asset.
         */
-        ModelData2D loadModelData2DAsset(const std::string& assetPath, bool* error);
+        ModelData loadModelDataAsset(const std::string& assetPath, bool* error);
 
-        /**
-        * \brief Loads the given scene object with 2D asset data.
-        *
-        * \param assetPath		Virtual path to the requested asset.
-        * \param sceneObject	The instantiated scene object to load with asset data.
-        *
-        * \return True if the scene object was successfully loaded with assets, False otherwise.
-        */
-        bool load2DSceneObject(const std::string& assetPath, SceneObject* sceneObject);
-
-        bool buildMeshAndBones(ModelData2D modelData, std::string parent, std::uint32_t depth,
-                               std::unordered_map<std::string, BoneMap>& bones,
-                               std::unordered_map<std::string, RenderedMesh*>& meshes);
+        bool buildMeshAndBones(
+                ModelData modelData,
+                std::string parent,
+                std::uint32_t depth,
+                std::unordered_map<std::string, BoneMap>& bones,
+                std::unordered_map<std::string, RenderedMesh*>& meshes);
     };
 }

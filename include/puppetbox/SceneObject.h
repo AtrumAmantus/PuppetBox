@@ -117,6 +117,14 @@ namespace PB
         void render();
 
         /**
+         * \brief Rotates the specified bone to the given rotation values.
+         *
+         * \param boneName The name of the bone to rotate.
+         * \param rotation The specific values to set the bone's rotations to.
+         */
+        void rotateBone(const std::string& boneName, vec3 rotation);
+
+        /**
         * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called
         * immediately after being added to the SceneObject.
         *
@@ -157,6 +165,11 @@ namespace PB
          * \param startFrame    The frame of the animation to start playing at.
          */
         void playAnimation(const std::string& animationPath, std::uint32_t startFrame);
+
+        /**
+         * \brief Removes any currently attached {\link Animator}s from the object.
+         */
+        void stopAnimation();
 
         /**
          * \brief Removes any attached animation with the given path reference.

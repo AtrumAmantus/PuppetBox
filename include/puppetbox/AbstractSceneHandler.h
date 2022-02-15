@@ -23,7 +23,7 @@ namespace PB
         /**
         * \brief Runs only once, when the scene first loads
         */
-        virtual void setUp();
+        virtual bool setUp();
 
         /**
         * \brief Runs once per frame, after input processing, but before rendering.

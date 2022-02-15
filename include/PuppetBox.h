@@ -37,8 +37,9 @@ namespace PB
      * \brief Set a derived scene handler for the active scene
      *
      * \param sceneHandler The derived SceneHandler to facilitate scene events
+     * \returns True if the scene could be set without error, False otherwise.
      */
-    extern PUPPET_BOX_API void SetSceneHandler(AbstractSceneHandler* sceneHandler);
+    extern PUPPET_BOX_API bool SetSceneHandler(AbstractSceneHandler* sceneHandler);
 
     /**
      * \brief Loads a special PuppetBox format asset package to be utilized in the scene
@@ -64,12 +65,10 @@ namespace PB
      *
      * \param assetPath The path to the asset to inject
      * \param sceneObject The SceneObject to inject assets into, must not be a nullptr.
-     * \param type Specifies what type the requested asset is.
      *
      * \return True if the SceneObject was successfully injected with assets, False otherwise.
      */
-    extern PUPPET_BOX_API bool
-    CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, LibraryAsset::Type type);
+    extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject);
 
     /**
      * \brief Loads the animations associated with the given asset path.

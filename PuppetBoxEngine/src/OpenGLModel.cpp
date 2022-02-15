@@ -33,6 +33,11 @@ namespace PB
         }
     }
 
+    void OpenGLModel::stopAnimation()
+    {
+        animator_ = nullptr;
+    }
+
     void OpenGLModel::stopAnimation(const std::string& animationPath)
     {
         if (animator_ && animator_->getAnimationName() == animationPath)
@@ -105,6 +110,14 @@ namespace PB
             itr->second->render(transform, bones, 1);
 
             delete[] bones;
+        }
+    }
+
+    void OpenGLModel::rotateBone(const std::string& boneName, vec3 rotation)
+    {
+        if (bones_.find(boneName) != bones_.end())
+        {
+            bones_.at(boneName).bone.rotation = vec4{rotation.x, rotation.y, rotation.z, 0.0f};
         }
     }
 }

@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "puppetbox/SceneObject.h"
-#include "puppetbox/WanderBehavior.h"
+#include <puppetbox/SceneObject.h>
+#include <puppetbox/WanderBehavior.h>
 
 class Entity : public PB::SceneObject
 {

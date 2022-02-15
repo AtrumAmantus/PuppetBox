@@ -1,6 +1,5 @@
 root:
   mesh:
-    type: sprite
     offset:
       x: -10
       y: 0
@@ -9,6 +8,7 @@ root:
       x: 40
       y: 25
     material: Assets1/Materials/Chain-Open
+    data: Assets1/Mesh/Sprite
   children:
     linka:
       offset:
@@ -18,7 +18,6 @@ root:
       rotation:
         z: 10
       mesh:
-        type: sprite
         offset:
           x: -15
           y: 0
@@ -26,6 +25,7 @@ root:
           x: 40
           y: 10
         material: Assets1/Materials/Chain-Closed
+        data: Assets1/Mesh/Sprite
       children:
         linkb:
           offset:
@@ -35,7 +35,6 @@ root:
           rotation:
             z: 10
           mesh:
-            type: sprite
             offset:
               x: -15
               y: 0
@@ -43,6 +42,7 @@ root:
               x: 40
               y: 25
             material: Assets1/Materials/Chain-Open
+            data: Assets1/Mesh/Sprite
           children:
             linkc:
               offset:
@@ -52,7 +52,6 @@ root:
               rotation:
                 z: 10
               mesh:
-                type: sprite
                 offset:
                   x: -15
                   y: 0
@@ -60,6 +59,7 @@ root:
                   x: 40
                   y: 10
                 material: Assets1/Materials/Chain-Closed
+                data: Assets1/Mesh/Sprite
               children:
                 linkd:
                   offset:
@@ -69,7 +69,6 @@ root:
                   rotation:
                     z: 10
                   mesh:
-                    type: sprite
                     offset:
                       x: -15
                       y: 0
@@ -77,3 +76,4 @@ root:
                       x: 40
                       y: 25
                     material: Assets1/Materials/Chain-Open
+                    data: Assets1/Mesh/Sprite

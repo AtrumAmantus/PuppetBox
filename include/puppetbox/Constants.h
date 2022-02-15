@@ -2,18 +2,6 @@
 
 namespace PB
 {
-    namespace LibraryAsset
-    {
-        /**
-        * \brief The publicly exposed Asset types to be used by consuming application to indicate
-        * desired asset types to be loaded.
-        */
-        enum Type
-        {
-            MODEL_2D
-        };
-    }
-
     namespace SceneView
     {
         /**

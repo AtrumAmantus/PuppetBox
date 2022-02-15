@@ -41,6 +41,11 @@ namespace PB
         void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
 
         /**
+         * \brief Removes any currently attached {\link Animator}s from the object.
+         */
+        void stopAnimation() override;
+
+        /**
          * \brief Removes any attached animators with the given animation path reference.
          *
          * \param animationPath The path reference to remove animators by.
@@ -74,6 +79,14 @@ namespace PB
         * \brief Renders the object with OpenGL specific invocations.
         */
         void render(mat4 transform) const override;
+
+        /**
+         * \brief Rotates the specified bone to the given rotation values.
+         *
+         * \param boneName The name of the bone to rotate.
+         * \param rotation The specific values to set the bone's rotations to.
+         */
+        void rotateBone(const std::string& boneName, vec3 rotation) override;
 
     private:
         std::unordered_map<std::string, BoneMap> bones_{};

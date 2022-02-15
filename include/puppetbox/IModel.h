@@ -22,6 +22,11 @@ namespace PB
         virtual void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) = 0;
 
         /**
+         * \brief Removes any currently attached {\link Animator}s from the object.
+         */
+        virtual void stopAnimation() = 0;
+
+        /**
          * \brief Removes any attached animators that reference the given animation path.
          *
          * \param animationPath The path reference that dictates which animators will be removed.
@@ -57,5 +62,13 @@ namespace PB
         * the derived implementation.
         */
         virtual void render(mat4 transform) const = 0;
+
+        /**
+         * \brief Rotates the specified bone to the given rotation values.
+         *
+         * \param boneName The name of the bone to rotate.
+         * \param rotation The specific values to set the bone's rotations to.
+         */
+        virtual void rotateBone(const std::string& boneName, vec3 rotation) = 0;
     };
 }

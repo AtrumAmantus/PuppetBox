@@ -40,7 +40,7 @@ namespace PB
         *
         * \param sceneHandler	The SceneHandler to be used for the scene.
         */
-        void setSceneHandler(AbstractSceneHandler* sceneHandler)
+        bool setSceneHandler(AbstractSceneHandler* sceneHandler)
         {
             if (sceneHandler_ != nullptr)
             {
@@ -50,7 +50,7 @@ namespace PB
             *sceneHandler = AbstractSceneHandler{inputReader_, SceneView::ORTHO};
             sceneHandler_ = sceneHandler;
             sceneHandler_->setCamera(&camera_);
-            sceneHandler_->setUp();
+            return sceneHandler_->setUp();
         };
 
         /**

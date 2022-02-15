@@ -19,31 +19,25 @@
 
 namespace PB
 {
-    enum MeshType
-    {
-        SPRITE,
-        UNDEFINED
-    };
-
     struct MeshData
     {
-        MeshType type = UNDEFINED;
         vec3 offset{0.0f, 0.0f, 0.0f};
         vec3 scale{1.0f, 1.0f, 1.0f};
         std::string materialPath;
+        std::string dataPath;
     };
 
     /**
-    * \brief Struct for holding 2D Model specific data for simple communication between archive & library.
+    * \brief Struct for holding Model data for simple communication between archive & library.
     */
-    struct ModelData2D
+    struct ModelData
     {
         vec3 offset{0.0f, 0.0f, 0.0f};
         vec3 rotation{0.0f, 0.0f, 0.0f};
         vec3 scale{1.0f, 1.0f, 1.0f};
         MeshData mesh{};
         std::string name;
-        std::unordered_map<std::string, ModelData2D> children{};
+        std::unordered_map<std::string, ModelData> children{};
     };
 
     /**
@@ -190,7 +184,7 @@ namespace PB
         *
         * \return A Model2D of the requested asset, or an empty object if an error occurred.
         */
-        ModelData2D load2DModelAsset(const std::string& assetPath, bool* error);
+        ModelData loadModelAsset(const std::string& assetPath, bool* error);
 
     private:
         std::string archiveName_;

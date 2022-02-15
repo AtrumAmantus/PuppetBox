@@ -80,6 +80,14 @@ namespace PB
         isUpdated = false;
     }
 
+    void SceneObject::rotateBone(const std::string& boneName, vec3 rotation)
+    {
+        if (model_ != nullptr)
+        {
+            model_->rotateBone(boneName, rotation);
+        }
+    }
+
     void SceneObject::setBehavior(AI::Behavior behavior)
     {
         switch (behavior)
@@ -112,6 +120,11 @@ namespace PB
     {
         std::unique_ptr<IAnimator> animator = animationPath.empty() ? nullptr : animationCatalogue_->get(animationPath);
         model_->playAnimation(std::move(animator), startFrame);
+    }
+
+    void SceneObject::stopAnimation()
+    {
+        model_->stopAnimation();
     }
 
     void SceneObject::stopAnimation(const std::string& animationPath)
