@@ -28,11 +28,17 @@ namespace PB
         std::string activeSceneId;
         SceneGraph invalidScene{"InvalidScene", nullptr, nullptr};
         bool pbInitialized = false;
+
         /**
-        * \brief Used to map scan codes to actual ascii characters
+        * \brief Used to map scan codes to the actual ascii characters
         * Key: scancode, Value: character
         */
         std::unordered_map<std::uint8_t, std::int8_t> charMap_{};
+        /**
+        * \brief Used to map scan codes to the actual ascii characters if shift was held
+        * Key: scancode, Value: character
+        */
+        std::unordered_map<std::uint8_t, std::int8_t> shiftedCharMap_{};
 
         /**
         * \brief Helper method to insider values into the charMap.
@@ -40,9 +46,16 @@ namespace PB
         * \param k	The scancode for the entry.
         * \param v	The value for the entry.
         */
-        void CharMapInsert(std::uint8_t k, std::uint8_t v)
+        void CharMapInsert(std::uint8_t k, std::uint8_t v, bool shifted = false)
         {
-            charMap_.insert(std::pair<std::uint8_t, std::uint8_t>{k, v});
+            if (shifted)
+            {
+                shiftedCharMap_.insert(std::pair<std::uint8_t, std::uint8_t>{k, v});
+            }
+            else
+            {
+                charMap_.insert(std::pair<std::uint8_t, std::uint8_t>{k, v});
+            }
         }
 
         /**
@@ -127,13 +140,109 @@ namespace PB
             CharMapInsert(KEY_U, 'u');
             CharMapInsert(KEY_V, 'v');
             CharMapInsert(KEY_W, 'w');
-            CharMapInsert(KEY_X, 'y');
-            CharMapInsert(KEY_Y, 'x');
+            CharMapInsert(KEY_X, 'x');
+            CharMapInsert(KEY_Y, 'y');
             CharMapInsert(KEY_Z, 'z');
+
+            CharMapInsert(KEY_SPACE, ' ');
+            CharMapInsert(KEY_MINUS, '-');
+            CharMapInsert(KEY_EQUAL, '=');
+            CharMapInsert(KEY_LEFT_BRACKET, '[');
+            CharMapInsert(KEY_RIGHT_BRACKET, ']');
+            CharMapInsert(KEY_BACKSLASH, '\\');
+            CharMapInsert(KEY_SEMICOLON, ';');
+            CharMapInsert(KEY_APOSTROPHE, '\'');
+            CharMapInsert(KEY_GRAVE_ACCENT, '`');
+            CharMapInsert(KEY_COMMA, ',');
+            CharMapInsert(KEY_PERIOD, '.');
+            CharMapInsert(KEY_SLASH, '/');
+
+            CharMapInsert(KEY_KP_DIVIDE, '/');
+            CharMapInsert(KEY_KP_MULTIPLY, '*');
+            CharMapInsert(KEY_KP_SUBTRACT, '-');
+            CharMapInsert(KEY_KP_ADD, '+');
+            CharMapInsert(KEY_KP_1, '1');
+            CharMapInsert(KEY_KP_2, '2');
+            CharMapInsert(KEY_KP_3, '3');
+            CharMapInsert(KEY_KP_4, '4');
+            CharMapInsert(KEY_KP_5, '5');
+            CharMapInsert(KEY_KP_6, '6');
+            CharMapInsert(KEY_KP_7, '7');
+            CharMapInsert(KEY_KP_8, '8');
+            CharMapInsert(KEY_KP_9, '9');
+            CharMapInsert(KEY_KP_0, '0');
+            CharMapInsert(KEY_KP_DECIMAL, '.');
+
+            CharMapInsert(KEY_1, '!', true);
+            CharMapInsert(KEY_2, '@', true);
+            CharMapInsert(KEY_3, '#', true);
+            CharMapInsert(KEY_4, '$', true);
+            CharMapInsert(KEY_5, '%', true);
+            CharMapInsert(KEY_6, '^', true);
+            CharMapInsert(KEY_7, '&', true);
+            CharMapInsert(KEY_8, '*', true);
+            CharMapInsert(KEY_9, '(', true);
+            CharMapInsert(KEY_0, ')', true);
+
+            CharMapInsert(KEY_A, 'A', true);
+            CharMapInsert(KEY_B, 'B', true);
+            CharMapInsert(KEY_C, 'C', true);
+            CharMapInsert(KEY_D, 'D', true);
+            CharMapInsert(KEY_E, 'E', true);
+            CharMapInsert(KEY_F, 'F', true);
+            CharMapInsert(KEY_G, 'G', true);
+            CharMapInsert(KEY_H, 'H', true);
+            CharMapInsert(KEY_I, 'I', true);
+            CharMapInsert(KEY_J, 'J', true);
+            CharMapInsert(KEY_K, 'K', true);
+            CharMapInsert(KEY_L, 'L', true);
+            CharMapInsert(KEY_M, 'M', true);
+            CharMapInsert(KEY_N, 'N', true);
+            CharMapInsert(KEY_O, 'O', true);
+            CharMapInsert(KEY_P, 'P', true);
+            CharMapInsert(KEY_Q, 'Q', true);
+            CharMapInsert(KEY_R, 'R', true);
+            CharMapInsert(KEY_S, 'S', true);
+            CharMapInsert(KEY_T, 'T', true);
+            CharMapInsert(KEY_U, 'U', true);
+            CharMapInsert(KEY_V, 'V', true);
+            CharMapInsert(KEY_W, 'W', true);
+            CharMapInsert(KEY_X, 'X', true);
+            CharMapInsert(KEY_Y, 'Y', true);
+            CharMapInsert(KEY_Z, 'Z', true);
+
+            CharMapInsert(KEY_SPACE, ' ', true);
+            CharMapInsert(KEY_MINUS, '_', true);
+            CharMapInsert(KEY_EQUAL, '+', true);
+            CharMapInsert(KEY_LEFT_BRACKET, '{', true);
+            CharMapInsert(KEY_RIGHT_BRACKET, '}', true);
+            CharMapInsert(KEY_BACKSLASH, '|', true);
+            CharMapInsert(KEY_SEMICOLON, ':', true);
+            CharMapInsert(KEY_APOSTROPHE, '"', true);
+            CharMapInsert(KEY_GRAVE_ACCENT, '~', true);
+            CharMapInsert(KEY_COMMA, '<', true);
+            CharMapInsert(KEY_PERIOD, '>', true);
+            CharMapInsert(KEY_SLASH, '?', true);
+
+            CharMapInsert(KEY_KP_DIVIDE, '/', true);
+            CharMapInsert(KEY_KP_MULTIPLY, '*', true);
+            CharMapInsert(KEY_KP_SUBTRACT, '-', true);
+            CharMapInsert(KEY_KP_ADD, '+', true);
+            CharMapInsert(KEY_KP_1, '1', true);
+            CharMapInsert(KEY_KP_2, '2', true);
+            CharMapInsert(KEY_KP_3, '3', true);
+            CharMapInsert(KEY_KP_4, '4', true);
+            CharMapInsert(KEY_KP_5, '5', true);
+            CharMapInsert(KEY_KP_6, '6', true);
+            CharMapInsert(KEY_KP_7, '7', true);
+            CharMapInsert(KEY_KP_8, '8', true);
+            CharMapInsert(KEY_KP_9, '9', true);
+            CharMapInsert(KEY_KP_0, '0', true);
+            CharMapInsert(KEY_KP_DECIMAL, '.', true);
         }
     }
 
-    void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight)
+    void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth)
     {
         Init_CharMap();
 
@@ -147,7 +256,7 @@ namespace PB
         hardwareInitializer_->enableDebugger();
 #endif
 
-        if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight))
+        if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight, renderDepth))
         {
             std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
 
@@ -282,12 +391,24 @@ namespace PB
         }
     }
 
-    std::int8_t GetCharFromCode(std::uint8_t code)
+    std::int8_t GetCharFromCode(std::uint8_t code, bool shifted)
     {
-        //TODO: Need a fallback
-        SDL_Keycode k = SDL_GetKeyFromScancode((SDL_Scancode)code);
+        if (shifted)
+        {
+            if (shiftedCharMap_.find(code) != shiftedCharMap_.end())
+            {
+                return shiftedCharMap_.at(code);
+            }
+        }
+        else
+        {
+            if (charMap_.find(code) != charMap_.end())
+            {
+                return charMap_.at(code);
+            }
+        }
 
-        return k;
+        return '\0';
     }
 
     //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
@@ -311,6 +432,11 @@ namespace PB
         }
 
         *error = component == nullptr || !component->init();
+
+        if (*error)
+        {
+            LOGGER_ERROR("Failed to load UI Component");
+        }
 
         return component;
     }

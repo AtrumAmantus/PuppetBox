@@ -61,7 +61,7 @@ namespace PB
         void setCameraMode(SceneView::Mode mode)
         {
             viewMode_ = mode;
-        }
+        };
 
         /**
         * \brief Invokes the update() method of the sceneHandler, allowing updates for various scene
@@ -88,7 +88,15 @@ namespace PB
             );
 
             gfxApi_->setTransformUBOData(view, projection, orthoProjection);
-        }
+        };
+
+        /**
+         * \brief Makes a call to process the current input for the active {@link AbstractSceneHandler}.
+         */
+        void processInput()
+        {
+            sceneHandler_->processInput();
+        };
 
         /**
         * \brief Invokes the render() method of the sceneHandler, rendering out any desired SceneObjects
@@ -97,7 +105,7 @@ namespace PB
         void render() const
         {
             sceneHandler_->render();
-        }
+        };
 
     private:
         std::string id_;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "puppetbox/AbstractBehavior.h"
-#include "puppetbox/DataStructures.h"
-#include "puppetbox/SceneObject.h"
+#include "AbstractBehavior.h"
+#include "DataStructures.h"
+#include "SceneObject.h"
 
 namespace PB
 {

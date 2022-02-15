@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-
 #include <iostream>
 
 #include <glad/glad.h>
@@ -9,7 +8,6 @@
 #include "puppetbox/DataStructures.h"
 
 #include "IGfxApi.h"
-#include "IHardwareInitializer.h"
 #include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Logger.h"
@@ -78,7 +76,7 @@ namespace PB
          * @return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
         bool
-        buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const override;
+        buildCharacterMap(FT_Face face, std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const override;
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load vertex data into GFX memory.

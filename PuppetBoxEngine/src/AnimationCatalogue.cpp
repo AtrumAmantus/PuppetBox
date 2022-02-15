@@ -79,25 +79,45 @@ namespace PB
             std::uint8_t startingPoint = 0;
 
             {
-                auto itr = keyframeIndexes.begin();
-
-                // Find which index in keyframeIndexes we start looking with
-                while (itr < keyframeIndexes.end() && *itr <= currentFrame)
+                if (direction < 0)
                 {
-                    ++startingPoint;
-                    ++itr;
-                }
-            }
+                    auto itr = keyframeIndexes.begin();
 
-            // If startingPoint is still 0, the currentframe is less than every keyframe, so start from the last one
-            if (startingPoint == 0)
-            {
-                startingPoint = keyframeIndexes.size() - 1;
-            }
-            else
-            {
-                // Adjust back one due to prior iteration logic "overshooting"
-                --startingPoint;
+                    // Find which index in keyframeIndexes we start looking with
+                    while (itr < keyframeIndexes.end() && *itr < currentFrame)
+                    {
+                        ++startingPoint;
+                        ++itr;
+                    }
+
+                    // If startingPoint is still 0, the currentframe is less than every keyframe, so start from the last one
+                    if (startingPoint == 0)
+                    {
+                        startingPoint = keyframeIndexes.size() - 1;
+                    }
+                    else
+                    {
+                        // Adjust back one due to prior iteration logic "overshooting"
+                        --startingPoint;
+                    }
+                }
+                else
+                {
+                    startingPoint = keyframeIndexes.size();
+
+                    auto itr = keyframeIndexes.end() - 1;
+
+                    while (itr >= keyframeIndexes.begin() && *itr > currentFrame)
+                    {
+                        --startingPoint;
+                        --itr;
+                    }
+
+                    if (startingPoint == keyframeIndexes.size())
+                    {
+                        startingPoint = 0;
+                    }
+                }
             }
 
             // Now, given the starting point, identify all keyframe indexes to search
@@ -362,7 +382,7 @@ namespace PB
                     // Current bone's offsets were already applied, skip
                     if (bone.name != entry.second.boneName)
                     {
-                        entry.second.transform *= originalKeyframeTransformationMatrixMap.at(bone.name).transform;
+                        entry.second.transform = originalKeyframeTransformationMatrixMap.at(bone.name).transform * entry.second.transform;
                     }
 
                     if (bones.find(bone.parent) != bones.end())

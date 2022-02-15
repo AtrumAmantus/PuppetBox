@@ -1,6 +1,6 @@
 #pragma once
 
-#include "puppetbox/DataStructures.h"
+#include "DataStructures.h"
 #include "SceneObject.h"
 
 namespace PB

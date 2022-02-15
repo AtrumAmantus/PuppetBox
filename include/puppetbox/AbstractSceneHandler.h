@@ -55,6 +55,11 @@ namespace PB
          */
         Camera* getCamera();
 
+        /**
+         * \brief Base engine input processing logic, followed by user defined input processing.
+         */
+        void processInput();
+
     protected:
         /**
          * \brief Provides access to input state to the child class.
@@ -99,10 +104,5 @@ namespace PB
         std::unordered_map<std::string, SceneObject*> sceneObjects_{};
         Camera* camera_ = nullptr;
         Queue<SceneObject*> processLater_{};
-    private:
-        /**
-         * \brief Base engine input processing logic, followed by user defined input processing.
-         */
-        void processInput();
     };
 }

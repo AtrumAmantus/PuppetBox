@@ -47,12 +47,8 @@ namespace PB
         IHardwareInitializer& hardwareInitializer_;
         AbstractInputProcessor& inputProcessor_;
         SceneGraph* scene_ = nullptr;
-    private:
-        /**
-        * \brief The primary game loop.
-        */
-        void loop();
 
+    private:
         /**
         * \brief Handles processing of the hardware input.
         */

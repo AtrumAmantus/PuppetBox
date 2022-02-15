@@ -20,10 +20,11 @@ namespace PB
         * \param windowTitle	The desired title for the window to be created.
         * \param windowWidth	The desired width for the window to be created.
         * \param windowHeight	The desired height for the window to be created.
+        * \param renderDepth    The desired depth for the rendered elements in the window.
         *
         * \return True if the hardware successfully initialized, False otherwise.
         */
-        virtual bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) = 0;
+        virtual bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth) = 0;
 
         /**
         * \brief Releases any allocated resources and cleans up hardware specific library configurations.

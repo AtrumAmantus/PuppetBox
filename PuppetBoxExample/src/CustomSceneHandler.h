@@ -15,7 +15,6 @@
 #include "Constants.h"
 #include "Controls.h"
 #include "Entity.h"
-#include "Sprite.h"
 #include "UIAttributeBuilder.h"
 #include "UIController.h"
 #include "UserInput.h"
@@ -91,6 +90,15 @@ public:
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
             weapon->attachTo(myEntity, "weapon_attach_right");
+        }
+
+        auto* chain = new Entity();
+
+        if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain, PB::LibraryAsset::Type::MODEL_2D))
+        {
+            chain->name = "chain";
+            chain->position = {0.0f, 0.0f, 40.0f};
+            addSceneObject(chain);
         }
 
         bool error = false;
@@ -237,7 +245,7 @@ protected:
 
                 for (auto k : releasedKeys)
                 {
-                    userInput_.append(PB::GetCharFromCode(k));
+                    userInput_.append(PB::GetCharFromCode(k, shiftDown));
                 }
 
                 if (input()->keyboard.isReleased(KEY_BACKSPACE))

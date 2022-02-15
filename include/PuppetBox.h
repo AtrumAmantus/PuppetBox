@@ -17,7 +17,7 @@ namespace PB
      * \param windowWidth The initial width of the window
      * \param windowHeight The initial height of the window
      */
-    extern PUPPET_BOX_API void Init(const std::string& windowTitle, int32_t windowWidth, int32_t windowHeight);
+    extern PUPPET_BOX_API void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth);
 
     /**
      * \brief Create a new scene referenced by the given string
@@ -95,11 +95,13 @@ namespace PB
     /**
     * \brief Helper function for getting the ascii character the given key code represents.
     *
-    * \param code	The arbitrary key code to be maped to an ascii character.
+    * \param code	    The arbitrary key code to be maped to an ascii character.
+    * \param shifted    Indicates if the shift modified version of the chracter is desired.
+    * Defaulted to true.
     *
     * \return The int value for the ascii character the key code represents.
     */
-    extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code);
+    extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code, bool shifted = false);
 
     /**
      * \brief Creates a {\link UIComponent} of the given {\link UI::Type}.

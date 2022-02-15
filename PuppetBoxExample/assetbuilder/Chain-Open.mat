@@ -1,0 +1,7 @@
+diffuse:
+  image: Assets1/Textures/Chain-Open
+  width: 40
+  height: 25
+  xOffset: 0
+  yOffset: 0
+shader: Assets1/Shaders/Basic

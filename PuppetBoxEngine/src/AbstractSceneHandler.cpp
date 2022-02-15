@@ -15,7 +15,6 @@ namespace PB
 
     void AbstractSceneHandler::update(const float deltaTime)
     {
-        processInput();
         camera_->update(deltaTime);
 
         // Update implementing application first in case new objects were added.

@@ -72,7 +72,11 @@ namespace PB
 
     void SceneObject::render()
     {
-        model_->render(transform_);
+        if (model_ != nullptr)
+        {
+            model_->render(transform_);
+        }
+
         isUpdated = false;
     }
 

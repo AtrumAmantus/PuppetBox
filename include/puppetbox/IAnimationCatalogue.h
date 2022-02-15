@@ -1,12 +1,12 @@
 #pragma once
 
-#include "puppetbox/TypeDef.h"
-#include "DataStructures.h"
-
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "DataStructures.h"
+#include "TypeDef.h"
 
 namespace PB
 {

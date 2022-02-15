@@ -131,7 +131,6 @@ namespace PB
                       << std::endl;
             std::cout << "OpenGL Vendor: " << (char*) glGetString(GL_VENDOR) << std::endl;
             std::cout << "OpenGL Renderer: " << (char*) glGetString(GL_RENDERER) << std::endl;
-            std::cout << "Build: Alpha 0.0.1" << std::endl;
 
             glEnable(GL_DEPTH_TEST);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -152,7 +151,7 @@ namespace PB
 
     void OpenGLGfxApi::preLoopCommands() const
     {
-        glViewport(0, 0, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
+        glViewport(0, 0, static_cast<std::int32_t>(width_), static_cast<std::int32_t>(height_));
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -231,7 +230,7 @@ namespace PB
     }
 
     bool
-    OpenGLGfxApi::buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const
+    OpenGLGfxApi::buildCharacterMap(FT_Face face, std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const
     {
         bool success = true;
 
@@ -292,7 +291,7 @@ namespace PB
                 imageReference.requiresAlphaBlending = true;
 
                 loadedCharacters.insert(
-                        std::pair<int8_t, TypeCharacter>{
+                        std::pair<std::int8_t, TypeCharacter>{
                                 c,
                                 TypeCharacter{
                                         imageReference,
@@ -395,7 +394,7 @@ namespace PB
         glBindVertexArray(0);
 
         // TODO: Hardcoded to only support EBO, revisit this? reason?
-        mesh.drawCount = static_cast<int32_t>(indices.size());
+        mesh.drawCount = static_cast<std::int32_t>(indices.size());
 
         return mesh;
     }

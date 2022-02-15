@@ -63,7 +63,7 @@ namespace PB
             return (&x)[i];
         }
 
-        ivec2 operator*(const int32_t& scalar) const
+        ivec2 operator*(const std::int32_t& scalar) const
         {
             return {
                     this->x * scalar,
@@ -757,8 +757,8 @@ namespace PB
     struct DoubleLinkedNode
     {
         T value;
-        DoubleLinkedNode* next;
-        DoubleLinkedNode* prev;
+        DoubleLinkedNode* next = nullptr;
+        DoubleLinkedNode* prev = nullptr;
     };
 
     template <typename T>
@@ -769,7 +769,7 @@ namespace PB
         {
             DoubleLinkedNode<T>* node = new DoubleLinkedNode<T>{item};
 
-            if (tail_ == nullptr)
+            if (head_ == nullptr)
             {
                 tail_ = node;
                 head_ = tail_;

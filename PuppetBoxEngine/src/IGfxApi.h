@@ -9,11 +9,11 @@
 #include "puppetbox/DataStructures.h"
 
 #include "Font.h"
-#include "IHardwareInitializer.h"
 #include "ImageData.h"
 #include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Mesh.h"
+#include "TypeDef.h"
 
 namespace PB
 {

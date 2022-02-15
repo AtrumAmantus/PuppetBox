@@ -1,9 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "DataStructures.h"
 #include "IAnimationCatalogue.h"
-
-#include <vector>
 
 namespace PB
 {

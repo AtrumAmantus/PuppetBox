@@ -4,7 +4,21 @@ namespace PB
 {
     void Engine::run()
     {
-        loop();
+        hardwareInitializer_.initializeGameTime();
+
+        while (!inputProcessor_.window.windowClose)
+        {
+            float deltaTime = hardwareInitializer_.updateElapsedTime();
+
+            processInput();
+
+            gfxApi_.preLoopCommands();
+
+            scene_->update(deltaTime);
+            scene_->render();
+
+            hardwareInitializer_.postLoopCommands();
+        }
     }
 
     void Engine::shutdown()
@@ -17,24 +31,6 @@ namespace PB
         scene_ = scene;
     }
 
-    void Engine::loop()
-    {
-        hardwareInitializer_.initializeGameTime();
-        while (!inputProcessor_.window.windowClose)
-        {
-            float deltaTime = hardwareInitializer_.updateElapsedTime();
-
-            gfxApi_.preLoopCommands();
-
-            processInput();
-
-            scene_->update(deltaTime);
-            scene_->render();
-
-            hardwareInitializer_.postLoopCommands();
-        }
-    }
-
     void Engine::processInput()
     {
         inputProcessor_.loadCurrentState();
@@ -43,5 +39,7 @@ namespace PB
         {
             gfxApi_.setRenderDimensions(inputProcessor_.window.newWidth, inputProcessor_.window.newHeight);
         }
+
+        scene_->processInput();
     }
 }

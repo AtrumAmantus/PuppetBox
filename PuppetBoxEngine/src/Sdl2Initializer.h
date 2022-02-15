@@ -37,8 +37,15 @@ namespace PB
         *
         * \return True if the hardware successfully initialized, False otherwise.
         */
-        bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight) override
+        bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth) override
         {
+#ifdef _DEBUG
+            std::cout << "Build: Debug" << std::endl;
+#endif
+#ifdef PB_BUILD_VERSION
+            auto version = PB_BUILD_VERSION;
+            std::cout << "Version: " << version << std::endl;
+#endif
             bool error = false;
 
             if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
@@ -68,6 +75,7 @@ namespace PB
                     if (glContext != nullptr)
                     {
                         SDL_GL_MakeCurrent(window_, glContext);
+                        SDL_GL_SetSwapInterval(0);
                     }
                     else
                     {
@@ -90,7 +98,7 @@ namespace PB
             if (!error)
             {
                 gfxApi_.setRenderDimensions(windowWidth, windowHeight);
-                gfxApi_.setRenderDistance(1000);
+                gfxApi_.setRenderDistance(renderDepth);
 
                 if (gfxApi_.init(SDL_GL_GetProcAddress))
                 {

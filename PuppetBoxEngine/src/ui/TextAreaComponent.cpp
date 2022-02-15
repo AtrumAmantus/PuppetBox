@@ -14,6 +14,12 @@ namespace PB
     {
         bool error = false;
         shader_ = library()->loadShaderAsset("Assets1/Shaders/UI/Glyph", &error);
+
+        if (error)
+        {
+            LOGGER_ERROR("Failed to load shader asset 'Assets1/Shaders/UI/Glyph'");
+        }
+
         return !error;
     }
 

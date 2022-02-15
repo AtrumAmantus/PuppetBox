@@ -84,7 +84,7 @@ namespace PB
 
                 while (!parentName.empty())
                 {
-                    transform *= bones_.at(parentName).bone.transform;
+                    transform = bones_.at(parentName).bone.transform * transform;
                     parentName = bones_.at(parentName).parent;
                 }
 
