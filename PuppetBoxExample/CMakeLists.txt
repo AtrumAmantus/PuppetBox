@@ -19,7 +19,13 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${PUBLIC_HEADER_F
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(SDL_FILENAME SDL2d)
+else()
+    set(SDL_FILENAME SDL2)
+endif()
+
 add_custom_command(TARGET ${PROJECT_NAME}
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${DEP_DLIBRARY_DIR}/SDL2.dll
+        ${DEP_DLIBRARY_DIR}/${SDL_FILENAME}.dll
         ${OUTPUT_DIR})
