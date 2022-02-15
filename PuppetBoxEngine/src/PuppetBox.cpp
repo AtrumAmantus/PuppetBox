@@ -18,7 +18,7 @@ namespace PB
     namespace
     {
         // Engine context variables
-        std::shared_ptr<IHardwareInitializer> hardwareInitializer{nullptr};
+        Sdl2Initializer hardwareInitializer{nullptr};
         std::shared_ptr<AbstractInputReader> inputReader{nullptr};
         std::shared_ptr<IGfxApi> gfxApi{nullptr};
         FontLoader fontLoader{nullptr};
@@ -228,21 +228,18 @@ namespace PB
     {
         Init_CharMap();
 
+        // Initialize APIs
         gfxApi = defaultGfxApi();
-
-        // Create hardware Api instance
+        hardwareInitializer = Sdl2Initializer{gfxApi};
         inputReader = std::make_shared<Sdl2InputReader>();
-        std::shared_ptr<Sdl2Initializer> hardwareInitializer_ = std::make_shared<Sdl2Initializer>(*gfxApi);
 
 #ifdef _DEBUG
-        hardwareInitializer_->enableDebugger();
+        hardwareInitializer.enableDebugger();
 #endif
 
-        if (hardwareInitializer_->init(windowTitle, windowWidth, windowHeight, renderDepth))
+        if (hardwareInitializer.init(windowTitle, windowWidth, windowHeight, renderDepth))
         {
-            std::cout << hardwareInitializer_->initializerName() << " loaded." << std::endl;
-
-            hardwareInitializer = hardwareInitializer_;
+            std::cout << hardwareInitializer.initializerName() << " loaded." << std::endl;
 
             pbInitialized = true;
 
@@ -344,7 +341,7 @@ namespace PB
     {
         if (pbInitialized)
         {
-            Engine engine{*gfxApi, *hardwareInitializer, *inputReader};
+            Engine engine{*gfxApi, hardwareInitializer, *inputReader};
 
             engine.setScene(&activeScene());
 
@@ -355,7 +352,7 @@ namespace PB
         else
         {
             LOGGER_ERROR("PuppetBox context was not initialized, must call PB::Init() before PB::Run()");
-            hardwareInitializer->destroy();
+            hardwareInitializer.destroy();
         }
     }
 

@@ -4,8 +4,8 @@
 
 #include "puppetbox/AbstractInputReader.h"
 #include "IGfxApi.h"
-#include "IHardwareInitializer.h"
 #include "SceneGraph.h"
+#include "Sdl2Initializer.h"
 
 namespace PB
 {
@@ -18,14 +18,14 @@ namespace PB
     public:
         /**
         * \brief Creates an engine instance using the given specific IGfxApi, Hardware, and Input
-        * implemenations.
+        * implementations.
         *
         * \param gfxApi					The specific GFX API implementation to be used.
-        * \param hardwareInitializer	The specific hardware library implemenation.
+        * \param hardwareInitializer	The specific hardware library implementation.
         * \param inputReader			The specific input processor for the given hardware library implementation.
         */
-        Engine(IGfxApi& gfxApi, IHardwareInitializer& hardwareInitializer, AbstractInputReader& inputReader) :
-                gfxApi_(gfxApi), hardwareInitializer_(hardwareInitializer), inputReader_(inputReader) {};
+        Engine(IGfxApi& gfxApi, Sdl2Initializer hardwareInitializer, AbstractInputReader& inputReader)
+                : gfxApi_(gfxApi), hardwareInitializer_(std::move(hardwareInitializer)), inputReader_(inputReader) {};
 
         /**
         * \brief Executes the engine, starting the primary game loop and processing input.
@@ -44,7 +44,7 @@ namespace PB
 
     private:
         IGfxApi& gfxApi_;
-        IHardwareInitializer& hardwareInitializer_;
+        Sdl2Initializer hardwareInitializer_;
         AbstractInputReader& inputReader_;
         SceneGraph* scene_ = nullptr;
 

@@ -1,23 +1,38 @@
 #pragma once
 
+#include <iostream>
 #include <string>
+#include <memory>
 
 #include <sdl2/SDL.h>
 
 #include "IGfxApi.h"
-#include "IHardwareInitializer.h"
 #include "Logger.h"
 #include "TypeDef.h"
 
 namespace PB
 {
+    struct DisplayDetails
+    {
+        std::int32_t index = -1;
+        std::int32_t width = -1;
+        std::int32_t height = -1;
+        std::int32_t refresh = -1;
+    };
+
+    struct SystemDetails
+    {
+        std::uint32_t displayCount = 0;
+        DisplayDetails displays[];
+    };
+
     /**
     * \brief SDL2 specific implementation for the IHardwareInitializer for hardware interactions.
     */
-    class Sdl2Initializer : public IHardwareInitializer
+    class Sdl2Initializer
     {
     public:
-        Sdl2Initializer(IGfxApi& gfxApi) : gfxApi_(gfxApi) {};
+        Sdl2Initializer(std::shared_ptr<IGfxApi> gfxApi) : gfxApi_(gfxApi) {};
 
         //TODO: Add this to the IHardwareInitializer
         /**
@@ -37,7 +52,7 @@ namespace PB
         *
         * \return True if the hardware successfully initialized, False otherwise.
         */
-        bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth) override
+        bool init(std::string windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth)
         {
 #ifdef _DEBUG
             std::cout << "Build: Debug" << std::endl;
@@ -97,14 +112,14 @@ namespace PB
 
             if (!error)
             {
-                gfxApi_.setRenderDimensions(windowWidth, windowHeight);
-                gfxApi_.setRenderDistance(renderDepth);
+                gfxApi_->setRenderDimensions(windowWidth, windowHeight);
+                gfxApi_->setRenderDistance(renderDepth);
 
-                if (gfxApi_.init(SDL_GL_GetProcAddress))
+                if (gfxApi_->init(SDL_GL_GetProcAddress))
                 {
                     if (useDebugger_)
                     {
-                        if (gfxApi_.initGfxDebug())
+                        if (gfxApi_->initGfxDebug())
                         {
                             std::cout << "GFX API Debugger Loaded." << std::endl;
                         }
@@ -114,7 +129,7 @@ namespace PB
                         }
                     }
 
-                    gfxApi_.initializeUBORanges();
+                    gfxApi_->initializeUBORanges();
 
                     std::cout << "GFX API Loaded." << std::endl;
                 }
@@ -128,9 +143,39 @@ namespace PB
         };
 
         /**
+         * \brief Returns system details (screen count, resolution, and refresh rate).
+         *
+         * \return Set of {\link SystemDetails} for the current system.
+         */
+        std::unique_ptr<SystemDetails> getSystemDetails() const
+        {
+            SDL_DisplayMode current;
+            std::int32_t displayCount = SDL_GetNumVideoDisplays();
+
+            SystemDetails* details = (SystemDetails*) malloc( sizeof(SystemDetails) + (sizeof(DisplayDetails) * displayCount) );
+            auto systemDetails = std::unique_ptr<SystemDetails>(details);
+            systemDetails->displayCount = displayCount;
+
+            for (std::int32_t i = 0; i < systemDetails->displayCount; ++i)
+            {
+                if (SDL_GetCurrentDisplayMode(i, &current) == 0)
+                {
+                    systemDetails->displays[i] = {i, current.w, current.h, current.refresh_rate};
+                    SDL_Log("Display #%d: %dx%dpx @ %dhz", i, current.w, current.h, current.refresh_rate);
+                }
+                else
+                {
+                    SDL_LogError(0,"Could not get display mode for video display #%d: %s", i, SDL_GetError());
+                }
+            }
+
+            return systemDetails;
+        }
+
+        /**
         * \brief Releases any allocated resources and cleans up SDL2 specific configurations.
         */
-        void destroy() override
+        void destroy()
         {
             if (window_) SDL_DestroyWindow(window_);
             SDL_Quit();
@@ -139,7 +184,7 @@ namespace PB
         /**
         * \brief The SDL2 specific commands to be executed after each loop, such as buffer swapping.
         */
-        void postLoopCommands() const override
+        void postLoopCommands() const
         {
             SDL_GL_SwapWindow(window_);
         };
@@ -147,7 +192,7 @@ namespace PB
         /**
         * \brief Initialize the game time for later tracking time deltas between frames.
         */
-        void initializeGameTime() override
+        void initializeGameTime()
         {
             lastFrameTime_ = SDL_GetPerformanceCounter();
         };
@@ -157,7 +202,7 @@ namespace PB
         *
         * \return The amount of time (in Milliseconds) since the last time the method was invoked.
         */
-        float updateElapsedTime() override
+        float updateElapsedTime()
         {
             std::uint64_t NOW = SDL_GetPerformanceCounter();
             std::uint64_t delta = (NOW - lastFrameTime_);
@@ -171,13 +216,13 @@ namespace PB
         *
         * \return The specific IHardwareInitializer identifier for this hardware library implementation.
         */
-        std::string initializerName() const override
+        std::string initializerName() const
         {
             return "SDL2";
         };
     private:
         std::uint64_t lastFrameTime_ = 0;
-        IGfxApi& gfxApi_;
+        std::shared_ptr<IGfxApi> gfxApi_;
         SDL_Window* window_ = nullptr;
         bool useDebugger_ = false;
     };
