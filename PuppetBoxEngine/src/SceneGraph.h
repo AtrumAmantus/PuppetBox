@@ -32,7 +32,7 @@ namespace PB
         SceneGraph(std::string sceneName, IGfxApi* gfxApi, AbstractInputReader* inputReader)
                 : id_(std::move(sceneName)), gfxApi_(gfxApi), inputReader_(inputReader)
         {
-            camera_ = Camera{std::make_unique<RenderWindowImplementation>(gfxApi_)};
+
         };
 
         /**
@@ -103,7 +103,7 @@ namespace PB
 
     private:
         std::string id_;
-        Camera camera_{nullptr};
+        Camera camera_{};
         IGfxApi* gfxApi_;
         AbstractInputReader* inputReader_;
         AbstractSceneHandler* sceneHandler_ = nullptr;

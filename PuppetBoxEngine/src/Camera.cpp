@@ -3,11 +3,6 @@
 
 namespace PB
 {
-    Camera::Camera(std::unique_ptr<IRenderWindow> renderWindow) : renderWindow_(std::move(renderWindow))
-    {
-
-    }
-
     void Camera::update(float deltaTime)
     {
         // Direction based movement
@@ -141,5 +136,15 @@ namespace PB
     vec3 Camera::getPosition() const
     {
         return position_;
+    }
+
+    void Camera::setPanSpeed(float panSpeed)
+    {
+        panSpeed_ = panSpeed;
+    }
+
+    void Camera::setZoomSpeed(float zoomSpeed)
+    {
+        zoomSpeed_ = zoomSpeed;
     }
 }

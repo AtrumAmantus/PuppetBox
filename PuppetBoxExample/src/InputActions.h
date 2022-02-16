@@ -5,7 +5,7 @@
 
 #include <puppetbox/AbstractInputReader.h>
 
-class Controls
+class InputActions
 {
 public:
     enum Command {
@@ -20,40 +20,42 @@ public:
         QUIT,
     };
 public:
-    Controls(PB::AbstractInputReader* inputReader) : inputReader_(inputReader) {};
+    InputActions() = default;
 
-    bool isCommandActive(Command commandName)
+    InputActions(PB::AbstractInputReader* inputReader) : inputReader_(inputReader) {};
+
+    bool isCommandActive(Command commandName) const
     {
-        bool isStarted = false;
+        bool isActive = false;
 
         if (bindings_.find(commandName) != bindings_.end())
         {
             auto vec = bindings_.at(commandName);
 
-            for (std::size_t i = 0; !isStarted && i < vec.size(); ++i)
+            for (std::size_t i = 0; !isActive && i < vec.size(); ++i)
             {
-                isStarted = inputReader_->keyboard.isDown(vec.at(i));
+                isActive = inputReader_->keyboard.isDown(vec.at(i));
             }
         }
 
-        return isStarted;
+        return isActive;
     };
 
-    bool isCommandReleased(Command commandName)
+    bool isCommandReleased(Command commandName) const
     {
-        bool isStarted = false;
+        bool isReleased = false;
 
         if (bindings_.find(commandName) != bindings_.end())
         {
             auto vec = bindings_.at(commandName);
 
-            for (std::size_t i = 0; !isStarted && i < vec.size(); ++i)
+            for (std::size_t i = 0; !isReleased && i < vec.size(); ++i)
             {
-                isStarted = inputReader_->keyboard.isReleased(vec.at(i));
+                isReleased = inputReader_->keyboard.isReleased(vec.at(i));
             }
         }
 
-        return isStarted;
+        return isReleased;
     };
 
     void registerCommand(Command commandName, std::int8_t key)
@@ -70,30 +72,7 @@ public:
         }
     };
 
-    void setZoomSpeed(float zoomSpeed)
-    {
-        zoomSpeed_ = zoomSpeed;
-    };
-
-    float getZoomSpeed() const
-    {
-        return zoomSpeed_;
-    };
-
-    void setPanSpeed(float moveSpeed)
-    {
-        panSpeed_ = moveSpeed;
-    };
-
-    float getPanSpeed() const
-    {
-        return panSpeed_;
-    };
-
 private:
     PB::AbstractInputReader* inputReader_ = nullptr;
     std::unordered_map<Command, std::vector<std::int8_t>> bindings_{};
-private:
-    float zoomSpeed_ = 1.0f;
-    float panSpeed_ = 1.0f;
 };

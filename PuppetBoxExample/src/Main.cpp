@@ -13,7 +13,11 @@ int main(int argc, char** argv)
     PB::SetActiveScene(primaryScene);
     PB::LoadAssetPack("Assets1");
     CustomSceneHandler handler{};
-    PB::SetSceneHandler(&handler);
+    if (!PB::SetSceneHandler(&handler))
+    {
+        std::cout << "Failed to set up scene" << std::endl;
+        return 1;
+    }
 
     PB::Run();
 

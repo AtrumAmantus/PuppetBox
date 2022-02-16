@@ -12,9 +12,12 @@
 #include <puppetbox/KeyCode.h>
 #include <puppetbox/SceneObject.h>
 
+#include "AbstractInputProcessor.h"
 #include "Constants.h"
-#include "Controls.h"
+#include "InputActions.h"
 #include "Entity.h"
+#include "EventDef.h"
+#include "Game2DInputProcessor.h"
 #include "UIAttributeBuilder.h"
 #include "UIController.h"
 #include "UserInput.h"
@@ -22,9 +25,13 @@
 #define INPUT_BOX 0
 #define FPS_BOX 1
 
+#define FPS_MAX_FRAME_COUNT 60
+
 namespace
 {
-    float timeSinceFpsCheck = 0.0f;
+    float _timeSinceGfxFpsCheck = 0.0f;
+    std::uint32_t _frameIndex = 0;
+    float _frameRates[FPS_MAX_FRAME_COUNT]{};
 
     inline std::uint32_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)
     {
@@ -39,223 +46,272 @@ namespace
 
         return 1.0f / average;
     }
-}
 
-class CustomSceneHandler : public PB::AbstractSceneHandler
-{
-public:
-    bool setUp() override
+    inline void controlRegistration(InputActions& controls)
     {
-        setViewMode(PB::SceneView::ORTHO);
+        controls.registerCommand(InputActions::CAMERA_UP, KEY_UP);
+        controls.registerCommand(InputActions::CAMERA_DOWN, KEY_DOWN);
+        controls.registerCommand(InputActions::CAMERA_LEFT, KEY_LEFT);
+        controls.registerCommand(InputActions::CAMERA_RIGHT, KEY_RIGHT);
+        controls.registerCommand(InputActions::FORWARD, KEY_W);
+        controls.registerCommand(InputActions::BACKWARD, KEY_S);
+        controls.registerCommand(InputActions::LEFT, KEY_A);
+        controls.registerCommand(InputActions::RIGHT, KEY_D);
+        controls.registerCommand(InputActions::QUIT, KEY_ESCAPE);
+    }
 
-        controls_ = Controls{input()};
-
-        controls_.registerCommand(Controls::CAMERA_UP, KEY_UP);
-        controls_.registerCommand(Controls::CAMERA_DOWN, KEY_DOWN);
-        controls_.registerCommand(Controls::CAMERA_LEFT, KEY_LEFT);
-        controls_.registerCommand(Controls::CAMERA_RIGHT, KEY_RIGHT);
-        controls_.registerCommand(Controls::FORWARD, KEY_W);
-        controls_.registerCommand(Controls::BACKWARD, KEY_S);
-        controls_.registerCommand(Controls::LEFT, KEY_A);
-        controls_.registerCommand(Controls::RIGHT, KEY_D);
-        controls_.registerCommand(Controls::QUIT, KEY_ESCAPE);
-
-        controls_.setPanSpeed(200.0f);
-        controls_.setZoomSpeed(2.0f);
-
-        if (!PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
-        {
-            std::cout << "Failed to load animation pack" << std::endl;
-        }
-
-        PB::LoadFontAsset(Constants::Font::kMochiyPop, 72);
-
-        getCamera().moveTo({0.0f, 0.0f, 0.0f});
-
-        player = new Entity{};
-
-        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", player))
-        {
-            player->name = "Fred";
-            player->position = PB::vec3{150.0f, 50.0f, -50.0f};
-//            myEntity->setBehavior(PB::AI::Behavior::WANDER);
-            addSceneObject(player);
-        }
-
-        auto* weapon = new Entity();
-
-        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
-        {
-            weapon->name = "weapon";
-            weapon->position = {0.0f, 0.0f, 0.0f};
-            addSceneObject(weapon);
-            weapon->attachTo(player, "weapon_attach_right");
-        }
-
-        auto* chain = new Entity();
-
-        if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain))
-        {
-            chain->name = "chain";
-            chain->position = {0.0f, 0.0f, -40.0f};
-            addSceneObject(chain);
-        }
-
+    inline bool updateFrameCounter(float deltaTime)
+    {
         bool error = false;
 
+        _frameRates[_frameIndex] = deltaTime;
+        _timeSinceGfxFpsCheck += deltaTime;
+        _frameIndex = (_frameIndex + 1) % FPS_MAX_FRAME_COUNT;
+
+        if (_timeSinceGfxFpsCheck > 0.1)
         {
-            auto textBox = std::shared_ptr<PB::UIComponent>(
-                    PB::CreateUIComponent(
-                            PB::UI::TEXT_AREA,
-                            std::move(UIAttributeBuilder{}
-                                              .dimensions({300, 200})
-                                              .fontSize(24)
-                                              .fontType(Constants::Font::kMochiyPop)
-                                              .build()
-                            ),
-                            &error
-                    )
-            );
+            _timeSinceGfxFpsCheck -= 0.25f;
+            std::uint32_t averageFps = calculateAverageFps(_frameRates, FPS_MAX_FRAME_COUNT);
 
-            textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                        "This is a long sentence that should wrap to the next line, followed by some additional words to check to see how big the bounding box is, and if it is properly clipping the text.");
+            std::shared_ptr<UIControllerEvent> event = std::make_shared<UIControllerEvent>();
+            event->action = [averageFps](UIController& controller) {
+                bool error = false;
+                auto component = controller.getComponent(FPS_BOX, &error);
 
-            auto inputBox = std::shared_ptr<PB::UIComponent>(
-                    PB::CreateUIComponent(
-                            PB::UI::TEXT_AREA,
-                            std::move(UIAttributeBuilder{}
-                                              .dimensions({200, 24})
-                                              .fontSize(24)
-                                              .fontType(Constants::Font::kMochiyPop)
-                                              .build()
-                            ),
-                            &error
-                    )
-            );
+                if (!error)
+                {
+                    component->setStringAttribute(PB::UI::TEXT_CONTENT, std::to_string(averageFps) + " FPS");
+                }
+            };
 
-            userInput_.targetComponent(inputBox);
-
-            auto groupComponent = std::shared_ptr<PB::UIComponent>(
-                    PB::CreateUIComponent(
-                            PB::UI::GROUP,
-                            std::move(UIAttributeBuilder{}
-                                              .origin(PB::UI::Origin::BOTTOM_LEFT)
-                                              .position(PB::vec3{10, 10, 1})
-                                              .layout(PB::UI::Layout::VERTICAL)
-                                              .build()
-                            ),
-                            &error
-                    )
-            );
-
-            groupComponent->addComponent(textBox);
-            groupComponent->addComponent(inputBox);
-
-            uiController_.addComponent(groupComponent, INPUT_BOX);
+            PB::PublishEvent(Event::Topic::UI_TOPIC, event);
         }
+        return error;
+    }
 
-        {
-            auto fpsCounter = std::shared_ptr<PB::UIComponent>(
-                    PB::CreateUIComponent(
-                            PB::UI::TEXT_AREA,
-                            std::move(UIAttributeBuilder{}
-                                              .origin(PB::UI::Origin::TOP_LEFT)
-                                              .fontSize(18)
-                                              .fontType(Constants::Font::kMochiyPop)
-                                              .dimensions(PB::vec2{100, 24})
-                                              .position(PB::vec3{10, 590, 1})
-                                              .build()),
-                            &error
-                    )
-            );
+    inline bool uiSetup(UIController& uiController, UserInput& userInput)
+    {
+        bool error = false;
 
-            uiController_.addComponent(fpsCounter, FPS_BOX);
-        }
+        auto textBox = std::shared_ptr<PB::UIComponent>(
+                PB::CreateUIComponent(
+                        PB::UI::TEXT_AREA,
+                        std::move(UIAttributeBuilder{}
+                                          .dimensions({300, 200})
+                                          .fontSize(24)
+                                          .fontType(Constants::Font::kMochiyPop)
+                                          .build()
+                        ),
+                        &error
+                )
+        );
+
+        textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
+                                    "This is a long sentence that should wrap to the next line, followed by some additional words to check to see how big the bounding box is, and if it is properly clipping the text.");
+
+        auto inputBox = std::shared_ptr<PB::UIComponent>(
+                PB::CreateUIComponent(
+                        PB::UI::TEXT_AREA,
+                        std::move(UIAttributeBuilder{}
+                                          .dimensions({200, 24})
+                                          .fontSize(24)
+                                          .fontType(Constants::Font::kMochiyPop)
+                                          .build()
+                        ),
+                        &error
+                )
+        );
+
+        userInput.targetComponent(inputBox);
+
+        auto groupComponent = std::shared_ptr<PB::UIComponent>(
+                PB::CreateUIComponent(
+                        PB::UI::GROUP,
+                        std::move(UIAttributeBuilder{}
+                                          .origin(PB::UI::Origin::BOTTOM_LEFT)
+                                          .position(PB::vec3{10, 10, 1})
+                                          .layout(PB::UI::Layout::VERTICAL)
+                                          .build()
+                        ),
+                        &error
+                )
+        );
+
+        groupComponent->addComponent(textBox);
+        groupComponent->addComponent(inputBox);
+
+        uiController.addComponent(groupComponent, INPUT_BOX);
+
+        auto fpsCounter = std::shared_ptr<PB::UIComponent>(
+                PB::CreateUIComponent(
+                        PB::UI::TEXT_AREA,
+                        std::move(UIAttributeBuilder{}
+                                          .origin(PB::UI::Origin::TOP_LEFT)
+                                          .fontSize(18)
+                                          .fontType(Constants::Font::kMochiyPop)
+                                          .dimensions(PB::vec2{100, 24})
+                                          .position(PB::vec3{10, 590, 1})
+                                          .build()),
+                        &error
+                )
+        );
+
+        uiController.addComponent(fpsCounter, FPS_BOX);
 
         return !error;
     }
 
-protected:
-    void updates(float deltaTime) override
+    inline void inputParser(UserInput& userInput)
     {
-        bool error = false;
-
-        frameRates_[frameIndex_] = deltaTime;
-        timeSinceFpsCheck += deltaTime;
-        frameIndex_ = (frameIndex_ + 1) % 60;
-
-        if (timeSinceFpsCheck > 0.1)
+        if (!userInput.isReading() && !userInput.isEmpty())
         {
-            timeSinceFpsCheck -= 0.25f;
-            std::uint32_t averageFps = calculateAverageFps(frameRates_, 60);
-            uiController_.getComponent(FPS_BOX, &error)->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                                                            std::to_string(averageFps) + " FPS");
-        }
-
-        if (!userInput_.isReading() && !userInput_.isEmpty())
-        {
-            std::string input = userInput_.read();
-            userInput_.clear();
+            std::string input = userInput.read();
+            userInput.clear();
 
             std::cout << "You typed: " << input << std::endl;
 
-            if (input == "/horizontal")
+            if (input.substr(0, 7) == "/engine")
             {
-                uiController_.getComponent(INPUT_BOX, &error)
-                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+                PB::PublishEvent("pb_test_event", std::make_shared<std::string>(input.substr(8)));
             }
-            else if (input == "/vertical")
+            else if (input.substr(0, 7) == "/camera")
             {
-                uiController_.getComponent(INPUT_BOX, &error)
-                        ->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
-            }
-            else if (input == "/ortho")
-            {
-                setViewMode(PB::SceneView::ORTHO);
-            }
-            else if (input == "/perspective" || input == "/persp")
-            {
-                setViewMode(PB::SceneView::PERSPECTIVE);
-            }
-            else if (input == "/play walk")
-            {
-                player->playAnimation(Constants::Animation::kWalk, 0);
-            }
-            else if (input == "/play idle0")
-            {
-                player->playAnimation(Constants::Animation::kIdle0, 0);
-            }
-            else if (input == "/stop")
-            {
-                player->stopAnimation();
-            }
-            else if (input.substr(0, 5) == "/bone")
-            {
-                std::uint32_t i = 6;
-                std::string boneName = "";
-
-                PB::vec3 rotation{};
-
-                while (i < input.size() && input.c_str()[i] != ' ')
+                if (input.size() == 7)
                 {
-                    boneName += input.c_str()[i++];
+                    auto event = std::make_shared<CameraEvent>();
+                    event->action = [](PB::Camera& camera) {
+                        PB::vec3 p = camera.getPosition();
+                        std::cout << "Camera position: " << p.x << ", " << p.y << ", " << p.z << std::endl;
+                    };
+
+                    PB::PublishEvent(Event::Topic::CAMERA_TOPIC, event);
                 }
-
-                i++;
-
-                std::string value = "";
-
-                while(i < input.size() && input.c_str()[i] != ' ')
+                else
                 {
-                    value += input.c_str()[i++];
+                    int v[3]{0, 0, 0};
+                    int vi = 0;
+
+                    std::string value;
+
+                    for (std::uint32_t i = 8; vi < 3 && i < input.size(); ++i)
+                    {
+                        char c = input.c_str()[i];
+                        if (c == ' ')
+                        {
+                            v[vi++] = std::stoi(value);
+                            value = "";
+                        }
+                        else
+                        {
+                            value += c;
+                        }
+                    }
+
+                    if (vi < 3 && !value.empty())
+                    {
+                        v[vi++] = std::stoi(value);
+                        value = "";
+                    }
+
+                    std::cout << "Moving camera: " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+                    auto event = std::make_shared<CameraEvent>();
+                    event->action = [v](PB::Camera& camera) {
+                        camera.moveTo({static_cast<float>(v[0]), static_cast<float>(v[1]), static_cast<float>(v[2])});
+                    };
+
+                    PB::PublishEvent(Event::Topic::CAMERA_TOPIC, event);
                 }
-
-                i++;
-
-                if (!value.empty())
+            }
+            else
+            {
+                if (input == "/horizontal")
                 {
-                    rotation.x = std::stof(value);
-                    value = "";
+                    auto event = std::make_shared<UIControllerEvent>();
+                    event->action = [](UIController& controller) {
+                        bool error = false;
+
+                        auto component = controller.getComponent(INPUT_BOX, &error);
+
+                        if (!error)
+                        {
+                            component->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::HORIZONTAL);
+                        }
+                    };
+
+                    PB::PublishEvent(Event::Topic::UI_TOPIC, event);
+                }
+                else if (input == "/vertical")
+                {
+                    auto event = std::make_shared<UIControllerEvent>();
+                    event->action = [](UIController& controller) {
+                        bool error = false;
+
+                        auto component = controller.getComponent(INPUT_BOX, &error);
+
+                        if (!error)
+                        {
+                            component->setUIntAttribute(PB::UI::LAYOUT, PB::UI::Layout::VERTICAL);
+                        }
+                    };
+
+                    PB::PublishEvent(Event::Topic::UI_TOPIC, event);
+                }
+                else if (input == "/ortho")
+                {
+                    auto event = std::make_shared<ViewModeEvent>();
+                    event->mode = PB::SceneView::ORTHO;
+
+                    PB::PublishEvent(Event::Topic::VIEW_MODE_TOPIC, event);
+                }
+                else if (input == "/perspective" || input == "/persp")
+                {
+                    auto event = std::make_shared<ViewModeEvent>();
+                    event->mode = PB::SceneView::PERSPECTIVE;
+
+                    PB::PublishEvent(Event::Topic::VIEW_MODE_TOPIC, event);
+                }
+                else if (input == "/play walk")
+                {
+                    auto event = std::make_shared<PlayerEvent>();
+                    event->action = [](Entity& entity) {
+                        entity.playAnimation(Constants::Animation::kWalk, 0);
+                    };
+
+                    PB::PublishEvent(Event::Topic::PLAYER_TOPIC, event);
+                }
+                else if (input == "/play idle0")
+                {
+                    auto event = std::make_shared<PlayerEvent>();
+                    event->action = [](Entity& entity) {
+                        entity.playAnimation(Constants::Animation::kIdle0, 0);
+                    };
+
+                    PB::PublishEvent(Event::Topic::PLAYER_TOPIC, event);
+                }
+                else if (input == "/stop")
+                {
+                    auto event = std::make_shared<PlayerEvent>();
+                    event->action = [](Entity& entity) {
+                        entity.stopAnimation();
+                    };
+
+                    PB::PublishEvent(Event::Topic::PLAYER_TOPIC, event);
+                }
+                else if (input.substr(0, 5) == "/bone")
+                {
+                    std::uint32_t i = 6;
+                    std::string boneName = "";
+
+                    PB::vec3 rotation{};
+
+                    while (i < input.size() && input.c_str()[i] != ' ')
+                    {
+                        boneName += input.c_str()[i++];
+                    }
+
+                    i++;
+
+                    std::string value = "";
 
                     while(i < input.size() && input.c_str()[i] != ' ')
                     {
@@ -266,7 +322,7 @@ protected:
 
                     if (!value.empty())
                     {
-                        rotation.y = std::stof(value);
+                        rotation.x = std::stof(value);
                         value = "";
 
                         while(i < input.size() && input.c_str()[i] != ' ')
@@ -274,20 +330,152 @@ protected:
                             value += input.c_str()[i++];
                         }
 
+                        i++;
+
                         if (!value.empty())
                         {
-                            rotation.z = std::stof(value);
+                            rotation.y = std::stof(value);
+                            value = "";
+
+                            while(i < input.size() && input.c_str()[i] != ' ')
+                            {
+                                value += input.c_str()[i++];
+                            }
+
+                            if (!value.empty())
+                            {
+                                rotation.z = std::stof(value);
+                            }
                         }
                     }
-                }
 
-                player->rotateBone(boneName, rotation);
+                    auto event = std::make_shared<PlayerEvent>();
+                    event->action = [boneName, rotation](Entity& entity) {
+                        entity.rotateBone(boneName, rotation);
+                    };
+
+                    PB::PublishEvent(Event::Topic::PLAYER_TOPIC, event);
+                }
             }
         }
         else
         {
-            userInput_.component()->setStringAttribute(PB::UI::TEXT_CONTENT, userInput_.read());
+            userInput.component()->setStringAttribute(PB::UI::TEXT_CONTENT, userInput.read());
         }
+    }
+}
+
+
+class CustomSceneHandler : public PB::AbstractSceneHandler
+{
+public:
+    bool setUp() override
+    {
+        setViewMode(PB::SceneView::ORTHO);
+
+        getCamera().setPanSpeed(100.0f);
+        getCamera().setZoomSpeed(2.0f);
+
+        bool success = true;
+
+        Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data){
+            std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
+
+            uiEvent->action(uiController_);
+        });
+
+        Event::Topic::TERMINATE_TOPIC = PB::SubscribeEvent("pbex_terminate_app", [this](std::shared_ptr<void> data){ input()->window.windowClose = true;});
+
+        Event::Topic::CAMERA_TOPIC = PB::SubscribeEvent("pbex_camera_update", [this](std::shared_ptr<void> data){
+            auto event = std::static_pointer_cast<CameraEvent>(data);
+
+            event->action(getCamera());
+        });
+
+        Event::Topic::PLAYER_TOPIC = PB::SubscribeEvent("pbex_player_update", [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<PlayerEvent>(data);
+
+            event->action(*player);
+
+            getCamera().moveNear(
+                    {player->position.x, player->position.y, 0.0f},
+                    {100.0f, 100.0f, 0.0f}
+            );
+        });
+
+        Event::Topic::VIEW_MODE_TOPIC = PB::SubscribeEvent("pbex_view_mode_update", [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<ViewModeEvent>(data);
+
+            setViewMode(event->mode);
+        });
+
+        inputActions_ = InputActions{input()};
+
+        controlRegistration(inputActions_);
+
+        getCamera().moveTo({0.0f, 0.0f, 3.0f});
+
+        inputProcessor_ = new Game2DInputProcessor(userInput_, inputActions_, *input());
+
+        if (PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
+        {
+            if (PB::LoadFontAsset(Constants::Font::kMochiyPop, 72))
+            {
+                if (!uiSetup(uiController_, userInput_))
+                {
+                    std::cout << "Failed to load interface" << std::endl;
+                }
+
+                player = new Entity{};
+
+                if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", player))
+                {
+                    player->name = "Fred";
+                    player->position = PB::vec3{150.0f, 50.0f, -50.0f};
+        //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
+                    addSceneObject(player);
+                }
+
+                auto* weapon = new Entity();
+
+                if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
+                {
+                    weapon->name = "weapon";
+                    weapon->position = {0.0f, 0.0f, 0.0f};
+                    addSceneObject(weapon);
+                    weapon->attachTo(player, "weapon_attach_right");
+                }
+
+                auto* chain = new Entity();
+
+                if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain))
+                {
+                    chain->name = "chain";
+                    chain->position = {0.0f, 0.0f, -40.0f};
+                    addSceneObject(chain);
+                }
+            }
+            else
+            {
+                success = false;
+                std::cout << "Failed to load font asset" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Failed to load animation pack" << std::endl;
+            success = false;
+        }
+
+        return success;
+    }
+
+protected:
+    void updates(float deltaTime) override
+    {
+        updateFrameCounter(deltaTime);
+
+        inputParser(userInput_);
 
         uiController_.update(deltaTime);
     }
@@ -299,132 +487,13 @@ protected:
 
     void processInputs() override
     {
-        if (input()->mouse.isReleased(BTN_LEFT))
-        {
-            std::cout << "Clicked at: " << input()->mouse.x << ", " << input()->mouse.y << std::endl;
-        }
-
-        if (userInput_.isReading())
-        {
-            if (input()->keyboard.isReleased(KEY_ENTER))
-            {
-                userInput_.stopReading();
-            }
-            else
-            {
-                // TODO: Still need to account for shift values
-                bool shiftDown = input()->keyboard.isDown(KEY_LEFT_SHIFT) || input()->keyboard.isDown(KEY_RIGHT_SHIFT);
-
-                // TODO: This can probably be better
-                std::vector<std::uint8_t> releasedKeys = input()->keyboard
-                        .areReleased(Constants::Input::inputKeys, Constants::Input::inputKeyCount);
-
-                for (auto k : releasedKeys)
-                {
-                    userInput_.append(PB::GetCharFromCode(k, shiftDown));
-                }
-
-                if (input()->keyboard.isReleased(KEY_BACKSPACE))
-                {
-                    userInput_.removeBeforeCursor();
-                }
-            }
-        }
-        else
-        {
-            if (input()->keyboard.isReleased(KEY_ENTER))
-            {
-                userInput_.startReading();
-            }
-            else
-            {
-                if (controls_.isCommandReleased(Controls::QUIT))
-                {
-                    input()->window.windowClose = true;
-                }
-
-                PB::vec3 moveVec{};
-                PB::vec3 cameraMoveVec{};
-
-                bool snapCamera = false;
-
-                if (controls_.isCommandActive(Controls::FORWARD) || controls_.isCommandActive(Controls::BACKWARD))
-                {
-                    moveVec.y = (
-                            controls_.isCommandActive(Controls::FORWARD)
-                            + (-1 * controls_.isCommandActive(Controls::BACKWARD))
-                    );
-
-                    snapCamera = true;
-                }
-
-                if (controls_.isCommandActive(Controls::RIGHT) || controls_.isCommandActive(Controls::LEFT))
-                {
-                    moveVec.x = (
-                            controls_.isCommandActive(Controls::RIGHT)
-                            + (-1 * controls_.isCommandActive(Controls::LEFT))
-                    );
-
-                    snapCamera = true;
-                }
-
-                if (controls_.isCommandActive(Controls::CAMERA_UP) || controls_.isCommandActive(Controls::CAMERA_DOWN))
-                {
-                    cameraMoveVec.y = (
-                            controls_.isCommandActive(Controls::CAMERA_UP)
-                            + (-1 * controls_.isCommandActive(Controls::CAMERA_DOWN))
-                    );
-                }
-
-                if (controls_.isCommandActive(Controls::CAMERA_LEFT) || controls_.isCommandActive(Controls::CAMERA_RIGHT))
-                {
-                    cameraMoveVec.x = (
-                            controls_.isCommandActive(Controls::CAMERA_RIGHT)
-                            + (-1 * controls_.isCommandActive(Controls::CAMERA_LEFT))
-                    );
-                }
-
-                if (getViewMode() == PB::SceneView::ORTHO)
-                {
-                    player->moveVector = moveVec;
-
-                    getCamera().move(cameraMoveVec * controls_.getPanSpeed());
-
-                    if (snapCamera)
-                    {
-                        getCamera().moveNear(
-                                {player->position.x, player->position.y, 0.0f},
-                                {100.0f, 100.0f, 0.0f}
-                        );
-                    }
-                }
-                else
-                {
-                    // +forward would be backwards since +z is toward user, so invert it
-                    getCamera().directionalMove({moveVec.x, 0.0f, -moveVec.y});
-                    // +yaw = turning left, so invert x value
-                    getCamera().rotate(PB::vec3{cameraMoveVec.y, -cameraMoveVec.x, 0.0f});
-                }
-            }
-        }
-
-        if (input()->window.newWidth != 0 || input()->window.newHeight != 0)
-        {
-            std::cout << "Window Size: " << std::to_string(input()->window.newWidth) << "x"
-                      << std::to_string(input()->window.newHeight) << std::endl;
-        }
-
-        if (input()->mouse.wheelYDir != 0)
-        {
-            getCamera().zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir) * controls_.getZoomSpeed());
-        }
+        inputProcessor_->processInput();
     }
 
 private:
     UIController uiController_{};
     UserInput userInput_{};
-    Controls controls_{nullptr};
-    float frameRates_[60];
-    std::uint8_t frameIndex_ = 0;
+    InputActions inputActions_;
     Entity* player = nullptr;
+    AbstractInputProcessor* inputProcessor_ = nullptr;
 };

@@ -16,11 +16,6 @@ namespace PB
     {
     public:
         /**
-        * \brief Create a default instance.
-        */
-        Camera(std::unique_ptr<IRenderWindow> renderWindow);
-
-        /**
          * \brief Update the current state of the camera based on current input.
          *
          * \param deltaTime The time (in milliseconds) since the last update().
@@ -90,6 +85,20 @@ namespace PB
          * \return The position of the camera in X, Y, and Z coordinate values.
          */
         vec3 getPosition() const;
+
+        /**
+         * Sets the speed at which the camera moves around the world space.
+         *
+         * \param panSpeed The speed at which the camera moves in units per second.
+         */
+        void setPanSpeed(float panSpeed);
+
+        /**
+         * Sets the speed at which the camera zooms in and out.
+         *
+         * \param zoomSpeed The speed at which the camera zooms per second
+         */
+        void setZoomSpeed(float zoomSpeed);
 
     private:
         vec3 position_{};

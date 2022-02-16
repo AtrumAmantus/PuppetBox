@@ -170,6 +170,17 @@ namespace PB
         */
         ModelData loadModelDataAsset(const std::string& assetPath, bool* error);
 
+        /**
+         * Builds the {\link RenderedMesh} and {\link BoneMap} objects infered by the given
+         * {\link ModelData} object.
+         *
+         * \param modelData The model data to use to build the {\link RenderedMesh} and {\link BoneMap} objects.
+         * \param parent    The name of the parent to the current {\link ModelData} object.
+         * \param depth     The depth of the current child data.
+         * \param bones     The map of {\link BoneMap} objects to add created bone data to.
+         * \param meshes    The map of {\link RenderedMesh} objects to add created mesh data to.
+         * \return True if the mesh and bone objects were created successfully, False otherwise.
+         */
         bool buildMeshAndBones(
                 ModelData modelData,
                 std::string parent,

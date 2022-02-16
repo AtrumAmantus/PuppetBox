@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include "puppetbox/AbstractSceneHandler.h"
@@ -105,4 +106,31 @@ namespace PB
      */
     extern PUPPET_BOX_API UIComponent*
     CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes, bool* error);
+
+    /**
+     * \brief Publish an event on the internal messaging system using the topic name.
+     *
+     * \param event The event topic ID to publish to.
+     * \param data  The data related to the event to send.
+     * \return The topic id associated to the topic of the event that was submitted.
+     */
+    extern PUPPET_BOX_API std::uint32_t PublishEvent(std::string event, std::shared_ptr<void> data);
+
+    /**
+     * \brief Publish an event on the internal messaging system using the topic id.
+     *
+     * \param event The event topic name to publish to.
+     * @param data  The data related to the event to send.
+     */
+    extern PUPPET_BOX_API void PublishEvent(std::uint32_t event, std::shared_ptr<void> data);
+
+    /**
+     * \brief Subscribe to events for a given topic name to start processing them with
+     * the given function reference.
+     *
+     * \param event     The event topic name to subscribe to and start processing for.
+     * \param callback  The function to process the data of events for the subscribed topic.
+     * \return The topic id associated to the subscribed topic name.
+     */
+    extern PUPPET_BOX_API std::uint32_t SubscribeEvent(std::string event, std::function<void(std::shared_ptr<void>)> callback);
 }
