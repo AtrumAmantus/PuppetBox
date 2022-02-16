@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "puppetbox/IRenderWindow.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "TypeDef.h"
@@ -80,6 +79,13 @@ namespace PB
         mat4 calculateViewMatrix(SceneView::Mode mode) const;
 
         /**
+         * \brief Returns a transformation matrix that scales related to the current camera zoom.
+         *
+         * \return A transformation matrix that scales according to zoom.
+         */
+        mat4 zoomMatrix() const;
+
+        /**
          * Returns the current position of the camera in X, Y, and Z coordinate values.
          *
          * \return The position of the camera in X, Y, and Z coordinate values.
@@ -114,6 +120,5 @@ namespace PB
         float targetZoom_ = 100.0f;
         float minZoom_ = 50.0f;
         float maxZoom_ = 150.0f;
-        std::unique_ptr<IRenderWindow> renderWindow_{nullptr};
     };
 }

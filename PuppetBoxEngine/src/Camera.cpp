@@ -110,13 +110,11 @@ namespace PB
 
         if (mode == SceneView::Mode::ORTHO)
         {
-            float z = currentZoom_ / 100.0f;
-
             // Negative coords because moving the "camera" is really just
             // moving the "world" the opposite direction.
             view = mat4{
-                    z, 0.0f, 0.0f, -position_.x,
-                    0.0f, z, 0.0f, -position_.y,
+                    1.0f, 0.0f, 0.0f, -position_.x,
+                    0.0f, 1.0f, 0.0f, -position_.y,
                     0.0f, 0.0f, 1.0f, -position_.z,
                     0.0f, 0.0f, 0.0f, 1.0f
             };
@@ -131,6 +129,18 @@ namespace PB
         }
 
         return view;
+    }
+
+    mat4 Camera::zoomMatrix() const
+    {
+        float z = currentZoom_ / 100.0f;
+
+        return mat4{
+                z, 0.0f, 0.0f, 0.0f,
+                0.0f, z, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+        };
     }
 
     vec3 Camera::getPosition() const

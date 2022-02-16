@@ -67,7 +67,7 @@ namespace PB
 
             mat4 view = camera_.calculateViewMatrix(viewMode);
 
-            mat4 projection = GfxMath::Projection(
+            mat4 projection = camera_.zoomMatrix() * GfxMath::Projection(
                     gfxApi_->getRenderWidth(),
                     gfxApi_->getRenderHeight(),
                     gfxApi_->getRenderDistance(),
