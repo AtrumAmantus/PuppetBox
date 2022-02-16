@@ -23,7 +23,3 @@ dependencies/
 # Jetbrains
 .idea/
 *.iml
-
-# Binaries
-*.jpg
-*.png
