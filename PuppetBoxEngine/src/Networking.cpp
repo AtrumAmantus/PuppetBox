@@ -58,7 +58,7 @@ namespace PB::Networking
         return success;
     }
 
-    bool send(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint32_t length)
+    bool send(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint32_t length, bool isHostBigEndian)
     {
         bool success = true;
 
@@ -66,10 +66,15 @@ namespace PB::Networking
 
         std::uint32_t offset = 0;
 
-        sendData[0] = length >> 24;
-        sendData[1] = length >> 16;
-        sendData[2] = length >> 8;
-        sendData[3] = length;
+        const std::uint8_t bitShift0 = isHostBigEndian ? 0 : 24;
+        const std::uint8_t bitShift1 = isHostBigEndian ? 8 : 16;
+        const std::uint8_t bitShift2 = isHostBigEndian ? 16 : 8;
+        const std::uint8_t bitShift3 = isHostBigEndian ? 24 : 0;
+
+        sendData[0] = length >> bitShift0;
+        sendData[1] = length >> bitShift1;
+        sendData[2] = length >> bitShift2;
+        sendData[3] = length >> bitShift3;
 
         std::uint8_t i = 4;
 

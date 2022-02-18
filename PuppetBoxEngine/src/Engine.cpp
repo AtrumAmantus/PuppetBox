@@ -44,6 +44,8 @@ namespace PB
         {
             LOGGER_INFO("Networking thread started.");
 
+            const bool isHostBigEndian = getEndianness() == BIG_ENDIAN;
+
             struct
             {
                 Networking::NetworkingDetails details{};
@@ -51,48 +53,55 @@ namespace PB
                 bool shouldThreadStop = false;
             } connection;
 
-            Event::Topic::NETWORK_TOPIC = MessageBroker::instance().subscribe("pb_network_update", [&connection](
-                    std::shared_ptr<void> data) {
-                auto networkEvent = std::static_pointer_cast<NetworkEvent>(data);
+            Event::Topic::NETWORK_TOPIC = MessageBroker::instance()
+                    .subscribe(
+                            "pb_network_update",
+                            [&connection, isHostBigEndian](std::shared_ptr<void> data) {
+                                auto networkEvent = std::static_pointer_cast<NetworkEvent>(data);
 
-                switch (networkEvent->type)
-                {
-                    case Event::NetworkEventType::CONNECT:
-                        if (!connection.details.isConnected)
-                        {
-                            LOGGER_INFO("Connecting to server " + networkEvent->host + ":" +
-                                        std::to_string(networkEvent->port));
-                            connection.details.isConnected = Networking::connect(&(connection.details),
-                                                                                 networkEvent->host,
-                                                                                 networkEvent->port);
-                        }
-                        else
-                        {
-                            LOGGER_WARN("Already connected to a server");
-                        }
+                                switch (networkEvent->type)
+                                {
+                                    case Event::NetworkEventType::CONNECT:
+                                        if (!connection.details.isConnected)
+                                        {
+                                            LOGGER_INFO("Connecting to server " + networkEvent->host + ":" +
+                                                        std::to_string(networkEvent->port));
+                                            connection.details.isConnected = Networking::connect(
+                                                    &(connection.details),
+                                                    networkEvent->host,
+                                                    networkEvent->port);
+                                        }
+                                        else
+                                        {
+                                            LOGGER_WARN("Already connected to a server");
+                                        }
 
-                        break;
-                    case Event::NetworkEventType::TERMINATE:
-                        connection.shouldThreadStop = true;
-                    case Event::NetworkEventType::DISCONNECT:
-                        connection.shouldDisconnect = true;
-                        LOGGER_INFO("Disconnect request received");
-                        break;
-                    case Event::NetworkEventType::SEND:
-                        if (connection.details.isConnected)
-                        {
-                            Networking::send(&(connection.details), networkEvent->data, networkEvent->dataLength);
-                        }
-                        else
-                        {
-                            LOGGER_ERROR("Not connected to any server");
-                        }
+                                        break;
+                                    case Event::NetworkEventType::TERMINATE:
+                                        connection.shouldThreadStop = true;
+                                    case Event::NetworkEventType::DISCONNECT:
+                                        connection.shouldDisconnect = true;
+                                        LOGGER_INFO("Disconnect request received");
+                                        break;
+                                    case Event::NetworkEventType::SEND:
+                                        if (connection.details.isConnected)
+                                        {
+                                            Networking::send(
+                                                    &(connection.details),
+                                                    networkEvent->data,
+                                                    networkEvent->dataLength,
+                                                    isHostBigEndian);
+                                        }
+                                        else
+                                        {
+                                            LOGGER_ERROR("Not connected to any server");
+                                        }
 
-                        break;
-                    default:
-                        LOGGER_ERROR("Unrecognized network event type");
-                }
-            });
+                                        break;
+                                    default:
+                                        LOGGER_ERROR("Unrecognized network event type");
+                                }
+                            });
 
             std::int16_t bytesRead = 0;
             std::uint8_t data[MAX_PACKET_SIZE];
@@ -101,12 +110,10 @@ namespace PB
             std::uint32_t bufferOffset = 0;
             std::uint32_t dataInCurrentPacket = 0;
 
-            const bool isBigEndian = getEndianness() == BIG_ENDIAN;
-
-            const std::uint8_t bitShift0 = isBigEndian ? 0 : 24;
-            const std::uint8_t bitShift1 = isBigEndian ? 8 : 16;
-            const std::uint8_t bitShift2 = isBigEndian ? 16 : 8;
-            const std::uint8_t bitShift3 = isBigEndian ? 24 : 0;
+            const std::uint8_t bitShift0 = isHostBigEndian ? 0 : 24;
+            const std::uint8_t bitShift1 = isHostBigEndian ? 8 : 16;
+            const std::uint8_t bitShift2 = isHostBigEndian ? 16 : 8;
+            const std::uint8_t bitShift3 = isHostBigEndian ? 24 : 0;
 
             while (!connection.shouldThreadStop)
             {

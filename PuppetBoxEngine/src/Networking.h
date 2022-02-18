@@ -29,7 +29,7 @@ namespace PB::Networking
      */
     bool connect(NetworkingDetails* networkingDetails, std::string host, std::uint16_t port);
 
-    bool send(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint32_t length);
+    bool send(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint32_t length, bool isHostBigEndian);
 
     std::int16_t read(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint8_t maxToRead);
 
