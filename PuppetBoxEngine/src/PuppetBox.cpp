@@ -227,8 +227,6 @@ namespace PB
 
     void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth)
     {
-        MessageBroker::init();
-
         Init_CharMap();
 
         // Initialize APIs
@@ -409,18 +407,23 @@ namespace PB
         return component;
     }
 
-    std::uint32_t PublishEvent(std::string event, std::shared_ptr<void> data)
+    std::uint32_t PublishEvent(std::string topicName, std::shared_ptr<void> data)
     {
-        return MessageBroker::publish(event, data);
+        return MessageBroker::instance().publish(topicName, data);
     }
 
-    void PublishEvent(std::uint32_t event, std::shared_ptr<void> data)
+    void PublishEvent(std::uint32_t topicId, std::shared_ptr<void> data)
     {
-        MessageBroker::publish(event, data);
+        MessageBroker::instance().publish(topicId, data);
     }
 
-    std::uint32_t SubscribeEvent(std::string eventName, std::function<void(std::shared_ptr<void>)> callback)
+    std::uint32_t SubscribeEvent(std::string topicName, std::function<void(std::shared_ptr<void>)> callback)
     {
-        return MessageBroker::subscribe(eventName, callback);
+        return MessageBroker::instance().subscribe(topicName, callback);
+    }
+
+    std::uint32_t RegisterTopic(std::string topicName)
+    {
+        return MessageBroker::instance().registerTopic(topicName);
     }
 }

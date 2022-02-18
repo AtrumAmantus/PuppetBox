@@ -18,7 +18,11 @@ namespace PB
      * \param windowWidth The initial width of the window
      * \param windowHeight The initial height of the window
      */
-    extern PUPPET_BOX_API void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth);
+    extern PUPPET_BOX_API void Init(
+            const std::string& windowTitle,
+            std::int32_t windowWidth,
+            std::int32_t windowHeight,
+            std::int32_t renderDepth);
 
     /**
      * \brief Create a new scene referenced by the given string
@@ -132,5 +136,7 @@ namespace PB
      * \param callback  The function to process the data of events for the subscribed topic.
      * \return The topic id associated to the subscribed topic name.
      */
-    extern PUPPET_BOX_API std::uint32_t SubscribeEvent(std::string event, std::function<void(std::shared_ptr<void>)> callback);
+    extern PUPPET_BOX_API std::uint32_t SubscribeEvent(
+            std::string event,
+            std::function<void(std::shared_ptr<void>)> callback);
 }

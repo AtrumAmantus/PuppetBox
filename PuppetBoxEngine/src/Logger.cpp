@@ -13,7 +13,7 @@ namespace PB
         }
     };
 
-    namespace DefaultLogger
+    namespace
     {
         static std::unique_ptr<LoggingAppender> appender_ = std::make_unique<DefaultLoggingAppender>();
 
@@ -36,42 +36,49 @@ namespace PB
             else
             {
                 fileName = "";
-                warn("File name was too long to parse", "Logger", 0);
+                DefaultLogger::warn("File name was too long to parse", "Logger", 0);
             }
 
             return fileName;
         };
 
-        static void log(
-                const std::string& level,
-                const std::string& message,
-                const std::string& filePath,
-                std::uint32_t line)
-        {
-            time_t now;
-            time(&now);
-            const std::string fileName = getFileName(filePath);
-            appender_->send(std::to_string(now) + " | " + level + " | " + fileName + " (" + std::to_string(line) + "): " + message);
-        };
+    }
 
-        void debug(const std::string& message, const std::string& filePath, std::uint32_t line)
-        {
-            log("DEBUG", message, filePath, line);
-        }
 
-        void warn(const std::string& message, const std::string& filePath, std::uint32_t line)
-        {
-            log("WARN", message, filePath, line);
-        }
+    void DefaultLogger::log(
+            const std::string& level,
+            const std::string& message,
+            const std::string& filePath,
+            std::uint32_t line)
+    {
+        time_t now;
+        time(&now);
+        const std::string fileName = getFileName(filePath);
+        appender_->send(std::to_string(now) + " | " + level + " | " + fileName + " (" + std::to_string(line) + "): " + message);
+    };
 
-        void error(const std::string& message, const std::string& filePath, std::uint32_t line)
-        {
-            log("ERROR", message, filePath, line);
-        }
+    void DefaultLogger::debug(const std::string& message, const std::string& filePath, std::uint32_t line)
+    {
+        log("DEBUG", message, filePath, line);
+    }
 
-        void setAppender(std::unique_ptr<LoggingAppender> loggingAppender)
-        {
-            appender_ = std::move(loggingAppender);
-        }
+    void DefaultLogger::info(const std::string& message, const std::string& filePath, std::uint32_t line)
+    {
+        log("INFO", message, filePath, line);
+    }
+
+    void DefaultLogger::warn(const std::string& message, const std::string& filePath, std::uint32_t line)
+    {
+        log("WARN", message, filePath, line);
+    }
+
+    void DefaultLogger::error(const std::string& message, const std::string& filePath, std::uint32_t line)
+    {
+        log("ERROR", message, filePath, line);
+    }
+
+    void DefaultLogger::setAppender(std::unique_ptr<LoggingAppender> loggingAppender)
+    {
+        appender_ = std::move(loggingAppender);
     }
 }

@@ -269,10 +269,8 @@ namespace PB
 
     Font AssetLibrary::loadFontAsset(const std::string& fontPath, std::uint8_t fontSize, bool* error)
     {
-        /**
-         * TODO: Currently, the fontSize attribute only applies to the first time the font is loaded,
-         * then it is ignored, since it's pulled from cache.  Maybe revisit this.
-         */
+        // TODO: Currently, the fontSize attribute only applies to the first time the font is loaded,
+        //then it is ignored, since it's pulled from cache.  Maybe revisit this.
         Font font;
 
         if (loadedFonts_.find(fontPath) == loadedFonts_.end())

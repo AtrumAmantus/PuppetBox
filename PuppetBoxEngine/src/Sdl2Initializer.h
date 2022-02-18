@@ -34,7 +34,6 @@ namespace PB
     public:
         Sdl2Initializer(std::shared_ptr<IGfxApi> gfxApi) : gfxApi_(gfxApi) {};
 
-        //TODO: Add this to the IHardwareInitializer
         /**
         * \brief Set a flag signaling to configure SDL2 to initialize the GFX API debugging features.
         */
@@ -220,6 +219,7 @@ namespace PB
         {
             return "SDL2";
         };
+
     private:
         std::uint64_t lastFrameTime_ = 0;
         std::shared_ptr<IGfxApi> gfxApi_;

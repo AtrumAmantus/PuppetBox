@@ -97,8 +97,8 @@ namespace
                 PB::CreateUIComponent(
                         PB::UI::TEXT_AREA,
                         std::move(UIAttributeBuilder{}
-                                          .dimensions({300, 200})
-                                          .fontSize(24)
+                                          .dimensions({400, 200})
+                                          .fontSize(16)
                                           .fontType(Constants::Font::kMochiyPop)
                                           .build()
                         ),
@@ -113,8 +113,8 @@ namespace
                 PB::CreateUIComponent(
                         PB::UI::TEXT_AREA,
                         std::move(UIAttributeBuilder{}
-                                          .dimensions({200, 24})
-                                          .fontSize(24)
+                                          .dimensions({400, 24})
+                                          .fontSize(16)
                                           .fontType(Constants::Font::kMochiyPop)
                                           .build()
                         ),

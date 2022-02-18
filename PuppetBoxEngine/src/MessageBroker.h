@@ -10,24 +10,21 @@
  */
 namespace PB
 {
-    class MessageBroker;
-
-    namespace
-    {
-        MessageBroker* instance = nullptr;
-    }
-
     class MessageBroker
     {
     public:
         /**
-         * \brief Creates a singleton instance of the messaging application, must be called before
-         * any other methods.
+         * \brief Returns the singleton instance of the {\link MessageBroker}, creating it first if
+         * it didn't already exist.
+         *
+         * \return The singleton instance of the {\link MessageBroker}
          */
-        static void init()
+        static MessageBroker& instance()
         {
-            instance = new MessageBroker{};
-        };
+            static MessageBroker instance;
+
+            return instance;
+        }
 
         /**
          * \brief Publishes an event by topic name to all current subscribers, executing
@@ -37,9 +34,13 @@ namespace PB
          * \param data  The data to send to all subscriber's callbacks.
          * \return The topic id for the published event name.
          */
-        static std::uint32_t publish(std::string topic, std::shared_ptr<void> data)
+        std::uint32_t publish(std::string topicName, std::shared_ptr<void> data)
         {
-            return instance->publishI(topic, data);
+            std::uint32_t topicId = registerTopic(topicName);
+
+            publish(topicId, data);
+
+            return topicId;
         }
 
         /**
@@ -49,9 +50,15 @@ namespace PB
          * \param topic The topic ID to publish the event to.
          * \param data  The data to send to all subscriber's callbacks.
          */
-        static void publish(std::uint32_t topic, std::shared_ptr<void> data)
+        void publish(std::uint32_t topicId, std::shared_ptr<void> data)
         {
-            instance->publishI(topic, data);
+            if (subscribers_.find(topicId) != subscribers_.end())
+            {
+                for (auto& f: subscribers_.at(topicId))
+                {
+                    f(data);
+                }
+            }
         };
 
         /**
@@ -62,50 +69,9 @@ namespace PB
          * \param consumer  The callback to be invoked for published events of this topic.
          * \return The topic id for the subscribed event name.
          */
-        static std::uint32_t subscribe(std::string topic, std::function<void(std::shared_ptr<void>)> consumer)
+        std::uint32_t subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
         {
-            return instance->subscribeI(topic, consumer);
-        };
-    private:
-        MessageBroker() = default;
-
-        std::uint32_t publishI(std::string topic, std::shared_ptr<void> data)
-        {
-            if (topicIds_.find(topic) == topicIds_.end())
-            {
-                topicIds_.insert(
-                        std::pair<std::string, std::uint32_t>{topic, ++lastTopicId_}
-                );
-            }
-
-            std::uint32_t topicId = topicIds_.at(topic);
-
-            publishI(topicId, data);
-
-            return topicId;
-        }
-
-        void publishI(std::uint32_t topic, std::shared_ptr<void> data)
-        {
-            if (subscribers_.find(topic) != subscribers_.end())
-            {
-                for (auto& f: subscribers_.at(topic))
-                {
-                    f(data);
-                }
-            }
-        };
-
-        std::uint32_t subscribeI(std::string topic, std::function<void(std::shared_ptr<void>)> consumer)
-        {
-            if (topicIds_.find(topic) == topicIds_.end())
-            {
-                topicIds_.insert(
-                        std::pair<std::string, std::uint32_t>{topic, ++lastTopicId_}
-                );
-            }
-
-            std::uint32_t topicId = topicIds_.at(topic);
+            std::uint32_t topicId = registerTopic(topicName);
 
             if (subscribers_.find(topicId) == subscribers_.end())
             {
@@ -121,9 +87,37 @@ namespace PB
 
             return topicId;
         };
+
+        /**
+         * \brief Registers a topic with the message broker, associating it with a
+         * topic ID if it is not already associated with one.
+         *
+         * \param topicName The name of the topic to register.
+         * \return The new or existing topic ID that is associated with the topic name.
+         */
+        std::uint32_t registerTopic(std::string topicName)
+        {
+            if (topicIds_.find(topicName) == topicIds_.end())
+            {
+                topicIds_.insert(
+                        std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_}
+                );
+            }
+
+            return topicIds_.at(topicName);
+        };
+
+    public:
+        MessageBroker(MessageBroker const&) = delete;
+
+        void operator=(MessageBroker const&) = delete;
+
     private:
         std::unordered_map<std::string, std::uint32_t> topicIds_{};
         std::unordered_map<std::uint32_t, std::vector<std::function<void(std::shared_ptr<void>)>>> subscribers_{};
         std::uint32_t lastTopicId_ = 0;
+
+    private:
+        MessageBroker() = default;
     };
 }

@@ -82,8 +82,6 @@ namespace PB
 
         back_ = GfxMath::Normalize(back_);
 
-        //TODO: Forward/backward not working <<<<<<<<
-
         // Using cross product on "absolute up" and "back" gets relative "right"
         right_ = GfxMath::Normalize(GfxMath::Cross({0.0f, 1.0f, 0.0f}, back_));
         // Using cross product on relative "back" and "right" gets relative "up"
