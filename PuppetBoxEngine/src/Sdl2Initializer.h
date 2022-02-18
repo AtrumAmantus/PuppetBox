@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <sdl2/SDL.h>
+#include <sdl2/SDL_net.h>
 
 #include "IGfxApi.h"
 #include "Logger.h"
@@ -64,6 +65,16 @@ namespace PB
 
             if (SDL_Init(SDL_INIT_EVERYTHING) >= 0)
             {
+                if (SDLNet_Init() == -1 )
+                {
+                    error = true;
+                    SDL_Log("ERROR: Failed to initialize SDLNet");
+                }
+                else
+                {
+                    std::cout << "SDLNet Loaded." << std::endl;
+                }
+
                 int context_flags = 0;
 
                 if (useDebugger_)
@@ -177,6 +188,7 @@ namespace PB
         void destroy()
         {
             if (window_) SDL_DestroyWindow(window_);
+            SDLNet_Quit();
             SDL_Quit();
         };
 

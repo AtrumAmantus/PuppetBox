@@ -8,6 +8,7 @@
 
 #include <PuppetBox.h>
 #include <puppetbox/Constants.h>
+#include <puppetbox/Event.h>
 #include <puppetbox/IAnimationCatalogue.h>
 #include <puppetbox/KeyCode.h>
 #include <puppetbox/SceneObject.h>
@@ -313,7 +314,7 @@ namespace
 
                     std::string value = "";
 
-                    while(i < input.size() && input.c_str()[i] != ' ')
+                    while (i < input.size() && input.c_str()[i] != ' ')
                     {
                         value += input.c_str()[i++];
                     }
@@ -325,7 +326,7 @@ namespace
                         rotation.x = std::stof(value);
                         value = "";
 
-                        while(i < input.size() && input.c_str()[i] != ' ')
+                        while (i < input.size() && input.c_str()[i] != ' ')
                         {
                             value += input.c_str()[i++];
                         }
@@ -337,7 +338,7 @@ namespace
                             rotation.y = std::stof(value);
                             value = "";
 
-                            while(i < input.size() && input.c_str()[i] != ' ')
+                            while (i < input.size() && input.c_str()[i] != ' ')
                             {
                                 value += input.c_str()[i++];
                             }
@@ -355,6 +356,69 @@ namespace
                     };
 
                     PB::PublishEvent(Event::Topic::PLAYER_TOPIC, event);
+                }
+                else if (input.substr(0, 8) == "/connect")
+                {
+                    std::uint32_t substringIndexes = 0;
+                    std::uint8_t byteIndex = 0;
+                    std::uint8_t count = 0;
+
+                    for (std::uint32_t i = 8; i < input.size(); ++i)
+                    {
+                        if (input[i] == ' ')
+                        {
+                            if (count != 0)
+                            {
+                                substringIndexes |= count << (byteIndex++ * 8);
+                                count = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (count == 0)
+                            {
+                                substringIndexes |= i << (byteIndex++ * 8);
+                            }
+
+                            ++count;
+                        }
+                    }
+
+                    // If the string ended, check if we even finished indexing the port
+                    if (count != 0)
+                    {
+                        substringIndexes |= count << (byteIndex * 8);
+                    }
+
+                    std::uint8_t* indexes = (std::uint8_t*) &substringIndexes;
+                    std::string host = input.substr(indexes[0], indexes[1]);
+                    std::string portString = input.substr(indexes[2], indexes[3]);
+                    std::uint16_t port = std::stoi(portString);
+
+                    auto networkEvent = std::make_shared<PB::NetworkEvent>();
+                    networkEvent->type = PB::Event::NetworkEventType::CONNECT;
+                    networkEvent->host = host;
+                    networkEvent->port = port;
+
+                    PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
+                }
+                else if (input == "/disconnect")
+                {
+                    auto networkEvent = std::make_shared<PB::NetworkEvent>();
+                    networkEvent->type = PB::Event::DISCONNECT;
+
+                    PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
+                }
+                else if (input.substr(0, 5) == "/send")
+                {
+                    std::string message = input.substr(6);
+
+                    auto networkEvent = std::make_shared<PB::NetworkEvent>();
+                    networkEvent->type = PB::Event::NetworkEventType::SEND;
+                    networkEvent->data = (std::uint8_t*) message.c_str();
+                    networkEvent->dataLength = message.length();
+
+                    PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
                 }
             }
         }
@@ -378,15 +442,18 @@ public:
 
         bool success = true;
 
-        Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data){
+        Event::Topic::NETWORK_TOPIC = PB::RegisterTopic("pb_network_update");
+
+        Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data) {
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
             uiEvent->action(uiController_);
         });
 
-        Event::Topic::TERMINATE_TOPIC = PB::SubscribeEvent("pbex_terminate_app", [this](std::shared_ptr<void> data){ input()->window.windowClose = true;});
+        Event::Topic::TERMINATE_TOPIC = PB::SubscribeEvent("pbex_terminate_app",
+                                                           [this](std::shared_ptr<void> data) { input()->window.windowClose = true; });
 
-        Event::Topic::CAMERA_TOPIC = PB::SubscribeEvent("pbex_camera_update", [this](std::shared_ptr<void> data){
+        Event::Topic::CAMERA_TOPIC = PB::SubscribeEvent("pbex_camera_update", [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<CameraEvent>(data);
 
             event->action(getCamera());

@@ -1,5 +1,6 @@
 ## PuppetBoxEngine Dependencies
 - [SDL2](https://www.libsdl.org/download-2.0.php) (2.0.14) (commit d2456b6)
+- [SDL_net](https://www.libsdl.org/projects/SDL_net/) (2.0.1)
 - [GLAD](https://glad.dav1d.de/) (C++ - OpenGL 4.4 - Core - ALL EXT)
 - [GLM](https://glm.g-truc.net/0.9.8/index.html) (0.9.8.5)
 - [FreeType](https://freetype.org/) (2.11.1) (commit 7eb9a9d)

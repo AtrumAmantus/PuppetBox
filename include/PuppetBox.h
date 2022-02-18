@@ -139,4 +139,12 @@ namespace PB
     extern PUPPET_BOX_API std::uint32_t SubscribeEvent(
             std::string event,
             std::function<void(std::shared_ptr<void>)> callback);
+
+    /**
+     * \brief Registers the given topic name if it is not already, returning the ID for it.
+     *
+     * \param topicName The topic name to register
+     * @return The newly registered topic ID, or the existing topic ID if the topic name was already registered.
+     */
+    extern PUPPET_BOX_API std::uint32_t RegisterTopic(std::string topicName);
 }

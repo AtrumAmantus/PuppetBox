@@ -1,9 +1,14 @@
 #pragma once
 
+#include <thread>
+
 #include <sdl2/SDL.h>
 
 #include "puppetbox/AbstractInputReader.h"
+#include "puppetbox/Event.h"
+#include "EventDef.h"
 #include "IGfxApi.h"
+#include "MessageBroker.h"
 #include "SceneGraph.h"
 #include "Sdl2Initializer.h"
 
