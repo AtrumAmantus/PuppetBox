@@ -1,18 +1,6 @@
 #pragma once
 
-#include <cstdint>
-#include <iostream>
-
-#include <glad/glad.h>
-
-#include "puppetbox/DataStructures.h"
-
 #include "IGfxApi.h"
-#include "ImageOptions.h"
-#include "ImageReference.h"
-#include "Logger.h"
-#include "Mesh.h"
-#include "TypeDef.h"
 
 namespace PB
 {
@@ -44,19 +32,21 @@ namespace PB
         */
         void setRenderDimensions(std::uint32_t width, std::uint32_t height) override;
 
+        /**
+         * \brief Sets the render distance of the render window, defining the z-depth range of
+         * elements that will be rendered.
+         *
+         * \param distance The distance on the z-axis of elements to render.
+         */
         void setRenderDistance(std::uint32_t distance) override;
 
         /**
-        * \brief Get the current render window area's width.
-        */
-        std::uint32_t getRenderWidth() const override;
-
-        /**
-        * \brief Get the current render window area's height.
-        */
-        std::uint32_t getRenderHeight() const override;
-
-        std::uint32_t getRenderDistance() const override;
+         * \brief Returns an object containing references to the window dimensions.
+         *
+         *
+         * \return Object holding references to the window dimensions.
+         */
+        const RenderWindow getRenderWindow();
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.

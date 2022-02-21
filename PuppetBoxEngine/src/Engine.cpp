@@ -1,6 +1,7 @@
-#include <cstdint>
-
+#include "DefaultSceneGraph.h"
 #include "Engine.h"
+#include "EventDef.h"
+#include "MessageBroker.h"
 #include "Networking.h"
 
 #define MAX_BUFFER_SIZE 0xffff
@@ -13,7 +14,9 @@ namespace PB
 {
     namespace Event::Topic
     {
-        std::uint32_t NETWORK_TOPIC;
+        std::uint32_t NETWORK_TOPIC = 0;
+        std::uint32_t ENGINE_ADD_SCENE_TOPIC = 0;
+        std::uint32_t ENGINE_SET_SCENE_TOPIC = 0;
     }
 
     namespace
@@ -103,7 +106,7 @@ namespace PB
                                 }
                             });
 
-            std::int16_t bytesRead = 0;
+            std::int16_t bytesRead;
             std::uint8_t data[MAX_PACKET_SIZE];
             std::uint8_t buffer[MAX_BUFFER_SIZE];
             std::uint8_t receivedData[MAX_BUFFER_SIZE];
@@ -191,22 +194,75 @@ namespace PB
         }
     }
 
+    Engine::Engine(
+            std::shared_ptr<IGfxApi>& gfxApi,
+            Sdl2Initializer hardwareInitializer,
+            std::shared_ptr<AbstractInputReader>& inputReader)
+            : gfxApi_(gfxApi), hardwareInitializer_(std::move(hardwareInitializer)), inputReader_(inputReader)
+    {
+
+    }
+
+    void Engine::init()
+    {
+        currentScene_ = std::make_shared<DefaultSceneGraph>("default", gfxApi_->getRenderWindow(), inputReader_);
+
+        sceneGraphs_.insert(
+                std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
+                        "default",
+                        currentScene_
+                }
+        );
+
+        // Listener for adding new scenes.
+        Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance().subscribe("pb_engine_add_scene", [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
+
+            *(event->scene) = AbstractSceneGraph{event->scene->name, gfxApi_->getRenderWindow(), inputReader_};
+            event->scene->setUp();
+
+            sceneGraphs_.insert(
+                    std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{event->scene->name, event->scene}
+            );
+        });
+
+        // Listener for setting the current scene.
+        Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance().subscribe("pb_event_set_scene", [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
+
+            if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
+            {
+                currentScene_ = sceneGraphs_.at(event->sceneName);
+            }
+            else
+            {
+                LOGGER_ERROR("Unable to locate specified scene: '" + event->sceneName + "'");
+            }
+        });
+    }
+
     void Engine::run()
     {
         std::thread networkThread{&networkRunner};
 
         hardwareInitializer_.initializeGameTime();
 
-        while (!inputReader_.window.windowClose)
+        while (!inputReader_->window.windowClose)
         {
             float deltaTime = hardwareInitializer_.updateElapsedTime();
 
             processInput();
 
-            gfxApi_.preLoopCommands();
+            gfxApi_->preLoopCommands();
 
-            scene_->update(deltaTime);
-            scene_->render();
+            currentScene_->update(deltaTime);
+
+            gfxApi_->setTransformUBOData(
+                    currentScene_->getView(),
+                    currentScene_->getProjection(),
+                    currentScene_->getUIProjection());
+
+            currentScene_->render();
 
             hardwareInitializer_.postLoopCommands();
         }
@@ -225,20 +281,15 @@ namespace PB
         hardwareInitializer_.destroy();
     }
 
-    void Engine::setScene(SceneGraph* scene)
-    {
-        scene_ = scene;
-    }
-
     void Engine::processInput()
     {
-        inputReader_.loadCurrentState();
+        inputReader_->loadCurrentState();
 
-        if (inputReader_.window.newWidth != 0 || inputReader_.window.newHeight != 0)
+        if (inputReader_->window.newWidth != 0 || inputReader_->window.newHeight != 0)
         {
-            gfxApi_.setRenderDimensions(inputReader_.window.newWidth, inputReader_.window.newHeight);
+            gfxApi_->setRenderDimensions(inputReader_->window.newWidth, inputReader_->window.newHeight);
         }
 
-        scene_->processInput();
+        currentScene_->processInput();
     }
 }

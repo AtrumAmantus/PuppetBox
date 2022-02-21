@@ -173,16 +173,30 @@ namespace PB
     {
         union
         {
-            std::uint32_t x, r, s = 0;
+            std::uint32_t x, r, s;
         };
         union
         {
-            std::uint32_t y, g, t = 0;
+            std::uint32_t y, g, t;
         };
         union
         {
-            std::uint32_t z, b, p = 0;
+            std::uint32_t z, b, p;
         };
+
+        uivec3()
+        {
+            this->x = 0;
+            this->y = 0;
+            this->z = 0;
+        }
+
+        uivec3(std::uint32_t x, std::uint32_t y, std::uint32_t z)
+        {
+            this->x = x;
+            this->y = y;
+            this->z = z;
+        }
 
         std::uint32_t& operator[](std::uint32_t i)
         {

@@ -1,15 +1,18 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
+#include <string>
 #include <thread>
+#include <unordered_map>
 
 #include <sdl2/SDL.h>
 
 #include "puppetbox/AbstractInputReader.h"
+#include "puppetbox/AbstractSceneGraph.h"
 #include "puppetbox/Event.h"
-#include "EventDef.h"
+
 #include "IGfxApi.h"
-#include "MessageBroker.h"
-#include "SceneGraph.h"
 #include "Sdl2Initializer.h"
 
 namespace PB
@@ -29,8 +32,15 @@ namespace PB
         * \param hardwareInitializer	The specific hardware library implementation.
         * \param inputReader			The specific input processor for the given hardware library implementation.
         */
-        Engine(IGfxApi& gfxApi, Sdl2Initializer hardwareInitializer, AbstractInputReader& inputReader)
-                : gfxApi_(gfxApi), hardwareInitializer_(std::move(hardwareInitializer)), inputReader_(inputReader) {};
+        Engine(
+                std::shared_ptr<IGfxApi>& gfxApi,
+                Sdl2Initializer hardwareInitializer,
+                std::shared_ptr<AbstractInputReader>& inputReader);
+
+        /**
+         * \brief Initialize engine configurations.
+         */
+        void init();
 
         /**
         * \brief Executes the engine, starting the primary game loop and processing input.
@@ -42,16 +52,12 @@ namespace PB
         */
         void shutdown();
 
-        /**
-        * \brief Sets the currently active scene to be used in update and render logic.
-        */
-        void setScene(SceneGraph* scene);
-
     private:
-        IGfxApi& gfxApi_;
+        std::shared_ptr<IGfxApi> gfxApi_;
         Sdl2Initializer hardwareInitializer_;
-        AbstractInputReader& inputReader_;
-        SceneGraph* scene_ = nullptr;
+        std::shared_ptr<AbstractInputReader> inputReader_;
+        std::shared_ptr<AbstractSceneGraph> currentScene_;
+        std::unordered_map<std::string, std::shared_ptr<AbstractSceneGraph>> sceneGraphs_{};
 
     private:
         /**

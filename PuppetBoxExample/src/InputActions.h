@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <puppetbox/AbstractInputReader.h>
 
@@ -22,7 +25,7 @@ public:
 public:
     InputActions() = default;
 
-    InputActions(PB::AbstractInputReader* inputReader) : inputReader_(inputReader) {};
+    InputActions(std::shared_ptr<PB::AbstractInputReader>& inputReader) : inputReader_(inputReader) {};
 
     bool isCommandActive(Command commandName) const
     {
@@ -73,6 +76,6 @@ public:
     };
 
 private:
-    PB::AbstractInputReader* inputReader_ = nullptr;
+    std::shared_ptr<PB::AbstractInputReader> inputReader_{nullptr};
     std::unordered_map<Command, std::vector<std::int8_t>> bindings_{};
 };

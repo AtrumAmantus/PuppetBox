@@ -7,19 +7,14 @@ int main(int argc, char** argv)
 {
     PB::Init("PuppetBox - My Window", 800, 600, 1000);
 
-    std::string primaryScene = "MyScene";
+    std::shared_ptr<PB::AbstractSceneGraph> myScene{nullptr};
 
-    PB::CreateScene(primaryScene);
-    PB::SetActiveScene(primaryScene);
-    PB::LoadAssetPack("Assets1");
-    CustomSceneHandler handler{};
-    if (!PB::SetSceneHandler(&handler))
-    {
-        std::cout << "Failed to set up scene" << std::endl;
-        return 1;
-    }
+    PB::Run([&myScene]() {
+        myScene = std::make_shared<CustomSceneHandler>("Main Scene");
 
-    PB::Run();
+        PB::CreateScene(myScene);
+        PB::SetActiveScene("Main Scene");
+    });
 
     return 0;
 }

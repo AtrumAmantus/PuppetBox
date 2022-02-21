@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 
-#include "puppetbox/AbstractSceneHandler.h"
+#include "puppetbox/AbstractSceneGraph.h"
 #include "puppetbox/Constants.h"
 #include "puppetbox/SceneObject.h"
 #include "puppetbox/TypeDef.h"
@@ -25,11 +27,12 @@ namespace PB
             std::int32_t renderDepth);
 
     /**
-     * \brief Create a new scene referenced by the given string
+     * \brief Injects {\link AbstractSceneGraph} data into an existing implementation class object and adding it to the
+     * list of available scenes.
      *
-     * \param sceneName The name to reference the scene by
+     * \param scene The scene object to be populated.
      */
-    extern PUPPET_BOX_API void CreateScene(const std::string& sceneName);
+    extern PUPPET_BOX_API void CreateScene(std::shared_ptr<AbstractSceneGraph> scene);
 
     /**
      * \brief Set the currently active scene
@@ -37,14 +40,6 @@ namespace PB
      * \param sceneName The name referencing the specified scene
      */
     extern PUPPET_BOX_API void SetActiveScene(const std::string& sceneName);
-
-    /**
-     * \brief Set a derived scene handler for the active scene
-     *
-     * \param sceneHandler The derived SceneHandler to facilitate scene events
-     * \returns True if the scene could be set without error, False otherwise.
-     */
-    extern PUPPET_BOX_API bool SetSceneHandler(AbstractSceneHandler* sceneHandler);
 
     /**
      * \brief Loads a special PuppetBox format asset package to be utilized in the scene
@@ -86,7 +81,7 @@ namespace PB
     /**
      * \brief Initiates start of core engine, input processors, and render loops.
      */
-    extern PUPPET_BOX_API void Run();
+    extern PUPPET_BOX_API void Run(std::function<void()> onReady);
 
     /**
     * \brief Helper function for getting the ascii character the given key code represents.

@@ -430,9 +430,11 @@ namespace
 }
 
 
-class CustomSceneHandler : public PB::AbstractSceneHandler
+class CustomSceneHandler : public PB::AbstractSceneGraph
 {
 public:
+    CustomSceneHandler(const std::string& sceneName) : PB::AbstractSceneGraph(sceneName) {};
+
     bool setUp() override
     {
         setViewMode(PB::SceneView::ORTHO);
@@ -442,6 +444,75 @@ public:
 
         bool success = true;
 
+        if (PB::LoadAssetPack("Assets1"))
+        {
+            eventSubscriptions();
+
+            inputActions_ = InputActions{input()};
+
+            controlRegistration(inputActions_);
+
+            getCamera().moveTo({0.0f, 0.0f, 3.0f});
+
+            inputProcessor_ = new Game2DInputProcessor(userInput_, inputActions_, input());
+
+            if (PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
+            {
+                if (PB::LoadFontAsset(Constants::Font::kMochiyPop, 72))
+                {
+                    sceneSetUp();
+                }
+                else
+                {
+                    success = false;
+                    std::cout << "Failed to load font asset" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Failed to load animation pack" << std::endl;
+                success = false;
+            }
+        }
+        else
+        {
+            std::cout << "Failed to load assets" << std::endl;
+            success = false;
+        }
+
+        return success;
+    }
+
+protected:
+    void updates(float deltaTime) override
+    {
+        updateFrameCounter(deltaTime);
+
+        inputParser(userInput_);
+
+        uiController_.update(deltaTime);
+    }
+
+    void renders() const override
+    {
+        uiController_.render();
+    }
+
+    void processInputs() override
+    {
+        inputProcessor_->processInput();
+    }
+
+private:
+    UIController uiController_{};
+    UserInput userInput_{};
+    InputActions inputActions_{};
+    Entity* player = nullptr;
+    AbstractInputProcessor* inputProcessor_ = nullptr;
+
+private:
+    void eventSubscriptions()
+    {
         Event::Topic::NETWORK_TOPIC = PB::RegisterTopic("pb_network_update");
 
         Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data) {
@@ -475,92 +546,47 @@ public:
 
             setViewMode(event->mode);
         });
+    };
 
-        inputActions_ = InputActions{input()};
+    bool sceneSetUp()
+    {
+        bool success = true;
 
-        controlRegistration(inputActions_);
-
-        getCamera().moveTo({0.0f, 0.0f, 3.0f});
-
-        inputProcessor_ = new Game2DInputProcessor(userInput_, inputActions_, *input());
-
-        if (PB::LoadAnimationsPack(Constants::Animation::Pack::kBasicHuman))
+        if (!uiSetup(uiController_, userInput_))
         {
-            if (PB::LoadFontAsset(Constants::Font::kMochiyPop, 72))
-            {
-                if (!uiSetup(uiController_, userInput_))
-                {
-                    std::cout << "Failed to load interface" << std::endl;
-                }
-
-                player = new Entity{};
-
-                if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", player))
-                {
-                    player->name = "Fred";
-                    player->position = PB::vec3{150.0f, 50.0f, -50.0f};
-        //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
-                    addSceneObject(player);
-                }
-
-                auto* weapon = new Entity();
-
-                if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
-                {
-                    weapon->name = "weapon";
-                    weapon->position = {0.0f, 0.0f, 0.0f};
-                    addSceneObject(weapon);
-                    weapon->attachTo(player, "weapon_attach_right");
-                }
-
-                auto* chain = new Entity();
-
-                if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain))
-                {
-                    chain->name = "chain";
-                    chain->position = {0.0f, 0.0f, -40.0f};
-                    addSceneObject(chain);
-                }
-            }
-            else
-            {
-                success = false;
-                std::cout << "Failed to load font asset" << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "Failed to load animation pack" << std::endl;
+            std::cout << "Failed to load interface" << std::endl;
             success = false;
         }
 
+        player = new Entity{};
+
+        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", player))
+        {
+            player->name = "Fred";
+            player->position = PB::vec3{150.0f, 50.0f, -50.0f};
+            //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
+            addSceneObject(player);
+        }
+
+        auto* weapon = new Entity();
+
+        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
+        {
+            weapon->name = "weapon";
+            weapon->position = {0.0f, 0.0f, 0.0f};
+            addSceneObject(weapon);
+            weapon->attachTo(player, "weapon_attach_right");
+        }
+
+        auto* chain = new Entity();
+
+        if (PB::CreateSceneObject("Assets1/Sprites/Misc/Chain", chain))
+        {
+            chain->name = "chain";
+            chain->position = {0.0f, 0.0f, -40.0f};
+            addSceneObject(chain);
+        }
+
         return success;
-    }
-
-protected:
-    void updates(float deltaTime) override
-    {
-        updateFrameCounter(deltaTime);
-
-        inputParser(userInput_);
-
-        uiController_.update(deltaTime);
-    }
-
-    void renders() const override
-    {
-        uiController_.render();
-    }
-
-    void processInputs() override
-    {
-        inputProcessor_->processInput();
-    }
-
-private:
-    UIController uiController_{};
-    UserInput userInput_{};
-    InputActions inputActions_;
-    Entity* player = nullptr;
-    AbstractInputProcessor* inputProcessor_ = nullptr;
+    };
 };

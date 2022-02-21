@@ -1,12 +1,13 @@
-#include <memory>
-#include <string>
 #include <utility>
+#include <unordered_map>
 
 #include <PuppetBox.h>
+#include "puppetbox/KeyCode.h"
 
 #include "AnimationCatalogue.h"
 #include "AssetLibrary.h"
 #include "Engine.h"
+#include "EventDef.h"
 #include "FontLoader.h"
 #include "MessageBroker.h"
 #include "OpenGLGfxApi.h"
@@ -24,11 +25,9 @@ namespace PB
         std::shared_ptr<IGfxApi> gfxApi{nullptr};
         FontLoader fontLoader{nullptr};
         AnimationCatalogue animationCatalogue{nullptr};
-        std::unordered_map<std::string, std::shared_ptr<SceneGraph>> loadedScenes{};
         std::shared_ptr<AssetLibrary> assetLibrary{nullptr};
-        std::string activeSceneId;
-        SceneGraph invalidScene{"InvalidScene", nullptr, nullptr};
         bool pbInitialized = false;
+        bool engineInitialized = false;
 
         /**
         * \brief Used to map scan codes to the actual ascii characters
@@ -67,21 +66,6 @@ namespace PB
         std::shared_ptr<IGfxApi> defaultGfxApi()
         {
             return std::make_shared<OpenGLGfxApi>();
-        }
-
-        /**
-        * \brief Helper function that returns a reference to the currently active SceneGraph.
-        *
-        * \return Reference to the currently active SceneGraph.
-        */
-        SceneGraph& activeScene()
-        {
-            if (!activeSceneId.empty() && loadedScenes.find(activeSceneId) != loadedScenes.end())
-            {
-                return *loadedScenes.at(activeSceneId);
-            }
-
-            return invalidScene;
         }
 
         /**
@@ -270,37 +254,32 @@ namespace PB
         }
     }
 
-    void CreateScene(const std::string& sceneName)
+    void CreateScene(std::shared_ptr<AbstractSceneGraph> scene)
     {
-        if (loadedScenes.find(sceneName) == loadedScenes.end())
+        if (engineInitialized)
         {
-            std::shared_ptr<SceneGraph> scene = std::make_shared<SceneGraph>(sceneName, &(*gfxApi), &(*inputReader));
-
-            loadedScenes.insert(
-                    std::pair<std::string, std::shared_ptr<SceneGraph>>{sceneName, scene}
-            );
+            auto event = std::make_shared<EngineAddSceneEvent>();
+            event->scene = scene;
+            MessageBroker::instance().publish(Event::Topic::ENGINE_ADD_SCENE_TOPIC, event);
         }
         else
         {
-            LOGGER_ERROR("Scene already exists with this identifier name");
+            LOGGER_ERROR("A scene can't be created until after the engine is running");
         }
     }
 
     void SetActiveScene(const std::string& sceneName)
     {
-        if (loadedScenes.find(sceneName) != loadedScenes.end())
+        if (engineInitialized)
         {
-            activeSceneId = sceneName;
+            auto event = std::make_shared<EngineSetSceneEvent>();
+            event->sceneName = sceneName;
+            MessageBroker::instance().publish(Event::Topic::ENGINE_SET_SCENE_TOPIC, event);
         }
         else
         {
-            LOGGER_ERROR("Scene does not exist with this identifier name");
+            LOGGER_ERROR("A scene can't be set until after the engine is running");
         }
-    }
-
-    bool SetSceneHandler(AbstractSceneHandler* sceneHandler)
-    {
-        return activeScene().setSceneHandler(sceneHandler);
     }
 
     bool LoadAssetPack(const std::string& archiveName)
@@ -338,13 +317,17 @@ namespace PB
         return animationCatalogue.load(assetPath);
     }
 
-    void Run()
+    void Run(std::function<void()> onReady)
     {
         if (pbInitialized)
         {
-            Engine engine{*gfxApi, hardwareInitializer, *inputReader};
+            Engine engine{gfxApi, hardwareInitializer, inputReader};
 
-            engine.setScene(&activeScene());
+            engine.init();
+
+            engineInitialized = true;
+
+            onReady();
 
             engine.run();
 

@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "AbstractInputProcessor.h"
-#include "EventDef.h"
 
 class Game2DInputProcessor : public AbstractInputProcessor
 {
@@ -11,7 +10,7 @@ public:
     Game2DInputProcessor(
             UserInput& userInput,
             const InputActions& inputActions,
-            const PB::AbstractInputReader& inputReader)
+            const std::shared_ptr<PB::AbstractInputReader>& inputReader)
             : AbstractInputProcessor(userInput, inputActions, inputReader)
     {
 
@@ -19,20 +18,20 @@ public:
 
     void staticProcessInputs() override
     {
-        if (input().mouse.isReleased(BTN_LEFT))
+        if (input()->mouse.isReleased(BTN_LEFT))
         {
-            std::cout << "Clicked at: " << input().mouse.x << ", "
-                      << input().mouse.y << std::endl;
+            std::cout << "Clicked at: " << input()->mouse.x << ", "
+                      << input()->mouse.y << std::endl;
         }
     }
 
     void processInputs() override
     {
-        if (input().mouse.wheelYDir != 0)
+        if (input()->mouse.wheelYDir != 0)
         {
             auto event = std::make_shared<CameraEvent>();
             event->action = [this](PB::Camera& camera){
-                camera.zoom(static_cast<std::int8_t>(input().mouse.wheelYDir));
+                camera.zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
             };
 
             PB::PublishEvent(Event::Topic::CAMERA_TOPIC, event);

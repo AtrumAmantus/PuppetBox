@@ -1,7 +1,11 @@
+#include <iostream>
 #include <vector>
+
+#include <glad/glad.h>
 
 #include "puppetbox/DataStructures.h"
 #include "GfxMath.h"
+#include "Logger.h"
 #include "OpenGLGfxApi.h"
 
 namespace PB
@@ -167,19 +171,13 @@ namespace PB
         distance_ = distance;
     }
 
-    std::uint32_t OpenGLGfxApi::getRenderWidth() const
+    const RenderWindow OpenGLGfxApi::getRenderWindow()
     {
-        return width_;
-    }
-
-    std::uint32_t OpenGLGfxApi::getRenderHeight() const
-    {
-        return height_;
-    }
-
-    std::uint32_t OpenGLGfxApi::getRenderDistance() const
-    {
-        return distance_;
+        return RenderWindow {
+            &width_,
+            &height_,
+            &distance_
+        };
     }
 
     ImageReference OpenGLGfxApi::loadImage(ImageData imageData, ImageOptions options) const
