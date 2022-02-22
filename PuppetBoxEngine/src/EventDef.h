@@ -6,6 +6,7 @@
 #include <string>
 
 #include "puppetbox/AbstractSceneGraph.h"
+#include "puppetbox/Event.h"
 
 /**
  * These are "hidden" internal events and topics that are not visible to the implementing application.
@@ -24,7 +25,7 @@ namespace PB
     struct NetworkListenerEvent
     {
         std::string topicName;
-        std::function<void(std::shared_ptr<void>, std::uint8_t**, std::uint32_t*)> transformer;
+        pb_EventTransformer transformer;
     };
 
     struct EngineAddSceneEvent

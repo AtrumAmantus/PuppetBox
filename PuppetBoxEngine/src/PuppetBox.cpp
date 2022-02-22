@@ -414,7 +414,7 @@ namespace PB
 
     void RegisterNetworkEventListener(
             std::string topicName,
-            std::function<void(std::shared_ptr<void>, std::uint8_t**, std::uint32_t*)> transformer)
+            pb_EventTransformer transformer)
     {
         auto listenerEvent = std::make_shared<NetworkListenerEvent>();
         listenerEvent->topicName = topicName;

@@ -59,7 +59,7 @@ namespace PB
 
             // Subscribe to listener events
             Event::Topic::NETWORK_LISTENER_TOPIC = MessageBroker::instance()
-                    .subscribe("pb_network_listener_update",
+                    .subscribe(PB_EVENT_NETWORK_LISTENER,
                                [&connection, isHostBigEndian](std::shared_ptr<void> data) {
                                    auto listenerEvent = std::static_pointer_cast<NetworkListenerEvent>(data);
                                    auto transformer = listenerEvent->transformer;
@@ -84,7 +84,7 @@ namespace PB
             // Subscribe to network events
             Event::Topic::NETWORK_TOPIC = MessageBroker::instance()
                     .subscribe(
-                            "pb_network_update",
+                            PB_EVENT_NETWORK,
                             [&connection, isHostBigEndian](std::shared_ptr<void> data) {
                                 auto networkEvent = std::static_pointer_cast<NetworkEvent>(data);
 
@@ -244,7 +244,7 @@ namespace PB
         // Listener for adding new scenes.
         Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance()
                 .subscribe(
-                        "pb_engine_add_scene",
+                        PB_EVENT_SCENE_ADD,
                         [this](std::shared_ptr<void> data) {
                             auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
 
@@ -264,7 +264,7 @@ namespace PB
         // Listener for setting the current scene.
         Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance()
                 .subscribe(
-                        "pb_event_set_scene",
+                        PB_EVENT_SCENE_SET,
                         [this](std::shared_ptr<void> data) {
                             auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
 

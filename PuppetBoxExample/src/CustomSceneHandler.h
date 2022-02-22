@@ -171,11 +171,7 @@ namespace
 
             std::cout << "You typed: " << input << std::endl;
 
-            if (input.substr(0, 7) == "/engine")
-            {
-                PB::PublishEvent("pb_test_event", std::make_shared<std::string>(input.substr(8)));
-            }
-            else if (input.substr(0, 7) == "/camera")
+            if (input.substr(0, 7) == "/camera")
             {
                 if (input.size() == 7)
                 {
@@ -519,16 +515,16 @@ private:
     void eventSubscriptions()
     {
         // Listen for network thread ready event to start registering listeners
-        Event::Topic::NETWORK_TOPIC = PB::SubscribeEvent("pb_network_update", [this](std::shared_ptr<void> event) {
+        Event::Topic::NETWORK_TOPIC = PB::SubscribeEvent(PB_EVENT_NETWORK, [this](std::shared_ptr<void> event) {
             auto networkEvent = std::static_pointer_cast<PB::NetworkEvent>(event);
 
             if (networkEvent->type == PB::Event::READY && !areListenersInitialized_)
             {
                 areListenersInitialized_ = true;
                 // Network Listener Events
-                Event::Topic::USER_CHAT_TOPIC = PB::RegisterTopic("pbex_user_chat_event");
+                Event::Topic::USER_CHAT_TOPIC = PB::RegisterTopic(PBEX_EVENT_USER_CHAT);
                 PB::RegisterNetworkEventListener(
-                        "pbex_user_chat_event",
+                        PBEX_EVENT_USER_CHAT,
                         [](std::shared_ptr<void> data, std::uint8_t** dataOut, std::uint32_t* dataLength) {
                             auto chatEvent = std::static_pointer_cast<UserChatEvent>(data);
 
@@ -552,22 +548,23 @@ private:
         PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
 
         // Application Events
-        Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data) {
+        Event::Topic::UI_TOPIC = PB::SubscribeEvent(PBEX_EVENT_UI, [this](std::shared_ptr<void> data) {
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
             uiEvent->action(uiController_);
         });
 
-        Event::Topic::TERMINATE_TOPIC = PB::SubscribeEvent("pbex_terminate_app",
-                                                           [this](std::shared_ptr<void> data) { input()->window.windowClose = true; });
+        Event::Topic::TERMINATE_TOPIC = PB::SubscribeEvent(
+                PBEX_EVENT_TERMINATE_APP,
+                [this](std::shared_ptr<void> data) { input()->window.windowClose = true; });
 
-        Event::Topic::CAMERA_TOPIC = PB::SubscribeEvent("pbex_camera_update", [this](std::shared_ptr<void> data) {
+        Event::Topic::CAMERA_TOPIC = PB::SubscribeEvent(PBEX_EVENT_CAMERA, [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<CameraEvent>(data);
 
             event->action(getCamera());
         });
 
-        Event::Topic::PLAYER_TOPIC = PB::SubscribeEvent("pbex_player_update", [this](std::shared_ptr<void> data) {
+        Event::Topic::PLAYER_TOPIC = PB::SubscribeEvent(PBEX_EVENT_PLAYER, [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<PlayerEvent>(data);
 
             event->action(*player);
@@ -578,7 +575,7 @@ private:
             );
         });
 
-        Event::Topic::VIEW_MODE_TOPIC = PB::SubscribeEvent("pbex_view_mode_update", [this](std::shared_ptr<void> data) {
+        Event::Topic::VIEW_MODE_TOPIC = PB::SubscribeEvent(PBEX_EVENT_VIEW_MODE, [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<ViewModeEvent>(data);
 
             setViewMode(event->mode);

@@ -7,6 +7,7 @@
 
 #include "puppetbox/AbstractSceneGraph.h"
 #include "puppetbox/Constants.h"
+#include "puppetbox/Event.h"
 #include "puppetbox/SceneObject.h"
 #include "puppetbox/TypeDef.h"
 #include "puppetbox/UIComponent.h"
@@ -151,7 +152,5 @@ namespace PB
      * \param topicId       The topic ID for events to listen for.
      * \param transformer   The transformer to use to convert the event into network data.
      */
-    extern PUPPET_BOX_API void RegisterNetworkEventListener(
-            std::string topicName,
-            std::function<void(std::shared_ptr<void>, std::uint8_t**, std::uint32_t*)> transformer);
+    extern PUPPET_BOX_API void RegisterNetworkEventListener(std::string topicName, pb_EventTransformer transformer);
 }

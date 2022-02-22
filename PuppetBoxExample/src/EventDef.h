@@ -10,6 +10,13 @@
 #include "Entity.h"
 #include "UIController.h"
 
+#define PBEX_EVENT_CAMERA           "pbex_camera_update"
+#define PBEX_EVENT_PLAYER           "pbex_player_update"
+#define PBEX_EVENT_UI               "pbex_ui_update"
+#define PBEX_EVENT_USER_CHAT        "pbex_user_chat_event"
+#define PBEX_EVENT_VIEW_MODE        "pbex_view_mode_update"
+#define PBEX_EVENT_TERMINATE_APP    "pbex_terminate_app"
+
 namespace Event::Topic
 {
     //TODO: This seems like the incorrect way to do these, prone to error
