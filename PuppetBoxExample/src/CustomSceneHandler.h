@@ -413,12 +413,10 @@ namespace
                 {
                     std::string message = input.substr(6);
 
-                    auto networkEvent = std::make_shared<PB::NetworkEvent>();
-                    networkEvent->type = PB::Event::NetworkEventType::SEND;
-                    networkEvent->data = (std::uint8_t*) message.c_str();
-                    networkEvent->dataLength = message.length();
+                    auto chatEvent = std::make_shared<UserChatEvent>();
+                    chatEvent->message = message;
 
-                    PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
+                    PB::PublishEvent(Event::Topic::USER_CHAT_TOPIC, chatEvent);
                 }
             }
         }
@@ -435,7 +433,8 @@ class CustomSceneHandler : public PB::AbstractSceneGraph
 public:
     CustomSceneHandler(const std::string& sceneName) : PB::AbstractSceneGraph(sceneName) {};
 
-    bool setUp() override
+protected:
+    bool setUps() override
     {
         setViewMode(PB::SceneView::ORTHO);
 
@@ -470,20 +469,19 @@ public:
             }
             else
             {
-                std::cout << "Failed to load animation pack" << std::endl;
                 success = false;
+                std::cout << "Failed to load animation pack" << std::endl;
             }
         }
         else
         {
-            std::cout << "Failed to load assets" << std::endl;
             success = false;
+            std::cout << "Failed to load assets" << std::endl;
         }
 
         return success;
     }
 
-protected:
     void updates(float deltaTime) override
     {
         updateFrameCounter(deltaTime);
@@ -509,12 +507,51 @@ private:
     InputActions inputActions_{};
     Entity* player = nullptr;
     AbstractInputProcessor* inputProcessor_ = nullptr;
+    bool areListenersInitialized_ = false;
 
 private:
+    /**
+     * \brief Sets up all the required events for the scene.  Events are permanent once they are registered,
+     * and can be shared between scenes.
+     *
+     * TODO: common scene event setup?
+     */
     void eventSubscriptions()
     {
-        Event::Topic::NETWORK_TOPIC = PB::RegisterTopic("pb_network_update");
+        // Listen for network thread ready event to start registering listeners
+        Event::Topic::NETWORK_TOPIC = PB::SubscribeEvent("pb_network_update", [this](std::shared_ptr<void> event) {
+            auto networkEvent = std::static_pointer_cast<PB::NetworkEvent>(event);
 
+            if (networkEvent->type == PB::Event::READY && !areListenersInitialized_)
+            {
+                areListenersInitialized_ = true;
+                // Network Listener Events
+                Event::Topic::USER_CHAT_TOPIC = PB::RegisterTopic("pbex_user_chat_event");
+                PB::RegisterNetworkEventListener(
+                        "pbex_user_chat_event",
+                        [](std::shared_ptr<void> data, std::uint8_t** dataOut, std::uint32_t* dataLength) {
+                            auto chatEvent = std::static_pointer_cast<UserChatEvent>(data);
+
+                            // +4 bytes for event id
+                            *dataLength = chatEvent->message.size() + 4;
+                            *dataOut = new uint8_t[*dataLength];
+                            (*dataOut)[0] = 0;
+                            (*dataOut)[1] = 0;
+                            (*dataOut)[2] = 0;
+                            (*dataOut)[3] = 4;
+                            for (std::uint32_t i = 0; i < chatEvent->message.size(); ++i) {
+                                (*dataOut)[i + 4] = chatEvent->message.c_str()[i];
+                            }
+                        });
+            }
+        });
+
+        // Ping the network thread in case it already started (in which case we missed the ready pulse)
+        auto networkEvent = std::make_shared<PB::NetworkEvent>();
+        networkEvent->type = PB::Event::READY_CHECK;
+        PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
+
+        // Application Events
         Event::Topic::UI_TOPIC = PB::SubscribeEvent("pbex_ui_update", [this](std::shared_ptr<void> data) {
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
@@ -548,14 +585,19 @@ private:
         });
     };
 
+    /**
+     * \brief Setup logic required to run before the current scene can be utilized.
+     *
+     * \return True if the scene was set up successfully, False otherwise.
+     */
     bool sceneSetUp()
     {
         bool success = true;
 
         if (!uiSetup(uiController_, userInput_))
         {
-            std::cout << "Failed to load interface" << std::endl;
             success = false;
+            std::cout << "Failed to load interface" << std::endl;
         }
 
         player = new Entity{};

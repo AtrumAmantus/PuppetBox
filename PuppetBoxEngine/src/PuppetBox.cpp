@@ -209,7 +209,11 @@ namespace PB
         }
     }
 
-    void Init(const std::string& windowTitle, std::int32_t windowWidth, std::int32_t windowHeight, std::int32_t renderDepth)
+    void Init(
+            const std::string& windowTitle,
+            std::int32_t windowWidth,
+            std::int32_t windowHeight,
+            std::int32_t renderDepth)
     {
         Init_CharMap();
 
@@ -317,7 +321,7 @@ namespace PB
         return animationCatalogue.load(assetPath);
     }
 
-    void Run(std::function<void()> onReady)
+    void Run(std::function<bool()> onReady)
     {
         if (pbInitialized)
         {
@@ -327,9 +331,7 @@ namespace PB
 
             engineInitialized = true;
 
-            onReady();
-
-            engine.run();
+            engine.run(onReady);
 
             engine.shutdown();
         }
@@ -408,5 +410,15 @@ namespace PB
     std::uint32_t RegisterTopic(std::string topicName)
     {
         return MessageBroker::instance().registerTopic(topicName);
+    }
+
+    void RegisterNetworkEventListener(
+            std::string topicName,
+            std::function<void(std::shared_ptr<void>, std::uint8_t**, std::uint32_t*)> transformer)
+    {
+        auto listenerEvent = std::make_shared<NetworkListenerEvent>();
+        listenerEvent->topicName = topicName;
+        listenerEvent->transformer = transformer;
+        MessageBroker::instance().publish(Event::Topic::NETWORK_LISTENER_TOPIC, listenerEvent);
     }
 }

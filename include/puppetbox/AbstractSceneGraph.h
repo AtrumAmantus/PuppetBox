@@ -35,11 +35,12 @@ namespace PB
                 std::shared_ptr<AbstractInputReader> inputReader);
 
         /**
-         * \brief Defined by the implementing class to handle any initial scene setup logic.
+         * \brief Invokes the implementing class's setUps() method, checking first if the
+         * {\link AbstractSceneGraph} was initialized propertly.
          *
          * \return True if the setup was successful, False otherwise.
          */
-        virtual bool setUp();
+        bool setUp();
 
         /**
         * \brief Invokes the update() method of the sceneHandler, allowing updates for various scene
@@ -84,6 +85,13 @@ namespace PB
         mat4 getUIProjection() const;
 
     protected:
+        /**
+         * \brief Defined by the implementing class to handle any initial scene setup logic.
+         *
+         * \return True if the setup was successful, False otherwise.
+         */
+        virtual bool setUps();
+
         /**
          * \brief Defined by the implementing class to specify scene specific update logic.
          *
@@ -134,6 +142,7 @@ namespace PB
         void addSceneObject(SceneObject* sceneObject);
 
     private:
+        bool isInitialized_ = false;
         Camera camera_{};
         RenderWindow renderWindow_{};
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};

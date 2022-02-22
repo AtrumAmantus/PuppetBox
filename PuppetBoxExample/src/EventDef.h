@@ -23,6 +23,7 @@ namespace Event::Topic
     std::uint32_t CAMERA_TOPIC = 0;
     std::uint32_t PLAYER_TOPIC = 0;
     std::uint32_t VIEW_MODE_TOPIC = 0;
+    std::uint32_t USER_CHAT_TOPIC = 0;
 }
 
 struct UIControllerEvent
@@ -43,4 +44,9 @@ struct PlayerEvent
 struct ViewModeEvent
 {
     PB::SceneView::Mode mode;
+};
+
+struct UserChatEvent
+{
+    std::string message;
 };

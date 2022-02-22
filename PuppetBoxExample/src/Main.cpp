@@ -14,6 +14,8 @@ int main(int argc, char** argv)
 
         PB::CreateScene(myScene);
         PB::SetActiveScene("Main Scene");
+
+        return true;
     });
 
     return 0;

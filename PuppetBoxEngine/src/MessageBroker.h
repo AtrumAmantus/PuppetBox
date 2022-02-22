@@ -31,14 +31,14 @@ namespace PB
          * their registered callbacks.
          *
          * \param topic The topic name to publish the event to.
-         * \param data  The data to send to all subscriber's callbacks.
+         * \param event The event to send to all subscriber's callbacks.
          * \return The topic id for the published event name.
          */
-        std::uint32_t publish(std::string topicName, std::shared_ptr<void> data)
+        std::uint32_t publish(std::string topicName, std::shared_ptr<void> event)
         {
             std::uint32_t topicId = registerTopic(topicName);
 
-            publish(topicId, data);
+            publish(topicId, event);
 
             return topicId;
         }
@@ -47,16 +47,37 @@ namespace PB
          * \brief Publishes an event by topic ID to all current subscribers, executing
          * their registered callbacks.
          *
-         * \param topic The topic ID to publish the event to.
-         * \param data  The data to send to all subscriber's callbacks.
+         * \param topicId The topic ID to publish the event to.
+         * \param event   The event to send to all subscriber's callbacks.
          */
-        void publish(std::uint32_t topicId, std::shared_ptr<void> data)
+        void publish(std::uint32_t topicId, std::shared_ptr<void> event)
         {
             if (subscribers_.find(topicId) != subscribers_.end())
             {
                 for (auto& f: subscribers_.at(topicId))
                 {
-                    f(data);
+                    f(event);
+                }
+            }
+            else
+            {
+                if (topicId == 0)
+                {
+                    LOGGER_WARN("Event published to unregistered topic");
+                }
+                else
+                {
+                    std::string topicName = "";
+
+                    for (auto entry: topicIds_)
+                    {
+                        if (entry.second == topicId)
+                        {
+                            topicName = entry.first;
+                        }
+                    }
+
+                    LOGGER_WARN("Event published to registered topic, '" + topicName + "', but no one is listening!");
                 }
             }
         };
@@ -65,13 +86,15 @@ namespace PB
          * \brief Subscribes a callback function to the given topic name to be used in future
          * published event handling.
          *
-         * \param topic     The topic name to subscribe the callback to.
+         * \param topicName The topic name to subscribe the callback to.
          * \param consumer  The callback to be invoked for published events of this topic.
          * \return The topic id for the subscribed event name.
          */
         std::uint32_t subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
         {
             std::uint32_t topicId = registerTopic(topicName);
+
+            LOGGER_DEBUG("Now listening for '" + topicName + "' events");
 
             if (subscribers_.find(topicId) == subscribers_.end())
             {
@@ -102,6 +125,8 @@ namespace PB
                 topicIds_.insert(
                         std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_}
                 );
+
+                LOGGER_DEBUG("Event '" + topicName + "' now registered with ID (" + std::to_string(lastTopicId_) + ")");
             }
 
             return topicIds_.at(topicName);

@@ -1,5 +1,6 @@
 #include "puppetbox/AbstractSceneGraph.h"
 #include "GfxMath.h"
+#include "Logger.h"
 
 namespace PB
 {
@@ -12,14 +13,26 @@ namespace PB
             const std::string& sceneName,
             RenderWindow renderWindow,
             std::shared_ptr<AbstractInputReader> inputReader)
-            : name(sceneName), renderWindow_(renderWindow), inputReader_(inputReader)
+            : name(sceneName), renderWindow_(renderWindow), inputReader_(inputReader), isInitialized_(true)
     {
 
     }
 
     bool AbstractSceneGraph::setUp()
     {
-        return true;
+        bool success;
+
+        if (isInitialized_)
+        {
+            success = setUps();
+        }
+        else
+        {
+            success = false;
+            LOGGER_ERROR("This object has not been properly initialized, this should be handled by the core engine.");
+        }
+
+        return success;
     }
 
     void AbstractSceneGraph::update(const float deltaTime)
@@ -108,6 +121,11 @@ namespace PB
                 *renderWindow_.depth,
                 SceneView::UI
         );
+    }
+
+    bool AbstractSceneGraph::setUps()
+    {
+        return true;
     }
 
     void AbstractSceneGraph::updates(const float deltaTime)

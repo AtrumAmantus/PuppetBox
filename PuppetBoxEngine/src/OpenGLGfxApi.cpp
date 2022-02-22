@@ -3,7 +3,6 @@
 
 #include <glad/glad.h>
 
-#include "puppetbox/DataStructures.h"
 #include "GfxMath.h"
 #include "Logger.h"
 #include "OpenGLGfxApi.h"

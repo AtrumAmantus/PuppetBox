@@ -1,6 +1,15 @@
 #pragma once
 
+#include <cstdint>
+
+#include "puppetbox/DataStructures.h"
+#include "puppetbox/RenderWindow.h"
+
 #include "IGfxApi.h"
+#include "ImageOptions.h"
+#include "ImageReference.h"
+#include "Mesh.h"
+#include "TypeDef.h"
 
 namespace PB
 {
@@ -60,10 +69,10 @@ namespace PB
          * \brief Generates textures for each glyph of the given font face, adding references to them
          * within the loaded characters {\link unordered_map}.
          *
-         * @param face              The font face to generate textures for.
-         * @param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
+         * \param face              The font face to generate textures for.
+         * \param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
          * glyph images.
-         * @return True if the glyph textures were successfully generated and loaded, False otherwise.
+         * \return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
         bool
         buildCharacterMap(FT_Face face, std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const override;

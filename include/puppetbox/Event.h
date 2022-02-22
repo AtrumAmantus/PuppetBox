@@ -11,8 +11,9 @@ namespace PB
         {
             CONNECT,
             DISCONNECT,
-            SEND,
-            TERMINATE
+            TERMINATE,
+            READY_CHECK,
+            READY
         };
     }
 

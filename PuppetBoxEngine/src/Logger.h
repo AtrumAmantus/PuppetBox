@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 
+//TODO: Add ability to set logging level
 #define LOGGER_DEBUG(a) DefaultLogger::debug(a,__FILE__,__LINE__)
 #define LOGGER_INFO(a) DefaultLogger::info(a,__FILE__,__LINE__)
 #define LOGGER_WARN(a) DefaultLogger::warn(a,__FILE__,__LINE__)
@@ -24,6 +25,8 @@ namespace PB
 
     /**
     * \brief Logging class for application logging needs.
+     *
+     * TODO: Add concurrency protection
     */
     class DefaultLogger
     {

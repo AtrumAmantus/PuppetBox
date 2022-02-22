@@ -4,6 +4,7 @@
 
 namespace PB
 {
+    //TODO: Add some default rendered objects to this scene graph
     class DefaultSceneGraph : public AbstractSceneGraph
     {
     public:

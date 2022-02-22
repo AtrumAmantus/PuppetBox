@@ -58,13 +58,14 @@ namespace PB::Networking
         return success;
     }
 
+    // TODO: Make network/packet logic customizable by implementing application
     bool send(NetworkingDetails* networkingDetails, std::uint8_t* data, std::uint32_t length, bool isHostBigEndian)
     {
         bool success = true;
 
         uint8_t sendData[MAX_PACKET];
 
-        std::uint32_t offset = 0;
+        std::uint32_t dataOffset = 0;
 
         const std::uint8_t bitShift0 = isHostBigEndian ? 0 : 24;
         const std::uint8_t bitShift1 = isHostBigEndian ? 8 : 16;
@@ -77,14 +78,16 @@ namespace PB::Networking
         sendData[3] = length >> bitShift3;
 
         std::uint8_t i = 4;
+        std::uint32_t bytesLeft;
 
-        while (offset < length)
+        while (dataOffset < length)
         {
-            std::uint32_t bytesLeft = length - offset;
+            // Add 'i' to bytesLeft to account for first loop packet size header
+            bytesLeft = i + length - dataOffset;
 
             while (i < bytesLeft && i < MAX_PACKET)
             {
-                sendData[i++] = data[offset++];
+                sendData[i++] = data[dataOffset++];
             }
 
             std::uint32_t numSent = SDLNet_TCP_Send(networkingDetails->socket, sendData, i);
@@ -97,18 +100,6 @@ namespace PB::Networking
             }
 
             i = 0;
-        }
-
-        if (i > 0)
-        {
-            std::uint32_t numSent = SDLNet_TCP_Send(networkingDetails->socket, sendData, i);
-
-            if (numSent < i)
-            {
-                success = false;
-                LOGGER_ERROR("ER: SDLNet_TCP_Send");
-                LOGGER_ERROR(SDLNet_GetError());
-            }
         }
 
         return success;

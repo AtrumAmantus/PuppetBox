@@ -45,7 +45,7 @@ namespace PB
         /**
         * \brief Executes the engine, starting the primary game loop and processing input.
         */
-        void run();
+        void run(std::function<bool()> onReady);
 
         /**
         * \brief Attempts to shut down the game engine.

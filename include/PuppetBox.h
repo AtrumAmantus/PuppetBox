@@ -81,7 +81,7 @@ namespace PB
     /**
      * \brief Initiates start of core engine, input processors, and render loops.
      */
-    extern PUPPET_BOX_API void Run(std::function<void()> onReady);
+    extern PUPPET_BOX_API void Run(std::function<bool()> onReady);
 
     /**
     * \brief Helper function for getting the ascii character the given key code represents.
@@ -139,7 +139,19 @@ namespace PB
      * \brief Registers the given topic name if it is not already, returning the ID for it.
      *
      * \param topicName The topic name to register
-     * @return The newly registered topic ID, or the existing topic ID if the topic name was already registered.
+     * \return The newly registered topic ID, or the existing topic ID if the topic name was already registered.
      */
     extern PUPPET_BOX_API std::uint32_t RegisterTopic(std::string topicName);
+
+    /**
+     * \brief Registers an event listener to be used with the network thread for sending events over the
+     * network.  The registered topic ID will be listened for and given transformer used to convert the event
+     * into a data stream that can be sent over the network.
+     *
+     * \param topicId       The topic ID for events to listen for.
+     * \param transformer   The transformer to use to convert the event into network data.
+     */
+    extern PUPPET_BOX_API void RegisterNetworkEventListener(
+            std::string topicName,
+            std::function<void(std::shared_ptr<void>, std::uint8_t**, std::uint32_t*)> transformer);
 }

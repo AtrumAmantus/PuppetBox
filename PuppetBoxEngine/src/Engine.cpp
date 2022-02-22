@@ -15,6 +15,7 @@ namespace PB
     namespace Event::Topic
     {
         std::uint32_t NETWORK_TOPIC = 0;
+        std::uint32_t NETWORK_LISTENER_TOPIC = 0;
         std::uint32_t ENGINE_ADD_SCENE_TOPIC = 0;
         std::uint32_t ENGINE_SET_SCENE_TOPIC = 0;
     }
@@ -37,7 +38,7 @@ namespace PB
 
             for (std::uint32_t i = 0; i < dataLength; ++i)
             {
-                std::cout << data[i] << ", ";
+                std::cout << (int) data[i] << ", ";
             }
 
             std::cout << std::endl;
@@ -56,6 +57,31 @@ namespace PB
                 bool shouldThreadStop = false;
             } connection;
 
+            // Subscribe to listener events
+            Event::Topic::NETWORK_LISTENER_TOPIC = MessageBroker::instance()
+                    .subscribe("pb_network_listener_update",
+                               [&connection, isHostBigEndian](std::shared_ptr<void> data) {
+                                   auto listenerEvent = std::static_pointer_cast<NetworkListenerEvent>(data);
+                                   auto transformer = listenerEvent->transformer;
+
+                                   MessageBroker::instance().subscribe(
+                                           listenerEvent->topicName,
+                                           [&connection, transformer, isHostBigEndian](std::shared_ptr<void> d) {
+                                               std::uint8_t* byteData = nullptr;
+                                               std::uint32_t dataLength;
+                                               transformer(d, &byteData, &dataLength);
+
+                                               Networking::send(
+                                                       &(connection.details),
+                                                       byteData,
+                                                       dataLength,
+                                                       isHostBigEndian);
+
+                                               delete[] byteData;
+                                           });
+                               });
+
+            // Subscribe to network events
             Event::Topic::NETWORK_TOPIC = MessageBroker::instance()
                     .subscribe(
                             "pb_network_update",
@@ -64,6 +90,18 @@ namespace PB
 
                                 switch (networkEvent->type)
                                 {
+                                    case Event::NetworkEventType::READY:
+                                        LOGGER_DEBUG("Network READY state event sent");
+                                        break;
+                                    case Event::NetworkEventType::READY_CHECK:
+                                    {
+                                        auto networkReadyEvent = std::make_shared<NetworkEvent>();
+                                        networkReadyEvent->type = Event::NetworkEventType::READY;
+                                        MessageBroker::instance().publish(
+                                                Event::Topic::NETWORK_TOPIC,
+                                                networkReadyEvent);
+                                    }
+                                        break;
                                     case Event::NetworkEventType::CONNECT:
                                         if (!connection.details.isConnected)
                                         {
@@ -86,21 +124,6 @@ namespace PB
                                         connection.shouldDisconnect = true;
                                         LOGGER_INFO("Disconnect request received");
                                         break;
-                                    case Event::NetworkEventType::SEND:
-                                        if (connection.details.isConnected)
-                                        {
-                                            Networking::send(
-                                                    &(connection.details),
-                                                    networkEvent->data,
-                                                    networkEvent->dataLength,
-                                                    isHostBigEndian);
-                                        }
-                                        else
-                                        {
-                                            LOGGER_ERROR("Not connected to any server");
-                                        }
-
-                                        break;
                                     default:
                                         LOGGER_ERROR("Unrecognized network event type");
                                 }
@@ -117,6 +140,10 @@ namespace PB
             const std::uint8_t bitShift1 = isHostBigEndian ? 8 : 16;
             const std::uint8_t bitShift2 = isHostBigEndian ? 16 : 8;
             const std::uint8_t bitShift3 = isHostBigEndian ? 24 : 0;
+
+            auto networkReadyEvent = std::make_shared<NetworkEvent>();
+            networkReadyEvent->type = Event::NetworkEventType::READY;
+            MessageBroker::instance().publish(Event::Topic::NETWORK_TOPIC, networkReadyEvent);
 
             while (!connection.shouldThreadStop)
             {
@@ -215,56 +242,75 @@ namespace PB
         );
 
         // Listener for adding new scenes.
-        Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance().subscribe("pb_engine_add_scene", [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
+        Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance()
+                .subscribe(
+                        "pb_engine_add_scene",
+                        [this](std::shared_ptr<void> data) {
+                            auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
 
-            *(event->scene) = AbstractSceneGraph{event->scene->name, gfxApi_->getRenderWindow(), inputReader_};
-            event->scene->setUp();
+                            *(event->scene) = AbstractSceneGraph{
+                                    event->scene->name,
+                                    gfxApi_->getRenderWindow(),
+                                    inputReader_};
+                            event->scene->setUp();
 
-            sceneGraphs_.insert(
-                    std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{event->scene->name, event->scene}
-            );
-        });
+                            sceneGraphs_.insert(
+                                    std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
+                                            event->scene->name,
+                                            event->scene}
+                            );
+                        });
 
         // Listener for setting the current scene.
-        Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance().subscribe("pb_event_set_scene", [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
+        Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance()
+                .subscribe(
+                        "pb_event_set_scene",
+                        [this](std::shared_ptr<void> data) {
+                            auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
 
-            if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
-            {
-                currentScene_ = sceneGraphs_.at(event->sceneName);
-            }
-            else
-            {
-                LOGGER_ERROR("Unable to locate specified scene: '" + event->sceneName + "'");
-            }
-        });
+                            if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
+                            {
+                                currentScene_ = sceneGraphs_.at(event->sceneName);
+                            }
+                            else
+                            {
+                                LOGGER_ERROR("Unable to locate specified scene: '" + event->sceneName + "'");
+                            }
+                        });
     }
 
-    void Engine::run()
+    void Engine::run(std::function<bool()> onReady)
     {
         std::thread networkThread{&networkRunner};
 
-        hardwareInitializer_.initializeGameTime();
-
-        while (!inputReader_->window.windowClose)
+        if (onReady())
         {
-            float deltaTime = hardwareInitializer_.updateElapsedTime();
+            hardwareInitializer_.initializeGameTime();
 
-            processInput();
+            while (!inputReader_->window.windowClose)
+            {
+                float deltaTime = hardwareInitializer_.updateElapsedTime();
 
-            gfxApi_->preLoopCommands();
+                processInput();
 
-            currentScene_->update(deltaTime);
+                gfxApi_->preLoopCommands();
 
-            gfxApi_->setTransformUBOData(
-                    currentScene_->getView(),
-                    currentScene_->getProjection(),
-                    currentScene_->getUIProjection());
+                currentScene_->update(deltaTime);
 
-            currentScene_->render();
+                // Set common transforms for all shaders
+                gfxApi_->setTransformUBOData(
+                        currentScene_->getView(),
+                        currentScene_->getProjection(),
+                        currentScene_->getUIProjection());
 
-            hardwareInitializer_.postLoopCommands();
+                currentScene_->render();
+
+                hardwareInitializer_.postLoopCommands();
+            }
+        }
+        else
+        {
+            LOGGER_ERROR("Invocation of ready state logic failed.");
         }
 
         // Send message to terminate network thread so join() can be called

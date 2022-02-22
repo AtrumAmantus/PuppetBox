@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "AbstractInputProcessor.h"
+#include "EventDef.h"
 
 class Game2DInputProcessor : public AbstractInputProcessor
 {
