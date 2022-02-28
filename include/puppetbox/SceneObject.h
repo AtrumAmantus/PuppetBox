@@ -67,10 +67,11 @@ namespace PB
         * \brief Typically called by PuppetBox internal logic to apply assets to an already
         * instantiated derived object.
         *
+        * \param uuid       The {\link PB::UUID} to associate with the scene object.
         * \param baseScale	The scale values used as a baseline for the object, SceneObject#scale values multiply this.
         * \param model		Pointer to the IModel assets applied to this object.
         */
-        SceneObject(std::string id, vec3 baseScale, IModel* model);
+        SceneObject(UUID uuid, vec3 baseScale, IModel* model);
 
         /**
          * \brief Attaches the object to another object, causing it to use it's transformation
@@ -198,7 +199,7 @@ namespace PB
          *
          * \return The UUID associated with this {\link SceneObject}.
          */
-        std::string getId() const;
+        const UUID getId() const;
 
         bool operator==(const SceneObject& rhs) const;
 
@@ -223,7 +224,7 @@ namespace PB
         virtual void behaviorEvent(std::string behaviorName, std::uint32_t behaviorEvent) {};
 
     private:
-        std::string id_;
+        UUID id_{};
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         mat4 transform_{};
         IAnimationCatalogue* animationCatalogue_ = nullptr;

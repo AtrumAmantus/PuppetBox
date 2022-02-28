@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ostream>
 #include <string>
 
 #include "Constants.h"
@@ -370,9 +371,9 @@ namespace PB
         operator vec3() const
         {
             return {
-                this->x,
-                this->y,
-                this->z
+                    this->x,
+                    this->y,
+                    this->z
             };
         };
 
@@ -434,7 +435,8 @@ namespace PB
         };
     };
 
-    struct Vec4 {
+    struct Vec4
+    {
         union
         {
             Result<float> x, r, s;
@@ -760,6 +762,79 @@ namespace PB
         Bone bone{};
     };
 
+    struct UUID
+    {
+        std::uint32_t bytes[4];
+
+        UUID()
+        {
+            bytes[0] = 0;
+            bytes[1] = 0;
+            bytes[2] = 0;
+            bytes[3] = 0;
+        };
+
+        UUID(std::uint32_t bytes0, std::uint32_t bytes1, std::uint32_t bytes2, std::uint32_t bytes3)
+        {
+            bytes[0] = bytes0;
+            bytes[1] = bytes1;
+            bytes[2] = bytes2;
+            bytes[3] = bytes3;
+        };
+
+        UUID(const UUID& o)
+        {
+            this->bytes[0] = o.bytes[0];
+            this->bytes[1] = o.bytes[1];
+            this->bytes[2] = o.bytes[2];
+            this->bytes[3] = o.bytes[3];
+        };
+
+        static UUID nullUUID()
+        {
+            return UUID(0, 0, 0, 0);
+        }
+
+        bool operator==(const UUID& rhs) const
+        {
+            return this->bytes[0] == rhs.bytes[0]
+                   && this->bytes[1] == rhs.bytes[1]
+                   && this->bytes[2] == rhs.bytes[2]
+                   && this->bytes[3] == rhs.bytes[3];
+        };
+
+        bool operator!=(const UUID& rhs) const
+        {
+            return this->bytes[0] != rhs.bytes[0]
+                   || this->bytes[1] != rhs.bytes[1]
+                   || this->bytes[2] != rhs.bytes[2]
+                   || this->bytes[3] != rhs.bytes[3];
+        };
+
+        friend std::ostream& operator<<(std::ostream& output, const UUID& uuid)
+        {
+            output << "UUID: {"
+                   << uuid.bytes[0] << ", "
+                   << uuid.bytes[1] << ", "
+                   << uuid.bytes[2] << ", "
+                   << uuid.bytes[3] << "}";
+            return output;
+        }
+
+        bool operator<(const UUID& rhs) const
+        {
+            return this->bytes[0] < rhs.bytes[0]
+                   || (this->bytes[0] == rhs.bytes[0] && this->bytes[1] < rhs.bytes[1])
+                   || (this->bytes[0] == rhs.bytes[0]
+                       && this->bytes[1] == rhs.bytes[1]
+                       && this->bytes[2] < rhs.bytes[2])
+                   || (this->bytes[0] == rhs.bytes[0]
+                       && this->bytes[1] == rhs.bytes[1]
+                       && this->bytes[2] == rhs.bytes[2]
+                       && this->bytes[3] < rhs.bytes[3]);
+        };
+    };
+
     /**
      * \brief Simple struct to pass an array and it's size in one object.
      *
@@ -780,7 +855,7 @@ namespace PB
         DoubleLinkedNode* prev = nullptr;
     };
 
-    template <typename T>
+    template<typename T>
     class Queue
     {
     public:
@@ -827,9 +902,25 @@ namespace PB
         {
             return size_ == 0;
         }
+
     private:
         DoubleLinkedNode<T>* head_ = nullptr;
         DoubleLinkedNode<T>* tail_ = nullptr;
         std::uint32_t size_ = 0;
+    };
+}
+
+namespace std
+{
+    /**
+     * \brief Define hashing operation for {\link PB::UUID} objects.
+     */
+    template<>
+    struct std::hash<PB::UUID>
+    {
+        std::size_t operator()(const PB::UUID& value) const noexcept
+        {
+            return (((((value.bytes[0] * 37) + value.bytes[1]) * 37) + value.bytes[2]) * 37) + value.bytes[3];
+        }
     };
 }

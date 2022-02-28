@@ -13,8 +13,8 @@ namespace PB
 
     }
 
-    SceneObject::SceneObject(std::string id, vec3 baseScale, IModel* model) :
-            id_(std::move(id)), baseScale_(baseScale), model_(model)
+    SceneObject::SceneObject(UUID uuid, vec3 baseScale, IModel* model)
+            : id_(uuid), baseScale_(baseScale), model_(model)
     {
 
     }
@@ -147,7 +147,7 @@ namespace PB
         };
     }
 
-    std::string SceneObject::getId() const
+    const UUID SceneObject::getId() const
     {
         return id_;
     }

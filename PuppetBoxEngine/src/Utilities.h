@@ -246,6 +246,13 @@ namespace PB
     namespace RandomUtils
     {
         /**
+         * \brief Generates a random {\link PB::UUID} object.
+         *
+         * \return A random {\link PB::UUID} object.
+         */
+        UUID uuid();
+
+        /**
         * \brief Returns values based on preloaded perlin noise values.
         *
         * \param offset	The offset value to draw from the preloaded perlin values.

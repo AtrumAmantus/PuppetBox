@@ -72,6 +72,17 @@ namespace PB
     extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject);
 
     /**
+     * \brief Injects the base asset into the given {\link PB::SceneObject} with the given UUID.
+     *
+     * \param assetPath     The path to the asset to inject
+     * \param sceneObject   The SceneObject to inject assets into, must not be a nullptr.
+     * \param uuid          The {\link PB::UUID} to use for the {\link PB::SceneObject}.
+     *
+     * \return True if the {\link PB::SceneObject} was successfully injected with assets, False otherwise.
+     */
+    extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid);
+
+    /**
      * \brief Loads the animations associated with the given asset path.
      *
      * \param assetPath The path to the animation assets to load.

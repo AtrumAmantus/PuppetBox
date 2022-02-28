@@ -300,6 +300,11 @@ namespace PB
 
     bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject)
     {
+        return CreateSceneObject(assetPath, sceneObject, RandomUtils::uuid());
+    }
+
+    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid)
+    {
         bool success;
 
         if (sceneObject == nullptr)
@@ -309,7 +314,7 @@ namespace PB
         }
         else
         {
-            success = assetLibrary->loadSceneObject(assetPath, sceneObject);
+            success = assetLibrary->loadSceneObject(assetPath, sceneObject, uuid);
             sceneObject->setAnimationCatalogue(&animationCatalogue);
         }
 

@@ -5,6 +5,8 @@
 
 #include <zip/zip.h>
 
+#include "puppetbox/DataStructures.h"
+
 #include "Logger.h"
 #include "Utilities.h"
 
@@ -335,7 +337,7 @@ namespace PB
 
         std::string toLowerCase(const std::string& original)
         {
-            char *chars = new char[original.length() + 1]{'\0'};
+            char* chars = new char[original.length() + 1]{'\0'};
 
             for (std::uint32_t i = 0; i < original.length(); ++i)
             {
@@ -357,6 +359,15 @@ namespace PB
             float pseudoRandom_[] = {PSEUDO_RANDOM};
 
             std::uint32_t nextPseudoIndex = 0;
+        }
+
+        UUID uuid()
+        {
+            static std::random_device rd;
+            static std::mt19937 gen(rd());
+            static std::uniform_int_distribution<> dis(INT_MIN, INT_MAX);
+
+            return UUID(dis(gen), dis(gen), dis(gen), dis(gen));
         }
 
         float perlinValue(std::uint64_t offset)

@@ -456,7 +456,7 @@ namespace PB
         return data;
     }
 
-    bool AssetLibrary::loadSceneObject(const std::string& assetPath, SceneObject* sceneObject)
+    bool AssetLibrary::loadSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid)
     {
         bool error = false;
 
@@ -485,7 +485,7 @@ namespace PB
                 vec3 velocity = sceneObject->velocity;
 
                 //TODO: Revisit "base scale"
-                *sceneObject = SceneObject{StringUtils::uuid(), vec3{1.0f, 1.0f, 1.0f}, model};
+                *sceneObject = SceneObject{uuid, vec3{1.0f, 1.0f, 1.0f}, model};
                 sceneObject->position = position;
                 sceneObject->rotation = rotation;
                 sceneObject->scale = scale;

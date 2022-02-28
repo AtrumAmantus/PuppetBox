@@ -147,7 +147,7 @@ namespace PB
         RenderWindow renderWindow_{};
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
-        std::unordered_map<std::string, SceneObject*> sceneObjects_{};
+        std::unordered_map<UUID, SceneObject*> sceneObjects_{};
         Queue<SceneObject*> processLater_{};
     };
 }

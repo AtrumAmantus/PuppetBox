@@ -161,7 +161,7 @@ namespace PB
     void AbstractSceneGraph::addSceneObject(SceneObject* sceneObject)
     {
         sceneObjects_.insert(
-                std::pair<std::string, SceneObject*>{sceneObject->getId(), sceneObject}
+                std::pair<UUID, SceneObject*>{sceneObject->getId(), sceneObject}
         );
     }
 }

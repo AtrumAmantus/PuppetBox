@@ -54,10 +54,11 @@ namespace PB
         *
         * \param assetPath		Virtual path to the requested asset.
         * \param sceneObject	The instantiated scene object to load with asset data.
+        * \param uuid           The UUID to use for the created {\link SceneObject}
         *
         * \return True if the scene object was successfully loaded with assets, False otherwise.
         */
-        bool loadSceneObject(const std::string& assetPath, SceneObject* sceneObject);
+        bool loadSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid);
 
         /**
         * \brief Loads a Shader asset given by the provided virtual asset path.
