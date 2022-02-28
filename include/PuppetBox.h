@@ -143,9 +143,16 @@ namespace PB
      * \param callback  The function to process the data of events for the subscribed topic.
      * \return The topic id associated to the subscribed topic name.
      */
-    extern PUPPET_BOX_API std::uint32_t SubscribeEvent(
+    extern PUPPET_BOX_API UUID SubscribeEvent(
             std::string topicName,
             std::function<void(std::shared_ptr<void>)> callback);
+
+    /**
+     * \brief Destroy the specific subscription associated with the given {\link PB::UUID}.
+     *
+     * \param uuid  The {\link PB::UUID} associated with the subscription to destroy.
+     */
+    extern PUPPET_BOX_API void Unsubscribe(UUID uuid);
 
     /**
      * \brief Registers the given topic name if it is not already, returning the ID for it.

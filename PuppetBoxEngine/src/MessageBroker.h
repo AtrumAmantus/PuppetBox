@@ -1,9 +1,12 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <string>
-#include <unordered_map>
+#include <concurrent_unordered_map.h>
 #include <vector>
+
+#include "Utilities.h"
 
 /**
  * Handles messaging communication within the base engine and implementing application.
@@ -54,9 +57,11 @@ namespace PB
         {
             if (subscribers_.find(topicId) != subscribers_.end())
             {
-                for (auto& f: subscribers_.at(topicId))
+                auto& topicSubscribers = subscribers_.at(topicId);
+
+                for (auto& f: topicSubscribers)
                 {
-                    f(event);
+                    f.second(event);
                 }
             }
             else
@@ -88,9 +93,9 @@ namespace PB
          *
          * \param topicName The topic name to subscribe the callback to.
          * \param consumer  The callback to be invoked for published events of this topic.
-         * \return The topic id for the subscribed event name.
+         * \return A UUID representing the subscription that can be used to remove it again later.
          */
-        std::uint32_t subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
+        UUID subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
         {
             std::uint32_t topicId = registerTopic(topicName);
 
@@ -99,16 +104,54 @@ namespace PB
             if (subscribers_.find(topicId) == subscribers_.end())
             {
                 subscribers_.insert(
-                        std::pair<std::uint32_t, std::vector<std::function<void(std::shared_ptr<void>)>>>(
+                        std::pair<std::uint32_t, std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>>(
                                 topicId,
-                                std::vector<std::function<void(std::shared_ptr<void>)>>{}
+                                std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>{}
                         )
                 );
             }
 
-            subscribers_.at(topicId).push_back(consumer);
+            UUID uuid = RandomUtils::uuid();
 
-            return topicId;
+            subscribers_.at(topicId).insert(
+                    std::pair<UUID, std::function<void(std::shared_ptr<void>)>>{uuid, consumer}
+            );
+
+            subscriptionToTopicId_.insert(
+                    std::pair<UUID, std::uint32_t>{uuid, topicId}
+            );
+
+            return uuid;
+        };
+
+        /**
+         * \brief Destroys any existing subscription associated with the given {\link PB::UUID}.
+         *
+         * \param uuid  The {\link PB::UUID} associated with the subscription to destroy.
+         */
+        void unsubscribe(UUID uuid)
+        {
+            auto iter = subscriptionToTopicId_.find(uuid);
+
+            if (iter != subscriptionToTopicId_.end())
+            {
+                std::uint32_t topicId = iter->second;
+
+                std::string topicName;
+
+                for (auto t: topicIds_)
+                {
+                    if (t.second == topicId)
+                    {
+                        topicName = t.first;
+                    }
+                }
+
+                subscribers_.at(topicId).erase(uuid);
+                subscriptionToTopicId_.unsafe_erase(uuid);
+
+                LOGGER_DEBUG("Stopped listening for '" + topicName + "' events");
+            }
         };
 
         /**
@@ -138,9 +181,11 @@ namespace PB
         void operator=(MessageBroker const&) = delete;
 
     private:
-        std::unordered_map<std::string, std::uint32_t> topicIds_{};
-        std::unordered_map<std::uint32_t, std::vector<std::function<void(std::shared_ptr<void>)>>> subscribers_{};
-        std::uint32_t lastTopicId_ = 0;
+        Concurrency::concurrent_unordered_map<std::string, std::uint32_t> topicIds_{};
+        Concurrency::concurrent_unordered_map
+                <std::uint32_t, std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>> subscribers_{};
+        Concurrency::concurrent_unordered_map<UUID, std::uint32_t> subscriptionToTopicId_{};
+        std::atomic<uint32_t> lastTopicId_ = 0;
 
     private:
         MessageBroker() = default;

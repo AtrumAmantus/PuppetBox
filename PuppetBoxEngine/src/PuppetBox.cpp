@@ -407,9 +407,14 @@ namespace PB
         MessageBroker::instance().publish(topicId, data);
     }
 
-    std::uint32_t SubscribeEvent(std::string topicName, std::function<void(std::shared_ptr<void>)> callback)
+    UUID SubscribeEvent(std::string topicName, std::function<void(std::shared_ptr<void>)> callback)
     {
         return MessageBroker::instance().subscribe(topicName, callback);
+    }
+
+    void Unsubscribe(UUID uuid)
+    {
+        MessageBroker::instance().unsubscribe(uuid);
     }
 
     std::uint32_t RegisterTopic(std::string topicName)
