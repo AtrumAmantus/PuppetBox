@@ -46,7 +46,7 @@ namespace PB
         * \brief Invokes the update() method of the sceneHandler, allowing updates for various scene
         * elements for the current frame.
         *
-        * \param deltaTime	The amount of time passed since the last update invocation (in Milliseconds).
+        * \param deltaTime	The amount of time passed since the last update invocation (in seconds).
         */
         void update(const float deltaTime);
 
@@ -95,7 +95,7 @@ namespace PB
         /**
          * \brief Defined by the implementing class to specify scene specific update logic.
          *
-         * \param deltaTime The amount of time in milliseconds that has passed since the last update.
+         * \param deltaTime The amount of time in seconds that has passed since the last update.
          */
         virtual void updates(const float deltaTime);
 

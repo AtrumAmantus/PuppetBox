@@ -107,7 +107,7 @@ namespace PB
         /**
         * \brief Calls updates() and updates model matrices.
         *
-        * \param deltaTime	The time passed (in Milliseconds) since the last update.
+        * \param deltaTime	The time passed (in seconds) since the last update.
         */
         void update(float deltaTime);
 
@@ -208,7 +208,7 @@ namespace PB
         /**
         * \brief Update method for consumer defined update logic, called by update().
         *
-        * \param deltaTime	The time passed (in Milliseconds) since the last update.
+        * \param deltaTime	The time passed (in seconds) since the last update.
         */
         virtual void updates(float deltaTime) {};
 

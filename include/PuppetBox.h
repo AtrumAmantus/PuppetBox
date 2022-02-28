@@ -62,12 +62,12 @@ namespace PB
     extern PUPPET_BOX_API bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize);
 
     /**
-     * \brief Injects the base assets into the given scene object.
+     * \brief Injects the base assets into the given {\link PB::SceneObject}.
      *
-     * \param assetPath The path to the asset to inject
-     * \param sceneObject The SceneObject to inject assets into, must not be a nullptr.
+     * \param assetPath     The path to the asset to inject
+     * \param sceneObject   The SceneObject to inject assets into, must not be a nullptr.
      *
-     * \return True if the SceneObject was successfully injected with assets, False otherwise.
+     * \return True if the {\link PB::SceneObject} was successfully injected with assets, False otherwise.
      */
     extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject);
 
@@ -110,30 +110,30 @@ namespace PB
     /**
      * \brief Publish an event on the internal messaging system using the topic name.
      *
-     * \param event The event topic ID to publish to.
-     * \param data  The data related to the event to send.
+     * \param topicName The event topic ID to publish to.
+     * \param data      The data related to the event to send.
      * \return The topic id associated to the topic of the event that was submitted.
      */
-    extern PUPPET_BOX_API std::uint32_t PublishEvent(std::string event, std::shared_ptr<void> data);
+    extern PUPPET_BOX_API std::uint32_t PublishEvent(std::string topicName, std::shared_ptr<void> data);
 
     /**
      * \brief Publish an event on the internal messaging system using the topic id.
      *
-     * \param event The event topic name to publish to.
-     * @param data  The data related to the event to send.
+     * \param topicId   The event topic name to publish to.
+     * @param data      The data related to the event to send.
      */
-    extern PUPPET_BOX_API void PublishEvent(std::uint32_t event, std::shared_ptr<void> data);
+    extern PUPPET_BOX_API void PublishEvent(std::uint32_t topicId, std::shared_ptr<void> data);
 
     /**
      * \brief Subscribe to events for a given topic name to start processing them with
      * the given function reference.
      *
-     * \param event     The event topic name to subscribe to and start processing for.
+     * \param topicName The event topic name to subscribe to and start processing for.
      * \param callback  The function to process the data of events for the subscribed topic.
      * \return The topic id associated to the subscribed topic name.
      */
     extern PUPPET_BOX_API std::uint32_t SubscribeEvent(
-            std::string event,
+            std::string topicName,
             std::function<void(std::shared_ptr<void>)> callback);
 
     /**
@@ -149,7 +149,7 @@ namespace PB
      * network.  The registered topic ID will be listened for and given transformer used to convert the event
      * into a data stream that can be sent over the network.
      *
-     * \param topicId       The topic ID for events to listen for.
+     * \param topicName     The topic name for events to listen for.
      * \param transformer   The transformer to use to convert the event into network data.
      */
     extern PUPPET_BOX_API void RegisterNetworkEventListener(std::string topicName, pb_EventTransformer transformer);

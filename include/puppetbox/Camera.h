@@ -17,7 +17,7 @@ namespace PB
         /**
          * \brief Update the current state of the camera based on current input.
          *
-         * \param deltaTime The time (in milliseconds) since the last update().
+         * \param deltaTime The time (in seconds) since the last update().
          */
         void update(float deltaTime);
 

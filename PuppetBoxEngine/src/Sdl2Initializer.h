@@ -211,7 +211,7 @@ namespace PB
         /**
         * \brief Re-calculate time elapsed since last invocation.
         *
-        * \return The amount of time (in Milliseconds) since the last time the method was invoked.
+        * \return The amount of time (in seconds) since the last time the method was invoked.
         */
         float updateElapsedTime()
         {

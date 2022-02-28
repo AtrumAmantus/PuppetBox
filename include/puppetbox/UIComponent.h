@@ -172,7 +172,7 @@ namespace PB
          *
          * TODO: Implement listeners for the various attributes?
          *
-         * \param deltaTime The amount of tie that has passed (in milliseconds) since the last update call.
+         * \param deltaTime The amount of tie that has passed (in seconds) since the last update call.
          */
         virtual void update(float deltaTime) = 0;
 

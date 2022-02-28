@@ -23,7 +23,7 @@ namespace PB
         * \brief Runs the update logic for the behavior.
         *
         * \param sceneObject	The SceneObject the behavior is attached to.
-        * \param deltaTime		The amount of time (in Milliseconds) that have elapsed since the last update.
+        * \param deltaTime		The amount of time (in seconds) that have elapsed since the last update.
         */
         virtual void update(SceneObject* sceneObject, float deltaTime) = 0;
 

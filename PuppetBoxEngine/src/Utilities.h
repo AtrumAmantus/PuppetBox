@@ -184,7 +184,7 @@ namespace PB
                 bool excludeNull = true);
 
         /**
-         * \brief Generates a Universally Unique Identifier
+         * \brief Generates a Universally Unique Identifier string
          *
          * \return A UUID string.
          */
