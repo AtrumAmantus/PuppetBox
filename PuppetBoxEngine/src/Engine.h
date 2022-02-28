@@ -53,10 +53,10 @@ namespace PB
         void shutdown();
 
     private:
-        std::shared_ptr<IGfxApi> gfxApi_;
+        std::shared_ptr<IGfxApi> gfxApi_{nullptr};
         Sdl2Initializer hardwareInitializer_;
-        std::shared_ptr<AbstractInputReader> inputReader_;
-        std::shared_ptr<AbstractSceneGraph> currentScene_;
+        std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
+        std::shared_ptr<AbstractSceneGraph> currentScene_{nullptr};
         std::unordered_map<std::string, std::shared_ptr<AbstractSceneGraph>> sceneGraphs_{};
 
     private:

@@ -167,8 +167,22 @@ namespace PB
      * network.  The registered topic ID will be listened for and given transformer used to convert the event
      * into a data stream that can be sent over the network.
      *
-     * \param topicName     The topic name for events to listen for.
-     * \param transformer   The transformer to use to convert the event into network data.
+     * \param topicName The topic name for events to listen for.
+     * \param writer    The transformer to use to convert the event into network data.
      */
-    extern PUPPET_BOX_API void RegisterNetworkEventListener(std::string topicName, pb_EventTransformer transformer);
+    extern PUPPET_BOX_API void RegisterNetworkEventWriter(std::string topicName, pb_NetworkEventWriter writer);
+
+    /**
+     * \brief Registers a network reader function to be used for reading data off the network.  Only one
+     * network reader can be registered (active) at a time.
+     *
+     * \param reader The network reader to register and utilize to read network data.
+     */
+    extern PUPPET_BOX_API void RegisterNetworkEventReader(pb_NetworkEventReader reader);
+
+    /**
+     * \brief Removes the current network reader function used to read network data.  All network
+     * data will be ignored after the reader has been cleared.
+     */
+    extern PUPPET_BOX_API void ClearNetworkEventReader();
 }

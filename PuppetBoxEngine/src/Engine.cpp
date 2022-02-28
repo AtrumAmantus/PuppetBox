@@ -15,33 +15,33 @@ namespace PB
     namespace Event::Topic
     {
         std::uint32_t NETWORK_TOPIC = 0;
-        std::uint32_t NETWORK_LISTENER_TOPIC = 0;
+        std::uint32_t NETWORK_STATUS_TOPIC = 0;
+        std::uint32_t NETWORK_EVENT_WRITER_TOPIC = 0;
+        std::uint32_t NETWORK_EVENT_READER_TOPIC = 0;
         std::uint32_t ENGINE_ADD_SCENE_TOPIC = 0;
         std::uint32_t ENGINE_SET_SCENE_TOPIC = 0;
     }
 
     namespace
     {
-        std::uint8_t getEndianness()
+        void defaultReader(std::uint8_t* data, std::uint32_t dataLength)
+        {
+
+        }
+
+        inline std::uint8_t getEndianness()
         {
             std::uint32_t n = 1;
             std::uint8_t* p = (uint8_t*) &n;
             return *p;
         }
 
-        void parseData(std::uint32_t contentLength, std::uint8_t* data, std::uint32_t dataLength)
+        inline void parseData(
+                pb_NetworkEventReader reader,
+                std::uint8_t* data,
+                std::uint32_t dataLength)
         {
-            std::cout << "Received " << dataLength << " bytes of data" << std::endl;
-            std::cout << "Headers:" << std::endl;
-            std::cout << "\tMessage Length: " << contentLength << std::endl;
-            std::cout << "Raw Packet:" << std::endl << "\t";
-
-            for (std::uint32_t i = 0; i < dataLength; ++i)
-            {
-                std::cout << (int) data[i] << ", ";
-            }
-
-            std::cout << std::endl;
+            reader(data, dataLength);
         }
 
         void networkRunner()
@@ -49,6 +49,8 @@ namespace PB
             LOGGER_INFO("Networking thread started.");
 
             const bool isHostBigEndian = getEndianness() == BIG_ENDIAN;
+
+            pb_NetworkEventReader networkReader = &defaultReader;
 
             struct
             {
@@ -58,94 +60,111 @@ namespace PB
             } connection;
 
             // Subscribe to listener events
-            Event::Topic::NETWORK_LISTENER_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_LISTENER);
-            MessageBroker::instance()
-                    .subscribe(PB_EVENT_NETWORK_LISTENER,
-                               [&connection, isHostBigEndian](std::shared_ptr<void> data) {
-                                   auto listenerEvent = std::static_pointer_cast<NetworkListenerEvent>(data);
-                                   auto transformer = listenerEvent->transformer;
+            Event::Topic::NETWORK_EVENT_WRITER_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_WRITER);
+            MessageBroker::instance().subscribe(
+                    PB_EVENT_NETWORK_WRITER,
+                    [&connection, isHostBigEndian](std::shared_ptr<void> data) {
+                        auto listenerEvent = std::static_pointer_cast<NetworkEventWriterEvent>(data);
+                        auto transformer = listenerEvent->writer;
 
-                                   MessageBroker::instance().subscribe(
-                                           listenerEvent->topicName,
-                                           [&connection, transformer, isHostBigEndian](std::shared_ptr<void> d) {
-                                               std::uint8_t* byteData = nullptr;
-                                               std::uint32_t dataLength;
-                                               transformer(d, &byteData, &dataLength);
+                        MessageBroker::instance().subscribe(
+                                listenerEvent->topicName,
+                                [&connection, transformer, isHostBigEndian](std::shared_ptr<void> d) {
+                                    if (connection.details.isConnected)
+                                    {
+                                        std::uint8_t* byteData = nullptr;
+                                        std::uint32_t dataLength;
+                                        transformer(d, &byteData, &dataLength);
 
-                                               Networking::send(
-                                                       &(connection.details),
-                                                       byteData,
-                                                       dataLength,
-                                                       isHostBigEndian);
+                                        Networking::send(
+                                                &(connection.details),
+                                                byteData,
+                                                dataLength,
+                                                isHostBigEndian);
 
-                                               delete[] byteData;
-                                           });
-                               });
+                                        delete[] byteData;
+                                    }
+                                });
+                    });
+
+            Event::Topic::NETWORK_EVENT_READER_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_READER);
+            MessageBroker::instance().subscribe(
+                    PB_EVENT_NETWORK_READER,
+                    [&networkReader](std::shared_ptr<void> data) {
+                        auto networkReaderEvent = std::static_pointer_cast<NetworkEventReaderEvent>(data);
+
+                        networkReader =
+                                networkReaderEvent->reader != nullptr ? networkReaderEvent->reader : &defaultReader;
+                    });
 
             // Subscribe to network events
+            Event::Topic::NETWORK_STATUS_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_STATUS);
             Event::Topic::NETWORK_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK);
-            MessageBroker::instance()
-                    .subscribe(
-                            PB_EVENT_NETWORK,
-                            [&connection, isHostBigEndian](std::shared_ptr<void> data) {
-                                auto networkEvent = std::static_pointer_cast<NetworkEvent>(data);
+            MessageBroker::instance().subscribe(
+                    PB_EVENT_NETWORK,
+                    [&connection, isHostBigEndian](std::shared_ptr<void> data) {
+                        auto networkEvent = std::static_pointer_cast<NetworkEvent>(data);
 
-                                switch (networkEvent->type)
+                        switch (networkEvent->type)
+                        {
+                            case Event::NetworkEventType::READY_CHECK:
+                            {
+                                auto networkReadyEvent = std::make_shared<NetworkStatusEvent>();
+                                networkReadyEvent->status = Event::NetworkStatus::READY;
+                                MessageBroker::instance().publish(
+                                        Event::Topic::NETWORK_STATUS_TOPIC,
+                                        networkReadyEvent);
+                            }
+                                break;
+                            case Event::NetworkEventType::CONNECT:
+                                if (!connection.details.isConnected)
                                 {
-                                    case Event::NetworkEventType::READY:
-                                        LOGGER_DEBUG("Network READY state event sent");
-                                        break;
-                                    case Event::NetworkEventType::READY_CHECK:
-                                    {
-                                        auto networkReadyEvent = std::make_shared<NetworkEvent>();
-                                        networkReadyEvent->type = Event::NetworkEventType::READY;
-                                        MessageBroker::instance().publish(
-                                                Event::Topic::NETWORK_TOPIC,
-                                                networkReadyEvent);
-                                    }
-                                        break;
-                                    case Event::NetworkEventType::CONNECT:
-                                        if (!connection.details.isConnected)
-                                        {
-                                            LOGGER_INFO("Connecting to server " + networkEvent->host + ":" +
-                                                        std::to_string(networkEvent->port));
-                                            connection.details.isConnected = Networking::connect(
-                                                    &(connection.details),
-                                                    networkEvent->host,
-                                                    networkEvent->port);
-                                        }
-                                        else
-                                        {
-                                            LOGGER_WARN("Already connected to a server");
-                                        }
+                                    LOGGER_INFO("Connecting to server " + networkEvent->host + ":" +
+                                                std::to_string(networkEvent->port));
+                                    connection.shouldDisconnect = false;
+                                    connection.details.isConnected = Networking::connect(
+                                            &(connection.details),
+                                            networkEvent->host,
+                                            networkEvent->port);
 
-                                        break;
-                                    case Event::NetworkEventType::TERMINATE:
-                                        connection.shouldThreadStop = true;
-                                    case Event::NetworkEventType::DISCONNECT:
-                                        connection.shouldDisconnect = true;
-                                        LOGGER_INFO("Disconnect request received");
-                                        break;
-                                    default:
-                                        LOGGER_ERROR("Unrecognized network event type");
+                                    auto event = std::make_shared<NetworkStatusEvent>();
+                                    event->status = connection.details.isConnected ? Event::CONNECTED
+                                                                                   : Event::DISCONNECTED;
+                                    MessageBroker::instance().publish(Event::Topic::NETWORK_STATUS_TOPIC,
+                                                                      event);
                                 }
-                            });
+                                else
+                                {
+                                    LOGGER_WARN("Already connected to a server");
+                                }
+
+                                break;
+                            case Event::NetworkEventType::TERMINATE:
+                                connection.shouldThreadStop = true;
+                            case Event::NetworkEventType::DISCONNECT:
+                                connection.shouldDisconnect = true;
+                                LOGGER_INFO("Disconnect request received");
+                                break;
+                            default:
+                                LOGGER_ERROR("Unrecognized network event type");
+                        }
+                    });
 
             std::int16_t bytesRead;
-            std::uint8_t data[MAX_PACKET_SIZE];
-            std::uint8_t buffer[MAX_BUFFER_SIZE];
-            std::uint8_t receivedData[MAX_BUFFER_SIZE];
-            std::uint32_t bufferOffset = 0;
-            std::uint32_t dataInCurrentPacket = 0;
+            std::uint8_t packetData[MAX_PACKET_SIZE];
+            std::uint8_t bufferedData[MAX_BUFFER_SIZE];
+            std::uint32_t messageStartIndex = 0;
+            std::uint32_t bufferedDataOffset = 0;
+            std::uint32_t currentEventDataLength = 0;
 
             const std::uint8_t bitShift0 = isHostBigEndian ? 0 : 24;
             const std::uint8_t bitShift1 = isHostBigEndian ? 8 : 16;
             const std::uint8_t bitShift2 = isHostBigEndian ? 16 : 8;
             const std::uint8_t bitShift3 = isHostBigEndian ? 24 : 0;
 
-            auto networkReadyEvent = std::make_shared<NetworkEvent>();
-            networkReadyEvent->type = Event::NetworkEventType::READY;
-            MessageBroker::instance().publish(Event::Topic::NETWORK_TOPIC, networkReadyEvent);
+            auto networkReadyEvent = std::make_shared<NetworkStatusEvent>();
+            networkReadyEvent->status = Event::NetworkStatus::READY;
+            MessageBroker::instance().publish(Event::Topic::NETWORK_STATUS_TOPIC, networkReadyEvent);
 
             while (!connection.shouldThreadStop)
             {
@@ -160,17 +179,72 @@ namespace PB
                         if (socketsReady > 0)
                         {
                             // Read from socket
-                            if ((bytesRead = Networking::read(&(connection.details), data, MAX_PACKET_SIZE)) > 0)
+                            if ((bytesRead = Networking::read(&(connection.details), packetData, MAX_PACKET_SIZE)) > 0)
                             {
-                                std::copy(std::begin(data), std::begin(data) + bytesRead,
-                                          std::begin(buffer) + bufferOffset);
+                                LOGGER_DEBUG("Received packet, size: " + std::to_string(bytesRead));
 
-                                bufferOffset += bytesRead;
+                                std::copy(std::begin(packetData),
+                                          std::begin(packetData) + bytesRead,
+                                          std::begin(bufferedData) + bufferedDataOffset);
 
-                                if (bufferOffset > PACKET_HEADER_SIZE)
+                                messageStartIndex = 0;
+                                bufferedDataOffset += bytesRead;
+
+                                if (bufferedDataOffset > PACKET_HEADER_SIZE)
                                 {
-                                    dataInCurrentPacket = (buffer[0] << bitShift0) | (buffer[1] << bitShift1) |
-                                                          (buffer[2] << bitShift2) | (buffer[3] << bitShift3);
+                                    currentEventDataLength = (bufferedData[messageStartIndex + 0] << bitShift0)
+                                                             | (bufferedData[messageStartIndex + 1] << bitShift1)
+                                                             | (bufferedData[messageStartIndex + 2] << bitShift2)
+                                                             | (bufferedData[messageStartIndex + 3] << bitShift3);
+                                }
+
+                                // As long as we have complete events to parse
+                                while (currentEventDataLength > 0 &&
+                                       (bufferedDataOffset - messageStartIndex - PACKET_HEADER_SIZE) >=
+                                       currentEventDataLength)
+                                {
+
+                                    parseData(
+                                            networkReader,
+                                            &bufferedData[messageStartIndex],
+                                            currentEventDataLength + PACKET_HEADER_SIZE);
+
+                                    // Jump to next event (if there is one)
+                                    messageStartIndex += (currentEventDataLength + PACKET_HEADER_SIZE);
+
+                                    // Check if we have leftover bytes from a new message
+                                    if (bufferedDataOffset > messageStartIndex)
+                                    {
+                                        // Get the next event packetData length if we have the bytes for it
+                                        if (bufferedDataOffset > (messageStartIndex + PACKET_HEADER_SIZE))
+                                        {
+                                            currentEventDataLength = (bufferedData[messageStartIndex + 0] << bitShift0)
+                                                                     | (bufferedData[messageStartIndex + 1] << bitShift1)
+                                                                     | (bufferedData[messageStartIndex + 2] << bitShift2)
+                                                                     | (bufferedData[messageStartIndex + 3] << bitShift3);
+                                        }
+                                        else
+                                        {
+                                            // Shift new packetData down
+                                            std::copy(
+                                                    std::begin(bufferedData) + messageStartIndex,
+                                                    std::begin(bufferedData) + bufferedDataOffset,
+                                                    std::begin(bufferedData));
+
+                                            bufferedDataOffset -= messageStartIndex;
+                                            messageStartIndex = 0;
+
+                                            // Reset to 0 to break the loop
+                                            currentEventDataLength = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Much easier, just reset everything to 0
+                                        messageStartIndex = 0;
+                                        currentEventDataLength = 0;
+                                        bufferedDataOffset = 0;
+                                    }
                                 }
                             }
                             else if (bytesRead == -1)
@@ -178,44 +252,22 @@ namespace PB
                                 LOGGER_INFO("Lost connection with server");
                                 connection.shouldDisconnect = true;
                             }
-
-
-                            // Check if we read at least as many bytes as we wanted for the current message
-                            if (dataInCurrentPacket > 0 && (bufferOffset - PACKET_HEADER_SIZE) >= dataInCurrentPacket)
-                            {
-                                // Copy message to new array and process
-                                std::copy(std::begin(buffer),
-                                          std::begin(buffer) + dataInCurrentPacket + PACKET_HEADER_SIZE,
-                                          std::begin(receivedData));
-                                parseData(dataInCurrentPacket, receivedData, dataInCurrentPacket + PACKET_HEADER_SIZE);
-
-                                // Check if we have leftover bytes from a new message
-                                if ((bufferOffset - PACKET_HEADER_SIZE) > dataInCurrentPacket)
-                                {
-                                    // Get bounds for leftover data in new message
-                                    std::uint32_t totalProcessedData = dataInCurrentPacket + PACKET_HEADER_SIZE;
-                                    std::uint32_t totalNewData = bufferOffset - totalProcessedData;
-                                    std::uint32_t newDataStart = bufferOffset - totalNewData;
-                                    // Shift new data down
-                                    std::copy(std::begin(buffer) + newDataStart, std::begin(buffer) + bufferOffset,
-                                              std::begin(buffer));
-                                    // Reset buffer offset
-                                    bufferOffset -= totalProcessedData;
-                                }
-                                else
-                                {
-                                    // Much easier, just reset everything to 0
-                                    dataInCurrentPacket = 0;
-                                    bufferOffset = 0;
-                                }
-                            }
                         }
+                    }
+
+                    if (connection.shouldDisconnect)
+                    {
+                        LOGGER_INFO("Connection closed by client request");
                     }
 
                     Networking::close(&(connection.details));
                     connection.details.isConnected = false;
                     connection.shouldDisconnect = false;
                     LOGGER_INFO("Server connection has closed");
+
+                    auto event = std::make_shared<NetworkStatusEvent>();
+                    event->status = Event::DISCONNECTED;
+                    MessageBroker::instance().publish(Event::Topic::NETWORK_STATUS_TOPIC, event);
                 }
             }
 
@@ -245,42 +297,39 @@ namespace PB
 
         // Listener for adding new scenes.
         Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_SCENE_ADD);
-        MessageBroker::instance()
-                .subscribe(
-                        PB_EVENT_SCENE_ADD,
-                        [this](std::shared_ptr<void> data) {
-                            auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
+        MessageBroker::instance().subscribe(
+                PB_EVENT_SCENE_ADD,
+                [this](std::shared_ptr<void> data) {
+                    auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
 
-                            *(event->scene) = AbstractSceneGraph{
+                    *(event->scene) = AbstractSceneGraph{
+                            event->scene->name,
+                            gfxApi_->getRenderWindow(),
+                            inputReader_};
+
+                    sceneGraphs_.insert(
+                            std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
                                     event->scene->name,
-                                    gfxApi_->getRenderWindow(),
-                                    inputReader_};
-                            event->scene->setUp();
-
-                            sceneGraphs_.insert(
-                                    std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
-                                            event->scene->name,
-                                            event->scene}
-                            );
-                        });
+                                    event->scene}
+                    );
+                });
 
         // Listener for setting the current scene.
         Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_SCENE_SET);
-        MessageBroker::instance()
-                .subscribe(
-                        PB_EVENT_SCENE_SET,
-                        [this](std::shared_ptr<void> data) {
-                            auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
+        MessageBroker::instance().subscribe(
+                PB_EVENT_SCENE_SET,
+                [this](std::shared_ptr<void> data) {
+                    auto event = std::static_pointer_cast<EngineSetSceneEvent>(data);
 
-                            if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
-                            {
-                                currentScene_ = sceneGraphs_.at(event->sceneName);
-                            }
-                            else
-                            {
-                                LOGGER_ERROR("Unable to locate specified scene: '" + event->sceneName + "'");
-                            }
-                        });
+                    if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
+                    {
+                        currentScene_ = sceneGraphs_.at(event->sceneName);
+                    }
+                    else
+                    {
+                        LOGGER_ERROR("Unable to locate specified scene: '" + event->sceneName + "'");
+                    }
+                });
     }
 
     void Engine::run(std::function<bool()> onReady)

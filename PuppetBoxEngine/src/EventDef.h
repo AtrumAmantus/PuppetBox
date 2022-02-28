@@ -16,16 +16,22 @@ namespace PB
     namespace Event::Topic
     {
         extern std::uint32_t NETWORK_TOPIC;
-        extern std::uint32_t NETWORK_LISTENER_TOPIC;
+        extern std::uint32_t NETWORK_EVENT_WRITER_TOPIC;
+        extern std::uint32_t NETWORK_EVENT_READER_TOPIC;
+        extern std::uint32_t NETWORK_STATUS_TOPIC;
         extern std::uint32_t ENGINE_ADD_SCENE_TOPIC;
         extern std::uint32_t ENGINE_SET_SCENE_TOPIC;
     }
 
-    // TODO: This could do with a better / more accurate name
-    struct NetworkListenerEvent
+    struct NetworkEventWriterEvent
     {
         std::string topicName;
-        pb_EventTransformer transformer;
+        pb_NetworkEventWriter writer;
+    };
+
+    struct NetworkEventReaderEvent
+    {
+        pb_NetworkEventReader reader;
     };
 
     struct EngineAddSceneEvent

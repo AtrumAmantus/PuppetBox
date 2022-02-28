@@ -422,13 +422,25 @@ namespace PB
         return MessageBroker::instance().registerTopic(topicName);
     }
 
-    void RegisterNetworkEventListener(
-            std::string topicName,
-            pb_EventTransformer transformer)
+    void RegisterNetworkEventWriter(std::string topicName, pb_NetworkEventWriter writer)
     {
-        auto listenerEvent = std::make_shared<NetworkListenerEvent>();
+        auto listenerEvent = std::make_shared<NetworkEventWriterEvent>();
         listenerEvent->topicName = topicName;
-        listenerEvent->transformer = transformer;
-        MessageBroker::instance().publish(Event::Topic::NETWORK_LISTENER_TOPIC, listenerEvent);
+        listenerEvent->writer = writer;
+        MessageBroker::instance().publish(Event::Topic::NETWORK_EVENT_WRITER_TOPIC, listenerEvent);
+    }
+
+    void RegisterNetworkEventReader(pb_NetworkEventReader reader)
+    {
+        auto readerEvent = std::make_shared<NetworkEventReaderEvent>();
+        readerEvent->reader = reader;
+        MessageBroker::instance().publish(Event::Topic::NETWORK_EVENT_READER_TOPIC, readerEvent);
+    }
+
+    void ClearNetworkEventReader()
+    {
+        auto readerEvent = std::make_shared<NetworkEventReaderEvent>();
+        readerEvent->reader = nullptr;
+        MessageBroker::instance().publish(Event::Topic::NETWORK_EVENT_READER_TOPIC, readerEvent);
     }
 }

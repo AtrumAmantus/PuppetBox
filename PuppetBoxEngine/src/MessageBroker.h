@@ -139,7 +139,7 @@ namespace PB
 
                 std::string topicName;
 
-                for (auto t: topicIds_)
+                for (auto t : topicIds_)
                 {
                     if (t.second == topicId)
                     {

@@ -121,15 +121,18 @@ namespace PB::Networking
     {
         bool success = true;
 
-        if (SDLNet_TCP_DelSocket(networkingDetails->socket_set, networkingDetails->socket) == -1)
+        if (networkingDetails->socket != nullptr)
         {
-            success = false;
-            LOGGER_ERROR("Failed to close connection");
-            LOGGER_ERROR(SDLNet_GetError());
-        }
+            if (SDLNet_TCP_DelSocket(networkingDetails->socket_set, networkingDetails->socket) == -1)
+            {
+                success = false;
+                LOGGER_ERROR("Failed to close connection");
+                LOGGER_ERROR(SDLNet_GetError());
+            }
 
-        SDLNet_FreeSocketSet(networkingDetails->socket_set);
-        SDLNet_TCP_Close(networkingDetails->socket);
+            SDLNet_FreeSocketSet(networkingDetails->socket_set);
+            SDLNet_TCP_Close(networkingDetails->socket);
+        }
 
         return success;
     }
