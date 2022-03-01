@@ -61,6 +61,14 @@ namespace PB
              */
             LAYOUT,
             /**
+             * \brief Spacing multiplier for spacing between letters.
+             *
+             * <p>1.0 means default spacing</p>
+             *
+             * <p>Expected type: Float</p>
+             */
+            LETTER_SPACE,
+            /**
              * \brief The location from which POS_X, POS_Y are set by.
              *
              * <p>Expected type: UInt (enum)</p>
@@ -104,6 +112,20 @@ namespace PB
              * <p>Expected type: UInt</p>
              */
             WIDTH,
+            /**
+             * \brief Spacing multiplier for space between words (width of space character).
+             *
+             * <p>1.0 means default spacing</p>
+             *
+             * <p>Expected type: Float</p>
+             */
+            WORD_SPACE,
+            /**
+             * \brief Denotes if the text should "wrap" around to the next line or not.
+             *
+             * <p>Expected type: Bool</p>
+             */
+            WORD_WRAP,
         };
 
         /**
@@ -138,9 +160,17 @@ namespace PB
 
         virtual Result<std::int32_t> getIntAttribute(UI::Attribute attributeName) const = 0;
 
+        virtual void setFloatAttribute(UI::Attribute attributeName, float value) = 0;
+
+        virtual Result<float> getFloatAttribute(UI::Attribute attributeName) const = 0;
+
         virtual void setStringAttribute(UI::Attribute attributeName, const std::string& value) = 0;
 
         virtual Result<std::string> getStringAttribute(UI::Attribute attributeName) const = 0;
+
+        virtual void setBoolAttribute(UI::Attribute attributeName, bool value) = 0;
+
+        virtual Result<bool> getBoolAttribute(UI::Attribute attributeName) const = 0;
     };
 
     /**
@@ -194,9 +224,17 @@ namespace PB
 
         Result<std::int32_t> getIntAttribute(UI::Attribute attributeName) const override;
 
+        void setFloatAttribute(UI::Attribute attributeName, float value) override;
+
+        Result<float> getFloatAttribute(UI::Attribute attributeName) const override;
+
         void setStringAttribute(UI::Attribute attributeName, const std::string& value) override;
 
         Result<std::string> getStringAttribute(UI::Attribute attributeName) const override;
+
+        void setBoolAttribute(UI::Attribute attributeName, bool value) override;
+
+        Result<bool> getBoolAttribute(UI::Attribute attributeName) const override;
 
     private:
         std::unique_ptr<UIComponentAttributes> attributes_;

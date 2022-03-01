@@ -58,6 +58,28 @@ namespace PB
             return result;
         };
 
+        void setFloatAttribute(UI::Attribute attributeName, float value) override
+        {
+            floatMap_[attributeName] = value;
+        };
+
+        Result<float> getFloatAttribute(UI::Attribute attributeName) const override
+        {
+            Result<float> result{};
+
+            if (floatMap_.find(attributeName) != floatMap_.end())
+            {
+                result.hasResult = true;
+                result.result = floatMap_.at(attributeName);
+            }
+            else
+            {
+                result.hasResult = false;
+            }
+
+            return result;
+        };
+
         void setStringAttribute(UI::Attribute attributeName, const std::string& value) override
         {
             stringMap_[attributeName] = value;
@@ -80,10 +102,34 @@ namespace PB
             return result;
         };
 
+        void setBoolAttribute(UI::Attribute attributeName, bool value) override
+        {
+            boolMap_[attributeName] = value;
+        };
+
+        Result<bool> getBoolAttribute(UI::Attribute attributeName) const override
+        {
+            Result<bool> result{};
+
+            if (boolMap_.find(attributeName) != boolMap_.end())
+            {
+                result.hasResult = true;
+                result.result = boolMap_.at(attributeName);
+            }
+            else
+            {
+                result.hasResult = false;
+            }
+
+            return result;
+        }
+
     private:
         std::unordered_map<UI::Attribute, std::int32_t> intMap_{};
         std::unordered_map<UI::Attribute, std::uint32_t> uintMap_{};
+        std::unordered_map<UI::Attribute, float> floatMap_{};
         std::unordered_map<UI::Attribute, std::string> stringMap_{};
+        std::unordered_map<UI::Attribute, bool> boolMap_{};
     };
 
     UIComponent::UIComponent()
@@ -132,6 +178,16 @@ namespace PB
         return attributes_->getIntAttribute(attributeName);
     }
 
+    void UIComponent::setFloatAttribute(UI::Attribute attributeName, float value)
+    {
+        attributes_->setFloatAttribute(attributeName, value);
+    }
+
+    Result<float> UIComponent::getFloatAttribute(UI::Attribute attributeName) const
+    {
+        return attributes_->getFloatAttribute(attributeName);
+    }
+
     void UIComponent::setStringAttribute(UI::Attribute attributeName, const std::string& value)
     {
         attributes_->setStringAttribute(attributeName, value);
@@ -140,5 +196,15 @@ namespace PB
     Result<std::string> UIComponent::getStringAttribute(UI::Attribute attributeName) const
     {
         return attributes_->getStringAttribute(attributeName);
+    }
+
+    void UIComponent::setBoolAttribute(UI::Attribute attributeName, bool value)
+    {
+        attributes_->setBoolAttribute(attributeName, value);
+    }
+
+    Result<bool> UIComponent::getBoolAttribute(UI::Attribute attributeName) const
+    {
+        return attributes_->getBoolAttribute(attributeName);
     }
 }

@@ -13,6 +13,7 @@
 #include <puppetbox/IAnimationCatalogue.h>
 #include <puppetbox/KeyCode.h>
 #include <puppetbox/SceneObject.h>
+#include <puppetbox/UIComponent.h>
 
 #include "AbstractInputProcessor.h"
 #include "Command.h"
@@ -93,7 +94,7 @@ namespace Singleplayer
                 event->action = [](UIController& controller) {
                     bool error = false;
 
-                    auto component = controller.getComponent(INPUT_BOX, &error);
+                    auto component = controller.getComponent(CHAT_BOX, &error);
 
                     if (!error)
                     {
@@ -109,7 +110,7 @@ namespace Singleplayer
                 event->action = [](UIController& controller) {
                     bool error = false;
 
-                    auto component = controller.getComponent(INPUT_BOX, &error);
+                    auto component = controller.getComponent(CHAT_BOX, &error);
 
                     if (!error)
                     {
@@ -132,6 +133,60 @@ namespace Singleplayer
                 event->mode = PB::SceneView::PERSPECTIVE;
 
                 PB::PublishEvent(Event::Topic::VIEW_MODE_TOPIC, event);
+            }
+            else if (input.substr(0, 7) == "/lspace")
+            {
+                float spaceMultiplier = std::stof(input.substr(8));
+
+                auto event = std::make_shared<UIControllerEvent>();
+                event->action = [&spaceMultiplier](UIController& controller) {
+                    bool error = false;
+
+                    auto component = controller.getComponent(CHAT_MESSAGES_BOX, &error);
+
+                    if (!error)
+                    {
+                        component->setFloatAttribute(PB::UI::LETTER_SPACE, spaceMultiplier);
+                    }
+                };
+
+                PB::PublishEvent(Event::Topic::UI_TOPIC, event);
+            }
+            else if (input.substr(0, 7) == "/wspace")
+            {
+                float spaceMultiplier = std::stof(input.substr(8));
+
+                auto event = std::make_shared<UIControllerEvent>();
+                event->action = [&spaceMultiplier](UIController& controller) {
+                    bool error = false;
+
+                    auto component = controller.getComponent(CHAT_MESSAGES_BOX, &error);
+
+                    if (!error)
+                    {
+                        component->setFloatAttribute(PB::UI::WORD_SPACE, spaceMultiplier);
+                    }
+                };
+
+                PB::PublishEvent(Event::Topic::UI_TOPIC, event);
+            }
+            else if (input.substr(0, 5) == "/wrap")
+            {
+                bool enabled = input.substr(6) == "true";
+
+                auto event = std::make_shared<UIControllerEvent>();
+                event->action = [&enabled](UIController& controller) {
+                    bool error = false;
+
+                    auto component = controller.getComponent(CHAT_MESSAGES_BOX, &error);
+
+                    if (!error)
+                    {
+                        component->setBoolAttribute(PB::UI::WORD_WRAP, enabled);
+                    }
+                };
+
+                PB::PublishEvent(Event::Topic::UI_TOPIC, event);
             }
             else if (input == "/multi")
             {

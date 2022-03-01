@@ -22,19 +22,26 @@ public:
     void addComponent(std::shared_ptr<PB::UIComponent> component, std::uint32_t referenceId)
     {
         componentList_.push_back(component);
-        componentMap_.insert(
-                std::pair<std::uint32_t, std::uint32_t>{referenceId, (std::uint32_t) componentList_.size() - 1}
-        );
+        referenceComponent(component, referenceId);
         std::sort(componentList_.begin(), componentList_.end(), compareZLevel);
+    };
+
+    void referenceComponent(std::shared_ptr<PB::UIComponent>& component, std::uint32_t referenceId)
+    {
+        componentMap_.insert(
+                std::pair<std::uint32_t, std::shared_ptr<PB::UIComponent>>{referenceId, component}
+        );
     };
 
     std::shared_ptr<PB::UIComponent> getComponent(std::uint32_t referenceId, bool* error)
     {
         std::shared_ptr<PB::UIComponent> component;
 
-        if (componentMap_.find(referenceId) != componentMap_.end())
+        auto itr = componentMap_.find(referenceId);
+
+        if (itr != componentMap_.end())
         {
-            component = componentList_.at(componentMap_.at(referenceId));
+            component = itr->second;
         }
         else
         {
@@ -42,7 +49,7 @@ public:
             component = nullptr;
         }
 
-        return component;
+        return std::move(component);
     };
 
     void clear()
@@ -67,6 +74,6 @@ public:
         }
     };
 private:
-    std::unordered_map<std::uint32_t, std::uint32_t> componentMap_{};
+    std::unordered_map<std::uint32_t, std::shared_ptr<PB::UIComponent>> componentMap_{};
     std::vector<std::shared_ptr<PB::UIComponent>> componentList_{};
 };

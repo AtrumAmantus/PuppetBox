@@ -46,6 +46,9 @@ namespace PB
                     uivec2 dimensions;
                     std::string fontPath;
                     std::uint32_t fontSize;
+                    bool wordWrapEnabled;
+                    float letterSpacing;
+                    float wordSpacing;
                 } component;
 
                 component.position.x = UIComponent::getUIntAttribute(UI::POS_X).orElse(0);
@@ -55,6 +58,9 @@ namespace PB
                 component.dimensions.y = UIComponent::getUIntAttribute(UI::HEIGHT).orElse(0);
                 component.fontSize = UIComponent::getUIntAttribute(UI::FONT_SIZE).orElse(0);
                 component.fontPath = UIComponent::getStringAttribute(UI::FONT_TYPE).orElse("");
+                component.letterSpacing = UIComponent::getFloatAttribute(UI::LETTER_SPACE).orElse(1.0f);
+                component.wordSpacing = UIComponent::getFloatAttribute(UI::WORD_SPACE).orElse(1.0f);
+                component.wordWrapEnabled = UIComponent::getBoolAttribute(UI::WORD_WRAP).orElse(true);
 
                 float scale = (float) component.fontSize / font_.fontSize();
 
@@ -62,6 +68,11 @@ namespace PB
                 vec3 localPosition{};
 
                 float deltaY = component.fontSize + 2;
+
+                std::vector<std::uint32_t> currentWordCharIndexes{};
+                bool precedingSpace = true;
+                bool newWord = true;
+                float wordFirstLetterOffset = 0;
 
                 c = text.begin();
                 // localPosition.y decrements, so invert before comparing
@@ -71,7 +82,6 @@ namespace PB
                     {
                         localPosition.x = 0;
                         localPosition.y -= deltaY;
-                        ++c;
                     }
                     else
                     {
@@ -87,25 +97,62 @@ namespace PB
                         glyph.dimensions.x = tchar.size.x * scale;
                         glyph.dimensions.y = tchar.size.y * scale;
 
+                        glyph.advance = tchar.advance;
+
                         glyph.character = *c;
 
-                        if (localPosition.x + glyph.dimensions.x > component.dimensions.x)
+                        if (*c == ' ')
                         {
-                            localPosition.x = 0;
-                            //TODO: Check if we're breaking a word and move it down if we are.
-                            localPosition.y -= deltaY;
+                            //TODO: Word spacing isn't quite working
+                            glyph.advance = tchar.advance * component.wordSpacing;
+                            currentWordCharIndexes.clear();
+                            precedingSpace = true;
+                            wordFirstLetterOffset = 0;
+                        }
+                        else
+                        {
+                            newWord = precedingSpace;
+                            precedingSpace = false;
+                        }
+
+                        wordFirstLetterOffset += newWord * glyph.position.x;
+                        newWord = false;
+
+                        if ((localPosition.x + glyph.dimensions.x) > component.dimensions.x)
+                        {
+                            if (component.wordWrapEnabled)
+                            {
+                                if (wordFirstLetterOffset > 0)
+                                {
+                                    localPosition.x = 0;
+                                    localPosition.y -= deltaY;
+
+                                    for (auto index: currentWordCharIndexes)
+                                    {
+                                        Glyph& storedGlyph = glyphs.at(index);
+                                        storedGlyph.position.x = localPosition.x;
+                                        storedGlyph.position.y = localPosition.y;
+                                        localPosition.x += ((storedGlyph.advance >> 6) * component.letterSpacing * scale);
+                                    }
+
+                                    glyph.position.x = localPosition.x;
+                                    glyph.position.y = localPosition.y;
+                                    glyphs.push_back(glyph);
+                                }
+                            }
                         }
                         else
                         {
                             glyphs.push_back(glyph);
-
-                            // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-                            localPosition.x +=
-                                    (tchar.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
-
-                            ++c;
+                            currentWordCharIndexes.push_back(glyphs.size() - 1);
                         }
+
+                        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+                        localPosition.x +=
+                                (tchar.advance >> 6) * component.letterSpacing * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
                     }
+
+                    ++c;
                 }
             }
         }

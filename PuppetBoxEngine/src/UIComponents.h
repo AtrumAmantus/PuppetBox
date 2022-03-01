@@ -22,6 +22,7 @@ namespace PB
     {
         vec3 position{};
         vec2 dimensions{};
+        std::uint32_t advance = 0;
         std::int8_t character = '\0';
     };
 
@@ -67,6 +68,7 @@ namespace PB
         void render() const override;
 
         bool addComponent(std::shared_ptr<UIComponent> component) override;
+
     private:
         std::vector<std::shared_ptr<UIComponent>> components_;
     };

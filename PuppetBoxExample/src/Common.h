@@ -122,7 +122,9 @@ extern inline bool uiSetup(UIController& uiController, UserInput& userInput)
     groupComponent->addComponent(textBox);
     groupComponent->addComponent(inputBox);
 
-    uiController.addComponent(groupComponent, INPUT_BOX);
+    uiController.addComponent(groupComponent, CHAT_BOX);
+    uiController.referenceComponent(textBox, CHAT_MESSAGES_BOX);
+    uiController.referenceComponent(inputBox, CHAT_INPUT_BOX);
 
     auto fpsCounter = std::shared_ptr<PB::UIComponent>(
             PB::CreateUIComponent(
