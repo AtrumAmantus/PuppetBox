@@ -8,26 +8,33 @@
 
 #include <puppetbox/AbstractInputReader.h>
 
+#include "Command.h"
+
 class InputActions
 {
-public:
-    enum Command {
-        CAMERA_UP,
-        CAMERA_DOWN,
-        CAMERA_LEFT,
-        CAMERA_RIGHT,
-        FORWARD,
-        BACKWARD,
-        LEFT,
-        RIGHT,
-        QUIT,
-    };
 public:
     InputActions() = default;
 
     InputActions(std::shared_ptr<PB::AbstractInputReader>& inputReader) : inputReader_(inputReader) {};
 
-    bool isCommandActive(Command commandName) const
+    bool isCommandActivated(Command::Command commandName) const
+    {
+        bool isActivated = false;
+
+        if (bindings_.find(commandName) != bindings_.end())
+        {
+            auto vec = bindings_.at(commandName);
+
+            for (std::size_t i = 0; !isActivated && i < vec.size(); ++i)
+            {
+                isActivated = inputReader_->keyboard.isPressed(vec.at(i));
+            }
+        }
+
+        return isActivated;
+    };
+
+    bool isCommandActive(Command::Command commandName) const
     {
         bool isActive = false;
 
@@ -44,7 +51,7 @@ public:
         return isActive;
     };
 
-    bool isCommandReleased(Command commandName) const
+    bool isCommandReleased(Command::Command commandName) const
     {
         bool isReleased = false;
 
@@ -61,7 +68,7 @@ public:
         return isReleased;
     };
 
-    void registerCommand(Command commandName, std::int8_t key)
+    void registerCommand(Command::Command commandName, std::int8_t key)
     {
         if (bindings_.find(commandName) != bindings_.end())
         {
@@ -70,12 +77,12 @@ public:
         else
         {
             bindings_.insert(
-                    std::pair<Command, std::vector<std::int8_t>>{commandName, std::vector<std::int8_t>{key}}
+                    std::pair<Command::Command, std::vector<std::int8_t>>{commandName, std::vector<std::int8_t>{key}}
             );
         }
     };
 
 private:
     std::shared_ptr<PB::AbstractInputReader> inputReader_{nullptr};
-    std::unordered_map<Command, std::vector<std::int8_t>> bindings_{};
+    std::unordered_map<Command::Command, std::vector<std::int8_t>> bindings_{};
 };

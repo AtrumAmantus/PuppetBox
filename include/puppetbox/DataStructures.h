@@ -2,7 +2,9 @@
 
 #include <cassert>
 #include <cstdint>
+#include <mutex>
 #include <ostream>
+#include <queue>
 #include <string>
 
 #include "Constants.h"
@@ -847,67 +849,78 @@ namespace PB
         std::uint32_t length = 0;
     };
 
-    template<typename T>
-    struct DoubleLinkedNode
+    namespace Concurrent
     {
-        T value;
-        DoubleLinkedNode* next = nullptr;
-        DoubleLinkedNode* prev = nullptr;
-    };
-
-    template<typename T>
-    class Queue
-    {
-    public:
-        void add(T item)
+        namespace NonBlocking
         {
-            DoubleLinkedNode<T>* node = new DoubleLinkedNode<T>{item};
-
-            if (head_ == nullptr)
+            template<typename T>
+            class Queue
             {
-                tail_ = node;
-                head_ = tail_;
-            }
-            else
-            {
-                tail_->next = node;
-                tail_ = tail_->next;
-            }
+            public:
+                void push(const T& item)
+                {
+                    std::unique_lock<std::mutex> mlock(mutex_);
+                    queue_.push(item);
+                };
 
-            ++size_;
-        };
+                Result<T> pop()
+                {
+                    std::unique_lock<std::mutex> mlock(mutex_);
+                    Result<T> item{};
 
-        T pop()
-        {
-            T value;
+                    if (!queue_.empty())
+                    {
+                        item.result = queue_.front();
+                        item.hasResult = true;
+                        queue_.pop();
+                    }
+                    else
+                    {
+                        item.hasResult = false;
+                    }
 
-            if (head_ != nullptr)
-            {
-                DoubleLinkedNode<T>* tmp = head_;
-                value = tmp->value;
-                head_ = head_->next;
-                delete tmp;
-                --size_;
-            }
+                    return item;
+                };
 
-            return value;
-        };
-
-        std::uint32_t size()
-        {
-            return size_;
+            private:
+                std::queue<T> queue_{};
+                std::mutex mutex_;
+            };
         }
 
-        bool isEmpty()
+        namespace Blocking
         {
-            return size_ == 0;
-        }
+            template<typename T>
+            class Queue
+            {
+            public:
+                void push(const T& item)
+                {
+                    std::unique_lock<std::mutex> mlock(mutex_);
+                    queue_.push(item);
+                    mlock.unlock();
+                    cond_.notify_one();
+                };
 
-    private:
-        DoubleLinkedNode<T>* head_ = nullptr;
-        DoubleLinkedNode<T>* tail_ = nullptr;
-        std::uint32_t size_ = 0;
-    };
+                T pop()
+                {
+                    std::unique_lock<std::mutex> mlock(mutex_);
+                    while (queue_.empty())
+                    {
+                        cond_.wait(mlock);
+                    }
+                    auto item = queue_.front();
+                    queue_.pop();
+                    return item;
+                };
+
+            private:
+                std::queue<T> queue_{};
+                std::mutex mutex_;
+                std::condition_variable cond_;
+            };
+        }
+    }
 }
 
 namespace std

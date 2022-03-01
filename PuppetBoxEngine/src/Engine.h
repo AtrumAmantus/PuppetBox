@@ -57,7 +57,9 @@ namespace PB
         Sdl2Initializer hardwareInitializer_;
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         std::shared_ptr<AbstractSceneGraph> currentScene_{nullptr};
+        std::shared_ptr<AbstractSceneGraph> nextScene_{nullptr};
         std::unordered_map<std::string, std::shared_ptr<AbstractSceneGraph>> sceneGraphs_{};
+        bool resetScene_ = false;
 
     private:
         /**

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "AbstractInputProcessor.h"
+#include "Command.h"
 #include "EventDef.h"
 
 class Game2DInputProcessor : public AbstractInputProcessor
@@ -31,7 +32,7 @@ public:
         if (input()->mouse.wheelYDir != 0)
         {
             auto event = std::make_shared<CameraEvent>();
-            event->action = [this](PB::Camera& camera){
+            event->action = [this](PB::Camera& camera) {
                 camera.zoom(static_cast<std::int8_t>(input()->mouse.wheelYDir));
             };
 
@@ -41,35 +42,49 @@ public:
         PB::vec3 moveVec{};
         PB::vec3 cameraMoveVec{};
 
-        if (inputActions().isCommandActive(InputActions::FORWARD) || inputActions().isCommandActive(InputActions::BACKWARD))
+        std::uint32_t commandIndex = 0;
+        CommandState commandStates[4]{};
+
+        bool isActive;
+
+        if ((isActive = (inputActions().isCommandActivated(Command::FORWARD))) ||
+            inputActions().isCommandReleased(Command::FORWARD))
         {
-            moveVec.y = (
-                    inputActions().isCommandActive(InputActions::FORWARD)
-                    + (-1 * inputActions().isCommandActive(InputActions::BACKWARD))
-            );
+            commandStates[commandIndex++] = {Command::FORWARD, isActive};
         }
 
-        if (inputActions().isCommandActive(InputActions::RIGHT) || inputActions().isCommandActive(InputActions::LEFT))
+        if ((isActive = (inputActions().isCommandActivated(Command::BACKWARD))) ||
+            inputActions().isCommandReleased(Command::BACKWARD))
         {
-            moveVec.x = (
-                    inputActions().isCommandActive(InputActions::RIGHT)
-                    + (-1 * inputActions().isCommandActive(InputActions::LEFT))
-            );
+            commandStates[commandIndex++] = {Command::BACKWARD, isActive};
         }
 
-        if (inputActions().isCommandActive(InputActions::CAMERA_UP) || inputActions().isCommandActive(InputActions::CAMERA_DOWN))
+        if ((isActive = (inputActions().isCommandActivated(Command::LEFT))) ||
+            inputActions().isCommandReleased(Command::LEFT))
+        {
+            commandStates[commandIndex++] = {Command::LEFT, isActive};
+        }
+
+        if ((isActive = (inputActions().isCommandActivated(Command::RIGHT))) ||
+            inputActions().isCommandReleased(Command::RIGHT))
+        {
+            commandStates[commandIndex++] = {Command::RIGHT, isActive};
+        }
+
+        if (inputActions().isCommandActive(Command::CAMERA_UP) || inputActions().isCommandActive(Command::CAMERA_DOWN))
         {
             cameraMoveVec.y = (
-                    inputActions().isCommandActive(InputActions::CAMERA_UP)
-                    + (-1 * inputActions().isCommandActive(InputActions::CAMERA_DOWN))
+                    inputActions().isCommandActive(Command::CAMERA_UP)
+                    + (-1 * inputActions().isCommandActive(Command::CAMERA_DOWN))
             );
         }
 
-        if (inputActions().isCommandActive(InputActions::CAMERA_LEFT) || inputActions().isCommandActive(InputActions::CAMERA_RIGHT))
+        if (inputActions().isCommandActive(Command::CAMERA_LEFT) ||
+            inputActions().isCommandActive(Command::CAMERA_RIGHT))
         {
             cameraMoveVec.x = (
-                    inputActions().isCommandActive(InputActions::CAMERA_RIGHT)
-                    + (-1 * inputActions().isCommandActive(InputActions::CAMERA_LEFT))
+                    inputActions().isCommandActive(Command::CAMERA_RIGHT)
+                    + (-1 * inputActions().isCommandActive(Command::CAMERA_LEFT))
             );
         }
 
@@ -80,11 +95,18 @@ public:
 
         PB::PublishEvent(Event::Topic::CAMERA_TOPIC, cameraEvent);
 
-        auto playerEvent = std::make_shared<PlayerEvent>();
-        playerEvent->action = [moveVec](Entity& entity) {
-            entity.moveVector = moveVec;
-        };
+        if (commandIndex > 0)
+        {
+            auto playerEvent = std::shared_ptr<PlayerEvent>(
+                    (PlayerEvent*) malloc(sizeof(PlayerEvent) + (commandIndex * sizeof(CommandState))));
+            playerEvent->commandCount = commandIndex;
 
-        PB::PublishEvent(Event::Topic::PLAYER_TOPIC, playerEvent);
+            for (std::uint32_t i = 0; i < playerEvent->commandCount; ++i)
+            {
+                playerEvent->commandStates[i] = commandStates[i];
+            }
+
+            PB::PublishEvent(Event::Topic::PLAYER_TOPIC, playerEvent);
+        }
     };
 };

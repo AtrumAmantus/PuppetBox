@@ -278,6 +278,7 @@ namespace PB
         {
             auto event = std::make_shared<EngineSetSceneEvent>();
             event->sceneName = sceneName;
+            event->resetLast = true;
             MessageBroker::instance().publish(Event::Topic::ENGINE_SET_SCENE_TOPIC, event);
         }
         else

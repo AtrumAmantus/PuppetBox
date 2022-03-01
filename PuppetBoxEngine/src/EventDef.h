@@ -42,5 +42,6 @@ namespace PB
     struct EngineSetSceneEvent
     {
         std::string sceneName;
+        bool resetLast = false;
     };
 }

@@ -45,6 +45,12 @@ public:
         return component;
     };
 
+    void clear()
+    {
+        componentMap_.clear();
+        componentList_.clear();
+    };
+
     void update(float deltaTime)
     {
         for (auto component : componentList_)

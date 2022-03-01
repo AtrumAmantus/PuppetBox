@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <string>
 #include <unordered_map>
 
@@ -41,6 +42,13 @@ namespace PB
          * \return True if the setup was successful, False otherwise.
          */
         bool setUp();
+
+        /**
+         * \breif Tears down the current scene, destroying any allocated resources.
+         *
+         * \return True if the scene was successfully destroyed, False otherwise.
+         */
+        bool tearDown();
 
         /**
         * \brief Invokes the update() method of the sceneHandler, allowing updates for various scene
@@ -93,11 +101,27 @@ namespace PB
         virtual bool setUps();
 
         /**
-         * \brief Defined by the implementing class to specify scene specific update logic.
+         * \brief Implementation specific tear down logic for destroying allocated resources and cleanup.
+         *
+         * \return True if the scene was destroyed successfully, False otherwise.
+         */
+        virtual bool tearDowns();
+
+        /**
+         * \brief Defined by the implementing class to specify scene specific update logic that is
+         * invoked at the beginning of the update loop.
          *
          * \param deltaTime The amount of time in seconds that has passed since the last update.
          */
-        virtual void updates(const float deltaTime);
+        virtual void preLoopUpdates(const float deltaTime);
+
+        /**
+         * \brief Defined by the implementing class to specify scene specific update logic that is
+         * invoked at the end of the update loop, just before the {\link PB::Camera} is updated.
+         *
+         * \param deltaTime The amount of time in seconds that has passed since the last update.
+         */
+        virtual void postLoopUpdates(const float deltaTime);
 
         /**
          * \brief Defined by the implementing class to specify scene specific render logic.
@@ -108,6 +132,14 @@ namespace PB
          * \brief Defined by the implementing class to specify scene specific input processing logic.
          */
         virtual void processInputs();
+
+        /**
+         * \brief Gets a {\link PB::SceneObject} based on it's {\link PB::UUID}
+         *
+         * \param uuid The {\link PB::UUID} associated to the desired {\link PB::SceneObject} to fetch.
+         * \return The {\link PB::SceneObject} that was associated with the given {\link PB::UUID}.
+         */
+        SceneObject* getSceneObject(UUID uuid);
 
         /**
          * \brief Provides access to the {\link AbstractInputReader} object from the implementing scene class.
@@ -141,13 +173,54 @@ namespace PB
          */
         void addSceneObject(SceneObject* sceneObject);
 
+        /**
+         * \brief Remove a {\link PB::SceneObject} associated with the given {\link PB::UUID}.
+         *
+         * \param uuid  The {\link PB::UUID} associated with the {\link PB::SceneObject} to destroy.
+         */
+        void removeSceneObject(UUID uid);
+
+        /**
+         * \brief Flags the scene to be cleared of all {\link PB::SceneObject}s on the next {\link #update()} cycle.
+         */
+        void clearScene();
+
+        /**
+         * \brief Clears all the {\link PB::SceneObject}s from the scene immediately and resetting the
+         * clear scene flag.
+         */
+        void clearSceneNow();
+
+        /**
+         * \brief Indicates if {\link #clearScene()} was invoked recently.
+         *
+         * \return True if {\link #clearScene()} has been invoked but the scene has not yet been cleared.
+         */
+        bool wasClearSceneInvoked();
+
     private:
         bool isInitialized_ = false;
+        bool isSetup_ = false;
+        bool clearSceneInvoked_ = false;
+        bool clearSceneCompleted_ = false;
         Camera camera_{};
         RenderWindow renderWindow_{};
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
+        Concurrent::NonBlocking::Queue<SceneObject*> objectsToAdd_{};
+        Concurrent::NonBlocking::Queue<UUID> objectsToRemove_{};
         std::unordered_map<UUID, SceneObject*> sceneObjects_{};
-        Queue<SceneObject*> processLater_{};
+        std::queue<SceneObject*> processLater_{};
+
+    public:
+        AbstractSceneGraph& operator=(const AbstractSceneGraph& rhv)
+        {
+            this->camera_ = rhv.camera_;
+            this->renderWindow_ = rhv.renderWindow_;
+            this->inputReader_ = std::move(rhv.inputReader_);
+            this->viewMode_ = rhv.viewMode_;
+            this->isInitialized_ = rhv.isInitialized_;
+            return *this;
+        };
     };
 }

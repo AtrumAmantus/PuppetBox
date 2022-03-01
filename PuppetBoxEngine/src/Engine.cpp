@@ -323,7 +323,8 @@ namespace PB
 
                     if (sceneGraphs_.find(event->sceneName) != sceneGraphs_.end())
                     {
-                        currentScene_ = sceneGraphs_.at(event->sceneName);
+                        nextScene_ = sceneGraphs_.at(event->sceneName);
+                        resetScene_ = event->resetLast;
                     }
                     else
                     {
@@ -344,6 +345,18 @@ namespace PB
             {
                 float deltaTime = hardwareInitializer_.updateElapsedTime();
 
+                if (nextScene_ != nullptr)
+                {
+                    if (resetScene_ && currentScene_ != nullptr)
+                    {
+                        currentScene_->tearDown();
+                    }
+
+                    currentScene_ = nextScene_;
+                    currentScene_->setUp();
+                    nextScene_ = nullptr;
+                }
+
                 processInput();
 
                 gfxApi_->preLoopCommands();
@@ -360,6 +373,8 @@ namespace PB
 
                 hardwareInitializer_.postLoopCommands();
             }
+
+            currentScene_->tearDown();
         }
         else
         {

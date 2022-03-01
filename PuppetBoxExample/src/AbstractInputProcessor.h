@@ -10,6 +10,7 @@
 #include <puppetbox/AbstractInputReader.h>
 #include <puppetbox/Camera.h>
 
+#include "Command.h"
 #include "Constants.h"
 #include "EventDef.h"
 #include "InputActions.h"
@@ -74,7 +75,7 @@ public:
             }
             else
             {
-                if (inputActions_.isCommandReleased(InputActions::QUIT))
+                if (inputActions_.isCommandReleased(Command::QUIT))
                 {
                     PB::PublishEvent(Event::Topic::TERMINATE_TOPIC, nullptr);
                 }

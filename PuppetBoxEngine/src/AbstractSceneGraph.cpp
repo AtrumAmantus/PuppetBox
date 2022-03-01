@@ -20,16 +20,45 @@ namespace PB
 
     bool AbstractSceneGraph::setUp()
     {
-        bool success;
+        bool success = true;
 
-        if (isInitialized_)
+        if (!isSetup_)
         {
-            success = setUps();
+            if (isInitialized_)
+            {
+                success = setUps();
+            }
+            else
+            {
+                success = false;
+                LOGGER_ERROR(
+                        "This object has not been properly initialized, this should be handled by the core engine.");
+            }
+
+            isSetup_ = true;
         }
-        else
+
+        return success;
+    }
+
+    bool AbstractSceneGraph::tearDown()
+    {
+        bool success = true;
+
+        if (isSetup_)
         {
-            success = false;
-            LOGGER_ERROR("This object has not been properly initialized, this should be handled by the core engine.");
+            if (isInitialized_)
+            {
+                success = tearDowns();
+            }
+            else
+            {
+                success = false;
+                LOGGER_ERROR(
+                        "This object has not been properly initialized, this should be handled by the core engine.");
+            }
+
+            isSetup_ = false;
         }
 
         return success;
@@ -37,11 +66,43 @@ namespace PB
 
     void AbstractSceneGraph::update(const float deltaTime)
     {
-        camera_.update(deltaTime);
+        // Clean up scene if it was requested
+        if (clearSceneInvoked_)
+        {
+            clearSceneNow();
+        }
 
-        // Update implementing application first in case new objects were added.
-        updates(deltaTime);
+        // Update implementing application first in case new objects were added or modified.
+        preLoopUpdates(deltaTime);
 
+        // Add queued objects
+        Result<SceneObject*> addSceneObject = objectsToAdd_.pop();
+        while (addSceneObject.hasResult)
+        {
+            sceneObjects_.insert(
+                    std::pair<UUID, SceneObject*>{addSceneObject.result->getId(), addSceneObject.result}
+            );
+
+            addSceneObject = objectsToAdd_.pop();
+        }
+
+        // Remove queued objects
+        Result<UUID> removeSceneObject = objectsToRemove_.pop();
+        while (removeSceneObject.hasResult)
+        {
+            auto itr = sceneObjects_.find(removeSceneObject.result);
+
+            if (itr != sceneObjects_.end())
+            {
+                SceneObject* object = itr->second;
+                sceneObjects_.erase(itr);
+                delete object;
+            }
+
+            removeSceneObject = objectsToRemove_.pop();
+        }
+
+        // Update all scene objects
         for (auto& e: sceneObjects_)
         {
             if (!e.second->isAttached() || e.second->getAttached().isUpdated)
@@ -50,19 +111,19 @@ namespace PB
             }
             else
             {
-                processLater_.add(e.second);
+                processLater_.push(e.second);
             }
         }
 
-        bool keepProcessing = !processLater_.isEmpty();
-
-        while (keepProcessing)
+        // Update any scene objects that couldn't be updated due to dependencies
+        while (!processLater_.empty())
         {
             std::uint32_t queueCount = processLater_.size();
 
             for (std::uint32_t i = 0; i < queueCount; ++i)
             {
-                SceneObject* object = processLater_.pop();
+                SceneObject* object = processLater_.front();
+                processLater_.pop();
 
                 if (!object->isAttached() || object->getAttached().isUpdated)
                 {
@@ -70,16 +131,26 @@ namespace PB
                 }
                 else
                 {
-                    processLater_.add(object);
+                    processLater_.push(object);
                 }
             }
 
+            // Check if even one thing processed successfully
             if (queueCount == processLater_.size())
             {
                 throw std::exception("Circular dependency, can't update objects");
             }
+        }
 
-            keepProcessing = !processLater_.isEmpty();
+        // Update implementing application's post loop updates
+        postLoopUpdates(deltaTime);
+
+        camera_.update(deltaTime);
+
+        if (clearSceneCompleted_)
+        {
+            clearSceneInvoked_ = false;
+            clearSceneCompleted_ = false;
         }
     }
 
@@ -128,19 +199,41 @@ namespace PB
         return true;
     }
 
-    void AbstractSceneGraph::updates(const float deltaTime)
+    bool AbstractSceneGraph::tearDowns()
     {
+        return true;
+    }
 
+    void AbstractSceneGraph::preLoopUpdates(const float deltaTime)
+    {
+        // No default executions
+    }
+
+    void AbstractSceneGraph::postLoopUpdates(const float deltaTime)
+    {
+        // No default executions
     }
 
     void AbstractSceneGraph::renders() const
     {
-
+        // No default executions
     }
 
     void AbstractSceneGraph::processInputs()
     {
+        // No default executions
+    }
 
+    SceneObject* AbstractSceneGraph::getSceneObject(UUID uuid)
+    {
+        auto itr = sceneObjects_.find(uuid);
+
+        if (itr != sceneObjects_.end())
+        {
+            return itr->second;
+        }
+
+        return nullptr;
     }
 
     std::shared_ptr<AbstractInputReader>& AbstractSceneGraph::input()
@@ -160,8 +253,35 @@ namespace PB
 
     void AbstractSceneGraph::addSceneObject(SceneObject* sceneObject)
     {
-        sceneObjects_.insert(
-                std::pair<UUID, SceneObject*>{sceneObject->getId(), sceneObject}
-        );
+        objectsToAdd_.push(sceneObject);
+    }
+
+    void AbstractSceneGraph::removeSceneObject(UUID uuid)
+    {
+        objectsToRemove_.push(uuid);
+    }
+
+    void AbstractSceneGraph::clearScene()
+    {
+        clearSceneInvoked_ = true;
+    }
+
+    void AbstractSceneGraph::clearSceneNow()
+    {
+        std::unordered_map<PB::UUID, SceneObject*>::iterator iter = sceneObjects_.begin();
+
+        while (iter != sceneObjects_.end())
+        {
+            SceneObject* object = iter->second;
+            iter = sceneObjects_.erase(iter);
+            delete object;
+        }
+
+        clearSceneCompleted_ = true;
+    }
+
+    bool AbstractSceneGraph::wasClearSceneInvoked()
+    {
+        return clearSceneInvoked_;
     }
 }
