@@ -32,6 +32,26 @@ namespace PB
 
         std::string text = UIComponent::getStringAttribute(UI::TEXT_CONTENT).orElse("");
 
+        std::vector<std::string> paragraphs{};
+        std::uint32_t lineStart = 0;
+        std::uint32_t lineEnd = 0;
+
+        while (lineEnd < text.size())
+        {
+            if (text.c_str()[lineEnd] == '\n')
+            {
+                paragraphs.push_back(text.substr(lineStart, lineEnd - lineStart));
+                lineStart = lineEnd + 1;
+            }
+
+            ++lineEnd;
+        }
+
+        if (lineStart != lineEnd)
+        {
+            paragraphs.push_back(text.substr(lineStart, lineEnd - lineStart));
+        }
+
         if (!text.empty())
         {
             Result<std::string> fontName = UIComponent::getStringAttribute(UI::FONT_TYPE);
@@ -41,7 +61,8 @@ namespace PB
             {
                 font_ = library()->loadFontAsset(fontName.result, 0, &error);
 
-                struct {
+                struct
+                {
                     uivec3 position;
                     uivec2 dimensions;
                     std::string fontPath;
@@ -66,32 +87,40 @@ namespace PB
 
                 std::string::const_iterator c;
                 vec3 localPosition{};
+                vec3 paragraphPosition{};
 
                 float deltaY = component.fontSize + 2;
 
-                std::vector<std::uint32_t> currentWordCharIndexes{};
-                bool precedingSpace = true;
-                bool newWord = true;
                 float wordFirstLetterOffset = 0;
 
-                c = text.begin();
-                // localPosition.y decrements, so invert before comparing
-                while (-(localPosition.y - deltaY + 2) <= component.dimensions.y && c != text.end())
+                std::uint32_t firstCharOfWordIndex = 0;
+                std::uint32_t firstCharOfParagraphIndex = 0;
+
+                std::int32_t paragraphIndex = paragraphs.size();
+
+                // For each paragraph
+                while (-(localPosition.y - deltaY) < component.dimensions.y && --paragraphIndex >= 0)
                 {
-                    if (*c == '\n')
-                    {
-                        localPosition.x = 0;
-                        localPosition.y -= deltaY;
-                    }
-                    else
+                    c = paragraphs.at(paragraphIndex).begin();
+                    firstCharOfParagraphIndex = glyphs.size();
+                    paragraphPosition.y = 0;
+
+                    // For each character in a paragraph
+                    // localPosition.y represents the "top", so we decrement it as we go.
+                    while (
+                            -(localPosition.y - deltaY) <= component.dimensions.y
+                            && c != paragraphs.at(paragraphIndex).end())
                     {
                         // TODO: Add a default character to load for unrecognized ones
                         TypeCharacter tchar = font_.getCharacter(*c).result;
 
                         Glyph glyph;
 
-                        glyph.position.x = localPosition.x + tchar.bearing.x * scale;
-                        glyph.position.y = localPosition.y - (tchar.size.y - tchar.bearing.y) * scale;
+                        glyph.charOffsets.x = tchar.bearing.x * scale;
+                        glyph.charOffsets.y = -((tchar.size.y - tchar.bearing.y) * scale);
+
+                        glyph.position.x = localPosition.x + glyph.charOffsets.x;
+                        glyph.position.y = paragraphPosition.y + glyph.charOffsets.y;
                         glyph.position.z = localPosition.z;
 
                         glyph.dimensions.x = tchar.size.x * scale;
@@ -101,42 +130,48 @@ namespace PB
 
                         glyph.character = *c;
 
+                        // Check for space sto identify the start of a new word
                         if (*c == ' ')
                         {
                             //TODO: Word spacing isn't quite working
                             glyph.advance = tchar.advance * component.wordSpacing;
-                            currentWordCharIndexes.clear();
-                            precedingSpace = true;
-                            wordFirstLetterOffset = 0;
-                        }
-                        else
-                        {
-                            newWord = precedingSpace;
-                            precedingSpace = false;
+                            // First character of next word will be the next one after this character, so
+                            // size + 1 for next index + 1
+                            firstCharOfWordIndex = glyphs.size() + 1;
                         }
 
-                        wordFirstLetterOffset += newWord * glyph.position.x;
-                        newWord = false;
-
-                        if ((localPosition.x + glyph.dimensions.x) > component.dimensions.x)
+                        // Check for horizontal clipping
+                        if ((localPosition.x + glyph.dimensions.x) > component.dimensions.x
+                            && firstCharOfWordIndex < glyphs.size())
                         {
+                            // If the letter is clipped (and not a space), move the whole word down a line
+                            // if wordwrap is enabled, otherwise it gets thrown out
                             if (component.wordWrapEnabled)
                             {
-                                if (wordFirstLetterOffset > 0)
+                                Glyph firstCharOfWordGlyph = glyphs.at(firstCharOfWordIndex);
+                                // Remove character offset to get true x coord of first char in word
+                                wordFirstLetterOffset = firstCharOfWordGlyph.position.x
+                                                        - firstCharOfWordGlyph.charOffsets.x;
+
+                                //TODO: Is this threshold too high?
+                                if (wordFirstLetterOffset > 0.01)
                                 {
                                     localPosition.x = 0;
-                                    localPosition.y -= deltaY;
+                                    paragraphPosition.y -= deltaY;
 
-                                    for (auto index: currentWordCharIndexes)
+                                    // Move every character of the word down
+                                    while (firstCharOfWordIndex < glyphs.size())
                                     {
-                                        Glyph& storedGlyph = glyphs.at(index);
-                                        storedGlyph.position.x = localPosition.x;
-                                        storedGlyph.position.y = localPosition.y;
-                                        localPosition.x += ((storedGlyph.advance >> 6) * component.letterSpacing * scale);
+                                        Glyph& storedGlyph = glyphs.at(firstCharOfWordIndex++);
+                                        storedGlyph.position.x = localPosition.x + storedGlyph.charOffsets.x;
+                                        storedGlyph.position.y = paragraphPosition.y + storedGlyph.charOffsets.y;
+                                        localPosition.x += ((storedGlyph.advance >> 6) * component.letterSpacing *
+                                                            scale);
                                     }
 
-                                    glyph.position.x = localPosition.x;
-                                    glyph.position.y = localPosition.y;
+                                    // Update current character as well
+                                    glyph.position.x = localPosition.x + glyph.charOffsets.x;
+                                    glyph.position.y = paragraphPosition.y + glyph.charOffsets.y;
                                     glyphs.push_back(glyph);
                                 }
                             }
@@ -144,15 +179,43 @@ namespace PB
                         else
                         {
                             glyphs.push_back(glyph);
-                            currentWordCharIndexes.push_back(glyphs.size() - 1);
                         }
 
                         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+                        // bitshift by 6 to get value in pixels (2^6 = 64)
                         localPosition.x +=
-                                (tchar.advance >> 6) * component.letterSpacing * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+                                (tchar.advance >> 6) * component.letterSpacing * scale;
+
+                        ++c;
                     }
 
-                    ++c;
+                    std::uint32_t paragraphToTopDelta;
+                    std::uint32_t paragraphShift;
+
+                    // Move current paragraph above previous paragraph
+                    for (std::uint32_t i = firstCharOfParagraphIndex; i < glyphs.size(); ++i)
+                    {
+                        auto& glyph = glyphs.at(i);
+                        // Difference between top of frame and top of previous paragraph
+                        // This is likely a negative value since y = 0 is the top of the frame
+                        // Because localPosition.y is decremented, the sum gives the delta
+                        // As localPosition.y becomes more negative, this delta gets smaller
+                        paragraphToTopDelta = component.dimensions.y + localPosition.y;
+                        // Distance of the top of the current glyph to the bottom of the paragraph
+                        // This creates a positive value, shifting [0, -1, -2, ...] to [..., 2, 1, 0]
+                        // The calculation is based on the top of the glyph, so shift everything up one extra line,
+                        // making the "bottom" of the glyphs in the last line of the paragraph the origin.
+                        paragraphShift = (-paragraphPosition.y) + deltaY;
+                        // Shift the paragraph "up" so the bottom of the paragraph is at y = 0
+                        glyph.position.y += paragraphShift;
+                        // Shift the paragraph "down" so the bottom of the paragraph is at y = top of previous paragraph
+                        glyph.position.y -= paragraphToTopDelta;
+                    }
+
+                    localPosition.x = 0;
+                    // New localPosition.y to track previous paragraph position
+                    localPosition.y += paragraphPosition.y - deltaY;
+                    paragraphPosition.y = 0;
                 }
             }
         }

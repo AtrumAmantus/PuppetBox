@@ -89,7 +89,11 @@ extern inline bool uiSetup(UIController& uiController, UserInput& userInput)
     );
 
     textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                "This is a long sentence that should wrap to the next line, followed by some additional words to check to see how big the bounding box is, and if it is properly clipping the text.");
+                                "This is a long sentence that should wrap to the next line, followed by some "
+                                "additional words to check to see how big the bounding box is, and if it is properly "
+                                "clipping the text.\n"
+                                "Another sentence that is not as long as the last one but still long enough to wrap.\n"
+                                "Plus one more small one.\n");
 
     auto inputBox = std::shared_ptr<PB::UIComponent>(
             PB::CreateUIComponent(

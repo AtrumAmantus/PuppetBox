@@ -22,6 +22,7 @@ namespace PB
     {
         vec3 position{};
         vec2 dimensions{};
+        ivec2 charOffsets{};
         std::uint32_t advance = 0;
         std::int8_t character = '\0';
     };
