@@ -77,10 +77,12 @@ namespace PB
          * @param face              The font face to generate textures for.
          * @param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
          * glyph images.
+         * @param fontSize          The requested font size to load the font at.
          * @return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
-        virtual bool
-        buildCharacterMap(FT_Face face, std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const = 0;
+        virtual bool buildCharacterMap(
+                FT_Face face,
+                std::unordered_map<int8_t, TypeCharacter>& loadedCharacters) const = 0;
 
         /**
         * \brief Used to execute the GFX API specific commands to load vertex data into GFX memory.

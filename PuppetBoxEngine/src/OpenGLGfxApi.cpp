@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 
+#include "puppetbox/DataStructures.h"
+
 #include "GfxMath.h"
 #include "Logger.h"
 #include "OpenGLGfxApi.h"
@@ -172,10 +174,10 @@ namespace PB
 
     const RenderWindow OpenGLGfxApi::getRenderWindow()
     {
-        return RenderWindow {
-            &width_,
-            &height_,
-            &distance_
+        return RenderWindow{
+                &width_,
+                &height_,
+                &distance_
         };
     }
 
@@ -226,14 +228,28 @@ namespace PB
         return imageReference;
     }
 
-    bool
-    OpenGLGfxApi::buildCharacterMap(FT_Face face, std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const
+    bool OpenGLGfxApi::buildCharacterMap(
+            FT_Face face,
+            std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const
     {
+        const std::uint32_t MAX_ATLAS_COLUMNS = 512;
+        const std::uint32_t MAX_CHARACTERS = 128;
+
+        struct AtlasRow
+        {
+            std::uint8_t data[MAX_ATLAS_COLUMNS];
+        };
+
+        std::vector<AtlasRow> atlasRows{};
+
+        uivec2 nextAtlasPosition{};
+        TypeCharacter typeCharacters[MAX_CHARACTERS];
+
         bool success = true;
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  // Disable byte-alignment restriction
 
-        for (std::uint8_t c = 0; success && c < 128U; ++c)
+        for (std::uint8_t c = 0; success && c < MAX_CHARACTERS; ++c)
         {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             {
@@ -253,10 +269,10 @@ namespace PB
 
                 for (std::uint32_t row = 0; row < bitmapHeight / 2; ++row)
                 {
-                    for (std::uint32_t pixel = 0; pixel < bitmapWidth; ++pixel)
+                    for (std::uint32_t column = 0; column < bitmapWidth; ++column)
                     {
-                        std::uint32_t currentIndex = (bitmapWidth * row) + pixel;
-                        std::uint32_t invertedIndex = (bitmapWidth * (bitmapHeight - row - 1)) + pixel;
+                        std::uint32_t currentIndex = (bitmapWidth * row) + column;
+                        std::uint32_t invertedIndex = (bitmapWidth * (bitmapHeight - row - 1)) + column;
 
                         std::uint8_t tmp = face->glyph->bitmap.buffer[currentIndex];
                         face->glyph->bitmap.buffer[currentIndex] = face->glyph->bitmap.buffer[invertedIndex];
@@ -264,42 +280,93 @@ namespace PB
                     }
                 }
 
-                std::uint32_t texture;
-                glGenTextures(1, &texture);
-                glBindTexture(GL_TEXTURE_2D, texture);
-                glTexImage2D(
-                        GL_TEXTURE_2D,
-                        0,
-                        GL_RED,
-                        face->glyph->bitmap.width,
-                        face->glyph->bitmap.rows,
-                        0,
-                        GL_RED,
-                        GL_UNSIGNED_BYTE,
-                        face->glyph->bitmap.buffer
-                );
+                // Check if we're overrunning the atlas row width
+                if (nextAtlasPosition.x + bitmapWidth > MAX_ATLAS_COLUMNS)
+                {
+                    // Move down to next data row
+                    nextAtlasPosition.y = atlasRows.size();
+                    // Starting from the left again
+                    nextAtlasPosition.x = 0;
+                }
 
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                // Now write all the data to the atlas for this character
+                for (std::uint32_t row = 0; row < bitmapHeight; ++row)
+                {
+                    for (std::uint32_t column = 0; column < bitmapWidth; ++column)
+                    {
+                        std::uint32_t pixelIndex = (bitmapWidth * row) + column;
 
-                ImageReference imageReference{texture};
-                imageReference.requiresAlphaBlending = true;
-
-                loadedCharacters.insert(
-                        std::pair<std::int8_t, TypeCharacter>{
-                                c,
-                                TypeCharacter{
-                                        imageReference,
-                                        texture,
-                                        {face->glyph->bitmap.width, face->glyph->bitmap.rows},
-                                        {face->glyph->bitmap_left, face->glyph->bitmap_top},
-                                        static_cast<std::uint32_t>(face->glyph->advance.x)
-                                }
+                        // Check if we're breaking our vertical bounds, resize if needed
+                        if (nextAtlasPosition.y + row >= atlasRows.size())
+                        {
+                            atlasRows.resize(nextAtlasPosition.y + row + 1);
                         }
-                );
+
+                        atlasRows.at(nextAtlasPosition.y + row).data[nextAtlasPosition.x +
+                                                                     column] = face->glyph->bitmap.buffer[pixelIndex];
+                    }
+                }
+
+                typeCharacters[c] = TypeCharacter{
+                        c,
+                        ImageReference{0},
+                        {bitmapWidth, bitmapHeight},
+                        nextAtlasPosition,
+                        {face->glyph->bitmap_left, face->glyph->bitmap_top},
+                        static_cast<std::uint32_t>(face->glyph->advance.x)
+                };
+
+                // Move position over for processing of next glyph
+                nextAtlasPosition.x += bitmapWidth;
             }
+        }
+
+        // Convert all glyph data into a 1D array
+        std::uint8_t* atlasData = new std::uint8_t[atlasRows.size() * MAX_ATLAS_COLUMNS];
+
+        for (std::uint32_t row = 0; row < atlasRows.size(); ++row)
+        {
+            for (std::uint32_t column = 0; column < MAX_ATLAS_COLUMNS; ++column)
+            {
+                atlasData[(row * MAX_ATLAS_COLUMNS) + column] = atlasRows.at(row).data[column];
+            }
+        }
+
+        // Create the OpenGL resource of the glyph atlas data
+        std::uint32_t texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RED,
+                MAX_ATLAS_COLUMNS,
+                atlasRows.size(),
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                atlasData
+        );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        delete[] atlasData;
+
+        ImageReference imageReference{texture};
+        imageReference.width = MAX_ATLAS_COLUMNS;
+        imageReference.height = atlasRows.size();
+        imageReference.requiresAlphaBlending = true;
+
+        // Load the map with all the individual glyph data
+        for (auto tChar: typeCharacters)
+        {
+            tChar.image = imageReference;
+            loadedCharacters.insert(
+                    std::pair<std::int8_t, TypeCharacter>{tChar.character, tChar}
+            );
         }
 
         return success;

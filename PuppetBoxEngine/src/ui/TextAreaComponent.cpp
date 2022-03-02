@@ -123,8 +123,13 @@ namespace PB
                         glyph.position.y = paragraphPosition.y + glyph.charOffsets.y;
                         glyph.position.z = localPosition.z;
 
-                        glyph.dimensions.x = tchar.size.x * scale;
-                        glyph.dimensions.y = tchar.size.y * scale;
+                        glyph.originalDimensions = tchar.size;
+
+                        glyph.scaledDimensions.x = tchar.size.x * scale;
+                        glyph.scaledDimensions.y = tchar.size.y * scale;
+
+                        glyph.atlasPosition = tchar.atlasPosition;
+                        glyph.image = tchar.image;
 
                         glyph.advance = tchar.advance;
 
@@ -141,7 +146,7 @@ namespace PB
                         }
 
                         // Check for horizontal clipping
-                        if ((localPosition.x + glyph.dimensions.x) > component.dimensions.x
+                        if ((localPosition.x + glyph.scaledDimensions.x) > component.dimensions.x
                             && firstCharOfWordIndex < glyphs.size())
                         {
                             // If the letter is clipped (and not a space), move the whole word down a line
@@ -266,15 +271,33 @@ namespace PB
                                 // Brings back down if origin is top
                                 - (component.dimension.y * originTop);
 
+            // Calculate all the opengl UV values based on atlas data
+            vec2 uvBottomLeft{
+                static_cast<float>(g.atlasPosition.x) / g.image.width,
+                static_cast<float>(g.atlasPosition.y) / g.image.height
+            };
+            vec2 uvTopLeft{
+                    static_cast<float>(g.atlasPosition.x) / g.image.width,
+                    static_cast<float>(g.atlasPosition.y + g.originalDimensions.y) / g.image.height
+            };
+            vec2 uvTopRight{
+                    static_cast<float>(g.atlasPosition.x + g.originalDimensions.x) / g.image.width,
+                    static_cast<float>(g.atlasPosition.y + g.originalDimensions.y) / g.image.height
+            };
+            vec2 uvBottomRight{
+                    static_cast<float>(g.atlasPosition.x + g.originalDimensions.x) / g.image.width,
+                    static_cast<float>(g.atlasPosition.y) / g.image.height
+            };
+
             //TODO: This may need to be reworked to support "floating" text in 3d space.
             float vertices[4][8] = {
                     {
                             g.position.x + containerOffset.x,
-                            g.position.y + containerOffset.y + g.dimensions.y,
+                            g.position.y + containerOffset.y + g.scaledDimensions.y,
                             g.position.z,
 
                             0.0f, 0.0f, 1.0f,   // Normals don't change
-                            0.0f, 1.0f              // UV coords don't change
+                            uvTopLeft.x, uvTopLeft.y
                     },
                     {
                             g.position.x + containerOffset.x,
@@ -282,31 +305,30 @@ namespace PB
                             g.position.z,
 
                             0.0f, 0.0f, 1.0f,
-                            0.0f, 0.0f
+                            uvBottomLeft.x, uvBottomLeft.y
                     },
                     {
-                            g.position.x + containerOffset.x + g.dimensions.x,
+                            g.position.x + containerOffset.x + g.scaledDimensions.x,
                             g.position.y + containerOffset.y,
                             g.position.z,
 
                             0.0f, 0.0f, 1.0f,
-                            1.0f, 0.0f
+                            uvBottomRight.x, uvBottomRight.y
                     },
                     {
-                            g.position.x + containerOffset.x + g.dimensions.x,
-                            g.position.y + containerOffset.y + g.dimensions.y,
+                            g.position.x + containerOffset.x + g.scaledDimensions.x,
+                            g.position.y + containerOffset.y + g.scaledDimensions.y,
                             g.position.z,
 
                             0.0f, 0.0f, 1.0f,
-                            1.0f, 1.0f
+                            uvTopRight.x, uvTopRight.y
                     }
             };
 
             // TODO: Add a default character to load for unrecognized ones
-            TypeCharacter tchar = font_.getCharacter(g.character).result;
-
+            
             // render glyph texture over quad
-            tchar.image.use(0);
+            g.image.use(0);
             // update content of VBO memory
             glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -323,7 +345,8 @@ namespace PB
                 //                            v-- number of vertices to draw
                 glDrawArrays(GL_TRIANGLES, 0, mesh.drawCount);
             }
-            tchar.image.unuse(0);
+
+            g.image.unuse(0);
         }
 
         shader_.unuse();

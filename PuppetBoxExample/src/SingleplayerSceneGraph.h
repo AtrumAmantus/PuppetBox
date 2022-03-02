@@ -38,7 +38,21 @@ namespace Singleplayer
             std::string input = userInput.read();
             userInput.clear();
 
-            std::cout << "You typed: " << input << std::endl;
+//            std::cout << "You typed: " << input << std::endl;
+
+            std::shared_ptr<UIControllerEvent> event = std::make_shared<UIControllerEvent>();
+            event->action = [&input](UIController& controller) {
+                bool error = false;
+                auto component = controller.getComponent(CHAT_MESSAGES_BOX, &error);
+
+                if (!error)
+                {
+                    std::string oldContent = component->getStringAttribute(PB::UI::TEXT_CONTENT).orElse("");
+                    component->setStringAttribute(PB::UI::TEXT_CONTENT, oldContent + input + "\n");
+                }
+            };
+
+            PB::PublishEvent(Event::Topic::UI_TOPIC, event);
 
             if (input.substr(0, 7) == "/camera")
             {

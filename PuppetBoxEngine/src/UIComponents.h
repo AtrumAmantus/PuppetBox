@@ -20,8 +20,11 @@ namespace PB
      */
     struct Glyph
     {
+        ImageReference image{0};
         vec3 position{};
-        vec2 dimensions{};
+        uivec2 atlasPosition{};
+        uivec2 originalDimensions{};
+        vec2 scaledDimensions{};
         ivec2 charOffsets{};
         std::uint32_t advance = 0;
         std::int8_t character = '\0';

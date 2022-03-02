@@ -13,10 +13,11 @@ namespace PB
      */
     struct TypeCharacter
     {
+        std::uint8_t character = 0;
         ImageReference image{0};
-        std::uint32_t textureId;
-        uivec2 size;
-        ivec2 bearing;
+        uivec2 size{};
+        uivec2 atlasPosition{};
+        ivec2 bearing{};
         std::uint32_t advance = 0;
     };
 

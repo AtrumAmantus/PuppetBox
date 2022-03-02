@@ -72,10 +72,12 @@ namespace PB
          * \param face              The font face to generate textures for.
          * \param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
          * glyph images.
+         * @param fontSize          The requested font size to load the font at.
          * \return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
-        bool
-        buildCharacterMap(FT_Face face, std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const override;
+        bool buildCharacterMap(
+                FT_Face face,
+                std::unordered_map<std::int8_t, TypeCharacter>& loadedCharacters) const override;
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load vertex data into GFX memory.
