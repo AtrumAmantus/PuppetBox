@@ -467,8 +467,8 @@ namespace PB
             IModel* model;
 
             std::unordered_map<std::string, RenderedMesh*> meshes{};
-            std::unordered_map<std::string, BoneMap> bones{};
-            error = !buildMeshAndBones(modelData, "", 0, bones, meshes);
+            BoneMap bones{};
+            error = !buildMeshAndBones(modelData, "", bones, meshes);
 
             if (!error)
             {
@@ -507,39 +507,31 @@ namespace PB
 
     bool AssetLibrary::buildMeshAndBones(
             ModelData modelData,
-            std::string parent,
-            std::uint32_t depth,
-            std::unordered_map<std::string, BoneMap>& bones,
+            const std::string& parentName,
+            BoneMap& bones,
             std::unordered_map<std::string, RenderedMesh*>& meshes
     )
     {
         bool error = false;
 
-        BoneMap boneMap = BoneMap{
-                modelData.name,
-                std::move(parent),
-                depth,
-                Bone{
-                        vec4{
-                                modelData.offset.x,
-                                modelData.offset.y,
-                                modelData.offset.z,
-                                0.0f
-                        },
-                        vec4{modelData.scale.x, modelData.scale.y, modelData.scale.z, 1.0f},
-                        vec4{modelData.rotation.x, modelData.rotation.y, modelData.rotation.z, 0.0f}
-                }
+        Bone bone{
+                vec4{
+                        modelData.offset.x,
+                        modelData.offset.y,
+                        modelData.offset.z,
+                        1.0f
+                },
+                vec4{modelData.scale.x, modelData.scale.y, modelData.scale.z, 1.0f},
+                vec4{modelData.rotation.x, modelData.rotation.y, modelData.rotation.z, 0.0f}
         };
 
-        boneMap.bone.transform = GfxMath::CreateTransformation(
-                boneMap.bone.rotation,
-                boneMap.bone.scale,
-                boneMap.bone.position
+        bone.transform = GfxMath::CreateTransformation(
+                bone.rotation,
+                bone.scale,
+                bone.position
         );
 
-        bones.insert(
-                std::pair<std::string, BoneMap>{modelData.name, boneMap}
-        );
+        bones.addBone(modelData.name, parentName, bone);
 
         if (!modelData.mesh.dataPath.empty())
         {
@@ -598,7 +590,7 @@ namespace PB
             error = !buildMeshAndBones(
                     modelData.children.at(itr->first),
                     modelData.name,
-                    depth + 1, bones,
+                    bones,
                     meshes
             );
         }

@@ -14,14 +14,16 @@ namespace PB
     public:
         Animation(
                 std::string animationPath,
-                std::unordered_map<std::string, BoneMap> boneMap,
                 std::uint8_t fps,
                 std::uint8_t frameCount,
                 std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes
         );
 
-        std::unordered_map<std::string, TransformKeyframe>
-        getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const override;
+        bool preLoadFrames(BoneMap& boneMap) override;
+
+        std::unordered_map<std::string, TransformKeyframe> getFrames(
+                std::uint8_t currentFrame,
+                BoneMap& bones) const override;
 
         std::string getPath() const;
 
@@ -33,11 +35,8 @@ namespace PB
         std::string animationPath_;
         std::uint8_t fps_;
         std::uint8_t frameCount_;
-        // TODO: This should be only used to verify the animation's BoneMap matches the model's
-        const std::unordered_map<std::string, BoneMap> boneMap_{};
-        /**
-         * Keyframes are stored as separate scale/rotation/transform vectors
-         */
+        //TODO: Revisit the RawKeyframe logic
+        /** Keyframes are stored as separate scale/rotation/transform vectors */
         const std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes_{};
         std::vector<std::uint8_t> keyframeIndexes_{};
     };
@@ -49,7 +48,7 @@ namespace PB
 
         std::string getAnimationName() const override;
 
-        void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) override;
+        void update(float deltaTime, BoneMap& bones) override;
 
         void setCurrentFrame(std::uint32_t frame) override;
 
@@ -68,6 +67,8 @@ namespace PB
         explicit AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary);
 
         bool load(const std::string& assetPath) override;
+
+        bool preloadAnimation(BoneMap& boneMap, const std::string& animationPath) override;
 
         std::unique_ptr<IAnimator> get(const std::string& animationPath) const override;
 

@@ -6,26 +6,17 @@ root:
     material: Assets1/Materials/TestBody
     data: Assets1/Mesh/Sprite
   children:
-    collar:
+    head:
       offset:
-        x: 0
         y: 16
         z: 1
-      children:
-        neck:
-          offset:
-            z: -10
-          children:
-            head:
-              offset:
-                z: 10
-              mesh:
-                scale:
-                  x: 32
-                  y: 32
-                material: Assets1/Materials/TestHead
-                data: Assets1/Mesh/Sprite
-    left_hand:
+      mesh:
+        scale:
+          x: 32
+          y: 32
+        material: Assets1/Materials/TestHead
+        data: Assets1/Mesh/Sprite
+    left_shoulder:
       offset:
         x: 16
         y: 0

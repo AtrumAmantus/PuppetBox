@@ -268,24 +268,22 @@ namespace PB
             return material;
         }
 
-        std::unordered_map<std::string, BoneMap>
-        mapToBones(PropertyTree* pTree, const std::string& parentName, bool* error)
+        BoneMap mapToBones(PropertyTree* pTree, const std::string& parentName, bool* error)
         {
-            std::unordered_map<std::string, BoneMap> boneMap{};
+            BoneMap boneMap{};
 
             if (!pTree->children().empty())
             {
                 for (auto& p: pTree->children())
                 {
                     auto childMap = mapToBones(pTree->get(p).result, pTree->name(), error);
-                    boneMap.insert(childMap.begin(), childMap.end());
+                    boneMap.addBones(childMap);
                 }
             }
-            boneMap.insert(
-                    std::pair<std::string, BoneMap>{pTree->name(), BoneMap{pTree->name(), parentName}}
-            );
 
-            return boneMap;
+            boneMap.addBone(pTree->name(), parentName, Bone{});
+
+            return std::move(boneMap);
         }
 
         RawKeyframe mapToKeyframe(PropertyTree* pTree, bool* error)
@@ -325,15 +323,6 @@ namespace PB
                 keyframe.scale.x = getNumericResultAtNode<float>("x", *scale, error);
                 keyframe.scale.y = getNumericResultAtNode<float>("y", *scale, error);
                 keyframe.scale.z = getNumericResultAtNode<float>("z", *scale, error);
-            }
-            else
-            {
-                keyframe.scale = {
-                        {1, true},
-                        {1, true},
-                        {1, true},
-                        {1, true}
-                };
             }
 
             return keyframe;
@@ -809,7 +798,8 @@ namespace PB
 
                     if (rootNode.hasResult)
                     {
-                        std::unordered_map<std::string, BoneMap> boneMap = mapToBones(rootNode.result, "", &error);
+                        //TODO: Remove this from the animation format or implement it fully
+                        //BoneMap boneMap = mapToBones(rootNode.result, "", &error);
 
                         auto fpsNode = propertyData.get("fps");
 
@@ -842,7 +832,6 @@ namespace PB
                                                                                     new Animation(
                                                                                             this->archiveName_ + "/" +
                                                                                             assetPath,
-                                                                                            boneMap,
                                                                                             fps,
                                                                                             frameCount,
                                                                                             keyframes
@@ -998,8 +987,12 @@ namespace PB
                 stream->read(buffer, streamLength);
 
                 //TODO: Check if streamLength is too long, expecting only 32bit value
-                data.bufferData = stbi_load_from_memory((std::uint8_t*) buffer, streamLength, &data.width,
-                                                        &data.height, &data.numChannels, 0);
+                data.bufferData = stbi_load_from_memory(
+                        (std::uint8_t*) buffer,
+                        streamLength, &data.width,
+                        &data.height,
+                        &data.numChannels,
+                        0);
             }
             else
             {

@@ -40,8 +40,8 @@ namespace Singleplayer
 
 //            std::cout << "You typed: " << input << std::endl;
 
-            std::shared_ptr<UIControllerEvent> event = std::make_shared<UIControllerEvent>();
-            event->action = [&input](UIController& controller) {
+            auto messageEvent = std::make_shared<UIControllerEvent>();
+            messageEvent->action = [&input](UIController& controller) {
                 bool error = false;
                 auto component = controller.getComponent(CHAT_MESSAGES_BOX, &error);
 
@@ -52,7 +52,7 @@ namespace Singleplayer
                 }
             };
 
-            PB::PublishEvent(Event::Topic::UI_TOPIC, event);
+            PB::PublishEvent(Event::Topic::UI_TOPIC, messageEvent);
 
             if (input.substr(0, 7) == "/camera")
             {
@@ -425,6 +425,12 @@ private:
             //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
             addSceneObject(playerToControl_);
         }
+
+        PB::BoneMap boneMap = playerToControl_->getBones();
+
+        //TODO: These load times are long, separate thread and maybe some optimizations
+        PB::PreloadAnimationFrames(Constants::Animation::kIdle0, boneMap);
+        PB::PreloadAnimationFrames(Constants::Animation::kWalk, boneMap);
 
         auto* weapon = new Entity();
 

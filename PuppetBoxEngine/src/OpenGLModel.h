@@ -21,16 +21,26 @@ namespace PB
     class OpenGLModel : public IModel
     {
     public:
-        OpenGLModel(std::unordered_map<std::string, BoneMap> bones,
-                    std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
 
         /**
         * \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
         *
+        * \param bones          Skeletal data associated with this model.
         * \param renderedMeshes Vector of {@link RenderedMesh} objects to use for model rendering.
         */
-        OpenGLModel(std::unordered_map<std::string, BoneMap> bones, std::unique_ptr<IAnimator> animator,
-                    std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
+        OpenGLModel(BoneMap& bones, std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
+
+        /**
+        * \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
+        *
+        * \param bones          Skeletal data associated with this model.
+        * \param animator       The desired animator to attach to this model.
+        * \param renderedMeshes Vector of {@link RenderedMesh} objects to use for model rendering.
+        */
+        OpenGLModel(
+                BoneMap& bones,
+                std::unique_ptr<IAnimator> animator,
+                std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
 
         /**
          * \brief Sets the animation of the Model to the one held by the given animator.
@@ -88,8 +98,15 @@ namespace PB
          */
         void rotateBone(const std::string& boneName, vec3 rotation) override;
 
+        /**
+         * \brief Fetches the skeletal data associated with this model.
+         *
+         * \return The skeletal data associated with this model.
+         */
+        BoneMap getBones() const override;
+
     private:
-        std::unordered_map<std::string, BoneMap> bones_{};
+        BoneMap bones_{};
         std::unordered_map<std::string, mat4> boneTransformations_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
         std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};

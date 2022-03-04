@@ -11,7 +11,7 @@ namespace PB
 {
     namespace
     {
-        std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::vector<TransformKeyframe>>> CACHED_KEYFRAMES{};
+        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::vector<TransformKeyframe>>> CACHED_KEYFRAMES{};
 
         inline Result<RawKeyframe> findExplicitKeyframe(
                 const std::string& boneName,
@@ -159,7 +159,6 @@ namespace PB
                 std::uint8_t currentFrame,
                 std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes,
                 std::vector<std::uint8_t> keyframeIndexes,
-                std::unordered_map<std::string, BoneMap> bones,
                 std::function<Vec4&(RawKeyframe&)> pullVec4,
                 std::function<Result<float>(Vec4&)> pullResult,
                 std::function<float(RawKeyframe, RawKeyframe)> tweenTransform
@@ -210,12 +209,10 @@ namespace PB
 
     Animation::Animation(
             std::string animationPath,
-            std::unordered_map<std::string, BoneMap> boneMap,
             std::uint8_t fps,
             std::uint8_t frameCount,
             std::unordered_map<std::uint8_t, std::vector<RawKeyframe>> keyframes
     ) : animationPath_(animationPath),
-        boneMap_(std::move(boneMap)),
         fps_(fps),
         frameCount_(frameCount),
         keyframes_(std::move(keyframes))
@@ -228,33 +225,32 @@ namespace PB
         std::sort(keyframeIndexes_.begin(), keyframeIndexes_.end());
     }
 
-    /**
-     * Gets the transformation matrices for each bone on the current currentFrame.
-     *
-     * <p>If the given currentFrame has defined transformations, those are directly used</p>
-     *
-     * <p>If the given currentFrame has no defined transformations, checks for previous/next frames with defined
-     * transformations and does a tween</p>
-     *
-     * <p>If the prev/next currentFrame are the same currentFrame, the bone has a hard set value for the animation, and it uses
-     * that</p>
-     *
-     * <p>If no transformations are defined anywhere for the bone, a default identity matrix is used.</p>
-     *
-     * \param currentFrame The frame to get the transformation matrix for on each bone.
-     * \param bones        The {\link BoneMap} provided by the model, with accurate offsets.
-     * \return An {\link std::unordered_map} of {\link Keyframe}s holding transformation matrices for every bone
-     * for the given frame.
-     */
-    //TODO: bones vs boneMap_ is confusing, plus BoneMap structure is wacky, revisit
-    std::unordered_map<std::string, TransformKeyframe>
-    Animation::getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const
+    bool Animation::preLoadFrames(BoneMap& boneMap)
     {
-        //TODO: This is slow as fuck now, need to pre-load animations.
+        LOGGER_INFO("Preloading animation '" + getPath() + "'...");
+
+        for (std::uint32_t i = 0; i < frameCount_; ++i)
+        {
+            getFrames(i, boneMap);
+        }
+
+        LOGGER_INFO("Animation '" + getPath() + "' has been loaded.");
+
+        return true;
+    }
+
+    std::unordered_map<std::string, TransformKeyframe> Animation::getFrames(
+            std::uint8_t currentFrame,
+            BoneMap& bones) const
+    {
+        const std::uint32_t MAX_VECTORS = 3;
+        const std::uint32_t MAX_AXES = 3;
+
         std::unordered_map<std::string, TransformKeyframe> keyframeTransformationMatrixMap{};
 
         bool animationCached = CACHED_KEYFRAMES.find(getPath()) != CACHED_KEYFRAMES.end();
 
+        // First check if we already loaded this keyframe
         if (animationCached &&
             CACHED_KEYFRAMES.at(getPath()).find(currentFrame) != CACHED_KEYFRAMES.at(getPath()).end())
         {
@@ -268,26 +264,27 @@ namespace PB
         }
         else
         {
+            // Otherwise, generate a keyframe for each property and store it in the cache
             const auto totalFrameCount = getFrameCount();
 
-            std::function<Vec4&(RawKeyframe&)> getVec4[] = {
+            std::function<Vec4&(RawKeyframe&)> getVec4[MAX_VECTORS] = {
                     [](RawKeyframe& k) -> Vec4& { return k.position; },
                     [](RawKeyframe& k) -> Vec4& { return k.scale; },
                     [](RawKeyframe& k) -> Vec4& { return k.rotation; }
             };
-            std::function<void(Vec4&, Result<float>)> setResult[] = {
+            std::function<void(Vec4&, Result<float>)> setResult[MAX_AXES] = {
                     [](Vec4& v, Result<float> r) -> void { v.x = r; },
                     [](Vec4& v, Result<float> r) -> void { v.y = r; },
                     [](Vec4& v, Result<float> r) -> void { v.z = r; }
             };
-            std::function<Result<float>(Vec4&)> getResult[] = {
+            std::function<Result<float>(Vec4&)> getResult[MAX_AXES] = {
                     [](Vec4& v) -> Result<float> { return v.x; },
                     [](Vec4& v) -> Result<float> { return v.y; },
                     [](Vec4& v) -> Result<float> { return v.z; }
             };
             std::function < float(RawKeyframe, RawKeyframe) > tweenTransform;
 
-            std::function<float(float, float, float)> transformAlgo[] = {
+            std::function<float(float, float, float)> transformAlgo[MAX_VECTORS] = {
                     [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
                     [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
                     [](float prev, float next, float blend) -> float {
@@ -298,13 +295,15 @@ namespace PB
                     }
             };
 
-            for (const auto& bone: bones)
+            for (const auto& bone: bones.getAllBones())
             {
                 RawKeyframe currentKey{};
 
-                for (std::uint8_t v4 = 0; v4 < 3; ++v4)
+                // For each vector
+                for (std::uint8_t v4 = 0; v4 < MAX_VECTORS; ++v4)
                 {
-                    for (std::uint8_t r = 0; r < 3; ++r)
+                    // For each axis
+                    for (std::uint8_t r = 0; r < MAX_AXES; ++r)
                     {
                         tweenTransform = [totalFrameCount, currentFrame, getResult, transformAlgo, getVec4, v4, r](
                                 RawKeyframe prev, RawKeyframe next) -> float {
@@ -327,7 +326,6 @@ namespace PB
                                 currentFrame,
                                 keyframes_,
                                 keyframeIndexes_,
-                                bones,
                                 getVec4[v4],
                                 getResult[r],
                                 tweenTransform
@@ -337,9 +335,8 @@ namespace PB
                     }
                 }
 
-                Bone tModelValues = bones.at(bone.first).bone;
+                Bone tModelValues = bones.getBone(bone.first).result->bone;
 
-                // TODO: Position changes on bones is awful, this needs to be removed
                 vec3 position = {
                         currentKey.position.x.orElse(tModelValues.position.x),
                         currentKey.position.y.orElse(tModelValues.position.y),
@@ -348,9 +345,9 @@ namespace PB
 
                 // TODO: Scaling comes later, this is a bit messy
                 vec3 scale = {
-                        currentKey.scale.x.orElse(1.0f),
-                        currentKey.scale.y.orElse(1.0f),
-                        currentKey.scale.z.orElse(1.0f)
+                        currentKey.scale.x.orElse(tModelValues.scale.x),
+                        currentKey.scale.y.orElse(tModelValues.scale.y),
+                        currentKey.scale.z.orElse(tModelValues.scale.z)
                 };
 
                 vec3 rotation = {
@@ -375,23 +372,26 @@ namespace PB
             // we add in the bone offsets to complete the transformation values.
             for (auto& entry: keyframeTransformationMatrixMap)
             {
-                auto bone = bones.at(entry.first);
+                auto bone = bones.getBone(entry.first).result;
 
-                while (!bone.name.empty())
+                while (!bone->name.empty())
                 {
                     // Current bone's offsets were already applied, skip
-                    if (bone.name != entry.second.boneName)
+                    if (bone->name != entry.second.boneName)
                     {
-                        entry.second.transform = originalKeyframeTransformationMatrixMap.at(bone.name).transform * entry.second.transform;
+                        entry.second.transform = originalKeyframeTransformationMatrixMap.at(bone->name).transform
+                                                 * entry.second.transform;
                     }
 
-                    if (bones.find(bone.parent) != bones.end())
+                    auto parentBone = bones.getBone(bone->parent);
+
+                    if (parentBone.hasResult)
                     {
-                        bone = bones.at(bone.parent);
+                        bone = parentBone.result;
                     }
                     else
                     {
-                        bone.name = "";
+                        bone->name = "";
                     }
                 }
             }
@@ -449,7 +449,7 @@ namespace PB
         return animation_->getPath();
     }
 
-    void Animator::update(float deltaTime, std::unordered_map<std::string, BoneMap> bones)
+    void Animator::update(float deltaTime, BoneMap& bones)
     {
         //TODO: Animations never stop, need to create an animation event.
         sequenceTime_ += deltaTime;
@@ -492,13 +492,33 @@ namespace PB
         return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
     }
 
-    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationPath) const
+    bool AnimationCatalogue::preloadAnimation(BoneMap& boneMap, const std::string& animationPath)
     {
-        if (animations_.find(animationPath) != animations_.end())
+        auto itr = animations_.find(animationPath);
+
+        if (itr != animations_.end())
         {
-            return std::make_unique<Animator>(animations_.at(animationPath));
+            itr->second->preLoadFrames(boneMap);
         }
 
-        return nullptr;
+        return itr != animations_.end();
+    }
+
+    std::unique_ptr<IAnimator> AnimationCatalogue::get(const std::string& animationPath) const
+    {
+        std::unique_ptr<IAnimator> animator;
+
+        auto itr = animations_.find(animationPath);
+
+        if (itr != animations_.end())
+        {
+            animator = std::make_unique<Animator>(itr->second);
+        }
+        else
+        {
+            animator = nullptr;
+        }
+
+        return animator;
     }
 }

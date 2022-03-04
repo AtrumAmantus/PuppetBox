@@ -327,6 +327,11 @@ namespace PB
         return animationCatalogue.load(assetPath);
     }
 
+    bool PreloadAnimationFrames(const std::string& animationPath, BoneMap& boneMap)
+    {
+        return animationCatalogue.preloadAnimation(boneMap, animationPath);
+    }
+
     void Run(std::function<bool()> onReady)
     {
         if (pbInitialized)

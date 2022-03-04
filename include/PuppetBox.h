@@ -91,6 +91,16 @@ namespace PB
     extern PUPPET_BOX_API bool LoadAnimationsPack(const std::string& assetPath);
 
     /**
+     * \brief Preloads the animation keyframes into memory.
+     *
+     * \param animationPath The path to the desired animation to preload.
+     * \param boneMap       The skeletal data to use when preloading the keyframes.
+     *
+     * \return True if the preload was successful, False otherwise.
+     */
+    extern PUPPET_BOX_API bool PreloadAnimationFrames(const std::string& animationPath, BoneMap& boneMap);
+
+    /**
      * \brief Initiates start of core engine, input processors, and render loops.
      */
     extern PUPPET_BOX_API void Run(std::function<bool()> onReady);

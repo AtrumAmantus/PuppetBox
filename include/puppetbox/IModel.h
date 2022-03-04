@@ -70,5 +70,12 @@ namespace PB
          * \param rotation The specific values to set the bone's rotations to.
          */
         virtual void rotateBone(const std::string& boneName, vec3 rotation) = 0;
+
+        /**
+         * \brief Grabs the skeletal data associated with this {\link PB::IModel}.
+         *
+         * \return The skeletal data associated with this {\link PB::IModel}.
+         */
+        virtual BoneMap getBones() const = 0;
     };
 }

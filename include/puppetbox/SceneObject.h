@@ -201,6 +201,13 @@ namespace PB
          */
         const UUID getId() const;
 
+        /**
+         * \brief Fetches the skeletal data associated with the model for this scene object.
+         *
+         * \return The skeletal data associated with the model for this scene object.
+         */
+        BoneMap getBones() const;
+
         bool operator==(const SceneObject& rhs) const;
 
         bool operator!=(const SceneObject& rhs) const;

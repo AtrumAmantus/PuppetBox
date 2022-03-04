@@ -147,6 +147,11 @@ namespace PB
         };
     }
 
+    BoneMap SceneObject::getBones() const
+    {
+        return model_->getBones();
+    }
+
     const UUID SceneObject::getId() const
     {
         return id_;

@@ -45,6 +45,15 @@ namespace PB
     class PUPPET_BOX_API IAnimation
     {
     public:
+
+        /**
+         * \brief Preloads the animation frames into memory.
+         *
+         * \param boneMap The skeletal data used to preload the animation.
+         * \return True if the animation was preloaded successfully, False otherwise.
+         */
+        virtual bool preLoadFrames(BoneMap& boneMap) = 0;
+
         /**
          * \brief Gets keyframes for the given bones at the given frame index.
          *
@@ -54,8 +63,9 @@ namespace PB
          * \param bones        The bones to get keyframes for.
          * \return A map of the keyframes for the given bones, keyed per bone.
          */
-        virtual std::unordered_map<std::string, TransformKeyframe>
-        getFrames(std::uint8_t currentFrame, std::unordered_map<std::string, BoneMap> bones) const = 0;
+        virtual std::unordered_map<std::string, TransformKeyframe> getFrames(
+                std::uint8_t currentFrame,
+                BoneMap& bones) const = 0;
 
         /**
          * \brief Returns the path associated with the animation.
@@ -97,7 +107,7 @@ namespace PB
          * \param deltaTime The time since the last update cycle.
          * \param bones     The bones for the target skeleton to apply the animation to.
          */
-        virtual void update(float deltaTime, std::unordered_map<std::string, BoneMap> bones) = 0;
+        virtual void update(float deltaTime, BoneMap& bones) = 0;
 
         /**
          * \brief Sets the current frame for the animation.
@@ -127,6 +137,15 @@ namespace PB
          * \return True if the animations were loaded successfully, False otherwise.
          */
         virtual bool load(const std::string& assetPath) = 0;
+
+        /**
+         * \brief Preloads the animation into memory.
+         *
+         * \param boneMap       The skeletal data to use to preload the animation.
+         * \param animationPath The path to the animation asset to preload.
+         * \return True if the animation was preloaded successfully, False otherwise.
+         */
+        virtual bool preloadAnimation(BoneMap& boneMap, const std::string& animationPath) = 0;
 
         /**
          * \brief Get the animation associated to the given path reference.

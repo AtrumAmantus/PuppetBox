@@ -6,16 +6,14 @@
 
 namespace PB
 {
-    OpenGLModel::OpenGLModel(
-            std::unordered_map<std::string, BoneMap> bones,
-            std::unordered_map<std::string, RenderedMesh*> renderedMeshes
+    OpenGLModel::OpenGLModel(BoneMap& bones, std::unordered_map<std::string, RenderedMesh*> renderedMeshes
     ) : bones_(std::move(bones)), animator_(nullptr), renderedMeshes_(std::move(renderedMeshes))
     {
 
     }
 
     OpenGLModel::OpenGLModel(
-            std::unordered_map<std::string, BoneMap> bones,
+            BoneMap& bones,
             std::unique_ptr<IAnimator> animator,
             std::unordered_map<std::string, RenderedMesh*> renderedMeshes
     ) : bones_(std::move(bones)), animator_(std::move(animator)), renderedMeshes_(std::move(renderedMeshes))
@@ -69,32 +67,32 @@ namespace PB
             //TODO: not supporting mix animations atm
 
             // Update T-Pose local bone transforms
-            for (auto itr = bones_.begin(); itr != bones_.end(); ++itr)
+            for (auto& itr : bones_.getAllBones())
             {
-                itr->second.bone.transform = GfxMath::CreateTransformation(
-                        itr->second.bone.rotation,
-                        itr->second.bone.scale,
-                        itr->second.bone.position
+                itr.second.bone.transform = GfxMath::CreateTransformation(
+                        itr.second.bone.rotation,
+                        itr.second.bone.scale,
+                        itr.second.bone.position
                 );
             }
 
             boneTransformations_.clear();
 
             // Calculate T-Pose final bone transforms
-            for (auto itr = bones_.begin(); itr != bones_.end(); ++itr)
+            for (auto& itr : bones_.getAllBones())
             {
-                mat4 transform = itr->second.bone.transform;
+                mat4 transform = itr.second.bone.transform;
 
-                std::string parentName = itr->second.parent;
+                std::string parentName = itr.second.parent;
 
                 while (!parentName.empty())
                 {
-                    transform = bones_.at(parentName).bone.transform * transform;
-                    parentName = bones_.at(parentName).parent;
+                    transform = bones_.getBone(parentName).result->bone.transform * transform;
+                    parentName = bones_.getBone(parentName).result->parent;
                 }
 
                 boneTransformations_.insert(
-                        std::pair<std::string, mat4>(itr->first, transform)
+                        std::pair<std::string, mat4>(itr.first, transform)
                 );
             }
         }
@@ -115,9 +113,16 @@ namespace PB
 
     void OpenGLModel::rotateBone(const std::string& boneName, vec3 rotation)
     {
-        if (bones_.find(boneName) != bones_.end())
+        auto bone = bones_.getBone(boneName);
+
+        if (bone.hasResult)
         {
-            bones_.at(boneName).bone.rotation = vec4{rotation.x, rotation.y, rotation.z, 0.0f};
+            bone.result->bone.rotation = vec4{rotation.x, rotation.y, rotation.z, 0.0f};
         }
+    }
+
+    BoneMap OpenGLModel::getBones() const
+    {
+        return bones_;
     }
 }

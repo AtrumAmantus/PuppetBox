@@ -184,9 +184,9 @@ namespace PB
          */
         bool buildMeshAndBones(
                 ModelData modelData,
-                std::string parent,
-                std::uint32_t depth,
-                std::unordered_map<std::string, BoneMap>& bones,
-                std::unordered_map<std::string, RenderedMesh*>& meshes);
+                const std::string& parentName,
+                BoneMap& bones,
+                std::unordered_map<std::string, RenderedMesh*>& meshes
+        );
     };
 }

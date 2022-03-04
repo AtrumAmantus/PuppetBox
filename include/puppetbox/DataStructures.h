@@ -6,6 +6,7 @@
 #include <ostream>
 #include <queue>
 #include <string>
+#include <unordered_map>
 
 #include "Constants.h"
 
@@ -756,12 +757,61 @@ namespace PB
         };
     };
 
-    struct BoneMap
+    struct BoneNode
     {
         std::string name;
         std::string parent;
-        std::uint32_t depth;
         Bone bone{};
+    };
+
+    class BoneMap
+    {
+    public:
+        BoneMap() = default;
+
+        BoneMap(const BoneMap& boneMap)
+        {
+            map_.insert(boneMap.map_.begin(), boneMap.map_.end());
+        };
+
+        void addBone(const std::string& name, const std::string& parent, const Bone& bone)
+        {
+            map_.insert(
+                    std::pair<std::string, BoneNode>{name, BoneNode{name, parent, bone}}
+            );
+        };
+
+        void addBones(const BoneMap& bones)
+        {
+            map_.insert(bones.map_.begin(), bones.map_.end());
+        };
+
+        Result<BoneNode*> getBone(const std::string& name)
+        {
+            Result<BoneNode*> result{};
+
+            auto itr = map_.find(name);
+
+            if (itr != map_.end())
+            {
+                result.hasResult = true;
+                result.result = &itr->second;
+            }
+
+            return result;
+        };
+
+        std::unordered_map<std::string, BoneNode>& getAllBones()
+        {
+            return map_;
+        };
+
+        const std::unordered_map<std::string, BoneNode>& getAllBones() const
+        {
+            return map_;
+        };
+    private:
+        std::unordered_map<std::string, BoneNode> map_{};
     };
 
     struct UUID

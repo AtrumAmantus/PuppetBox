@@ -1,38 +1,158 @@
 skeleton:
   root:
-    - neck
+    - head
     - leftHand
     - rightHand
 fps: 30
 length: 30
 keyframes:
   0:
-    collar:
-      rotation:
-        x: 0
-    neck:
-      rotation:
-        x: 0
     head:
-      rotation:
-        x: 0
+      position:
+        x: 0.00
+        y: 16.00
+  1:
+    head:
+      position:
+        x: 0.00
+        y: 16.56
+  2:
+    head:
+      position:
+        x: 0.00
+        y: 17.04
+  3:
+    head:
+      position:
+        x: 0.00
+        y: 17.44
+  4:
+    head:
+      position:
+        x: 0.00
+        y: 17.76
+  5:
+    head:
+      position:
+        x: 0.00
+        y: 18.00
+  6:
+    head:
+      position:
+        x: 0.00
+        y: 18.16
   7:
-    collar:
-      rotation:
-        x: -11.25
-    neck:
-      rotation:
-        x: 22.5
     head:
-      rotation:
-        x: -11.25
+      position:
+        x: 0.00
+        y: 18.24
+  8:
+    head:
+      position:
+        x: 0.00
+        y: 18.24
+  9:
+    head:
+      position:
+        x: 0.00
+        y: 18.16
+  10:
+    head:
+      position:
+        x: 0.00
+        y: 18.00
+  11:
+    head:
+      position:
+        x: 0.00
+        y: 17.76
+  12:
+    head:
+      position:
+        x: 0.00
+        y: 17.44
+  13:
+    head:
+      position:
+        x: 0.00
+        y: 17.04
+  14:
+    head:
+      position:
+        x: 0.00
+        y: 16.56
+  15:
+    head:
+      position:
+        x: 0.00
+        y: 16.00
+  16:
+    head:
+      position:
+        x: 0.00
+        y: 15.44
+  17:
+    head:
+      position:
+        x: 0.00
+        y: 14.96
+  18:
+    head:
+      position:
+        x: 0.00
+        y: 14.56
+  19:
+    head:
+      position:
+        x: 0.00
+        y: 14.24
+  20:
+    head:
+      position:
+        x: 0.00
+        y: 14.00
+  21:
+    head:
+      position:
+        x: 0.00
+        y: 13.84
   22:
-    collar:
-      rotation:
-        x: 11.25
-    neck:
-      rotation:
-        x: -22.5
     head:
-      rotation:
-        x: 11.25
+      position:
+        x: 0.00
+        y: 13.76
+  23:
+    head:
+      position:
+        x: 0.00
+        y: 13.76
+  24:
+    head:
+      position:
+        x: 0.00
+        y: 13.84
+  25:
+    head:
+      position:
+        x: 0.00
+        y: 14.00
+  26:
+    head:
+      position:
+        x: 0.00
+        y: 14.24
+  27:
+    head:
+      position:
+        x: 0.00
+        y: 14.56
+  28:
+    head:
+      position:
+        x: 0.00
+        y: 14.96
+  29:
+    head:
+      position:
+        x: 0.00
+        y: 15.44

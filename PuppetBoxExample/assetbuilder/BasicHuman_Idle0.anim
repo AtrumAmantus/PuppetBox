@@ -1,23 +1,16 @@
 skeleton:
   root:
-    - neck
+    - head
     - left_hand
     - right_hand
 fps: 30
 length: 30
 keyframes:
   0:
-    collar:
-      rotation:
-        x: 0
-        y: 0
-        z: 0
-    neck:
-      rotation:
-        x: 0
     head:
-      rotation:
-        x: 0
+      position:
+        x: 0.00
+        y: 16.00
     right_hand:
       position:
         x: -16.00
@@ -25,62 +18,91 @@ keyframes:
       rotation:
         z: -5
   1:
+    head:
+      position:
+        x: 0.03
+        y: 16.63
     right_hand:
       position:
         x: -17.39
         y: 0.60
   2:
+    head:
+      position:
+        x: 0.11
+        y: 17.29
     right_hand:
       position:
         x: -18.96
         y: 3.35
   3:
+    head:
+      position:
+        x: 0.23
+        y: 17.96
     right_hand:
       position:
         x: -20.25
         y: 7.58
   4:
+    head:
+      position:
+        x: 0.38
+        y: 18.62
     right_hand:
       position:
         x: -20.77
         y: 12.62
   5:
+    head:
+      position:
+        x: 0.55
+        y: 19.25
     right_hand:
       position:
         x: -20.05
         y: 17.79
   6:
+    head:
+      position:
+        x: 0.73
+        y: 19.82
     right_hand:
       position:
         x: -17.60
         y: 22.42
   7:
+    head:
+      position:
+        x: 0.91
+        y: 20.30
     right_hand:
       position:
         x: -12.95
         y: 25.84
   8:
+    head:
+      position:
+        x: 1.09
+        y: 20.67
     right_hand:
       position:
         x: -8.09
         y: 27.96
   9:
+    head:
+      position:
+        x: 1.25
+        y: 20.91
     right_hand:
       position:
         x: -5.21
         y: 29.14
   10:
-    collar:
-      rotation:
-        x: 11.25
-        y: -5
-        z: 20
-    neck:
-      rotation:
-        x: -22.5
     head:
-      rotation:
-        x: 11.25
+      position:
+        x: 1.375
+        y: 21
     right_hand:
       position:
         x: -4.15
@@ -130,32 +152,37 @@ keyframes:
         x: -16.16
         y: 21.39
   19:
-    collar:
-      rotation:
-        x: 11.25
-        y: -5
-        z: 20
-    neck:
-      rotation:
-        x: -22.5
     head:
-      rotation:
-        x: 11.25
+      position:
+        x: 1.375
+        y: 21
     right_hand:
       position:
         x: -11.95
         y: 25.25
   20:
+    head:
+      position:
+        x: 1.25
+        y: 20.91
     right_hand:
       position:
         x: -6.62
         y: 29.05
   21:
+    head:
+      position:
+        x: 1.09
+        y: 20.67
     right_hand:
       position:
         x: -0.48
         y: 32.07
   22:
+    head:
+      position:
+        x: 0.91
+        y: 20.30
     right_hand:
       position:
         x: 2.58
@@ -163,26 +190,46 @@ keyframes:
       rotation:
         z: 55
   23:
+    head:
+      position:
+        x: 0.73
+        y: 19.82
     right_hand:
       position:
         x: 0.35
         y: 33.45
   24:
+    head:
+      position:
+        x: 0.55
+        y: 19.25
     right_hand:
       position:
         x: -5.04
         y: 31.31
   25:
+    head:
+      position:
+        x: 0.38
+        y: 18.62
     right_hand:
       position:
         x: -11.49
         y: 27.07
   26:
+    head:
+      position:
+        x: 0.23
+        y: 17.96
     right_hand:
       position:
         x: -16.88
         y: 20.55
   27:
+    head:
+      position:
+        x: 0.11
+        y: 17.29
     right_hand:
       position:
         x: -19.09
