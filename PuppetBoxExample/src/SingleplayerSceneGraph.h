@@ -206,6 +206,93 @@ namespace Singleplayer
             {
                 PB::SetActiveScene("Multiplayer");
             }
+            else if (input == "/play walk")
+            {
+                auto event = std::make_shared<UpdateEntityEvent>();
+                event->action = [](Entity* entity) {
+                    entity->playAnimation(Constants::Animation::kWalk, 0);
+                };
+
+                PB::PublishEvent(Event::Topic::UPDATE_ENTITY_TOPIC, event);
+            }
+            else if (input == "/play idle0")
+            {
+                auto event = std::make_shared<UpdateEntityEvent>();
+                event->action = [](Entity* entity) {
+                    entity->playAnimation(Constants::Animation::kIdle0, 0);
+                };
+
+                PB::PublishEvent(Event::Topic::UPDATE_ENTITY_TOPIC, event);
+            }
+            else if (input == "/stop")
+            {
+                auto event = std::make_shared<UpdateEntityEvent>();
+                event->action = [](Entity* entity) {
+                    entity->stopAnimation();
+                };
+
+                PB::PublishEvent(Event::Topic::UPDATE_ENTITY_TOPIC, event);
+            }
+            else if (input.substr(0, 5) == "/bone")
+            {
+                std::uint32_t i = 6;
+                std::string boneName = "";
+
+                PB::vec3 rotation{};
+
+                while (i < input.size() && input.c_str()[i] != ' ')
+                {
+                    boneName += input.c_str()[i++];
+                }
+
+                i++;
+
+                std::string value = "";
+
+                while (i < input.size() && input.c_str()[i] != ' ')
+                {
+                    value += input.c_str()[i++];
+                }
+
+                i++;
+
+                if (!value.empty())
+                {
+                    rotation.x = std::stof(value);
+                    value = "";
+
+                    while (i < input.size() && input.c_str()[i] != ' ')
+                    {
+                        value += input.c_str()[i++];
+                    }
+
+                    i++;
+
+                    if (!value.empty())
+                    {
+                        rotation.y = std::stof(value);
+                        value = "";
+
+                        while (i < input.size() && input.c_str()[i] != ' ')
+                        {
+                            value += input.c_str()[i++];
+                        }
+
+                        if (!value.empty())
+                        {
+                            rotation.z = std::stof(value);
+                        }
+                    }
+                }
+
+                auto event = std::make_shared<UpdateEntityEvent>();
+
+                event->action = [boneName, rotation](Entity* entity) {
+                    entity->rotateBone(boneName, rotation);
+                };
+
+                PB::PublishEvent(Event::Topic::UPDATE_ENTITY_TOPIC, event);
+            }
         }
         else
         {

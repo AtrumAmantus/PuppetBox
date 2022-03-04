@@ -21,6 +21,7 @@
 #define PBEX_EVENT_CREATE_ENTITY            "pbex_create_entity_event"
 #define PBEX_EVENT_DESTROY_ENTITY           "pbex_destroy_entity_event"
 #define PBEX_EVENT_SET_USER_ENTITY          "pbex_set_user_entity_event"
+#define PBEX_EVENT_UPDATE_ENTITY            "pbex_update_entity_event"
 #define PBEX_EVENT_UPDATE_ENTITY_ACTION     "pbex_update_entity_action_event"
 #define PBEX_EVENT_UPDATE_ENTITY_LOC        "pbex_update_entity_location_event"
 
@@ -45,6 +46,7 @@ namespace Event::Topic
     std::uint32_t SET_USER_ENTITY_TOPIC = 0;
     std::uint32_t ENTITY_UPDATE_ACTION_TOPIC = 0;
     std::uint32_t ENTITY_UPDATE_LOCATION_TOPIC = 0;
+    std::uint32_t UPDATE_ENTITY_TOPIC = 0;
 }
 
 struct UIControllerEvent
@@ -106,4 +108,9 @@ struct UpdateEntityLocationEvent
 {
     PB::UUID uuid{};
     PB::vec3 location{};
+};
+
+struct UpdateEntityEvent
+{
+    std::function<void(Entity*)> action;
 };
