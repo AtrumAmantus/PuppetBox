@@ -6,43 +6,61 @@ root:
     material: Assets1/Materials/TestBody
     data: Assets1/Mesh/Sprite
   children:
-    head:
+    collar:
       offset:
         y: 16
         z: 1
-      mesh:
-        scale:
-          x: 32
-          y: 32
-        material: Assets1/Materials/TestHead
-        data: Assets1/Mesh/Sprite
+      children:
+        neck:
+          offset:
+            z: -10
+          children:
+            head:
+              offset:
+                z: 10
+              mesh:
+                scale:
+                  x: 32
+                  y: 32
+                material: Assets1/Materials/TestHead
+                data: Assets1/Mesh/Sprite
     left_shoulder:
       offset:
         x: 16
-        y: 0
         z: 2
-      rotation:
-        z: 5
-      mesh:
-        scale:
-          x: 16
-          y: 16
-        material: Assets1/Materials/TestHand
-        data: Assets1/Mesh/Sprite
-    right_hand:
+      children:
+        left_elbow:
+          offset:
+            y: -16
+          children:
+            left_hand:
+              offset:
+                y: 16
+              mesh:
+                scale:
+                  x: 16
+                  y: 16
+                material: Assets1/Materials/TestHand
+                data: Assets1/Mesh/Sprite
+    right_shoulder:
       offset:
         x: -16
-        y: 0
         z: 2
-      rotation:
-        z: -5
-      mesh:
-        scale:
-          x: 16
-          y: 16
-        material: Assets1/Materials/TestHand
-        data: Assets1/Mesh/Sprite
       children:
-        weapon_attach_right:
+        right_elbow:
           offset:
-            z: 1
+            y: -16
+          children:
+            right_hand:
+              offset:
+                y: 16
+              mesh:
+                scale:
+                  x: 16
+                  y: 16
+                material: Assets1/Materials/TestHand
+                data: Assets1/Mesh/Sprite
+              children:
+                weapon_attach_right:
+                  offset:
+                    z: 1

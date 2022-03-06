@@ -243,16 +243,17 @@ namespace PB
             std::uint8_t currentFrame,
             BoneMap& bones) const
     {
-        const std::uint32_t MAX_VECTORS = 3;
+        const std::uint32_t MAX_VECTORS = 2;
         const std::uint32_t MAX_AXES = 3;
 
         std::unordered_map<std::string, TransformKeyframe> keyframeTransformationMatrixMap{};
 
-        bool animationCached = CACHED_KEYFRAMES.find(getPath()) != CACHED_KEYFRAMES.end();
+        auto animationItr = CACHED_KEYFRAMES.find(getPath());
+
+        bool animationCached = animationItr != CACHED_KEYFRAMES.end();
 
         // First check if we already loaded this keyframe
-        if (animationCached &&
-            CACHED_KEYFRAMES.at(getPath()).find(currentFrame) != CACHED_KEYFRAMES.at(getPath()).end())
+        if (animationCached && animationItr->second.find(currentFrame) != animationItr->second.end())
         {
             // We already computed this before, awesome, use the cached values.
             for (auto& k: CACHED_KEYFRAMES.at(getPath()).at(currentFrame))
@@ -268,7 +269,6 @@ namespace PB
             const auto totalFrameCount = getFrameCount();
 
             std::function<Vec4&(RawKeyframe&)> getVec4[MAX_VECTORS] = {
-                    [](RawKeyframe& k) -> Vec4& { return k.position; },
                     [](RawKeyframe& k) -> Vec4& { return k.scale; },
                     [](RawKeyframe& k) -> Vec4& { return k.rotation; }
             };
@@ -285,7 +285,6 @@ namespace PB
             std::function < float(RawKeyframe, RawKeyframe) > tweenTransform;
 
             std::function<float(float, float, float)> transformAlgo[MAX_VECTORS] = {
-                    [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
                     [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
                     [](float prev, float next, float blend) -> float {
                         float coef = next > prev ? -1 : 1;
@@ -335,67 +334,30 @@ namespace PB
                     }
                 }
 
-                Bone tModelValues = bones.getBone(bone.first).result->bone;
-
-                vec3 position = {
-                        currentKey.position.x.orElse(tModelValues.position.x),
-                        currentKey.position.y.orElse(tModelValues.position.y),
-                        currentKey.position.z.orElse(tModelValues.position.z)
-                };
+                vec3 position{};
 
                 // TODO: Scaling comes later, this is a bit messy
                 vec3 scale = {
-                        currentKey.scale.x.orElse(tModelValues.scale.x),
-                        currentKey.scale.y.orElse(tModelValues.scale.y),
-                        currentKey.scale.z.orElse(tModelValues.scale.z)
+                        currentKey.scale.x.orElse(1),
+                        currentKey.scale.y.orElse(1),
+                        currentKey.scale.z.orElse(1)
                 };
 
                 vec3 rotation = {
-                        currentKey.rotation.x.orElse(tModelValues.rotation.x),
-                        currentKey.rotation.y.orElse(tModelValues.rotation.y),
-                        currentKey.rotation.z.orElse(tModelValues.rotation.z)
+                        currentKey.rotation.x.orElse(0),
+                        currentKey.rotation.y.orElse(0),
+                        currentKey.rotation.z.orElse(0)
                 };
-
-                mat4 transformation = GfxMath::CreateTransformation(rotation, scale, position);
 
                 keyframeTransformationMatrixMap.insert(
                         std::pair<std::string, TransformKeyframe>(
                                 bone.first,
-                                {currentFrame, bone.first, transformation}
+                                {currentFrame, bone.first, {position, rotation, scale}}
                         )
                 );
             }
 
-            auto originalKeyframeTransformationMatrixMap = keyframeTransformationMatrixMap;
-
-            // Transformations are defined as relative to original position, so now
-            // we add in the bone offsets to complete the transformation values.
-            for (auto& entry: keyframeTransformationMatrixMap)
-            {
-                auto bone = bones.getBone(entry.first).result;
-
-                while (!bone->name.empty())
-                {
-                    // Current bone's offsets were already applied, skip
-                    if (bone->name != entry.second.boneName)
-                    {
-                        entry.second.transform = originalKeyframeTransformationMatrixMap.at(bone->name).transform
-                                                 * entry.second.transform;
-                    }
-
-                    auto parentBone = bones.getBone(bone->parent);
-
-                    if (parentBone.hasResult)
-                    {
-                        bone = parentBone.result;
-                    }
-                    else
-                    {
-                        bone->name = "";
-                    }
-                }
-            }
-
+            // If this animation has not been cached at all yet, add it
             if (!animationCached)
             {
                 CACHED_KEYFRAMES.insert(
@@ -406,16 +368,22 @@ namespace PB
                 );
             }
 
-            CACHED_KEYFRAMES.at(getPath()).insert(
+            auto& animationMap = CACHED_KEYFRAMES.at(getPath());
+
+            // Add a vector for the current frame index
+            animationMap.insert(
                     std::pair<std::uint32_t, std::vector<TransformKeyframe>>(
                             currentFrame,
                             std::vector<TransformKeyframe>{}
                     )
             );
 
+            auto& animationFrameMap = animationMap.at(currentFrame);
+
+            // Add the keyframe information for each bone for the current frame index
             for (auto k: keyframeTransformationMatrixMap)
             {
-                CACHED_KEYFRAMES.at(getPath()).at(currentFrame).push_back(k.second);
+                animationFrameMap.push_back(k.second);
             }
         }
 
@@ -464,7 +432,7 @@ namespace PB
         for (auto& keyFrame: currentKeyframes)
         {
             boneTransformations_.insert(
-                    std::pair<std::string, mat4>{keyFrame.first, keyFrame.second.transform}
+                    std::pair<std::string, Transform>{keyFrame.first, keyFrame.second.transform}
             );
         }
     }
@@ -476,7 +444,7 @@ namespace PB
         sequenceTime_ = fmod(sequenceTime_, sequenceDuration_);
     }
 
-    std::unordered_map<std::string, mat4> Animator::getBoneTransformations() const
+    std::unordered_map<std::string, Transform> Animator::getBoneTransformations() const
     {
         return boneTransformations_;
     }

@@ -724,6 +724,13 @@ namespace PB
         vec4 values_[4];
     };
 
+    struct Transform
+    {
+        vec3 position;
+        vec3 rotation;
+        vec3 scale;
+    };
+
     /**
     * \brief Struct defining data for a single vertex.
     */

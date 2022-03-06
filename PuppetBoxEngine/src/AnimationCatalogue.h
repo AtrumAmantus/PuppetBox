@@ -52,13 +52,13 @@ namespace PB
 
         void setCurrentFrame(std::uint32_t frame) override;
 
-        std::unordered_map<std::string, mat4> getBoneTransformations() const override;
+        std::unordered_map<std::string, Transform> getBoneTransformations() const override;
 
     private:
         IAnimation* animation_;
         float sequenceTime_ = 0;
         float sequenceDuration_;
-        std::unordered_map<std::string, mat4> boneTransformations_;
+        std::unordered_map<std::string, Transform> boneTransformations_;
     };
 
     class AnimationCatalogue : public IAnimationCatalogue

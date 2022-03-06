@@ -31,7 +31,7 @@ namespace PB
     {
         std::uint8_t frameIndex;
         std::string boneName;
-        mat4 transform;
+        Transform transform;
 
         bool operator==(const TransformKeyframe& rhs) const
         {
@@ -120,9 +120,9 @@ namespace PB
          * \brief Gets the previously calculated bone transformation matrices
          * for the attached animation.
          *
-         * \return A map of the bone transformation matrices, keyed on each bone name.
+         * \return A map of the bone transformations, keyed on each bone name.
          */
-        virtual std::unordered_map<std::string, mat4> getBoneTransformations() const = 0;
+        virtual std::unordered_map<std::string, Transform> getBoneTransformations() const = 0;
     };
 
     class PUPPET_BOX_API IAnimationCatalogue

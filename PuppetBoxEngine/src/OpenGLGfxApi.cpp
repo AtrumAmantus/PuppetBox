@@ -517,7 +517,9 @@ namespace PB
         {
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#ifdef _WIN64
             glDebugMessageCallback(debug_callback, nullptr);
+#endif
             //                    v-- source    v-- error type v-- severity
             glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 

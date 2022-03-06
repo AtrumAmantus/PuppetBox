@@ -1,236 +1,234 @@
 skeleton:
   root:
-    - head
-    - left_hand
-    - right_hand
+    - collar
+    - left_shoulder
+    - right_shoulder
 fps: 30
 length: 30
 keyframes:
   0:
-    head:
-      position:
-        x: 0.00
-        y: 16.00
-    right_hand:
-      position:
-        x: -16.00
-        y: 0.00
+    collar:
       rotation:
-        z: -5
+        x: 0
+        z: 0
+    neck:
+      rotation:
+        x: 0
+    head:
+      rotation:
+        x: 0
+    right_shoulder:
+      rotation:
+        z: 0
+    right_elbow:
+      rotation:
+        z: 0
   1:
-    head:
-      position:
-        x: 0.03
-        y: 16.63
-    right_hand:
-      position:
-        x: -17.39
-        y: 0.60
+    right_shoulder:
+      rotation:
+        z: -307.18
+    right_elbow:
+      rotation:
+        z: -7.6
   2:
-    head:
-      position:
-        x: 0.11
-        y: 17.29
-    right_hand:
-      position:
-        x: -18.96
-        y: 3.35
+    right_shoulder:
+      rotation:
+        z: -303.43
+    right_elbow:
+      rotation:
+        z: -16.06
   3:
-    head:
-      position:
-        x: 0.23
-        y: 17.96
-    right_hand:
-      position:
-        x: -20.25
-        y: 7.58
+    right_shoulder:
+      rotation:
+        z: -283.52
+    right_elbow:
+      rotation:
+        z: -31.52
   4:
-    head:
-      position:
-        x: 0.38
-        y: 18.62
-    right_hand:
-      position:
-        x: -20.77
-        y: 12.62
+    right_shoulder:
+      rotation:
+        z: -265.77
+    right_elbow:
+      rotation:
+        z: -49.87
   5:
-    head:
-      position:
-        x: 0.55
-        y: 19.25
-    right_hand:
-      position:
-        x: -20.05
-        y: 17.79
+    right_shoulder:
+      rotation:
+        z: -248.06
+    right_elbow:
+      rotation:
+        z: -69.52
   6:
-    head:
-      position:
-        x: 0.73
-        y: 19.82
-    right_hand:
-      position:
-        x: -17.60
-        y: 22.42
+    right_shoulder:
+      rotation:
+        z: -229.46
+    right_elbow:
+      rotation:
+        z: -89.24
   7:
-    head:
-      position:
-        x: 0.91
-        y: 20.30
-    right_hand:
-      position:
-        x: -12.95
-        y: 25.84
+    right_shoulder:
+      rotation:
+        z: -208.87
+    right_elbow:
+      rotation:
+        z: -108.8
   8:
-    head:
-      position:
-        x: 1.09
-        y: 20.67
-    right_hand:
-      position:
-        x: -8.09
-        y: 27.96
+    right_shoulder:
+      rotation:
+        z: -188.97
+    right_elbow:
+      rotation:
+        z: -130.47
   9:
-    head:
-      position:
-        x: 1.25
-        y: 20.91
-    right_hand:
-      position:
-        x: -5.21
-        y: 29.14
+    right_shoulder:
+      rotation:
+        z: -173.5
+    right_elbow:
+      rotation:
+        z: -152.36
   10:
-    head:
-      position:
-        x: 1.375
-        y: 21
-    right_hand:
-      position:
-        x: -4.15
-        y: 29.34
+    collar:
       rotation:
-        z: 45
+        x: 10
+        z: 20
+    neck:
+      rotation:
+        x: -20
+    head:
+      rotation:
+        x: 10
+    right_shoulder:
+      rotation:
+        z: -166.58
+    right_elbow:
+      rotation:
+        z: -162.86
   11:
-    right_hand:
-      position:
-        x: -4.75
-        y: 28.51
+    right_shoulder:
+      rotation:
+        z: -175.17
+    right_elbow:
+      rotation:
+        z: -146.59
   12:
-    right_hand:
-      position:
-        x: -6.83
-        y: 26.64
+    right_shoulder:
+      rotation:
+        z: -189.31
+    right_elbow:
+      rotation:
+        z: -123.39
   13:
-    right_hand:
-      position:
-        x: -10.25
-        y: 23.68
+    right_shoulder:
+      rotation:
+        z: -206.75
+    right_elbow:
+      rotation:
+        z: -99.19
   14:
-    right_hand:
-      position:
-        x: -14.82
-        y: 19.61
+    right_shoulder:
+      rotation:
+        z: -228.68
+    right_elbow:
+      rotation:
+        z: -75.75
   15:
-    right_hand:
-      position:
-        x: -18.57
-        y: 16.59
+    right_shoulder:
+      rotation:
+        z: -247.16
+    right_elbow:
+      rotation:
+        z: -63.29
   16:
-    right_hand:
-      position:
-        x: -19.81
-        y: 16.35
+    right_shoulder:
       rotation:
-        z: 12
+        z: -251.47
+    right_elbow:
+      rotation:
+        z: -63.29
   17:
-    right_hand:
-      position:
-        x: -18.89
-        y: 18.19
-  18:
-    right_hand:
-      position:
-        x: -16.16
-        y: 21.39
-  19:
-    head:
-      position:
-        x: 1.375
-        y: 21
-    right_hand:
-      position:
-        x: -11.95
-        y: 25.25
-  20:
-    head:
-      position:
-        x: 1.25
-        y: 20.91
-    right_hand:
-      position:
-        x: -6.62
-        y: 29.05
-  21:
-    head:
-      position:
-        x: 1.09
-        y: 20.67
-    right_hand:
-      position:
-        x: -0.48
-        y: 32.07
-  22:
-    head:
-      position:
-        x: 0.91
-        y: 20.30
-    right_hand:
-      position:
-        x: 2.58
-        y: 33.65
+    right_shoulder:
       rotation:
-        z: 55
+        z: -243.89
+    right_elbow:
+      rotation:
+        z: -70.28
+  18:
+    right_shoulder:
+      rotation:
+        z: -228.48
+    right_elbow:
+      rotation:
+        z: -83.9
+  19:
+    collar:
+      rotation:
+        x: 10
+        z: 20
+    neck:
+      rotation:
+        x: -20
+    head:
+      rotation:
+        x: 10
+    right_shoulder:
+      rotation:
+        z: -207.84
+    right_elbow:
+      rotation:
+        z: -106.1
+  20:
+    right_shoulder:
+      rotation:
+        z: -179.56
+    right_elbow:
+      rotation:
+        z: -145.09
+  21:
+    right_shoulder:
+      rotation:
+        z: -154.18
+    right_elbow:
+      rotation:
+        z: -180
+  22:
+    right_shoulder:
+      rotation:
+        z: -151.09
+    right_elbow:
+      rotation:
+        z: -180
   23:
-    head:
-      position:
-        x: 0.73
-        y: 19.82
-    right_hand:
-      position:
-        x: 0.35
-        y: 33.45
+    right_shoulder:
+      rotation:
+        z: -153.95
+    right_elbow:
+      rotation:
+        z: -180
   24:
-    head:
-      position:
-        x: 0.55
-        y: 19.25
-    right_hand:
-      position:
-        x: -5.04
-        y: 31.31
+    right_shoulder:
+      rotation:
+        z: -160.71
+    right_elbow:
+      rotation:
+        z: -180
   25:
-    head:
-      position:
-        x: 0.38
-        y: 18.62
-    right_hand:
-      position:
-        x: -11.49
-        y: 27.07
+    right_shoulder:
+      rotation:
+        z: -201.49
+    right_elbow:
+      rotation:
+        z: -118.1
   26:
-    head:
-      position:
-        x: 0.23
-        y: 17.96
-    right_hand:
-      position:
-        x: -16.88
-        y: 20.55
+    right_shoulder:
+      rotation:
+        z: -232.45
+    right_elbow:
+      rotation:
+        z: -80
   27:
-    head:
-      position:
-        x: 0.11
-        y: 17.29
-    right_hand:
-      position:
-        x: -19.09
-        y: 11.58
+    right_shoulder:
+      rotation:
+        z: -235.21
+    right_elbow:
+      rotation:
+        z: -85.88
