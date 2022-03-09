@@ -137,6 +137,17 @@ namespace PB
             std::cout << "OpenGL Vendor: " << (char*) glGetString(GL_VENDOR) << std::endl;
             std::cout << "OpenGL Renderer: " << (char*) glGetString(GL_RENDERER) << std::endl;
 
+#ifdef _DEBUG
+            std::cout << "Hardware Specs:" << std::endl;
+
+            {
+                std::int32_t vuv = 0;
+                glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &vuv);
+
+                std::cout << "\t" << vuv << " max uniform vectors" << std::endl;
+            }
+#endif
+
             glEnable(GL_DEPTH_TEST);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

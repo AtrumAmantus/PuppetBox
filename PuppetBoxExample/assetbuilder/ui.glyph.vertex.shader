@@ -27,7 +27,7 @@ layout(std140) uniform Transforms
     };
 */
 
-uniform float instanceData[900];
+uniform float instanceData[225];
 
 void main()
 {

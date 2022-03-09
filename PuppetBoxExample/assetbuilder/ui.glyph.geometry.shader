@@ -25,7 +25,7 @@ out GS_OUT
     };
 */
 
-uniform float instanceData[900];
+uniform float instanceData[225];
 
 void main()
 {

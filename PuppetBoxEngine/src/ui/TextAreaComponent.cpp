@@ -281,7 +281,7 @@ namespace PB
 
         glBindVertexArray(VAO_);
 
-        const std::uint32_t MAX_INSTANCE_COUNT = 100;
+        const std::uint32_t MAX_INSTANCE_COUNT = 25;
         const std::uint32_t MAX_INSTANCE_SIZE = MAX_INSTANCE_COUNT * 9;
 
         auto itr = glyphs.begin();
@@ -337,8 +337,6 @@ namespace PB
         // Render any remaining glyphs
         if (instanceCount > 0)
         {
-            std::int32_t val = 0;
-            glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &val);
             shader_.setFloatArray("instanceData", instanceDataIndex, instanceData);
 
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instanceCount);
