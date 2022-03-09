@@ -58,6 +58,8 @@ namespace PB
 
     private:
         Shader shader_{""};
+        std::uint32_t VAO_;
+        std::uint32_t VBO_;
         std::vector<Glyph> glyphs{};
         Font font_{};
     };

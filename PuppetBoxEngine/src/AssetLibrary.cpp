@@ -74,9 +74,10 @@ namespace PB
         * \return A string containing the raw shader code of the requested shader asset, or an empty
         * string if an error occurred fetching the asset.
         */
-        std::string
-        loadShaderCode(const std::string& assetPath, std::unordered_map<std::string, AssetArchive>& assetArchiveMap,
-                       bool* error)
+        std::string loadShaderCode(
+                const std::string& assetPath,
+                std::unordered_map<std::string, AssetArchive>& assetArchiveMap,
+                bool* error)
         {
             if (!StringUtils::trim(assetPath).empty())
             {
@@ -88,6 +89,7 @@ namespace PB
 
                     if (!*error)
                     {
+                        LOGGER_INFO("Shader '" + assetPath + "' read...");
                         return data;
                     }
                     else
@@ -182,6 +184,7 @@ namespace PB
                 {
                     if (shader.init())
                     {
+                        LOGGER_INFO("Shader program '" + assetPath + "' loaded.");
                         insertIntoMap(assetPath, shader, loadedShaders_);
                     }
                     else

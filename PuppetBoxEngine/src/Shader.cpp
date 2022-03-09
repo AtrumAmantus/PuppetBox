@@ -44,11 +44,6 @@ namespace PB
                 LOGGER_ERROR("Failed to link program'\n" + std::string(infoLog));
             }
 
-            // delete the shaders as they're linked into our program now and no longer necessary
-            glDeleteShader(*vShaderId);
-            glDeleteShader(*gShaderId);
-            glDeleteShader(*fShaderId);
-
             return success;
         }
 
@@ -210,6 +205,11 @@ namespace PB
         glUniform1f(glGetUniformLocation(programId_, name.c_str()), value);
     }
 
+    void Shader::setFloatArray(const std::string& name, std::uint32_t count, float* values) const
+    {
+        glUniform1fv(glGetUniformLocation(programId_, name.c_str()), count, values);
+    }
+
     void Shader::setVec2(const std::string& name, const vec2& value) const
     {
         glUniform2fv(glGetUniformLocation(programId_, name.c_str()), 1, &value[0]);
@@ -253,5 +253,21 @@ namespace PB
     void Shader::setMat4(const std::string& name, const mat4& mat) const
     {
         glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    }
+
+    void Shader::destroy()
+    {
+        glDetachShader(programId_, vertexShaderId_);
+        glDeleteShader(vertexShaderId_);
+        glDetachShader(programId_, geometryShaderId_);
+        glDeleteShader(geometryShaderId_);
+        glDetachShader(programId_, fragmentShaderId_);
+        glDeleteShader(fragmentShaderId_);
+
+        glDeleteProgram(programId_);
+        programId_ = 0;
+        vertexShaderId_ = 0;
+        geometryShaderId_ = 0;
+        fragmentShaderId_ = 0;
     }
 }

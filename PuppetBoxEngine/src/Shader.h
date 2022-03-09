@@ -125,6 +125,15 @@ namespace PB
         void setFloat(const std::string& name, float value) const;
 
         /**
+         * \brief Sets an array of Float uniform values in the shader.
+         *
+         * \param name      The name of the uniform variable in the shader.
+         * \param size      The size of the float array.
+         * \param values    Pointer to the float array.
+         */
+        void setFloatArray(const std::string& name, std::uint32_t size, float* values) const;
+
+        /**
         * \brief Sets a Vec2 uniform value in the shader.
         *
         * \param name   The name of the uniform variable in the shader.
@@ -201,6 +210,11 @@ namespace PB
         * \param value  The desired value for the uniform variable in the shader.
         */
         void setMat4(const std::string& name, const mat4& mat) const;
+
+        /**
+         * \brief Cleans up all shader resources.
+         */
+        void destroy();
 
     private:
         std::string shaderName_;

@@ -21,6 +21,7 @@ Shaders/Basic/Vertex basic.vertex.shader
 Shaders/Basic/Fragment basic.fragment.shader
 Shaders/Basic basic.program.shader
 Shaders/UI/Glyph/Vertex ui.glyph.vertex.shader
+Shaders/UI/Glyph/Geometry ui.glyph.geometry.shader
 Shaders/UI/Glyph/Fragment ui.glyph.fragment.shader
 Shaders/UI/Glyph ui.glyph.program.shader
 Animations/BasicHuman BasicHuman.anims

@@ -20,6 +20,34 @@ namespace PB
             LOGGER_ERROR("Failed to load shader asset 'Assets1/Shaders/UI/Glyph'");
         }
 
+        // Setting both Vertex and UV origin to 0 to make shader calculations simpler
+        //TODO: This may need to be revisited, offset origin could get weird later
+        float vertices[] = {
+                // Vertex                           // UV
+                0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // Top left
+                0.0f, 0.0f, 0.0f,       0.0f, 0.0f, // Bot left
+                1.0f, 0.0f, 0.0f,       1.0f, 0.0f, // Bot right
+
+                0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // Top left
+                1.0f, 0.0f, 0.0f,       1.0f, 0.0f, // Bot right
+                1.0f, 1.0f, 0.0f,       1.0f, 1.0f  // Top right
+        };
+
+        glGenVertexArrays(1, &VAO_);
+        glGenBuffers(1, &VBO_);
+
+        glBindVertexArray(VAO_);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+        glBindVertexArray(0);
+
         return !error;
     }
 
@@ -229,7 +257,6 @@ namespace PB
     void TextAreaComponent::render() const
     {
         //TODO: Abstract the OpenGL calls/logic away
-        bool error = false;
 
         struct
         {
@@ -252,11 +279,33 @@ namespace PB
         shader_.use();
         shader_.setVec3("textColour", vec3{1.0f, 1.0f, 1.0f});
 
-        Mesh mesh = library()->loadMeshAsset("Assets1/Mesh/Glyph", &error);
-        glBindVertexArray(mesh.VAO);
+        glBindVertexArray(VAO_);
 
-        for (auto& g: glyphs)
+        const std::uint32_t MAX_INSTANCE_COUNT = 100;
+        const std::uint32_t MAX_INSTANCE_SIZE = MAX_INSTANCE_COUNT * 9;
+
+        auto itr = glyphs.begin();
+        float instanceData[MAX_INSTANCE_SIZE];
+        std::uint32_t instanceCount = 0;
+
+        TypeCharacter c = font_.getCharacter(' ').result;
+        c.image.use(0);
+
+        std::uint32_t instanceDataIndex = 0;
+
+        // Build sets of 100 glyphs, then render them as an instance group
+        while (itr != glyphs.end())
         {
+            if (instanceCount >= MAX_INSTANCE_COUNT)
+            {
+                shader_.setFloatArray("instanceData", instanceDataIndex, instanceData);
+
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instanceCount);
+
+                instanceCount = 0;
+                instanceDataIndex = 0;
+            }
+
             bool originTop = component.origin == UI::TOP_LEFT || component.origin == UI::TOP_RIGHT;
             //TODO: Still need to implement this
             bool originRight = component.origin == UI::TOP_RIGHT || component.origin == UI::BOTTOM_RIGHT;
@@ -271,83 +320,36 @@ namespace PB
                                 // Brings back down if origin is top
                                 - (component.dimension.y * originTop);
 
-            // Calculate all the opengl UV values based on atlas data
-            vec2 uvBottomLeft{
-                static_cast<float>(g.atlasPosition.x) / g.image.width,
-                static_cast<float>(g.atlasPosition.y) / g.image.height
-            };
-            vec2 uvTopLeft{
-                    static_cast<float>(g.atlasPosition.x) / g.image.width,
-                    static_cast<float>(g.atlasPosition.y + g.originalDimensions.y) / g.image.height
-            };
-            vec2 uvTopRight{
-                    static_cast<float>(g.atlasPosition.x + g.originalDimensions.x) / g.image.width,
-                    static_cast<float>(g.atlasPosition.y + g.originalDimensions.y) / g.image.height
-            };
-            vec2 uvBottomRight{
-                    static_cast<float>(g.atlasPosition.x + g.originalDimensions.x) / g.image.width,
-                    static_cast<float>(g.atlasPosition.y) / g.image.height
-            };
+            instanceData[instanceDataIndex++] = itr->position.x + containerOffset.x;
+            instanceData[instanceDataIndex++] = itr->position.y + containerOffset.y;// + itr->scaledDimensions.y;
+            instanceData[instanceDataIndex++] = itr->position.z;
+            instanceData[instanceDataIndex++] = itr->scaledDimensions.x;
+            instanceData[instanceDataIndex++] = itr->scaledDimensions.y;
+            instanceData[instanceDataIndex++] = static_cast<float>(itr->atlasPosition.x) / itr->image.width;
+            instanceData[instanceDataIndex++] = static_cast<float>(itr->atlasPosition.y) / itr->image.height;
+            instanceData[instanceDataIndex++] = static_cast<float>(itr->originalDimensions.x) / itr->image.width;
+            instanceData[instanceDataIndex++] = static_cast<float>(itr->originalDimensions.y) / itr->image.height;
 
-            //TODO: This may need to be reworked to support "floating" text in 3d space.
-            float vertices[4][8] = {
-                    {
-                            g.position.x + containerOffset.x,
-                            g.position.y + containerOffset.y + g.scaledDimensions.y,
-                            g.position.z,
-
-                            0.0f, 0.0f, 1.0f,   // Normals don't change
-                            uvTopLeft.x, uvTopLeft.y
-                    },
-                    {
-                            g.position.x + containerOffset.x,
-                            g.position.y + containerOffset.y,
-                            g.position.z,
-
-                            0.0f, 0.0f, 1.0f,
-                            uvBottomLeft.x, uvBottomLeft.y
-                    },
-                    {
-                            g.position.x + containerOffset.x + g.scaledDimensions.x,
-                            g.position.y + containerOffset.y,
-                            g.position.z,
-
-                            0.0f, 0.0f, 1.0f,
-                            uvBottomRight.x, uvBottomRight.y
-                    },
-                    {
-                            g.position.x + containerOffset.x + g.scaledDimensions.x,
-                            g.position.y + containerOffset.y + g.scaledDimensions.y,
-                            g.position.z,
-
-                            0.0f, 0.0f, 1.0f,
-                            uvTopRight.x, uvTopRight.y
-                    }
-            };
-
-            // TODO: Add a default character to load for unrecognized ones
-            
-            // render glyph texture over quad
-            g.image.use(0);
-            // update content of VBO memory
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            if (mesh.EBO != 0)
-            {
-                //                           v-- number of indices to draw
-                glDrawElements(GL_TRIANGLES, mesh.drawCount, GL_UNSIGNED_INT,
-                               0); // NOLINT(modernize-use-nullptr)
-            }
-            else
-            {
-                //                            v-- number of vertices to draw
-                glDrawArrays(GL_TRIANGLES, 0, mesh.drawCount);
-            }
-
-            g.image.unuse(0);
+            ++itr;
+            ++instanceCount;
         }
+
+        // Render any remaining glyphs
+        if (instanceCount > 0)
+        {
+            std::int32_t val = 0;
+            glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &val);
+            shader_.setFloatArray("instanceData", instanceDataIndex, instanceData);
+
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instanceCount);
+
+            instanceCount = 0;
+            instanceDataIndex = 0;
+        }
+
+        glBindVertexArray(0);
+
+        c.image.unuse(0);
 
         shader_.unuse();
     }
