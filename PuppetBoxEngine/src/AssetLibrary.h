@@ -52,13 +52,18 @@ namespace PB
         /**
         * \brief Loads the given scene object with asset data.
         *
-        * \param assetPath		Virtual path to the requested asset.
-        * \param sceneObject	The instantiated scene object to load with asset data.
-        * \param uuid           The UUID to use for the created {\link SceneObject}
+        * \param assetPath		    Virtual path to the requested asset.
+        * \param sceneObject	    The instantiated scene object to load with asset data.
+        * \param uuid               The UUID to use for the created {\link SceneObject}
+        * \param animationCatalogue The {\link PB::IAnimationCatalogue} to use with the object model.
         *
         * \return True if the scene object was successfully loaded with assets, False otherwise.
         */
-        bool loadSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid);
+        bool loadSceneObject(
+                const std::string& assetPath,
+                SceneObject* sceneObject,
+                UUID uuid,
+                IAnimationCatalogue* animationCatalogue);
 
         /**
         * \brief Loads a Shader asset given by the provided virtual asset path.

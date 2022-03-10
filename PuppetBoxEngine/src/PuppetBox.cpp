@@ -315,8 +315,7 @@ namespace PB
         }
         else
         {
-            success = assetLibrary->loadSceneObject(assetPath, sceneObject, uuid);
-            sceneObject->setAnimationCatalogue(&animationCatalogue);
+            success = assetLibrary->loadSceneObject(assetPath, sceneObject, uuid, &animationCatalogue);
         }
 
         return success;

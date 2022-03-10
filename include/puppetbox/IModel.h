@@ -14,12 +14,12 @@ namespace PB
     {
     public:
         /**
-         * \brief Sets the animation of the Model to the one held by the given animator.
+         * \brief Sets the animation of the Model.
          *
-         * \param animator   {\link Animator} holding the desired {\link Animation}.
-         * \param startFrame The frame that the animation will start playing from.
+         * \param animationPath Path to the animation to start playing
+         * \param startFrame    The frame that the animation will start playing from.
          */
-        virtual void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) = 0;
+        virtual void playAnimation(const std::string& animationPath, std::uint32_t startFrame) = 0;
 
         /**
          * \brief Removes any currently attached {\link Animator}s from the object.

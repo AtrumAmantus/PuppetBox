@@ -149,15 +149,6 @@ namespace PB
         const AbstractBehavior* getBehavior() const;
 
         /**
-         * \brief Sets the {\link IAnimationCatalogue} that will be used to load animations.
-         *
-         * <p>Called automatically by the {\link SceneObject} creation calls.</p>
-         *
-         * \param animationCatalogue The {\link IAnimationCatalogue} to use for loading/playing animations.
-         */
-        void setAnimationCatalogue(IAnimationCatalogue* animationCatalogue);
-
-        /**
          * \brief Applies the given animation to the {\link IModel} associated with this
          * {\link SceneObject} beginning start frame, looping endlessly as long as it is
          * attached.
@@ -234,7 +225,6 @@ namespace PB
         UUID id_{};
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         mat4 transform_{};
-        IAnimationCatalogue* animationCatalogue_ = nullptr;
         IModel* model_ = nullptr;
         std::unique_ptr<AbstractBehavior> behavior_{nullptr};
         SceneObject* attachedTo_ = nullptr;

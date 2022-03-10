@@ -25,30 +25,22 @@ namespace PB
         /**
         * \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
         *
-        * \param bones          Skeletal data associated with this model.
-        * \param renderedMeshes Vector of {@link RenderedMesh} objects to use for model rendering.
-        */
-        OpenGLModel(BoneMap& bones, std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
-
-        /**
-        * \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
-        *
-        * \param bones          Skeletal data associated with this model.
-        * \param animator       The desired animator to attach to this model.
-        * \param renderedMeshes Vector of {@link RenderedMesh} objects to use for model rendering.
+        * \param bones              Skeletal data associated with this model.
+        * \param renderedMeshes     Vector of {@link RenderedMesh} objects to use for model rendering.
+        * \param animationCatalogue The {\link PB::IAnimationCatalogue} to use with this model for loading animations.
         */
         OpenGLModel(
                 BoneMap& bones,
-                std::unique_ptr<IAnimator> animator,
-                std::unordered_map<std::string, RenderedMesh*> renderedMeshes);
+                std::unordered_map<std::string, RenderedMesh*> renderedMeshes,
+                IAnimationCatalogue* animationCatalogue);
 
         /**
-         * \brief Sets the animation of the Model to the one held by the given animator.
+         * \brief Sets the animation of the Model.
          *
-         * \param animator   The {\link Animator} holding the desired {\link Animation}.
-         * \param startFrame The frame that the animation will start playing from.
+         * \param animationPath Path to the animation to start playing
+         * \param startFrame    The frame that the animation will start playing from.
          */
-        void playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame) override;
+        void playAnimation(const std::string& animationPath, std::uint32_t startFrame) override;
 
         /**
          * \brief Removes any currently attached {\link Animator}s from the object.
@@ -110,5 +102,6 @@ namespace PB
         std::unordered_map<std::string, mat4> boneTransformations_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
         std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};
+        IAnimationCatalogue* animationCatalogue_ = nullptr;
     };
 }

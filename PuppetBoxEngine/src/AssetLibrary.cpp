@@ -459,7 +459,11 @@ namespace PB
         return data;
     }
 
-    bool AssetLibrary::loadSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid)
+    bool AssetLibrary::loadSceneObject(
+            const std::string& assetPath,
+            SceneObject* sceneObject,
+            UUID uuid,
+            IAnimationCatalogue* animationCatalogue)
     {
         bool error = false;
 
@@ -475,7 +479,7 @@ namespace PB
 
             if (!error)
             {
-                model = new OpenGLModel{bones, meshes};
+                model = new OpenGLModel{bones, meshes, animationCatalogue};
 
                 /**
                 * Make a copy of the previous SceneObject property data so that

@@ -6,24 +6,20 @@
 
 namespace PB
 {
-    OpenGLModel::OpenGLModel(BoneMap& bones, std::unordered_map<std::string, RenderedMesh*> renderedMeshes
-    ) : bones_(std::move(bones)), animator_(nullptr), renderedMeshes_(std::move(renderedMeshes))
-    {
-
-    }
-
     OpenGLModel::OpenGLModel(
             BoneMap& bones,
-            std::unique_ptr<IAnimator> animator,
-            std::unordered_map<std::string, RenderedMesh*> renderedMeshes
-    ) : bones_(std::move(bones)), animator_(std::move(animator)), renderedMeshes_(std::move(renderedMeshes))
+            std::unordered_map<std::string, RenderedMesh*> renderedMeshes,
+            IAnimationCatalogue* animationCatalogue) :
+            bones_(std::move(bones)),
+            animationCatalogue_(animationCatalogue),
+            renderedMeshes_(std::move(renderedMeshes))
     {
 
     }
 
-    void OpenGLModel::playAnimation(std::unique_ptr<IAnimator> animator, std::uint32_t startFrame)
+    void OpenGLModel::playAnimation(const std::string& animationPath, std::uint32_t startFrame)
     {
-        animator_ = std::move(animator);
+        animator_ = std::move(animationCatalogue_->get(animationPath));
 
         if (animator_ != nullptr)
         {

@@ -111,15 +111,9 @@ namespace PB
         return &(*behavior_);
     }
 
-    void SceneObject::setAnimationCatalogue(IAnimationCatalogue* animationCatalogue)
-    {
-        animationCatalogue_ = animationCatalogue;
-    }
-
     void SceneObject::playAnimation(const std::string& animationPath, std::uint32_t startFrame)
     {
-        std::unique_ptr<IAnimator> animator = animationPath.empty() ? nullptr : animationCatalogue_->get(animationPath);
-        model_->playAnimation(std::move(animator), startFrame);
+        model_->playAnimation(animationPath, startFrame);
     }
 
     void SceneObject::stopAnimation()
