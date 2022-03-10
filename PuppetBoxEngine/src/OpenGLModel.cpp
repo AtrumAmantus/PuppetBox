@@ -57,7 +57,7 @@ namespace PB
         if (animator_ != nullptr)
         {
             // Update bone transformation matrices for current frame
-            animator_->update(deltaTime, bones_);
+            animator_->update(deltaTime, bones_, boneTransformationOverrides_);
 
             // Get bone transformation matrices
             auto& keyValues = animator_->getBoneTransformations();
@@ -71,11 +71,20 @@ namespace PB
             // Update T-Pose local bone transforms
             for (auto& itr : bones_.getAllBones())
             {
-                itr.second.bone.transform = GfxMath::CreateTransformation(
-                        itr.second.bone.rotation,
-                        itr.second.bone.scale,
-                        itr.second.bone.position
-                );
+                auto override = boneTransformationOverrides_.find(itr.first);
+
+                if (override != boneTransformationOverrides_.end())
+                {
+                    itr.second.bone.transform = override->second;
+                }
+                else
+                {
+                    itr.second.bone.transform = GfxMath::CreateTransformation(
+                            itr.second.bone.rotation,
+                            itr.second.bone.scale,
+                            itr.second.bone.position
+                    );
+                }
             }
 
             // Calculate T-Pose final bone transforms
@@ -111,14 +120,18 @@ namespace PB
         }
     }
 
-    void OpenGLModel::rotateBone(const std::string& boneName, vec3 rotation)
+    void OpenGLModel::overrideBoneRotation(const std::string& boneName, vec3 rotation)
     {
-        auto bone = bones_.getBone(boneName);
+        //TODO: Need to translate over the scaling values from the animation frame
+        boneTransformationOverrides_[boneName] = GfxMath::CreateTransformation(
+                rotation,
+                {1, 1, 1},
+                bones_.getBone(boneName).result->bone.position);
+    }
 
-        if (bone.hasResult)
-        {
-            bone.result->bone.rotation = vec4{rotation.x, rotation.y, rotation.z, 0.0f};
-        }
+    void OpenGLModel::clearBoneOverrides(const std::string& boneName)
+    {
+        boneTransformationOverrides_.erase(boneName);
     }
 
     BoneMap OpenGLModel::getBones() const

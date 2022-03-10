@@ -83,12 +83,19 @@ namespace PB
         void render(mat4 transform) const override;
 
         /**
-         * \brief Rotates the specified bone to the given rotation values.
+         * \brief Rotates the specified bone to the given rotation values, negating animation logic.
          *
          * \param boneName The name of the bone to rotate.
          * \param rotation The specific values to set the bone's rotations to.
          */
-        void rotateBone(const std::string& boneName, vec3 rotation) override;
+        void overrideBoneRotation(const std::string& boneName, vec3 rotation) override;
+
+        /**
+         * \brief Clears any override transformations for the specified bone.
+         *
+         * \param boneName  The bone to clear overrides for.
+         */
+        void clearBoneOverrides(const std::string& boneName) override;
 
         /**
          * \brief Fetches the skeletal data associated with this model.
@@ -100,6 +107,7 @@ namespace PB
     private:
         BoneMap bones_{};
         std::unordered_map<std::string, mat4> boneTransformations_{};
+        std::unordered_map<std::string, mat4> boneTransformationOverrides_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
         std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};
         IAnimationCatalogue* animationCatalogue_ = nullptr;

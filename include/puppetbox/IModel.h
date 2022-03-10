@@ -64,12 +64,19 @@ namespace PB
         virtual void render(mat4 transform) const = 0;
 
         /**
-         * \brief Rotates the specified bone to the given rotation values.
+         * \brief Rotates the specified bone to the given rotation values, negating animation logic.
          *
          * \param boneName The name of the bone to rotate.
          * \param rotation The specific values to set the bone's rotations to.
          */
-        virtual void rotateBone(const std::string& boneName, vec3 rotation) = 0;
+        virtual void overrideBoneRotation(const std::string& boneName, vec3 rotation) = 0;
+
+        /**
+         * \brief Clears any override transformations for the specified bone.
+         *
+         * \param boneName  The bone to clear overrides for.
+         */
+        virtual void clearBoneOverrides(const std::string& boneName) = 0;
 
         /**
          * \brief Grabs the skeletal data associated with this {\link PB::IModel}.

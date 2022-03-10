@@ -80,11 +80,19 @@ namespace PB
         isUpdated = false;
     }
 
-    void SceneObject::rotateBone(const std::string& boneName, vec3 rotation)
+    void SceneObject::overrideBoneRotation(const std::string& boneName, vec3 rotation)
     {
         if (model_ != nullptr)
         {
-            model_->rotateBone(boneName, rotation);
+            model_->overrideBoneRotation(boneName, rotation);
+        }
+    }
+
+    void SceneObject::clearBoneOverrides(const std::string& boneName)
+    {
+        if (model_ != nullptr)
+        {
+            model_->clearBoneOverrides(boneName);
         }
     }
 

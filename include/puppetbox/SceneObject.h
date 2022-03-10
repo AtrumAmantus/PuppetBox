@@ -123,7 +123,14 @@ namespace PB
          * \param boneName The name of the bone to rotate.
          * \param rotation The specific values to set the bone's rotations to.
          */
-        void rotateBone(const std::string& boneName, vec3 rotation);
+        void overrideBoneRotation(const std::string& boneName, vec3 rotation);
+
+        /**
+         * \brief Clears any previously set overrides for this bone.
+         *
+         * \param boneName The name of the bone to clear overrides for.
+         */
+        void clearBoneOverrides(const std::string& boneName);
 
         /**
         * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called

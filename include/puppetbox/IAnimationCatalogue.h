@@ -104,8 +104,9 @@ namespace PB
          *
          * \param deltaTime The time since the last update cycle.
          * \param bones     The bones for the target skeleton to apply the animation to.
+         * \param overrides The bone overrides to use when calculating transformations.
          */
-        virtual void update(float deltaTime, BoneMap& bones) = 0;
+        virtual void update(float deltaTime, BoneMap& bones, std::unordered_map<std::string, mat4> overrides) = 0;
 
         /**
          * \brief Sets the current frame for the animation.

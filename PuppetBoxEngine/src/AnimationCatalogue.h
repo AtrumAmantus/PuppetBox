@@ -46,7 +46,7 @@ namespace PB
 
         std::string getAnimationName() const override;
 
-        void update(float deltaTime, BoneMap& bones) override;
+        void update(float deltaTime, BoneMap& bones, std::unordered_map<std::string, mat4> overrides) override;
 
         void setCurrentFrame(std::uint32_t frame) override;
 

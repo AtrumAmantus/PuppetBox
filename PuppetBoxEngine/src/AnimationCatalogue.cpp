@@ -482,7 +482,7 @@ namespace PB
         return animation_->getPath();
     }
 
-    void Animator::update(float deltaTime, BoneMap& bones)
+    void Animator::update(float deltaTime, BoneMap& bones, std::unordered_map<std::string, mat4> overrides)
     {
         //TODO: Animations never stop, need to create an animation event.
         sequenceTime_ += deltaTime;
@@ -494,34 +494,49 @@ namespace PB
 
         for (auto& entry: bones.getAllBones())
         {
-            auto transformationMatrix = findCachedTransformationMatrix(animation_->getPath(), currentFrame,
-                                                                       entry.first);
+            auto override = overrides.find(entry.first);
 
-            if (transformationMatrix.hasResult)
+            // If there is an override for this bone, don't calculate animation transform
+            if (override != overrides.end())
             {
                 boneTransformations.insert(
-                        std::pair<std::string, mat4>{entry.first, *transformationMatrix.result}
+                        std::pair<std::string, mat4>{entry.first, override->second}
                 );
             }
             else
             {
-                // Get the bone's Transform keyframe
-                auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
+                // Check to see if this transformation has been calculated before
+                auto transformationMatrix = findCachedTransformationMatrix(
+                        animation_->getPath(),
+                        currentFrame,
+                        entry.first);
 
-                //TODO: Need to validate the animation skeleton matches the model skeleton
-                auto boneNode = bones.getBone(entry.first).result;
+                if (transformationMatrix.hasResult)
+                {
+                    boneTransformations.insert(
+                            std::pair<std::string, mat4>{entry.first, *transformationMatrix.result}
+                    );
+                }
+                else
+                {
+                    // Get the bone's Transform keyframe
+                    auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
 
-                auto matrix = GfxMath::CreateTransformation(
-                        boneKeyframe.transform.rotation,
-                        boneKeyframe.transform.scale,
-                        boneNode->bone.position);
+                    //TODO: Need to validate the animation skeleton matches the model skeleton
+                    auto boneNode = bones.getBone(entry.first).result;
 
-                // Create a transformation matrix for the bone
-                boneTransformations.insert(
-                        std::pair<std::string, mat4>{entry.first, matrix}
-                );
+                    auto matrix = GfxMath::CreateTransformation(
+                            boneKeyframe.transform.rotation,
+                            boneKeyframe.transform.scale,
+                            boneNode->bone.position);
 
-                cacheTransformationMatrix(animation_->getPath(), currentFrame, entry.first, matrix);
+                    // Create a transformation matrix for the bone
+                    boneTransformations.insert(
+                            std::pair<std::string, mat4>{entry.first, matrix}
+                    );
+
+                    cacheTransformationMatrix(animation_->getPath(), currentFrame, entry.first, matrix);
+                }
             }
         }
 
