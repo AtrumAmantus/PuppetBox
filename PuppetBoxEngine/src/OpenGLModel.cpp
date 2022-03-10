@@ -56,50 +56,13 @@ namespace PB
 
         if (animator_ != nullptr)
         {
-            // Update bone key values for current frame
+            // Update bone transformation matrices for current frame
             animator_->update(deltaTime, bones_);
 
-            // Get bone key values for current frame
-            auto keyValues = animator_->getBoneTransformations();
+            // Get bone transformation matrices
+            auto& keyValues = animator_->getBoneTransformations();
 
-            auto boneTransforms = std::unordered_map<std::string, mat4>{};
-
-            // Create base transform matrix for each bone
-            for (auto keyValue: keyValues)
-            {
-                auto boneNode = bones_.getBone(keyValue.first).result;
-
-                boneTransforms.insert(
-                        std::pair<std::string, mat4>{
-                                keyValue.first,
-                                GfxMath::CreateTransformation(
-                                        keyValue.second.rotation,
-                                        keyValue.second.scale,
-                                        boneNode->bone.position)
-                        }
-                );
-            }
-
-            // Iteratively compound transform matrix with parent bone
-            for (auto& transform: boneTransforms)
-            {
-                boneTransformations_.insert(
-                        std::pair<std::string, mat4>{transform.first, transform.second}
-                );
-
-                auto& matrix = boneTransformations_.at(transform.first);
-
-                auto bone = bones_.getBone(transform.first).result;
-
-                auto parent = bones_.getBone(bone->parent);
-
-                while (parent.hasResult)
-                {
-                    matrix = boneTransforms.at(parent.result->name) * matrix;
-
-                    parent = bones_.getBone(parent.result->parent);
-                }
-            }
+            boneTransformations_.insert(keyValues.begin(), keyValues.end());
         }
         else
         {

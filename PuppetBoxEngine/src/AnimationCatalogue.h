@@ -21,9 +21,7 @@ namespace PB
 
         bool preLoadFrames(BoneMap& boneMap) override;
 
-        std::unordered_map<std::string, TransformKeyframe> getFrames(
-                std::uint8_t currentFrame,
-                BoneMap& bones) const override;
+        TransformKeyframe& getKeyFrameForBone(std::uint8_t currentFrame, const std::string& boneName) const override;
 
         std::string getPath() const;
 
@@ -52,13 +50,13 @@ namespace PB
 
         void setCurrentFrame(std::uint32_t frame) override;
 
-        std::unordered_map<std::string, Transform> getBoneTransformations() const override;
+        const std::unordered_map<std::string, mat4>& getBoneTransformations() const override;
 
     private:
         IAnimation* animation_;
         float sequenceTime_ = 0;
         float sequenceDuration_;
-        std::unordered_map<std::string, Transform> boneTransformations_;
+        std::unordered_map<std::string, mat4> boneTransformations_;
     };
 
     class AnimationCatalogue : public IAnimationCatalogue

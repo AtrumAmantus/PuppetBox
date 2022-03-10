@@ -60,12 +60,10 @@ namespace PB
          * <p>Every bone will have a keyframe for the given index.</p>
          *
          * \param currentFrame The frame index to get keyframes for.
-         * \param bones        The bones to get keyframes for.
+         * \param boneName     The name of the bone to get the keyframe data for.
          * \return A map of the keyframes for the given bones, keyed per bone.
          */
-        virtual std::unordered_map<std::string, TransformKeyframe> getFrames(
-                std::uint8_t currentFrame,
-                BoneMap& bones) const = 0;
+        virtual TransformKeyframe& getKeyFrameForBone(std::uint8_t currentFrame, const std::string& boneName) const = 0;
 
         /**
          * \brief Returns the path associated with the animation.
@@ -122,7 +120,7 @@ namespace PB
          *
          * \return A map of the bone transformations, keyed on each bone name.
          */
-        virtual std::unordered_map<std::string, Transform> getBoneTransformations() const = 0;
+        virtual const std::unordered_map<std::string, mat4>& getBoneTransformations() const = 0;
     };
 
     class PUPPET_BOX_API IAnimationCatalogue
