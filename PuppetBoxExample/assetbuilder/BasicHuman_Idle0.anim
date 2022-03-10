@@ -90,7 +90,7 @@ keyframes:
     collar:
       rotation:
         x: 10
-        z: 20
+        z: -20
     neck:
       rotation:
         x: -20
@@ -163,7 +163,7 @@ keyframes:
     collar:
       rotation:
         x: 10
-        z: 20
+        z: -20
     neck:
       rotation:
         x: -20
