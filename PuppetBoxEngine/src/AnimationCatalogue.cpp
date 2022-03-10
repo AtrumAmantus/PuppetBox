@@ -12,6 +12,62 @@ namespace PB
     namespace
     {
         static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, TransformKeyframe>>> CACHED_KEYFRAMES{};
+        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, mat4>>> CACHED_TRANSFORMATIONS{};
+
+        inline void cacheTransformationMatrix(
+                const std::string& animationPath,
+                const std::uint32_t currentFrame,
+                const std::string& boneName,
+                mat4 transformationMatrix)
+        {
+            if (CACHED_TRANSFORMATIONS.find(animationPath) == CACHED_TRANSFORMATIONS.end())
+            {
+                CACHED_TRANSFORMATIONS.insert(
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, mat4>>>{
+                                animationPath, {}}
+                );
+            }
+
+            auto& frameIndexMap = CACHED_TRANSFORMATIONS.at(animationPath);
+
+            if (frameIndexMap.find(currentFrame) == frameIndexMap.end())
+            {
+                frameIndexMap.insert(
+                        std::pair<std::uint32_t, std::unordered_map<std::string, mat4>>{currentFrame, {}}
+                );
+            }
+
+            auto& boneMap = frameIndexMap.at(currentFrame);
+
+            boneMap.insert(
+                    std::pair<std::string, mat4>{boneName, transformationMatrix}
+            );
+        }
+
+        inline Result<mat4*> findCachedTransformationMatrix(
+                const std::string& animationPath,
+                const std::uint32_t currentFrame,
+                const std::string& boneName)
+        {
+            auto animationItr = CACHED_TRANSFORMATIONS.find(animationPath);
+
+            if (animationItr != CACHED_TRANSFORMATIONS.end())
+            {
+                auto frameItr = animationItr->second.find(currentFrame);
+
+                if (frameItr != animationItr->second.end())
+                {
+                    auto boneItr = frameItr->second.find(boneName);
+
+                    if (boneItr != frameItr->second.end())
+                    {
+                        return {&boneItr->second, true};
+                    }
+                }
+            }
+
+            return {nullptr, false};
+        }
 
         inline Result<TransformKeyframe*> findCachedTransformKeyframe(
                 const std::string& animationPath,
@@ -438,22 +494,35 @@ namespace PB
 
         for (auto& entry: bones.getAllBones())
         {
-            // Get the bone's Transform keyframe
-            auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
+            auto transformationMatrix = findCachedTransformationMatrix(animation_->getPath(), currentFrame,
+                                                                       entry.first);
 
-            //TODO: Need to validate the animation skeleton matches the model skeleton
-            auto boneNode = bones.getBone(entry.first).result;
+            if (transformationMatrix.hasResult)
+            {
+                boneTransformations.insert(
+                        std::pair<std::string, mat4>{entry.first, *transformationMatrix.result}
+                );
+            }
+            else
+            {
+                // Get the bone's Transform keyframe
+                auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
 
-            // Create a transformation matrix for the bone
-            boneTransformations.insert(
-                    std::pair<std::string, mat4>{
-                            entry.first,
-                            GfxMath::CreateTransformation(
-                                    boneKeyframe.transform.rotation,
-                                    boneKeyframe.transform.scale,
-                                    boneNode->bone.position)
-                    }
-            );
+                //TODO: Need to validate the animation skeleton matches the model skeleton
+                auto boneNode = bones.getBone(entry.first).result;
+
+                auto matrix = GfxMath::CreateTransformation(
+                        boneKeyframe.transform.rotation,
+                        boneKeyframe.transform.scale,
+                        boneNode->bone.position);
+
+                // Create a transformation matrix for the bone
+                boneTransformations.insert(
+                        std::pair<std::string, mat4>{entry.first, matrix}
+                );
+
+                cacheTransformationMatrix(animation_->getPath(), currentFrame, entry.first, matrix);
+            }
         }
 
         boneTransformations_.clear();
