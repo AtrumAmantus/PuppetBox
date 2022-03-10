@@ -56,6 +56,7 @@ namespace PB
         IAnimation* animation_;
         float sequenceTime_ = 0;
         float sequenceDuration_;
+        std::int32_t lastFrameIndex_ = -1;
         std::unordered_map<std::string, mat4> boneTransformations_;
     };
 

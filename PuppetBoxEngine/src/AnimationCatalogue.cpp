@@ -490,6 +490,11 @@ namespace PB
 
         std::uint8_t currentFrame = (sequenceTime_ / sequenceDuration_) * animation_->getFrameCount();
 
+        // If this is still the same frame, nothing to update
+        if (currentFrame == lastFrameIndex_) return;
+
+        lastFrameIndex_ = currentFrame;
+
         std::unordered_map<std::string, mat4> boneTransformations{};
 
         for (auto& entry: bones.getAllBones())
