@@ -75,11 +75,18 @@ namespace PB::GfxMath
 
     mat4 LookAt(vec3 origin, vec3 target, vec3 up)
     {
-        return glmToMat4(glm::lookAt(glm::vec3{origin.x, origin.y, origin.z}, {target.x, target.y, target.z},
-                                     {up.x, up.y, up.z}));
+        return glmToMat4(
+                glm::lookAt(
+                        glm::vec3{origin.x, origin.y, origin.z},
+                        {target.x, target.y, target.z},
+                        {up.x, up.y, up.z}));
     }
 
-    mat4 Projection(std::uint32_t viewWidth, std::uint32_t viewHeight, std::uint32_t viewDepth, SceneView::Mode viewMode)
+    mat4 Projection(
+            std::uint32_t viewWidth,
+            std::uint32_t viewHeight,
+            std::uint32_t viewDepth,
+            SceneView::Mode viewMode)
     {
         mat4 projection = mat4::eye();
 
@@ -116,7 +123,7 @@ namespace PB::GfxMath
 
             projection[0][0] = 2.0f / (right - left); // Normalize x
             projection[1][1] = 2.0f / (top - bottom); // Normalize y, not inverted so +y is "up"
-            projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z, -z is toward user
+            projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z
             projection[3][0] = -((right + left) / (right - left)); // Sets x:0 to left edge
             projection[3][1] = -((top + bottom) / (top - bottom)); // Sets y:0 to top edge
             projection[3][2] = -((zFar + zNear) / (zFar - zNear)); // Sets z:0 to screen
@@ -162,6 +169,11 @@ namespace PB::GfxMath
 
     mat4 Rotate(mat4 m, vec3 angles)
     {
+        if (vec3{0, 0, 0} == angles)
+        {
+            return mat4::eye();
+        }
+
         glm::mat4 gM{
                 m[0].x, m[0].y, m[0].z, m[0].w,
                 m[1].x, m[1].y, m[1].z, m[1].w,
@@ -172,7 +184,7 @@ namespace PB::GfxMath
         //TODO: Lets make our own later
         gM = glm::rotate(gM, angles.x * RADS_PER_DEGREE, {1.0f, 0.0f, 0.0f});
         gM = glm::rotate(gM, angles.y * RADS_PER_DEGREE, {0.0f, 1.0f, 0.0f});
-        gM = glm::rotate(gM, angles.z * -RADS_PER_DEGREE, {0.0f, 0.0f, 1.0f}); // Rotate z the other way
+        gM = glm::rotate(gM, angles.z * RADS_PER_DEGREE, {0.0f, 0.0f, 1.0f});
 
         return glmToMat4(gM);
     }

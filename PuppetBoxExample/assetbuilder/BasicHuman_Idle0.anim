@@ -9,83 +9,83 @@ keyframes:
   0:
     collar:
       rotation:
-        x: 0
-        z: 0
+        x: 0.00
+        z: 0.00
     neck:
       rotation:
-        x: 0
+        x: 0.00
     head:
       rotation:
-        x: 0
+        x: 0.00
     right_shoulder:
       rotation:
-        z: 0
+        z: 0.00
     right_elbow:
       rotation:
-        z: 0
+        z: 0.00
   1:
     right_shoulder:
       rotation:
-        z: -307.18
+        z: 307.18
     right_elbow:
       rotation:
-        z: -7.6
+        z: 7.60
   2:
     right_shoulder:
       rotation:
-        z: -303.43
+        z: 303.43
     right_elbow:
       rotation:
-        z: -16.06
+        z: 16.06
   3:
     right_shoulder:
       rotation:
-        z: -283.52
+        z: 283.52
     right_elbow:
       rotation:
-        z: -31.52
+        z: 31.52
   4:
     right_shoulder:
       rotation:
-        z: -265.77
+        z: 265.77
     right_elbow:
       rotation:
-        z: -49.87
+        z: 49.87
   5:
     right_shoulder:
       rotation:
-        z: -248.06
+        z: 248.06
     right_elbow:
       rotation:
-        z: -69.52
+        z: 69.52
   6:
     right_shoulder:
       rotation:
-        z: -229.46
+        z: 229.46
     right_elbow:
       rotation:
-        z: -89.24
+        z: 89.24
   7:
     right_shoulder:
       rotation:
-        z: -208.87
+        z: 208.87
     right_elbow:
       rotation:
-        z: -108.8
+        z: 108.80
   8:
     right_shoulder:
       rotation:
-        z: -188.97
+        z: 188.97
     right_elbow:
       rotation:
-        z: -130.47
+        z: 130.47
   9:
     right_shoulder:
       rotation:
-        z: -173.5
+        z: 173.50
     right_elbow:
       rotation:
-        z: -152.36
+        z: 152.36
   10:
     collar:
       rotation:
@@ -99,66 +99,66 @@ keyframes:
         x: 10
     right_shoulder:
       rotation:
-        z: -166.58
+        z: 166.58
     right_elbow:
       rotation:
-        z: -162.86
+        z: 162.86
   11:
     right_shoulder:
       rotation:
-        z: -175.17
+        z: 175.17
     right_elbow:
       rotation:
-        z: -146.59
+        z: 146.59
   12:
     right_shoulder:
       rotation:
-        z: -189.31
+        z: 189.31
     right_elbow:
       rotation:
-        z: -123.39
+        z: 123.39
   13:
     right_shoulder:
       rotation:
-        z: -206.75
+        z: 206.75
     right_elbow:
       rotation:
-        z: -99.19
+        z: 99.19
   14:
     right_shoulder:
       rotation:
-        z: -228.68
+        z: 228.68
     right_elbow:
       rotation:
-        z: -75.75
+        z: 75.75
   15:
     right_shoulder:
       rotation:
-        z: -247.16
+        z: 247.16
     right_elbow:
       rotation:
-        z: -63.29
+        z: 63.29
   16:
     right_shoulder:
       rotation:
-        z: -251.47
+        z: 251.47
     right_elbow:
       rotation:
-        z: -63.29
+        z: 63.29
   17:
     right_shoulder:
       rotation:
-        z: -243.89
+        z: 243.89
     right_elbow:
       rotation:
-        z: -70.28
+        z: 70.28
   18:
     right_shoulder:
       rotation:
-        z: -228.48
+        z: 228.48
     right_elbow:
       rotation:
-        z: -83.9
+        z: 83.90
   19:
     collar:
       rotation:
@@ -172,63 +172,63 @@ keyframes:
         x: 10
     right_shoulder:
       rotation:
-        z: -207.84
+        z: 207.84
     right_elbow:
       rotation:
-        z: -106.1
+        z: 106.10
   20:
     right_shoulder:
       rotation:
-        z: -179.56
+        z: 179.56
     right_elbow:
       rotation:
-        z: -145.09
+        z: 145.09
   21:
     right_shoulder:
       rotation:
-        z: -154.18
+        z: 154.18
     right_elbow:
       rotation:
-        z: -180
+        z: 180.00
   22:
     right_shoulder:
       rotation:
-        z: -151.09
+        z: 151.09
     right_elbow:
       rotation:
-        z: -180
+        z: 180.00
   23:
     right_shoulder:
       rotation:
-        z: -153.95
+        z: 153.95
     right_elbow:
       rotation:
-        z: -180
+        z: 180.00
   24:
     right_shoulder:
       rotation:
-        z: -160.71
+        z: 160.71
     right_elbow:
       rotation:
-        z: -180
+        z: 180.00
   25:
     right_shoulder:
       rotation:
-        z: -201.49
+        z: 201.49
     right_elbow:
       rotation:
-        z: -118.1
+        z: 118.10
   26:
     right_shoulder:
       rotation:
-        z: -232.45
+        z: 232.45
     right_elbow:
       rotation:
-        z: -80
+        z: 80.00
   27:
     right_shoulder:
       rotation:
-        z: -235.21
+        z: 235.21
     right_elbow:
       rotation:
-        z: -85.88
+        z: 85.88
