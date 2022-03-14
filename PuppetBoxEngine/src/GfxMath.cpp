@@ -94,30 +94,13 @@ namespace PB::GfxMath
         auto vHeight = static_cast<float>(viewHeight);
         auto vDepth = static_cast<float>(viewDepth);
 
-        if (viewMode == SceneView::Mode::UI)
+        if (viewMode == SceneView::Mode::ORTHO)
         {
             // Using  0 -> dimension will put 0,0 in the bottom left
             float left = 0;
             float right = vWidth;
             float bottom = 0;
             float top = vHeight;
-            float zNear = 0;
-            float zFar = vDepth;
-
-            projection[0][0] = 2.0f / (right - left); // Normalize x
-            projection[1][1] = 2.0f / (top - bottom); // Normalize y, not inverted so +y is "up"
-            projection[2][2] = -(2.0f / (zFar - zNear)); // Normalize z, -z is toward user
-            projection[3][0] = -((right + left) / (right - left)); // Sets x:0 to left edge
-            projection[3][1] = -((top + bottom) / (top - bottom)); // Sets y:0 to top edge
-            projection[3][2] = -((zFar + zNear) / (zFar - zNear)); // Sets z:0 to screen
-        }
-        else if (viewMode == SceneView::Mode::ORTHO)
-        {
-            // Using +/- (dimension / 2) will center the camera on 0,0
-            float left = -static_cast<float>(vWidth) / 2.0f;
-            float right = static_cast<float>(vWidth) / 2.0f;
-            float bottom = -static_cast<float>(vHeight) / 2.0f;
-            float top = static_cast<float>(vHeight) / 2.0f;
             float zNear = 0;
             float zFar = vDepth;
 

@@ -4,6 +4,7 @@
 
 #include "Constants.h"
 #include "DataStructures.h"
+#include "RenderWindow.h"
 #include "TypeDef.h"
 
 namespace PB
@@ -76,14 +77,7 @@ namespace PB
         *
         * \return The calculated mat4 view matrix.
         */
-        mat4 calculateViewMatrix(SceneView::Mode mode) const;
-
-        /**
-         * \brief Returns a transformation matrix that scales related to the current camera zoom.
-         *
-         * \return A transformation matrix that scales according to zoom.
-         */
-        mat4 zoomMatrix() const;
+        mat4 calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
 
         /**
          * Returns the current position of the camera in X, Y, and Z coordinate values.

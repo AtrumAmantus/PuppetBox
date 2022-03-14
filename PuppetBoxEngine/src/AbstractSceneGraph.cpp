@@ -172,12 +172,12 @@ namespace PB
 
     mat4 AbstractSceneGraph::getView() const
     {
-        return camera_.calculateViewMatrix(viewMode_);
+        return camera_.calculateViewMatrix(renderWindow_, viewMode_);
     }
 
     mat4 AbstractSceneGraph::getProjection() const
     {
-        return camera_.zoomMatrix() * GfxMath::Projection(
+        return GfxMath::Projection(
                 *renderWindow_.width,
                 *renderWindow_.height,
                 *renderWindow_.depth,
@@ -190,7 +190,7 @@ namespace PB
                 *renderWindow_.width,
                 *renderWindow_.height,
                 *renderWindow_.depth,
-                SceneView::UI
+                SceneView::ORTHO
         );
     }
 

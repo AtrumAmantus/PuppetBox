@@ -10,8 +10,7 @@ namespace PB
         enum Mode
         {
             ORTHO,
-            PERSPECTIVE,
-            UI
+            PERSPECTIVE
         };
     }
 

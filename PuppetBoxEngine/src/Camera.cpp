@@ -102,17 +102,20 @@ namespace PB
         }
     }
 
-    mat4 Camera::calculateViewMatrix(SceneView::Mode mode) const
+    mat4 Camera::calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const
     {
         mat4 view;
 
         if (mode == SceneView::Mode::ORTHO)
         {
-            // Negative coords because moving the "camera" is really just
+            float z = currentZoom_ / 100.0f;
+
+            // Centers the camera on its own position for orthographic
+            // Subtract position because moving the "camera" is really just
             // moving the "world" the opposite direction.
             view = mat4{
-                    1.0f, 0.0f, 0.0f, -position_.x,
-                    0.0f, 1.0f, 0.0f, -position_.y,
+                    z, 0.0f, 0.0f, ((*renderWindow.width / 2)) - (position_.x * z),
+                    0.0f, z, 0.0f, ((*renderWindow.height / 2)) - (position_.y * z),
                     0.0f, 0.0f, 1.0f, -position_.z,
                     0.0f, 0.0f, 0.0f, 1.0f
             };
@@ -127,18 +130,6 @@ namespace PB
         }
 
         return view;
-    }
-
-    mat4 Camera::zoomMatrix() const
-    {
-        float z = currentZoom_ / 100.0f;
-
-        return mat4{
-                z, 0.0f, 0.0f, 0.0f,
-                0.0f, z, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-        };
     }
 
     vec3 Camera::getPosition() const
