@@ -359,6 +359,11 @@ namespace PB
             this->w = w;
         }
 
+        vec3 vec3() const
+        {
+            return {this->x, this->y, this->z};
+        }
+
         float& operator[](std::uint32_t i)
         {
             assert(i < 4);
@@ -369,15 +374,6 @@ namespace PB
         {
             assert(i < 4);
             return (&x)[i];
-        };
-
-        operator vec3() const
-        {
-            return {
-                    this->x,
-                    this->y,
-                    this->z
-            };
         };
 
         vec4 operator*(float scalar) const
@@ -644,7 +640,21 @@ namespace PB
             return this->values_[i];
         };
 
-        mat4 operator*(mat4 const& rhv)
+        vec4 operator*(vec4 const& rhv) const
+        {
+            return {
+                    (this->values_[0].x * rhv.x) + (this->values_[1].x * rhv.y) + (this->values_[2].x * rhv.z)
+                    + (this->values_[3].x * rhv.w),
+                    (this->values_[0].y * rhv.x) + (this->values_[1].y * rhv.y) + (this->values_[2].y * rhv.z)
+                    + (this->values_[3].y * rhv.w),
+                    (this->values_[0].z * rhv.x) + (this->values_[1].z * rhv.y) + (this->values_[2].z * rhv.z)
+                    + (this->values_[3].z * rhv.w),
+                    (this->values_[0].w * rhv.x) + (this->values_[1].w * rhv.y) + (this->values_[2].w * rhv.z)
+                    + (this->values_[3].w * rhv.w)
+            };
+        };
+
+        mat4 operator*(mat4 const& rhv) const
         {
             mat4 newMatrix{};
 

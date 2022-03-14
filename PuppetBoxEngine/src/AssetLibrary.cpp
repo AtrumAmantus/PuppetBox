@@ -533,9 +533,9 @@ namespace PB
         };
 
         bone.transform = GfxMath::CreateTransformation(
-                bone.rotation,
-                bone.scale,
-                bone.position
+                bone.rotation.vec3(),
+                bone.scale.vec3(),
+                bone.position.vec3()
         );
 
         bones.addBone(modelData.name, parentName, bone);

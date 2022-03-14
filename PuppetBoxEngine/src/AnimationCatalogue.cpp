@@ -533,7 +533,7 @@ namespace PB
                     auto matrix = GfxMath::CreateTransformation(
                             boneKeyframe.transform.rotation,
                             boneKeyframe.transform.scale,
-                            boneNode->bone.position);
+                            boneNode->bone.position.vec3());
 
                     // Create a transformation matrix for the bone
                     boneTransformations.insert(

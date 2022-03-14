@@ -108,8 +108,8 @@ protected:
     {
         setViewMode(PB::SceneView::ORTHO);
 
-        getCamera().setPanSpeed(100.0f);
-        getCamera().setZoomSpeed(2.0f);
+        camera().setPanSpeed(100.0f);
+        camera().setZoomSpeed(2.0f);
 
         bool success = true;
 
@@ -121,7 +121,7 @@ protected:
 
             controlRegistration(inputActions_);
 
-            getCamera().moveTo({0.0f, 0.0f, 3.0f});
+            camera().moveTo({0.0f, 0.0f, 3.0f});
 
             inputProcessor_ = new Game2DInputProcessor(userInput_, inputActions_, input());
 
@@ -203,7 +203,7 @@ protected:
     {
         if (player_ != nullptr && (player_->moveVector.x != 0 || player_->moveVector.y != 0))
         {
-            getCamera().moveNear(
+            camera().moveNear(
                     {player_->position.x, player_->position.y, 0.0f},
                     {100.0f, 100.0f, 0.0f}
             );
@@ -285,7 +285,7 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_CAMERA, [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<CameraEvent>(data);
 
-            event->action(getCamera());
+            event->action(camera());
         });
 
         subscriptions_.push(uuid);

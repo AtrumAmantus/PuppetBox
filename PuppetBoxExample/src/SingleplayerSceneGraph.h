@@ -24,6 +24,7 @@
 #include "EventDef.h"
 #include "Game2DInputProcessor.h"
 #include "GameEvent.h"
+#include "ScreenTranslator.h"
 #include "TypeDef.h"
 #include "UIAttributeBuilder.h"
 #include "UIController.h"
@@ -311,8 +312,8 @@ protected:
     {
         setViewMode(PB::SceneView::ORTHO);
 
-        getCamera().setPanSpeed(100.0f);
-        getCamera().setZoomSpeed(2.0f);
+        camera().setPanSpeed(100.0f);
+        camera().setZoomSpeed(2.0f);
 
         bool success = true;
 
@@ -324,7 +325,7 @@ protected:
 
             controlRegistration(inputActions_);
 
-            getCamera().moveTo({0.0f, 0.0f, 3.0f});
+            camera().moveTo({0.0f, 0.0f, 3.0f});
 
             inputProcessor_ = new Game2DInputProcessor(userInput_, inputActions_, input());
 
@@ -392,7 +393,7 @@ protected:
     {
         if (player_ != nullptr && (player_->moveVector.x != 0 || player_->moveVector.y != 0))
         {
-            getCamera().moveNear(
+            camera().moveNear(
                     {player_->position.x, player_->position.y, 0.0f},
                     {100.0f, 100.0f, 0.0f}
             );
@@ -406,6 +407,14 @@ protected:
 
     void processInputs() override
     {
+        screenTranslator_.cursor.renderCoords = {input()->mouse.x, (*renderWindow().height) - input()->mouse.y};
+        screenTranslator_.cursor.worldCoords = (camera().calculateInverseViewMatrix(renderWindow(), viewMode()) * PB::vec4 {
+                static_cast<float>(screenTranslator_.cursor.renderCoords.x),
+                static_cast<float>(screenTranslator_.cursor.renderCoords.y),
+                0.0f,
+                1.0f
+        }).vec3();
+        screenTranslator_.cursor.worldVector = {};
         inputProcessor_->processInput();
     }
 
@@ -416,6 +425,7 @@ private:
     Entity* player_ = nullptr;
     Entity* playerToControl_ = nullptr;
     AbstractInputProcessor* inputProcessor_ = nullptr;
+    ScreenTranslator screenTranslator_{};
     std::queue<PB::UUID> subscriptions_{};
 
 private:
@@ -448,7 +458,7 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_CAMERA, [this](std::shared_ptr<void> data) {
             auto event = std::static_pointer_cast<CameraEvent>(data);
 
-            event->action(getCamera());
+            event->action(camera());
         });
 
         subscriptions_.push(uuid);

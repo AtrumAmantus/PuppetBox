@@ -80,6 +80,17 @@ namespace PB
         mat4 calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
 
         /**
+         * \brief Calculates the Inverse View Matrix for transforming window coordinates into
+         * world coordinates.
+         *
+         * \param renderWindow  {\link PB::RenderWindow} instance containing render window dimensions.
+         * \param mode          The current projection {\link PB::SceneView::Mode}.
+         *
+         * \return The Inverse View Matrix
+         */
+        mat4 calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
+
+        /**
          * Returns the current position of the camera in X, Y, and Z coordinate values.
          *
          * \return The position of the camera in X, Y, and Z coordinate values.

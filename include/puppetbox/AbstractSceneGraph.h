@@ -156,13 +156,27 @@ namespace PB
         void setViewMode(SceneView::Mode mode);
 
         /**
+         * \brief Returns the current {\link PB::SceneView::Mode} of the scene.
+         *
+         * \return The current {\link PB::SceneView::Mode} of the scene.
+         */
+        const SceneView::Mode viewMode();
+
+        /**
          * \brief Returns a reference to the current scene {\link PB::Camera}.
          *
          * TODO: Add multiple cameras option
          *
          * \return Reference to the current scene {\link PB::Camera}
          */
-        Camera& getCamera();
+        Camera& camera();
+
+        /**
+         * \brief Returns a reference to the {\link PB::RenderWindow}.
+         *
+         * \return The reference to the {\link PB::RenderWindow}.
+         */
+        const RenderWindow& renderWindow() const;
 
         /**
          * \brief Adds a scene object to the base {\link PB::AbstractSceneGraph} to

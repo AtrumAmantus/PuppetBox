@@ -132,6 +132,29 @@ namespace PB
         return view;
     }
 
+    mat4 Camera::calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode viewMode) const
+    {
+        float z = 100.0f / currentZoom_;
+
+        mat4 inverseView{};
+
+        if (viewMode == SceneView::ORTHO)
+        {
+            inverseView = mat4{
+                    z, 0.0f, 0.0f, position_.x - (((*renderWindow.width * z) / 2)),
+                    0.0f, z, 0.0f, position_.y - (((*renderWindow.height * z) / 2)),
+                    0.0f, 0.0f, 1.0f, position_.z,
+                    0.0f, 0.0f, 0.0f, 1.0f
+            };
+        }
+        else
+        {
+            //TODO: Implement inverse perspective view
+        }
+
+        return inverseView;
+    }
+
     vec3 Camera::getPosition() const
     {
         return position_;

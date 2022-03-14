@@ -80,9 +80,9 @@ namespace PB
                 else
                 {
                     itr.second.bone.transform = GfxMath::CreateTransformation(
-                            itr.second.bone.rotation,
-                            itr.second.bone.scale,
-                            itr.second.bone.position
+                            itr.second.bone.rotation.vec3(),
+                            itr.second.bone.scale.vec3(),
+                            itr.second.bone.position.vec3()
                     );
                 }
             }
@@ -126,7 +126,7 @@ namespace PB
         boneTransformationOverrides_[boneName] = GfxMath::CreateTransformation(
                 rotation,
                 {1, 1, 1},
-                bones_.getBone(boneName).result->bone.position);
+                bones_.getBone(boneName).result->bone.position.vec3());
     }
 
     void OpenGLModel::clearBoneOverrides(const std::string& boneName)

@@ -246,9 +246,19 @@ namespace PB
         viewMode_ = mode;
     }
 
-    Camera& AbstractSceneGraph::getCamera()
+    const SceneView::Mode AbstractSceneGraph::viewMode()
+    {
+        return viewMode_;
+    }
+
+    Camera& AbstractSceneGraph::camera()
     {
         return camera_;
+    }
+
+    const RenderWindow& AbstractSceneGraph::renderWindow() const
+    {
+        return renderWindow_;
     }
 
     void AbstractSceneGraph::addSceneObject(SceneObject* sceneObject)
