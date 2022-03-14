@@ -78,6 +78,7 @@ namespace PB
                 }
             }
         };
+
     private:
         void handleWindowEvent(SDL_Event sdlEvent)
         {

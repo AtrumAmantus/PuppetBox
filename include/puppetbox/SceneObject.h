@@ -149,6 +149,11 @@ namespace PB
         void setBehavior(std::unique_ptr<AbstractBehavior> behavior);
 
         /**
+         * \brief Flags this object to have it's behavior removed on the next update cycle.
+         */
+        void clearBehavior();
+
+        /**
          * \brief Returns a reference to the current {\link AbstractBehavior} of the {\link SceneObject}.
          *
          * \return Reference to the current {\link AbstractBehavior}.
@@ -233,7 +238,9 @@ namespace PB
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         mat4 transform_{};
         IModel* model_ = nullptr;
-        std::unique_ptr<AbstractBehavior> behavior_{nullptr};
+        std::unique_ptr<AbstractBehavior> behavior_ = nullptr;
+        std::unique_ptr<AbstractBehavior> behaviorToAdd_ = nullptr;
+        bool clearBehavior_ = false;
         SceneObject* attachedTo_ = nullptr;
         std::string attachPoint_ = "";
     };

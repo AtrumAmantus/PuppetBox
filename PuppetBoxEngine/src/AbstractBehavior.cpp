@@ -4,13 +4,34 @@
 
 namespace PB
 {
-    AbstractBehavior::AbstractBehavior(std::string behaviorName) : behaviorName_(std::move(behaviorName))
+    AbstractBehavior::AbstractBehavior(const std::string& behaviorName) : behaviorName_(behaviorName)
     {
 
     }
 
-    void AbstractBehavior::triggerBehaviorEvent(SceneObject* sceneObject, std::uint32_t behaviorEvent)
+    AbstractBehavior::~AbstractBehavior() noexcept
     {
-        sceneObject->behaviorEvent(behaviorName_, behaviorEvent);
+
+    }
+
+    void AbstractBehavior::init(SceneObject* sceneObject)
+    {
+        this->sceneObject_ = sceneObject;
+        inits();
+    }
+
+    void AbstractBehavior::triggerBehaviorEvent(std::uint32_t behaviorEvent)
+    {
+        sceneObject_->behaviorEvent(behaviorName_, behaviorEvent);
+    }
+
+    void AbstractBehavior::inits()
+    {
+
+    }
+
+    SceneObject* AbstractBehavior::sceneObject()
+    {
+        return sceneObject_;
     }
 }

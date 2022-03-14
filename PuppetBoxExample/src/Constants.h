@@ -27,4 +27,12 @@ namespace Constants
 
         extern std::uint8_t inputKeys[63];
     }
+
+    namespace Behavior
+    {
+        enum Behavior {
+            NONE,
+            WANDER
+        };
+    }
 }

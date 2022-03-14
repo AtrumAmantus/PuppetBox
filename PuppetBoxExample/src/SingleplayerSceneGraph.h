@@ -447,6 +447,41 @@ private:
 
         subscriptions_.push(uuid);
 
+        Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_SET_BEHAVIOR);
+        uuid = PB::SubscribeEvent(
+                PBEX_EVENT_PLAYER_SET_BEHAVIOR,
+                [this](std::shared_ptr<void> data) {
+                    if (player_ != nullptr)
+                    {
+                        auto event = std::static_pointer_cast<PlayerSetBehaviorEvent>(data);
+
+                        switch (event->behavior)
+                        {
+                            case Constants::Behavior::WANDER:
+                                player_->setBehavior(PB::AI::WANDER);
+                                break;
+                            default:
+                                std::cout << "Tried to set invali behavior" << std::endl;
+                        }
+                    }
+                }
+        );
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::PLAYER_CLEAR_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR);
+        uuid = PB::SubscribeEvent(
+                PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR,
+                [this](std::shared_ptr<void> data) {
+                    if (player_ != nullptr)
+                    {
+                        player_->clearBehavior();
+                    }
+                }
+        );
+
+        subscriptions_.push(uuid);
+
         Event::Topic::TERMINATE_TOPIC = PB::RegisterTopic(PBEX_EVENT_TERMINATE_APP);
         uuid = PB::SubscribeEvent(
                 PBEX_EVENT_TERMINATE_APP,

@@ -5,6 +5,7 @@
 #include "puppetbox/WanderBehavior.h"
 
 #include "GfxMath.h"
+#include "Logger.h"
 
 namespace PB
 {
@@ -48,9 +49,23 @@ namespace PB
         position += (finalVelocity * deltaTime);
 
         // Behaviors might alter animations, etc, so need to run updates on those first.
-        if (behavior_ != nullptr)
+        if (behaviorToAdd_ != nullptr)
         {
-            behavior_->update(this, deltaTime);
+            LOGGER_DEBUG("Behavior added to scene object");
+            behavior_ = std::move(behaviorToAdd_);
+            behaviorToAdd_ = nullptr;
+            behavior_->init(this);
+            behavior_->update(deltaTime);
+        }
+        else if (clearBehavior_)
+        {
+            LOGGER_DEBUG("Behavior removed from scene object");
+            clearBehavior_ = false;
+            behavior_ = nullptr;
+        }
+        else if (behavior_ != nullptr)
+        {
+            behavior_->update(deltaTime);
         }
 
         if (attachedTo_ != nullptr)
@@ -101,17 +116,21 @@ namespace PB
         switch (behavior)
         {
             case AI::Behavior::WANDER:
-                behavior_ = std::make_unique<WanderBehavior>();
-                behavior_->init(this);
+                behaviorToAdd_ = std::make_unique<WanderBehavior>();
                 break;
             default:
-                behavior_ = nullptr;
+                behaviorToAdd_ = nullptr;
         }
     }
 
     void SceneObject::setBehavior(std::unique_ptr<AbstractBehavior> behavior)
     {
-        behavior_ = std::move(behavior);
+        behaviorToAdd_ = std::move(behavior);
+    }
+
+    void SceneObject::clearBehavior()
+    {
+        clearBehavior_ = true;
     }
 
     const AbstractBehavior* SceneObject::getBehavior() const

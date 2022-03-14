@@ -9,18 +9,20 @@ namespace PB
     class WanderBehavior : public AbstractBehavior
     {
     public:
-        enum Events {
+        enum Events
+        {
             START,
             STOP
         };
     public:
         WanderBehavior();
 
-        void init(SceneObject* sceneObject) override;
-
-        void update(SceneObject* sceneObject, float deltaTime) override;
+        void update(float deltaTime) override;
 
         vec3 getTargetPosition() const override;
+
+    protected:
+        void inits() override;
 
     private:
         vec3 targetPosition_{};

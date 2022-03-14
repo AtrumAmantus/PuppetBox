@@ -8,20 +8,15 @@ namespace PB
     WanderBehavior::WanderBehavior() : AbstractBehavior("wander")
     {
 
-    };
+    }
 
-    void WanderBehavior::init(SceneObject* sceneObject)
-    {
-        targetPosition_ = sceneObject->position;
-    };
-
-    void WanderBehavior::update(SceneObject* sceneObject, float deltaTime)
+    void WanderBehavior::update(float deltaTime)
     {
         if (waitTime_ <= 0)
         {
-            if (GfxMath::BasicallyEqual(sceneObject->position, targetPosition_))
+            if (GfxMath::BasicallyEqual(sceneObject()->position, targetPosition_))
             {
-                AbstractBehavior::triggerBehaviorEvent(sceneObject, STOP);
+                AbstractBehavior::triggerBehaviorEvent(STOP);
                 behaviorStarted_ = false;
 
                 waitTime_ = ((3 * RandomUtils::pseudoRand()) + 1);
@@ -38,27 +33,27 @@ namespace PB
                         0
                 };
 
-                targetPosition_ = sceneObject->position + newPosOffset;
+                targetPosition_ = sceneObject()->position + newPosOffset;
             }
             else
             {
                 if (!behaviorStarted_)
                 {
-                    AbstractBehavior::triggerBehaviorEvent(sceneObject, START);
+                    AbstractBehavior::triggerBehaviorEvent(START);
                     behaviorStarted_ = true;
                 }
 
-                vec3 positionDelta = targetPosition_ - sceneObject->position;
-                float deltaSpeed = sceneObject->speed * deltaTime;
+                vec3 positionDelta = targetPosition_ - sceneObject()->position;
+                float deltaSpeed = sceneObject()->speed * deltaTime;
 
                 if (GfxMath::Dot(positionDelta, positionDelta) < deltaSpeed)
                 {
-                    sceneObject->position = targetPosition_;
+                    sceneObject()->position = targetPosition_;
                 }
                 else
                 {
                     vec3 deltaMove = GfxMath::Normalize(positionDelta) * deltaSpeed;
-                    sceneObject->position += deltaMove;
+                    sceneObject()->position += deltaMove;
                 }
             }
         }
@@ -71,5 +66,10 @@ namespace PB
     vec3 WanderBehavior::getTargetPosition() const
     {
         return targetPosition_;
+    }
+
+    void WanderBehavior::inits()
+    {
+        targetPosition_ = sceneObject()->position;
     }
 }

@@ -7,6 +7,7 @@
 #include <puppetbox/Constants.h>
 
 #include "Command.h"
+#include "Constants.h"
 #include "Entity.h"
 #include "UIController.h"
 
@@ -14,7 +15,9 @@
 #define PBEX_EVENT_CREATE_ENTITY            "pbex_create_entity_event"
 #define PBEX_EVENT_DESTROY_ENTITY           "pbex_destroy_entity_event"
 #define PBEX_EVENT_PLAYER                   "pbex_player_update"
+#define PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR    "pbex_player_clear_behavior_event"
 #define PBEX_EVENT_PLAYER_LOC               "pbex_player_location"
+#define PBEX_EVENT_PLAYER_SET_BEHAVIOR      "pbex_player_set_behavior_event"
 #define PBEX_EVENT_SET_USER_ENTITY          "pbex_set_user_entity_event"
 #define PBEX_EVENT_TERMINATE_APP            "pbex_terminate_app"
 #define PBEX_EVENT_UI                       "pbex_ui_update"
@@ -44,6 +47,8 @@ namespace Event::Topic
     extern std::uint32_t ENTITY_UPDATE_ACTION_TOPIC;
     extern std::uint32_t ENTITY_UPDATE_LOCATION_TOPIC;
     extern std::uint32_t UPDATE_ENTITY_TOPIC;
+    extern std::uint32_t PLAYER_SET_BEHAVIOR_TOPIC;
+    extern std::uint32_t PLAYER_CLEAR_BEHAVIOR_TOPIC;
 }
 
 struct UIControllerEvent
@@ -54,6 +59,16 @@ struct UIControllerEvent
 struct CameraEvent
 {
     std::function<void(PB::Camera&)> action;
+};
+
+struct PlayerSetBehaviorEvent
+{
+     Constants::Behavior::Behavior behavior = Constants::Behavior::NONE;
+};
+
+struct PlayerClearBehaviorEvent
+{
+
 };
 
 struct PlayerEvent
