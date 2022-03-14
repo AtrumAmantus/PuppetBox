@@ -83,6 +83,6 @@ namespace PB
          *
          * \return The skeletal data associated with this {\link PB::IModel}.
          */
-        virtual BoneMap getBones() const = 0;
+        virtual const BoneMap& getBones() const = 0;
     };
 }

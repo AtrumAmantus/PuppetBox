@@ -5,7 +5,7 @@
 namespace PB
 {
 
-    bool KeyboardInput::isDown(std::uint16_t key) const
+    const bool KeyboardInput::isDown(std::uint16_t key) const
     {
         return keyState[key] == KEY_IS_DOWN;
     }
@@ -25,7 +25,7 @@ namespace PB
         return downKeys;
     }
 
-    bool KeyboardInput::isUp(std::uint16_t key) const
+    const bool KeyboardInput::isUp(std::uint16_t key) const
     {
         return keyState[key] != KEY_IS_DOWN;
     }
@@ -45,7 +45,7 @@ namespace PB
         return upKeys;
     }
 
-    bool KeyboardInput::isPressed(std::uint16_t key) const
+    const bool KeyboardInput::isPressed(std::uint16_t key) const
     {
         return keyState[key] == KEY_IS_DOWN && previousKeyState[key] != KEY_IS_DOWN;
     }
@@ -65,7 +65,7 @@ namespace PB
         return pressedKeys;
     }
 
-    bool KeyboardInput::isReleased(std::uint16_t key) const
+    const bool KeyboardInput::isReleased(std::uint16_t key) const
     {
         return keyState[key] != KEY_IS_DOWN && previousKeyState[key] == KEY_IS_DOWN;
     }
@@ -85,28 +85,28 @@ namespace PB
         return releasedKeys;
     }
 
-    bool MouseInput::isDown(std::uint8_t btn) const
+    const bool MouseInput::isDown(std::uint8_t btn) const
     {
         return mouseState[btn] == KEY_IS_DOWN;
     }
 
-    bool MouseInput::isUp(std::uint8_t btn) const
+    const bool MouseInput::isUp(std::uint8_t btn) const
     {
         return mouseState[btn] != KEY_IS_DOWN;
     }
 
-    bool MouseInput::isPressed(std::uint8_t btn) const
+    const bool MouseInput::isPressed(std::uint8_t btn) const
     {
         return mouseState[btn] == KEY_IS_DOWN && previousMouseState[btn] != KEY_IS_DOWN;
     }
 
-    bool MouseInput::isReleased(std::uint8_t btn) const
+    const bool MouseInput::isReleased(std::uint8_t btn) const
     {
         return mouseState[btn] != KEY_IS_DOWN && previousMouseState[btn] == KEY_IS_DOWN;
     }
 
 
-    bool WindowInput::isClosed() const
+    const bool WindowInput::isClosed() const
     {
         return windowClose;
     }

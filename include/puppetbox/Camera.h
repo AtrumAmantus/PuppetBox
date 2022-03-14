@@ -77,7 +77,7 @@ namespace PB
         *
         * \return The calculated mat4 view matrix.
         */
-        mat4 calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
+        const mat4 calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
 
         /**
          * \brief Calculates the Inverse View Matrix for transforming window coordinates into
@@ -88,14 +88,14 @@ namespace PB
          *
          * \return The Inverse View Matrix
          */
-        mat4 calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
+        const mat4 calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const;
 
         /**
          * Returns the current position of the camera in X, Y, and Z coordinate values.
          *
          * \return The position of the camera in X, Y, and Z coordinate values.
          */
-        vec3 getPosition() const;
+        const vec3 getPosition() const;
 
         /**
          * Sets the speed at which the camera moves around the world space.

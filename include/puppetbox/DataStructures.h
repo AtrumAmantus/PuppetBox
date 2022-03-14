@@ -803,11 +803,11 @@ namespace PB
             map_.insert(bones.map_.begin(), bones.map_.end());
         };
 
-        Result<BoneNode*> getBone(const std::string& name)
+        Result<const BoneNode*> getBone(const std::string& boneName) const
         {
-            Result<BoneNode*> result{};
+            Result<const BoneNode*> result{};
 
-            auto itr = map_.find(name);
+            auto itr = map_.find(boneName);
 
             if (itr != map_.end())
             {

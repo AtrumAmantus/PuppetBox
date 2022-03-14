@@ -14,6 +14,7 @@
 #define PBEX_EVENT_CAMERA                   "pbex_camera_update"
 #define PBEX_EVENT_CREATE_ENTITY            "pbex_create_entity_event"
 #define PBEX_EVENT_DESTROY_ENTITY           "pbex_destroy_entity_event"
+#define PBEX_EVENT_MOUSE_CLICK              "pbex_mouse_click_event"
 #define PBEX_EVENT_PLAYER                   "pbex_player_update"
 #define PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR    "pbex_player_clear_behavior_event"
 #define PBEX_EVENT_PLAYER_LOC               "pbex_player_location"
@@ -49,6 +50,7 @@ namespace Event::Topic
     extern std::uint32_t UPDATE_ENTITY_TOPIC;
     extern std::uint32_t PLAYER_SET_BEHAVIOR_TOPIC;
     extern std::uint32_t PLAYER_CLEAR_BEHAVIOR_TOPIC;
+    extern std::uint32_t MOUSE_CLICK_TOPIC;
 }
 
 struct UIControllerEvent
@@ -125,4 +127,9 @@ struct UpdateEntityLocationEvent
 struct UpdateEntityEvent
 {
     std::function<void(Entity*)> action;
+};
+
+struct MouseClickEvent
+{
+    PB::uivec2 coords{};
 };

@@ -25,7 +25,6 @@ namespace PB
         /**
         * \brief Runs the update logic for the behavior.
         *
-        * \param sceneObject	The SceneObject the behavior is attached to.
         * \param deltaTime		The amount of time (in seconds) that have elapsed since the last update.
         */
         virtual void update(float deltaTime) = 0;
@@ -36,7 +35,7 @@ namespace PB
          *
          * \return A {\link vec3} of the current behavior's target position.
          */
-        virtual vec3 getTargetPosition() const = 0;
+        virtual const vec3 getTargetPosition() const = 0;
 
     protected:
         /**
@@ -51,7 +50,7 @@ namespace PB
          *
          * \return The {\link PB::SceneObject} reference of the object this behavior is attached to.
          */
-        SceneObject* sceneObject();
+        SceneObject* sceneObject() const;
 
         /**
          * \brief Triggers the {\link SceneObject#behaviorEvent(std::string, std::string)} method on the

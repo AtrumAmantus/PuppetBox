@@ -102,7 +102,7 @@ namespace PB
         }
     }
 
-    mat4 Camera::calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const
+    const mat4 Camera::calculateViewMatrix(RenderWindow renderWindow, SceneView::Mode mode) const
     {
         mat4 view;
 
@@ -132,7 +132,7 @@ namespace PB
         return view;
     }
 
-    mat4 Camera::calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode viewMode) const
+    const mat4 Camera::calculateInverseViewMatrix(RenderWindow renderWindow, SceneView::Mode viewMode) const
     {
         float z = 100.0f / currentZoom_;
 
@@ -155,7 +155,7 @@ namespace PB
         return inverseView;
     }
 
-    vec3 Camera::getPosition() const
+    const vec3 Camera::getPosition() const
     {
         return position_;
     }

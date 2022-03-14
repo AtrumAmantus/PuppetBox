@@ -168,7 +168,7 @@ namespace PB
         };
     }
 
-    BoneMap SceneObject::getBones() const
+    const BoneMap& SceneObject::getBones() const
     {
         return model_->getBones();
     }

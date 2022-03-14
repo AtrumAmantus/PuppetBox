@@ -134,7 +134,7 @@ namespace PB
         boneTransformationOverrides_.erase(boneName);
     }
 
-    BoneMap OpenGLModel::getBones() const
+    const BoneMap& OpenGLModel::getBones() const
     {
         return bones_;
     }

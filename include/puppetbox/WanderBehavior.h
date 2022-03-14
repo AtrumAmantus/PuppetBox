@@ -19,7 +19,7 @@ namespace PB
 
         void update(float deltaTime) override;
 
-        vec3 getTargetPosition() const override;
+        const vec3 getTargetPosition() const override;
 
     protected:
         void inits() override;

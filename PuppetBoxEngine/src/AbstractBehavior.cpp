@@ -30,7 +30,7 @@ namespace PB
 
     }
 
-    SceneObject* AbstractBehavior::sceneObject()
+    SceneObject* AbstractBehavior::sceneObject() const
     {
         return sceneObject_;
     }

@@ -209,7 +209,7 @@ namespace PB
          *
          * \return The skeletal data associated with the model for this scene object.
          */
-        BoneMap getBones() const;
+        const BoneMap& getBones() const;
 
         bool operator==(const SceneObject& rhs) const;
 

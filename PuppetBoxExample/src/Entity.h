@@ -1,15 +1,21 @@
 #pragma once
 
+#include <cstdint>
+#include <queue>
 #include <string>
+#include <unordered_map>
 
 #include <puppetbox/SceneObject.h>
 #include <puppetbox/WanderBehavior.h>
+
+#include "Command.h"
+#include "Constants.h"
 
 class Entity : public PB::SceneObject
 {
 public:
     std::string name;
-    uint8_t health = 50;
+    std::uint8_t health = 50;
 public:
     Entity()
     {
@@ -61,17 +67,17 @@ protected:
 
         if (moveVector.x != 0 || moveVector.y != 0)
         {
-            if (!isMoving)
+            if (!isMoving_)
             {
-                isMoving = true;
+                isMoving_ = true;
                 this->playAnimation(Constants::Animation::kWalk, 0);
             }
         }
         else
         {
-            if (isMoving)
+            if (isMoving_)
             {
-                isMoving = false;
+                isMoving_ = false;
                 this->stopAnimation(Constants::Animation::kWalk);
             }
         }
@@ -107,7 +113,7 @@ protected:
     };
 
 private:
-    bool isMoving = false;
+    bool isMoving_ = false;
     PB::vec3 positionUpdate_{};
     bool updatePosition_ = false;
     std::unordered_map<Command::Command, bool> commands_{};

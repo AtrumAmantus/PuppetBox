@@ -63,7 +63,7 @@ namespace PB
         }
     }
 
-    vec3 WanderBehavior::getTargetPosition() const
+    const vec3 WanderBehavior::getTargetPosition() const
     {
         return targetPosition_;
     }

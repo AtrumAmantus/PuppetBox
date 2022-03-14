@@ -102,7 +102,7 @@ namespace PB
          *
          * \return The skeletal data associated with this model.
          */
-        BoneMap getBones() const override;
+        const BoneMap& getBones() const override;
 
     private:
         BoneMap bones_{};

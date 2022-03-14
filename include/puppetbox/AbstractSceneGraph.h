@@ -221,6 +221,7 @@ namespace PB
         RenderWindow renderWindow_{};
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
+        SceneView::Mode nextViewMode_ = SceneView::ORTHO;
         Concurrent::NonBlocking::Queue<SceneObject*> objectsToAdd_{};
         Concurrent::NonBlocking::Queue<UUID> objectsToRemove_{};
         std::unordered_map<UUID, SceneObject*> sceneObjects_{};

@@ -22,8 +22,10 @@ public:
     {
         if (input()->mouse.isReleased(BTN_LEFT))
         {
-            std::cout << "Clicked at: " << input()->mouse.x << ", "
-                      << input()->mouse.y << std::endl;
+            auto event = std::make_shared<MouseClickEvent>();
+            event->coords = {input()->mouse.x, input()->mouse.y};
+
+            PB::PublishEvent(Event::Topic::MOUSE_CLICK_TOPIC, event);
         }
     }
 

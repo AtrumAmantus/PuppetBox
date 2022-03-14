@@ -66,6 +66,8 @@ namespace PB
 
     void AbstractSceneGraph::update(const float deltaTime)
     {
+        viewMode_ = nextViewMode_;
+
         // Clean up scene if it was requested
         if (clearSceneInvoked_)
         {
@@ -243,7 +245,7 @@ namespace PB
 
     void AbstractSceneGraph::setViewMode(SceneView::Mode mode)
     {
-        viewMode_ = mode;
+        nextViewMode_ = mode;
     }
 
     const SceneView::Mode AbstractSceneGraph::viewMode()

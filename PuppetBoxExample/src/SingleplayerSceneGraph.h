@@ -447,6 +447,16 @@ private:
 
         subscriptions_.push(uuid);
 
+        Event::Topic::MOUSE_CLICK_TOPIC = PB::RegisterTopic(PBEX_EVENT_MOUSE_CLICK);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_MOUSE_CLICK, [](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<MouseClickEvent>(data);
+
+            std::cout << "Clicked at: " << event->coords.x << ", "
+                      << event->coords.y << std::endl;
+        });
+
+        subscriptions_.push(uuid);
+
         Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_SET_BEHAVIOR);
         uuid = PB::SubscribeEvent(
                 PBEX_EVENT_PLAYER_SET_BEHAVIOR,
