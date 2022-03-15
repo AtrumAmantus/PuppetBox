@@ -4,9 +4,10 @@
 
 #include <puppetbox/DataStructures.h>
 
-#define HALF_PI     1.5707963267f
-#define PI          3.1415926535f
-#define PI_AND_HALF 4.7123889803f
+#define HALF_PI         1.5707963267f
+#define PI              3.1415926535f
+#define PI_AND_HALF     4.7123889803f
+#define RADS_PER_DEG    0.0174532925f
 
 #define FLOAT_EQUALITY_THRESHOLD 0.0001
 

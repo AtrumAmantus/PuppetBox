@@ -290,10 +290,30 @@ namespace Singleplayer
                 auto event = std::make_shared<UpdateEntityEvent>();
 
                 event->action = [boneName, rotation](Entity* entity) {
-                    entity->rotateBone(boneName, rotation);
+                    if (rotation == PB::vec3{0, 0, 0})
+                    {
+                        entity->clearBoneOverrides(boneName);
+                    }
+                    else
+                    {
+                        entity->overrideBoneRotation(boneName, (rotation * RADS_PER_DEG));
+                    }
                 };
 
                 PB::PublishEvent(Event::Topic::UPDATE_ENTITY_TOPIC, event);
+            }
+            else if (input == "/wander")
+            {
+                auto event = std::make_shared<PlayerSetBehaviorEvent>();
+                event->behavior = Constants::Behavior::WANDER;
+
+                PB::PublishEvent(Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC, event);
+            }
+            else if (input == "/stopb")
+            {
+                auto event = std::make_shared<PlayerClearBehaviorEvent>();
+
+                PB::PublishEvent(Event::Topic::PLAYER_CLEAR_BEHAVIOR_TOPIC, event);
             }
         }
         else
@@ -449,6 +469,38 @@ private:
     {
         PB::UUID uuid;
 
+        // Testing events
+
+        Event::Topic::MOUSE_CLICK_TOPIC = PB::RegisterTopic(PBEX_EVENT_MOUSE_CLICK);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_MOUSE_CLICK, [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<MouseClickEvent>(data);
+
+            std::cout << "Mouse click, Screen: " << event->coords.x << ", " << event->coords.y
+                      << " Render: " << screenTranslator_.cursor.renderCoords.x << ", " << screenTranslator_.cursor.renderCoords.y
+                      << " World: " << screenTranslator_.cursor.worldCoords.x << ", " << screenTranslator_.cursor.worldCoords.y
+                      << std::endl;
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::CAMERA_TOPIC = PB::RegisterTopic(PBEX_EVENT_CAMERA);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_CAMERA, [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<CameraEvent>(data);
+
+            event->action(camera());
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::UPDATE_ENTITY_TOPIC = PB::RegisterTopic(PBEX_EVENT_UPDATE_ENTITY);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_UPDATE_ENTITY, [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<UpdateEntityEvent>(data);
+
+            event->action(player_);
+        });
+
+        subscriptions_.push(uuid);
+
         // Application Events
 
         Event::Topic::UI_TOPIC = PB::RegisterTopic(PBEX_EVENT_UI);
@@ -456,16 +508,6 @@ private:
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
             uiEvent->action(uiController_);
-        });
-
-        subscriptions_.push(uuid);
-
-        Event::Topic::MOUSE_CLICK_TOPIC = PB::RegisterTopic(PBEX_EVENT_MOUSE_CLICK);
-        uuid = PB::SubscribeEvent(PBEX_EVENT_MOUSE_CLICK, [](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<MouseClickEvent>(data);
-
-            std::cout << "Clicked at: " << event->coords.x << ", "
-                      << event->coords.y << std::endl;
         });
 
         subscriptions_.push(uuid);
@@ -512,15 +554,6 @@ private:
         uuid = PB::SubscribeEvent(
                 PBEX_EVENT_TERMINATE_APP,
                 [this](std::shared_ptr<void> data) { input()->window.windowClose = true; });
-
-        subscriptions_.push(uuid);
-
-        Event::Topic::CAMERA_TOPIC = PB::RegisterTopic(PBEX_EVENT_CAMERA);
-        uuid = PB::SubscribeEvent(PBEX_EVENT_CAMERA, [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<CameraEvent>(data);
-
-            event->action(camera());
-        });
 
         subscriptions_.push(uuid);
 
