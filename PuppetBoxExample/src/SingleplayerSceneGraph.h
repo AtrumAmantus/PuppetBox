@@ -16,6 +16,7 @@
 #include <puppetbox/UIComponent.h>
 
 #include "AbstractInputProcessor.h"
+#include "AimingBehavior.h"
 #include "Command.h"
 #include "Common.h"
 #include "Constants.h"
@@ -374,7 +375,18 @@ protected:
 
     void preLoopUpdates(float deltaTime) override
     {
+        //TODO: Super hacky logic
+        if (player_ != nullptr)
+        {
+            player_->isPlayerControlled = false;
+        }
+
         player_ = playerToControl_;
+
+        if (player_ != nullptr)
+        {
+            player_->isPlayerControlled = true;
+        }
 
         if (wasClearSceneInvoked())
         {
@@ -438,6 +450,7 @@ private:
         PB::UUID uuid;
 
         // Application Events
+
         Event::Topic::UI_TOPIC = PB::RegisterTopic(PBEX_EVENT_UI);
         uuid = PB::SubscribeEvent(PBEX_EVENT_UI, [this](std::shared_ptr<void> data) {
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
@@ -467,6 +480,9 @@ private:
 
                         switch (event->behavior)
                         {
+                            case Constants::Behavior::AIM:
+                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_));
+                                break;
                             case Constants::Behavior::WANDER:
                                 player_->setBehavior(PB::AI::WANDER);
                                 break;
@@ -510,7 +526,7 @@ private:
 
         Event::Topic::PLAYER_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER);
         uuid = PB::SubscribeEvent(PBEX_EVENT_PLAYER, [this](std::shared_ptr<void> data) {
-            //TODO: Would be better to simply unsubscribe from this event if no player_ model exists
+            //TODO: Would be better to simply unsubscribe from this event if no player_ object exists
             if (player_ != nullptr)
             {
                 auto event = std::static_pointer_cast<PlayerEvent>(data);

@@ -32,6 +32,7 @@ namespace Constants
     {
         enum Behavior {
             NONE,
+            AIM,
             WANDER
         };
     }

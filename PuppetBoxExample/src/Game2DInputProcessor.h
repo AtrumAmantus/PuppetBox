@@ -20,6 +20,20 @@ public:
 
     void staticProcessInputs() override
     {
+        if (input()->mouse.isPressed(BTN_RIGHT))
+        {
+            auto event = std::make_shared<PlayerSetBehaviorEvent>();
+            event->behavior = Constants::Behavior::AIM;
+
+            PB::PublishEvent(Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC, event);
+        }
+        else if (input()->mouse.isReleased(BTN_RIGHT))
+        {
+            auto event = std::make_shared<PlayerClearBehaviorEvent>();
+
+            PB::PublishEvent(Event::Topic::PLAYER_CLEAR_BEHAVIOR_TOPIC, event);
+        }
+
         if (input()->mouse.isReleased(BTN_LEFT))
         {
             auto event = std::make_shared<MouseClickEvent>();

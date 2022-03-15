@@ -154,6 +154,22 @@ namespace PB
             assert(i < 2);
             return (&x)[i];
         };
+
+        vec2 operator/(const float& scalar) const
+        {
+            return {
+                    this->x / scalar,
+                    this->y / scalar
+            };
+        };
+
+        vec2 operator*(const float& scalar) const
+        {
+            return {
+                    this->x * scalar,
+                    this->y * scalar
+            };
+        };
     };
 
     struct ivec3

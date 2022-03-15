@@ -10,14 +10,15 @@
 
 #include "Command.h"
 #include "Constants.h"
-
-#define PI     3.1415926
+#include "MathUtils.h"
 
 class Entity : public PB::SceneObject
 {
 public:
     std::string name;
     std::uint8_t health = 50;
+    //TODO: Hacky?
+    bool isPlayerControlled = false;
 public:
     Entity()
     {
