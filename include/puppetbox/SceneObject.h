@@ -31,7 +31,7 @@ namespace PB
         vec3 position{0.0f, 0.0f, 0.0f};
 
         /**
-        * \brief World relative rotation of object.
+        * \brief World relative rotation of object, in radians.
         */
         vec3 rotation{0.0f, 0.0f, 0.0f};
 
@@ -121,7 +121,7 @@ namespace PB
          * \brief Rotates the specified bone to the given rotation values.
          *
          * \param boneName The name of the bone to rotate.
-         * \param rotation The specific values to set the bone's rotations to.
+         * \param rotation The specific values to set the bone's rotations to, in radians.
          */
         void overrideBoneRotation(const std::string& boneName, vec3 rotation);
 

@@ -58,7 +58,7 @@ namespace PB
         /**
         * \brief Set the rotation of the camera.
         *
-        * \param rotation	A vector containing rotation values around x, y, and z axis.
+        * \param rotation	A vector containing rotation values, in radians, around x, y, and z axis.
         */
         void rotate(vec3 rotation);
 

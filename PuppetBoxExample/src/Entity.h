@@ -11,6 +11,8 @@
 #include "Command.h"
 #include "Constants.h"
 
+#define PI     3.1415926
+
 class Entity : public PB::SceneObject
 {
 public:
@@ -58,7 +60,7 @@ protected:
 
         if (moveVector.y > 0)
         {
-            rotation.y = 180;
+            rotation.y = PI;
         }
         else
         {
@@ -90,15 +92,6 @@ protected:
             if (behaviorEvent == PB::WanderBehavior::Events::START)
             {
                 this->playAnimation(Constants::Animation::kWalk, 0);
-
-                if (this->getBehavior()->getTargetPosition().y > position.y)
-                {
-                    rotation.y = 180;
-                }
-                else
-                {
-                    rotation.y = 0;
-                }
             }
             else if (behaviorEvent == PB::WanderBehavior::Events::STOP)
             {

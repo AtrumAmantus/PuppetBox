@@ -1,6 +1,8 @@
 #include "puppetbox/Camera.h"
 #include "GfxMath.h"
 
+static float PITCH_LIMIT = 89.0 * PB::GfxMath::RADS_PER_DEGREE;
+
 namespace PB
 {
     void Camera::update(float deltaTime)
@@ -72,13 +74,13 @@ namespace PB
         // Y is yaw
         // Z is roll
         pyr_.x -= rotation.x;
-        if (pyr_.x > 89.0f) pyr_.x = 89.0f;
-        if (pyr_.x < -89.0f) pyr_.x = -89.0f;
+        if (pyr_.x > PITCH_LIMIT) pyr_.x = PITCH_LIMIT;
+        if (pyr_.x < -PITCH_LIMIT) pyr_.x = -PITCH_LIMIT;
         pyr_.y += rotation.y;
 
-        back_.z = cos(pyr_.y * GfxMath::RADS_PER_DEGREE) * cos(pyr_.x * GfxMath::RADS_PER_DEGREE);
-        back_.y = sin(pyr_.x * GfxMath::RADS_PER_DEGREE);
-        back_.x = sin(pyr_.y * GfxMath::RADS_PER_DEGREE) * cos(pyr_.x * GfxMath::RADS_PER_DEGREE);
+        back_.z = cos(pyr_.y) * cos(pyr_.x);
+        back_.y = sin(pyr_.x);
+        back_.x = sin(pyr_.y) * cos(pyr_.x);
 
         back_ = GfxMath::Normalize(back_);
 

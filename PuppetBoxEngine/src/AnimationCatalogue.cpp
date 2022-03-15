@@ -337,7 +337,7 @@ namespace PB
         else
         {
             // Otherwise, generate a keyframe for each property and store it in the cache
-            const auto totalFrameCount = getFrameCount();
+            const std::uint8_t totalFrameCount = getFrameCount();
 
             const std::function<Vec4&(RawKeyframe&)> getVec4[MAX_VECTORS] = {
                     [](RawKeyframe& k) -> Vec4& { return k.scale; },
@@ -360,9 +360,9 @@ namespace PB
                     [](float prev, float next, float blend) -> float { return prev + ((next - prev) * blend); },
                     [](float prev, float next, float blend) -> float {
                         float coef = next > prev ? -1 : 1;
-                        float offset = abs(next - prev) > 180 ? 360 : 0;
+                        float offset = abs(next - prev) > PI ? TWO_PI : 0;
                         float delta = ((next - prev) + (offset * coef)) * blend;
-                        return fmod(prev + delta + 360, 360);
+                        return fmod(prev + delta + TWO_PI, TWO_PI);
                     }
             };
 
@@ -511,7 +511,7 @@ namespace PB
             else
             {
                 // Check to see if this transformation has been calculated before
-                auto transformationMatrix = findCachedTransformationMatrix(
+                Result<mat4*> transformationMatrix = findCachedTransformationMatrix(
                         animation_->getPath(),
                         currentFrame,
                         entry.first);
@@ -528,9 +528,9 @@ namespace PB
                     auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
 
                     //TODO: Need to validate the animation skeleton matches the model skeleton
-                    auto boneNode = bones.getBone(entry.first).result;
+                    const BoneNode* boneNode = bones.getBone(entry.first).result;
 
-                    auto matrix = GfxMath::CreateTransformation(
+                    mat4 matrix = GfxMath::CreateTransformation(
                             boneKeyframe.transform.rotation,
                             boneKeyframe.transform.scale,
                             boneNode->bone.position.vec3());
@@ -554,9 +554,9 @@ namespace PB
                     std::pair<std::string, mat4>{transform.first, transform.second}
             );
 
-            auto& matrix = boneTransformations_.at(transform.first);
+            mat4& matrix = boneTransformations_.at(transform.first);
 
-            auto bone = bones.getBone(transform.first).result;
+            const BoneNode* bone = bones.getBone(transform.first).result;
 
             auto parent = bones.getBone(bone->parent);
 

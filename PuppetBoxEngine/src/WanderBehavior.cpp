@@ -43,6 +43,15 @@ namespace PB
                     behaviorStarted_ = true;
                 }
 
+                if (targetPosition_.y > sceneObject()->position.y)
+                {
+                    sceneObject()->rotation.y = PI;
+                }
+                else
+                {
+                    sceneObject()->rotation.y = 0;
+                }
+
                 vec3 positionDelta = targetPosition_ - sceneObject()->position;
                 float deltaSpeed = sceneObject()->speed * deltaTime;
 

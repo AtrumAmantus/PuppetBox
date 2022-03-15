@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <mutex>
 #include <ostream>
 #include <queue>
@@ -31,7 +32,7 @@ namespace PB
          * \param defaultValue The default value to return.
          * \return The result if it was not empty, otherwise returns the given defaulValue.
          */
-        T orElse(T defaultValue)
+        T orElse(T defaultValue) const
         {
             if (hasResult)
             {
@@ -42,6 +43,16 @@ namespace PB
                 return defaultValue;
             }
         };
+
+        Result<T>& ifPresent(std::function<void(T&)> consumer)
+        {
+            if (hasResult)
+            {
+                consumer(this->result);
+            }
+
+            return *this;
+        }
     };
 
     struct ivec2
@@ -256,7 +267,7 @@ namespace PB
             return (&x)[i];
         };
 
-        vec3& operator+=(vec3 const& rhv)
+        vec3& operator+=(const vec3& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
@@ -273,7 +284,7 @@ namespace PB
             };
         };
 
-        vec3& operator-=(vec3 const& rhv)
+        vec3& operator-=(const vec3& rhv)
         {
             this->x -= rhv.x;
             this->y -= rhv.y;
@@ -288,6 +299,14 @@ namespace PB
                     this->y - rhv.y,
                     this->z - rhv.z
             };
+        };
+
+        vec3& operator*=(const float& scalar)
+        {
+            this->x *= scalar;
+            this->y *= scalar;
+            this->z *= scalar;
+            return *this;
         };
 
         vec3 operator*(const float& scalar) const
@@ -416,7 +435,7 @@ namespace PB
             };
         };
 
-        vec4& operator+=(vec4 const& rhv)
+        vec4& operator+=(const vec4& rhv)
         {
             this->x += rhv.x;
             this->y += rhv.y;
@@ -640,7 +659,7 @@ namespace PB
             return this->values_[i];
         };
 
-        vec4 operator*(vec4 const& rhv) const
+        vec4 operator*(const vec4& rhv) const
         {
             return {
                     (this->values_[0].x * rhv.x) + (this->values_[1].x * rhv.y) + (this->values_[2].x * rhv.z)
@@ -654,7 +673,7 @@ namespace PB
             };
         };
 
-        mat4 operator*(mat4 const& rhv) const
+        mat4 operator*(const mat4& rhv) const
         {
             mat4 newMatrix{};
 
@@ -698,7 +717,7 @@ namespace PB
             return newMatrix;
         };
 
-        mat4& operator*=(mat4 const& rhv)
+        mat4& operator*=(const mat4& rhv)
         {
             mat4 newMatrix = *this * rhv;
 

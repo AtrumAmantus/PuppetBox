@@ -3,8 +3,10 @@
 #include <STBI/stb_image.h>
 
 #include "puppetbox/IAnimationCatalogue.h"
+
 #include "AnimationCatalogue.h"
 #include "AssetArchive.h"
+#include "GfxMath.h"
 #include "PropertyTree.h"
 
 namespace PB
@@ -137,6 +139,8 @@ namespace PB
                 model.rotation.x = getNumericResultAtNode<float>("x", *rotationProperties, error).orElse(0.0f);
                 model.rotation.y = getNumericResultAtNode<float>("y", *rotationProperties, error).orElse(0.0f);
                 model.rotation.z = getNumericResultAtNode<float>("z", *rotationProperties, error).orElse(0.0f);
+
+                model.rotation *= GfxMath::RADS_PER_DEGREE;
             }
 
             auto meshNode = rootProperties.get("mesh");
@@ -309,9 +313,11 @@ namespace PB
             {
                 auto rotation = rotationNode.result;
 
-                keyframe.rotation.x = getNumericResultAtNode<float>("x", *rotation, error);
-                keyframe.rotation.y = getNumericResultAtNode<float>("y", *rotation, error);
-                keyframe.rotation.z = getNumericResultAtNode<float>("z", *rotation, error);
+                std::function<void(float&)> consumer = [](float& value) { value *= GfxMath::RADS_PER_DEGREE; };
+
+                keyframe.rotation.x = getNumericResultAtNode<float>("x", *rotation, error).ifPresent(consumer);
+                keyframe.rotation.y = getNumericResultAtNode<float>("y", *rotation, error).ifPresent(consumer);
+                keyframe.rotation.z = getNumericResultAtNode<float>("z", *rotation, error).ifPresent(consumer);
             }
 
             auto scaleNode = pTree->get("scale");
@@ -977,6 +983,7 @@ namespace PB
 
             if (FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream))
             {
+                //TODO: Revisit this, work on 32 bit max value
                 stream->ignore(INTMAX_MAX);
                 std::int64_t streamLength = stream->gcount();
                 stream->clear();

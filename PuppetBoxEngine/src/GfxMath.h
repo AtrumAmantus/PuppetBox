@@ -4,7 +4,8 @@
 
 #include "puppetbox/DataStructures.h"
 
-#define PI 3.1415926
+#define PI     3.1415926
+#define TWO_PI 6.2831853
 
 namespace PB::GfxMath
 {

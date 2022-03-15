@@ -165,9 +165,9 @@ namespace PB::GfxMath
         };
 
         //TODO: Lets make our own later
-        gM = glm::rotate(gM, angles.x * RADS_PER_DEGREE, {1.0f, 0.0f, 0.0f});
-        gM = glm::rotate(gM, angles.y * RADS_PER_DEGREE, {0.0f, 1.0f, 0.0f});
-        gM = glm::rotate(gM, angles.z * RADS_PER_DEGREE, {0.0f, 0.0f, 1.0f});
+        gM = glm::rotate(gM, angles.x, {1.0f, 0.0f, 0.0f});
+        gM = glm::rotate(gM, angles.y, {0.0f, 1.0f, 0.0f});
+        gM = glm::rotate(gM, angles.z, {0.0f, 0.0f, 1.0f});
 
         return glmToMat4(gM);
     }

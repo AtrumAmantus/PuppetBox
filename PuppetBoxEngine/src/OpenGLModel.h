@@ -86,7 +86,7 @@ namespace PB
          * \brief Rotates the specified bone to the given rotation values, negating animation logic.
          *
          * \param boneName The name of the bone to rotate.
-         * \param rotation The specific values to set the bone's rotations to.
+         * \param rotation The specific values to set the bone's rotations to, in radians.
          */
         void overrideBoneRotation(const std::string& boneName, vec3 rotation) override;
 
