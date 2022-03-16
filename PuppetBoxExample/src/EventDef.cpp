@@ -23,4 +23,6 @@ namespace Event::Topic
     std::uint32_t PLAYER_SET_BEHAVIOR_TOPIC = 0;
     std::uint32_t PLAYER_CLEAR_BEHAVIOR_TOPIC = 0;
     std::uint32_t MOUSE_CLICK_TOPIC = 0;
+    std::uint32_t BONE_OVERRIDE_TOPIC = 0;
+    std::uint32_t BONE_CLEAR_OVERRIDE_TOPIC = 0;
 }

@@ -19,7 +19,7 @@ static std::uint8_t getHostEndian()
     std::uint32_t n = 1;
     std::uint8_t* p = (uint8_t*) &n;
     return *p;
-};
+}
 
 static bool isHostBigEndian = getHostEndian() == BIG_ENDIAN;
 
@@ -36,17 +36,17 @@ static const std::uint8_t endianInt32Shift3 = isHostBigEndian ? 24 : 0;
 extern bool networkInitialized()
 {
     return _networkInitialized;
-};
+}
 
 extern bool networkConnected()
 {
     return _networkConnected;
-};
+}
 
 extern std::vector<PB::UUID>& getSubscriptionUUIDs()
 {
     return _subscriptions;
-};
+}
 
 static inline void getBytesFromUInt32(std::uint8_t bytes[4], std::uint32_t value)
 {
@@ -126,21 +126,54 @@ static inline void parseEventActionEnded(std::uint8_t* data, std::uint32_t dataO
     };
 
     PB::PublishEvent(Event::Topic::ENTITY_UPDATE_ACTION_TOPIC, event);
-};
+}
+
+static inline void parseBoneClearOverride(std::uint8_t* data, std::uint32_t dataOffset)
+{
+    auto event = std::make_shared<BoneClearOverrideEvent>();
+    event->uuid = PB::UUID(
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset)
+    );
+
+    event->boneId = getUInt32FromBytes(data, &dataOffset);
+
+    PB::PublishEvent(Event::Topic::BONE_CLEAR_OVERRIDE_TOPIC, event);
+}
+
+static inline void parseBoneOverride(std::uint8_t* data, std::uint32_t dataOffset)
+{
+    auto event = std::make_shared<BoneOverrideEvent>();
+    event->uuid = PB::UUID(
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset),
+            getUInt32FromBytes(data, &dataOffset)
+    );
+
+    event->boneId = getUInt32FromBytes(data, &dataOffset);
+    event->rotation.x = getFloatFromBytes(data, &dataOffset);
+    event->rotation.y = getFloatFromBytes(data, &dataOffset);
+    event->rotation.z = getFloatFromBytes(data, &dataOffset);
+
+    PB::PublishEvent(Event::Topic::BONE_OVERRIDE_TOPIC, event);
+}
 
 static inline void parseEventConnect(std::uint8_t* data, std::uint32_t dataOffset)
 {
     std::uint32_t userId = getUInt32FromBytes(data, &dataOffset);
 
     std::cout << "User (" << userId << ") Connected" << std::endl;
-};
+}
 
 static inline void parseEventDisconnect(std::uint8_t* data, std::uint32_t dataOffset)
 {
     std::uint32_t userId = getUInt32FromBytes(data, &dataOffset);
 
     std::cout << "User (" << userId << ") Disconnected" << std::endl;
-};
+}
 
 static inline void parseEventLocationUpdate(std::uint8_t* data, std::uint32_t dataOffset)
 {
@@ -158,12 +191,12 @@ static inline void parseEventLocationUpdate(std::uint8_t* data, std::uint32_t da
     };
 
     PB::PublishEvent(Event::Topic::ENTITY_UPDATE_LOCATION_TOPIC, event);
-};
+}
 
 static inline void parseEventMessage(std::uint8_t* data, std::uint32_t dataOffset)
 {
     std::cout << "MESSAGE event parsing not implemented" << std::endl;
-};
+}
 
 static inline void parseEventCreateEntity(std::uint8_t* data, std::uint32_t dataOffset)
 {
@@ -183,7 +216,7 @@ static inline void parseEventCreateEntity(std::uint8_t* data, std::uint32_t data
     event->uuid = uuid;
     event->position = {x, y, z};
     PB::PublishEvent(Event::Topic::CREATE_ENTITY_TOPIC, event);
-};
+}
 
 static inline void parseEventDestroyEntity(std::uint8_t* data, std::uint32_t dataOffset)
 {
@@ -198,7 +231,7 @@ static inline void parseEventDestroyEntity(std::uint8_t* data, std::uint32_t dat
     auto event = std::make_shared<DestroyEntityEvent>();
     event->uuid = uuid;
     PB::PublishEvent(Event::Topic::DESTROY_ENTITY_TOPIC, event);
-};
+}
 
 static inline void parseEventSetUserEntity(std::uint8_t* data, std::uint32_t dataOffset)
 {
@@ -213,7 +246,7 @@ static inline void parseEventSetUserEntity(std::uint8_t* data, std::uint32_t dat
     auto event = std::make_shared<SetUserEntityEvent>();
     event->uuid = uuid;
     PB::PublishEvent(Event::Topic::SET_USER_ENTITY_TOPIC, event);
-};
+}
 
 extern void networkReader(std::uint8_t* data, std::uint32_t dataLength)
 {
@@ -244,6 +277,12 @@ extern void networkReader(std::uint8_t* data, std::uint32_t dataLength)
         case ACTION_ENDED:
             parseEventActionEnded(data, dataOffset);
             break;
+        case BONE_CLEAR_OVERRIDE:
+            parseBoneClearOverride(data, dataOffset);
+            break;
+        case BONE_OVERRIDE:
+            parseBoneOverride(data, dataOffset);
+            break;
         case CONNECT:
             parseEventConnect(data, dataOffset);
             break;
@@ -268,7 +307,7 @@ extern void networkReader(std::uint8_t* data, std::uint32_t dataLength)
         default:
             break;
     }
-};
+}
 
 extern void networkWriterUserChatEvent(std::shared_ptr<void> event, std::uint8_t** dataOut, std::uint32_t* dataLength)
 {
@@ -291,7 +330,7 @@ extern void networkWriterUserChatEvent(std::shared_ptr<void> event, std::uint8_t
     {
         (*dataOut)[dataOffset++] = chatEvent->message.c_str()[i];
     }
-};
+}
 
 extern void networkWriterPlayerEvent(std::shared_ptr<void> event, std::uint8_t** dataOut, std::uint32_t* dataLength)
 {
@@ -321,10 +360,12 @@ extern void networkWriterPlayerEvent(std::shared_ptr<void> event, std::uint8_t**
         (*dataOut)[dataOffset++] = bytes[2];
         (*dataOut)[dataOffset++] = bytes[3];
     }
-};
+}
 
-extern void
-networkWriterPlayerLocationEvent(std::shared_ptr<void> event, std::uint8_t** dataOut, std::uint32_t* dataLength)
+extern void networkWriterPlayerLocationEvent(
+        std::shared_ptr<void> event,
+        std::uint8_t** dataOut,
+        std::uint32_t* dataLength)
 {
     auto playerLocEvent = std::static_pointer_cast<PlayerLocationEvent>(event);
     std::uint8_t bytes[4];
@@ -358,7 +399,81 @@ networkWriterPlayerLocationEvent(std::shared_ptr<void> event, std::uint8_t** dat
     (*dataOut)[dataOffset++] = bytes[1];
     (*dataOut)[dataOffset++] = bytes[2];
     (*dataOut)[dataOffset++] = bytes[3];
-};
+}
+
+extern void networkWriterPlayerBoneOverrideEvent(
+        std::shared_ptr<void> event,
+        std::uint8_t** dataOut,
+        std::uint32_t* dataLength)
+{
+    auto data = std::static_pointer_cast<PlayerBoneOverrideEvent>(event);
+    std::uint8_t bytes[4];
+
+    // 4 bytes eventId, +4 bytes for bone ID, +4 bytes for each x/y/z coord.
+    *dataLength = 4 + 4 + (3 * 4);
+    *dataOut = new uint8_t[*dataLength];
+    std::uint32_t dataOffset = 0;
+
+    std::uint32_t eventID = BONE_OVERRIDE;
+    getBytesFromUInt32(bytes, eventID);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+
+    std::uint32_t boneID = data->boneId;
+    getBytesFromUInt32(bytes, boneID);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+
+    getBytesFromFloat(bytes, data->override.x);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+
+    getBytesFromFloat(bytes, data->override.y);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+
+    getBytesFromFloat(bytes, data->override.z);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+}
+
+extern void networkWriterPlayerClearBoneOverrideEvent(
+        std::shared_ptr<void> event,
+        std::uint8_t** dataOut,
+        std::uint32_t* dataLength)
+{
+    auto data = std::static_pointer_cast<PlayerClearBoneOverrideEvent>(event);
+    std::uint8_t bytes[4];
+
+    // 4 bytes eventId, +4 bytes for bone ID
+    *dataLength = 4 + 4;
+    *dataOut = new uint8_t[*dataLength];
+    std::uint32_t dataOffset = 0;
+
+    std::uint32_t eventID = BONE_CLEAR_OVERRIDE;
+    getBytesFromUInt32(bytes, eventID);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+
+    std::uint32_t boneID = data->boneId;
+    getBytesFromUInt32(bytes, boneID);
+    (*dataOut)[dataOffset++] = bytes[0];
+    (*dataOut)[dataOffset++] = bytes[1];
+    (*dataOut)[dataOffset++] = bytes[2];
+    (*dataOut)[dataOffset++] = bytes[3];
+}
 
 extern void networkReadyStatusEvent(std::shared_ptr<void> event)
 {
@@ -383,6 +498,8 @@ extern void networkReadyStatusEvent(std::shared_ptr<void> event)
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_USER_CHAT, &networkWriterUserChatEvent);
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER, &networkWriterPlayerEvent);
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_LOC, &networkWriterPlayerLocationEvent);
+                PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_BONE_OVERRIDE, &networkWriterPlayerBoneOverrideEvent);
+                PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, &networkWriterPlayerClearBoneOverrideEvent);
             }
             break;
         case PB::Event::NetworkStatus::CONNECTED:
@@ -396,4 +513,4 @@ extern void networkReadyStatusEvent(std::shared_ptr<void> event)
         default:
             break;
     }
-};
+}

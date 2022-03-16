@@ -395,23 +395,34 @@ protected:
 
     void preLoopUpdates(float deltaTime) override
     {
-        //TODO: Super hacky logic
-        if (player_ != nullptr)
+        if (playerToControl_ != PB::UUID::nullUUID())
         {
-            player_->isPlayerControlled = false;
-        }
+            //TODO: Super hacky logic
+            if (player_ != nullptr)
+            {
+                player_->isPlayerControlled = false;
+            }
 
-        player_ = playerToControl_;
+            std::cout << "Setting player to UUID" << std::endl;
+            player_ = (Entity*) getSceneObject(playerToControl_);
 
-        if (player_ != nullptr)
-        {
-            player_->isPlayerControlled = true;
+            // Lazy way to handle race condition where player is set before entity was added
+            if (player_ != nullptr)
+            {
+                player_->isPlayerControlled = true;
+                playerToControl_ = PB::UUID::nullUUID();
+            }
         }
 
         if (wasClearSceneInvoked())
         {
+            if (player_ != nullptr)
+            {
+                player_->isPlayerControlled = false;
+            }
+
             player_ = nullptr;
-            playerToControl_ = nullptr;
+            playerToControl_ = PB::UUID::nullUUID();
         }
 
         updateFrameCounter(deltaTime);
@@ -455,7 +466,7 @@ private:
     UserInput userInput_{};
     InputActions inputActions_{};
     Entity* player_ = nullptr;
-    Entity* playerToControl_ = nullptr;
+    PB::UUID playerToControl_{};
     AbstractInputProcessor* inputProcessor_ = nullptr;
     ScreenTranslator screenTranslator_{};
     std::queue<PB::UUID> subscriptions_{};
@@ -607,21 +618,17 @@ private:
     {
         bool success = true;
 
-        playerToControl_ = new Entity{};
+        auto entity = new Entity{};
 
-        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", playerToControl_))
+        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", entity))
         {
-            playerToControl_->name = "Fred";
-            playerToControl_->position = PB::vec3{150.0f, 50.0f, -50.0f};
+            entity->name = "Fred";
+            entity->position = PB::vec3{150.0f, 50.0f, -50.0f};
             //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
-            addSceneObject(playerToControl_);
+            addSceneObject(entity);
         }
 
-        PB::BoneMap boneMap = playerToControl_->getBones();
-
-        //TODO: These load times are long, separate thread and maybe some optimizations
-        PB::PreloadAnimationFrames(Constants::Animation::kIdle0, boneMap);
-        PB::PreloadAnimationFrames(Constants::Animation::kWalk, boneMap);
+        playerToControl_ = entity->getId();
 
         auto* weapon = new Entity();
 
@@ -630,7 +637,7 @@ private:
             weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
-            weapon->attachTo(playerToControl_, playerToControl_->getBoneId("weapon_attach_right"));
+            weapon->attachTo(entity, entity->getBoneId("weapon_attach_right"));
         }
 
         auto* chain = new Entity();

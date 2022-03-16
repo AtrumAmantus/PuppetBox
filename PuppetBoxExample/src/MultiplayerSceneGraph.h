@@ -3,6 +3,7 @@
 #include <puppetbox/AbstractSceneGraph.h>
 
 #include "AbstractInputProcessor.h"
+#include "AimingBehavior.h"
 #include "Common.h"
 #include "Constants.h"
 #include "Entity.h"
@@ -10,6 +11,7 @@
 #include "GameEvent.h"
 #include "InputActions.h"
 #include "NetworkEvents.h"
+#include "ScreenTranslator.h"
 #include "UIController.h"
 #include "UserInput.h"
 
@@ -165,6 +167,7 @@ protected:
             subscriptions_.pop();
         }
 
+        // Disconnect from server if there is still an active connection
         auto event = std::make_shared<PB::NetworkEvent>();
         event->type = PB::Event::DISCONNECT;
         PB::PublishEvent(PB_EVENT_NETWORK, event);
@@ -176,18 +179,30 @@ protected:
     {
         if (playerToControl_ != PB::UUID::nullUUID())
         {
+            //TODO: Super hacky logic
+            if (player_ != nullptr)
+            {
+                player_->isPlayerControlled = false;
+            }
+
             std::cout << "Setting player to UUID" << std::endl;
             player_ = (Entity*) getSceneObject(playerToControl_);
 
             // Lazy way to handle race condition where player is set before entity was added
             if (player_ != nullptr)
             {
+                player_->isPlayerControlled = true;
                 playerToControl_ = PB::UUID::nullUUID();
             }
         }
 
         if (wasClearSceneInvoked())
         {
+            if (player_ != nullptr)
+            {
+                player_->isPlayerControlled = false;
+            }
+
             player_ = nullptr;
             playerToControl_ = PB::UUID::nullUUID();
         }
@@ -231,6 +246,15 @@ protected:
 
     void processInputs() override
     {
+        screenTranslator_.cursor.renderCoords = {input()->mouse.x, (*renderWindow().height) - input()->mouse.y};
+        screenTranslator_.cursor.worldCoords = (camera().calculateInverseViewMatrix(renderWindow(), viewMode()) *
+                                                PB::vec4{
+                                                        static_cast<float>(screenTranslator_.cursor.renderCoords.x),
+                                                        static_cast<float>(screenTranslator_.cursor.renderCoords.y),
+                                                        0.0f,
+                                                        1.0f
+                                                }).vec3();
+        screenTranslator_.cursor.worldVector = {};
         inputProcessor_->processInput();
     }
 
@@ -242,6 +266,7 @@ private:
     PB::UUID playerToControl_{};
     AbstractInputProcessor* inputProcessor_ = nullptr;
     float timeSinceLastLocationUpdate_ = 0.0f;
+    ScreenTranslator screenTranslator_{};
     std::queue<PB::UUID> subscriptions_{};
 
 private:
@@ -251,26 +276,82 @@ private:
      */
     void eventSubscriptions()
     {
-        Event::Topic::NETWORK_TOPIC = PB::RegisterTopic(PB_EVENT_NETWORK);
+        PB::UUID uuid;
+
+        // Testing events
+
+        Event::Topic::MOUSE_CLICK_TOPIC = PB::RegisterTopic(PBEX_EVENT_MOUSE_CLICK);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_MOUSE_CLICK, [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<MouseClickEvent>(data);
+
+            std::cout << "Mouse click, Screen: " << event->coords.x << ", " << event->coords.y
+                      << " Render: " << screenTranslator_.cursor.renderCoords.x << ", "
+                      << screenTranslator_.cursor.renderCoords.y
+                      << " World: " << screenTranslator_.cursor.worldCoords.x << ", "
+                      << screenTranslator_.cursor.worldCoords.y
+                      << std::endl;
+        });
+
+        subscriptions_.push(uuid);
+
+        // Application Events
 
         // Listen for network thread ready event to start registering listeners
         Event::Topic::NETWORK_STATUS_TOPIC = PB::RegisterTopic(PB_EVENT_NETWORK_STATUS);
-        auto uuid = PB::SubscribeEvent(PB_EVENT_NETWORK_STATUS, &networkReadyStatusEvent);
+        uuid = PB::SubscribeEvent(PB_EVENT_NETWORK_STATUS, &networkReadyStatusEvent);
 
         subscriptions_.push(uuid);
 
         // Ping the network thread in case it already started (in which case we missed the ready pulse)
+        Event::Topic::NETWORK_TOPIC = PB::RegisterTopic(PB_EVENT_NETWORK);
         auto networkEvent = std::make_shared<PB::NetworkEvent>();
         networkEvent->type = PB::Event::NetworkEventType::READY_CHECK;
         PB::PublishEvent(Event::Topic::NETWORK_TOPIC, networkEvent);
 
-        // Application Events
         Event::Topic::UI_TOPIC = PB::RegisterTopic(PBEX_EVENT_UI);
         uuid = PB::SubscribeEvent(PBEX_EVENT_UI, [this](std::shared_ptr<void> data) {
             std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
             uiEvent->action(uiController_);
         });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_SET_BEHAVIOR);
+        uuid = PB::SubscribeEvent(
+                PBEX_EVENT_PLAYER_SET_BEHAVIOR,
+                [this](std::shared_ptr<void> data) {
+                    if (player_ != nullptr)
+                    {
+                        auto event = std::static_pointer_cast<PlayerSetBehaviorEvent>(data);
+
+                        switch (event->behavior)
+                        {
+                            case Constants::Behavior::AIM:
+                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_));
+                                break;
+                            case Constants::Behavior::WANDER:
+                                player_->setBehavior(PB::AI::WANDER);
+                                break;
+                            default:
+                                std::cout << "Tried to set invali behavior" << std::endl;
+                        }
+                    }
+                }
+        );
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::PLAYER_CLEAR_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR);
+        uuid = PB::SubscribeEvent(
+                PBEX_EVENT_PLAYER_CLEAR_BEHAVIOR,
+                [this](std::shared_ptr<void> data) {
+                    if (player_ != nullptr)
+                    {
+                        player_->clearBehavior();
+                    }
+                }
+        );
 
         subscriptions_.push(uuid);
 
@@ -364,6 +445,26 @@ private:
             auto updateEntityEvent = std::static_pointer_cast<UpdateEntityLocationEvent>(data);
 
             ((Entity*) getSceneObject(updateEntityEvent->uuid))->setPosition(updateEntityEvent->location);
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::BONE_OVERRIDE_TOPIC = PB::RegisterTopic(PBEX_EVENT_BONE_OVERRIDE);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_BONE_OVERRIDE, [this](std::shared_ptr<void> data) {
+            auto boneOverrideEvent = std::static_pointer_cast<BoneOverrideEvent>(data);
+
+            ((Entity*) getSceneObject(boneOverrideEvent->uuid))
+                    ->overrideBoneRotation(boneOverrideEvent->boneId, boneOverrideEvent->rotation);
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::BONE_CLEAR_OVERRIDE_TOPIC = PB::RegisterTopic(PBEX_EVENT_BONE_CLEAR_OVERRIDE);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_BONE_CLEAR_OVERRIDE, [this](std::shared_ptr<void> data) {
+            auto boneClearOverrideEvent = std::static_pointer_cast<BoneClearOverrideEvent>(data);
+
+            ((Entity*) getSceneObject(boneClearOverrideEvent->uuid))
+                    ->clearBoneOverrides(boneClearOverrideEvent->boneId);
         });
 
         subscriptions_.push(uuid);

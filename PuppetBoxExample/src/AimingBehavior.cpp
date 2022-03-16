@@ -22,6 +22,22 @@ AimingBehavior::~AimingBehavior()
     sceneObject()->clearBoneOverrides(boneIds_.rightElbow);
     sceneObject()->clearBoneOverrides(boneIds_.leftShoulder);
     sceneObject()->clearBoneOverrides(boneIds_.leftElbow);
+
+    auto event = std::make_shared<PlayerClearBoneOverrideEvent>();
+    event->boneId = boneIds_.rightShoulder;
+    PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, event);
+
+    event = std::make_shared<PlayerClearBoneOverrideEvent>();
+    event->boneId = boneIds_.rightElbow;
+    PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, event);
+
+    event = std::make_shared<PlayerClearBoneOverrideEvent>();
+    event->boneId = boneIds_.leftShoulder;
+    PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, event);
+
+    event = std::make_shared<PlayerClearBoneOverrideEvent>();
+    event->boneId = boneIds_.leftElbow;
+    PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, event);
 }
 
 void AimingBehavior::update(float deltaTime)
@@ -34,7 +50,8 @@ void AimingBehavior::update(float deltaTime)
     {
         timeSinceLastUpdate_ = fmod(timeSinceLastUpdate_, timeBetweenUpdates_);
 
-        //TODO: For non-player entities, the targetPosition_ is set externally by network traffic or AI
+        //TODO: Still need to figure out how to apply this to other entities...
+        // maybe this tied to the client player only?
         if (((Entity*) sceneObject())->isPlayerControlled)
         {
             targetPosition_ = screenTranslator_.cursor.worldCoords;
@@ -74,6 +91,29 @@ void AimingBehavior::update(float deltaTime)
 
         sceneObject()->overrideBoneRotation(boneIds_.leftShoulder, jointRotations[1][0]);
         sceneObject()->overrideBoneRotation(boneIds_.leftElbow, jointRotations[1][1]);
+
+        if (((Entity*) sceneObject())->isPlayerControlled)
+        {
+            auto event = std::make_shared<PlayerBoneOverrideEvent>();
+            event->boneId = boneIds_.rightShoulder;
+            event->override = jointRotations[0][0];
+            PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_OVERRIDE, event);
+
+            event = std::make_shared<PlayerBoneOverrideEvent>();
+            event->boneId = boneIds_.rightElbow;
+            event->override = jointRotations[0][1];
+            PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_OVERRIDE, event);
+
+            event = std::make_shared<PlayerBoneOverrideEvent>();
+            event->boneId = boneIds_.leftShoulder;
+            event->override = jointRotations[1][0];
+            PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_OVERRIDE, event);
+
+            event = std::make_shared<PlayerBoneOverrideEvent>();
+            event->boneId = boneIds_.leftElbow;
+            event->override = jointRotations[1][1];
+            PB::PublishEvent(PBEX_EVENT_PLAYER_BONE_OVERRIDE, event);
+        }
     }
 }
 
