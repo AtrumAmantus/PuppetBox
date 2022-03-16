@@ -11,19 +11,19 @@ namespace PB
 {
     namespace
     {
-        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, TransformKeyframe>>> CACHED_KEYFRAMES{};
-        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, mat4>>> CACHED_TRANSFORMATIONS{};
+        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::uint32_t, TransformKeyframe>>> CACHED_KEYFRAMES{};
+        static std::unordered_map<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::uint32_t, mat4>>> CACHED_TRANSFORMATIONS{};
 
         inline void cacheTransformationMatrix(
                 const std::string& animationPath,
                 const std::uint32_t currentFrame,
-                const std::string& boneName,
+                std::uint32_t boneId,
                 mat4 transformationMatrix)
         {
             if (CACHED_TRANSFORMATIONS.find(animationPath) == CACHED_TRANSFORMATIONS.end())
             {
                 CACHED_TRANSFORMATIONS.insert(
-                        std::pair<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, mat4>>>{
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::uint32_t, mat4>>>{
                                 animationPath, {}}
                 );
             }
@@ -33,21 +33,21 @@ namespace PB
             if (frameIndexMap.find(currentFrame) == frameIndexMap.end())
             {
                 frameIndexMap.insert(
-                        std::pair<std::uint32_t, std::unordered_map<std::string, mat4>>{currentFrame, {}}
+                        std::pair<std::uint32_t, std::unordered_map<std::uint32_t, mat4>>{currentFrame, {}}
                 );
             }
 
             auto& boneMap = frameIndexMap.at(currentFrame);
 
             boneMap.insert(
-                    std::pair<std::string, mat4>{boneName, transformationMatrix}
+                    std::pair<std::uint32_t, mat4>{boneId, transformationMatrix}
             );
         }
 
         inline Result<mat4*> findCachedTransformationMatrix(
                 const std::string& animationPath,
                 const std::uint32_t currentFrame,
-                const std::string& boneName)
+                std::uint32_t boneId)
         {
             auto animationItr = CACHED_TRANSFORMATIONS.find(animationPath);
 
@@ -57,7 +57,7 @@ namespace PB
 
                 if (frameItr != animationItr->second.end())
                 {
-                    auto boneItr = frameItr->second.find(boneName);
+                    auto boneItr = frameItr->second.find(boneId);
 
                     if (boneItr != frameItr->second.end())
                     {
@@ -72,7 +72,7 @@ namespace PB
         inline Result<TransformKeyframe*> findCachedTransformKeyframe(
                 const std::string& animationPath,
                 const std::uint32_t currentFrame,
-                const std::string& boneName)
+                std::uint32_t boneId)
         {
             auto animationItr = CACHED_KEYFRAMES.find(animationPath);
 
@@ -82,7 +82,7 @@ namespace PB
 
                 if (frameItr != animationItr->second.end())
                 {
-                    auto boneItr = frameItr->second.find(boneName);
+                    auto boneItr = frameItr->second.find(boneId);
 
                     if (boneItr != frameItr->second.end())
                     {
@@ -314,7 +314,7 @@ namespace PB
         {
             for (auto& entry: boneMap.getAllBones())
             {
-                getKeyFrameForBone(i, entry.first);
+                getKeyFrameForBone(i, entry.first, entry.second.name);
             }
         }
 
@@ -323,12 +323,15 @@ namespace PB
         return true;
     }
 
-    TransformKeyframe& Animation::getKeyFrameForBone(std::uint8_t currentFrame, const std::string& boneName) const
+    TransformKeyframe& Animation::getKeyFrameForBone(
+            std::uint8_t currentFrame,
+            std::uint32_t boneId,
+            const std::string& boneName) const
     {
         const std::uint32_t MAX_VECTORS = 2;
         const std::uint32_t MAX_AXES = 3;
 
-        Result<TransformKeyframe*> cachedFrame = findCachedTransformKeyframe(getPath(), currentFrame, boneName);
+        Result<TransformKeyframe*> cachedFrame = findCachedTransformKeyframe(getPath(), currentFrame, boneId);
 
         if (cachedFrame.hasResult)
         {
@@ -422,13 +425,13 @@ namespace PB
                     currentKey.rotation.z.orElse(0)
             };
 
-            TransformKeyframe transformKeyframe = {currentFrame, boneName, {position, rotation, scale}};
+            TransformKeyframe transformKeyframe = {currentFrame, boneName, boneId, {position, rotation, scale}};
 
             // If this animation has not been cached at all yet, add it
             if (CACHED_KEYFRAMES.find(getPath()) == CACHED_KEYFRAMES.end())
             {
                 CACHED_KEYFRAMES.insert(
-                        std::pair<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::string, TransformKeyframe>>>(
+                        std::pair<std::string, std::unordered_map<std::uint32_t, std::unordered_map<std::uint32_t, TransformKeyframe>>>(
                                 getPath(),
                                 {}
                         )
@@ -439,7 +442,7 @@ namespace PB
 
             // If this frame hasn't been cached yet, add it
             frameIndexMap.insert(
-                    std::pair<std::uint32_t, std::unordered_map<std::string, TransformKeyframe>>(
+                    std::pair<std::uint32_t, std::unordered_map<std::uint32_t, TransformKeyframe>>(
                             currentFrame,
                             {}
                     )
@@ -449,10 +452,10 @@ namespace PB
 
             // Finally, add the bone's TransformKeyframe
             boneTransformMap.insert(
-                    std::pair<std::string, TransformKeyframe>{boneName, transformKeyframe}
+                    std::pair<std::uint32_t, TransformKeyframe>{boneId, transformKeyframe}
             );
 
-            return boneTransformMap.at(boneName);
+            return boneTransformMap.at(boneId);
         }
     }
 
@@ -482,7 +485,7 @@ namespace PB
         return animation_->getPath();
     }
 
-    void Animator::update(float deltaTime, BoneMap& bones, std::unordered_map<std::string, mat4> overrides)
+    void Animator::update(float deltaTime, BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides)
     {
         //TODO: Animations never stop, need to create an animation event.
         sequenceTime_ += deltaTime;
@@ -495,7 +498,7 @@ namespace PB
 
         lastFrameIndex_ = currentFrame;
 
-        std::unordered_map<std::string, mat4> boneTransformations{};
+        std::unordered_map<std::uint32_t, mat4> boneTransformations{};
 
         for (auto& entry: bones.getAllBones())
         {
@@ -505,7 +508,7 @@ namespace PB
             if (override != overrides.end())
             {
                 boneTransformations.insert(
-                        std::pair<std::string, mat4>{entry.first, override->second}
+                        std::pair<std::uint32_t, mat4>{entry.first, override->second}
                 );
             }
             else
@@ -519,13 +522,13 @@ namespace PB
                 if (transformationMatrix.hasResult)
                 {
                     boneTransformations.insert(
-                            std::pair<std::string, mat4>{entry.first, *transformationMatrix.result}
+                            std::pair<std::uint32_t, mat4>{entry.first, *transformationMatrix.result}
                     );
                 }
                 else
                 {
                     // Get the bone's Transform keyframe
-                    auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first);
+                    auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first, entry.second.name);
 
                     //TODO: Need to validate the animation skeleton matches the model skeleton
                     const BoneNode* boneNode = bones.getBone(entry.first).result;
@@ -537,7 +540,7 @@ namespace PB
 
                     // Create a transformation matrix for the bone
                     boneTransformations.insert(
-                            std::pair<std::string, mat4>{entry.first, matrix}
+                            std::pair<std::uint32_t, mat4>{entry.first, matrix}
                     );
 
                     cacheTransformationMatrix(animation_->getPath(), currentFrame, entry.first, matrix);
@@ -551,20 +554,20 @@ namespace PB
         for (auto& transform: boneTransformations)
         {
             boneTransformations_.insert(
-                    std::pair<std::string, mat4>{transform.first, transform.second}
+                    std::pair<std::uint32_t, mat4>{transform.first, transform.second}
             );
 
             mat4& matrix = boneTransformations_.at(transform.first);
 
             const BoneNode* bone = bones.getBone(transform.first).result;
 
-            auto parent = bones.getBone(bone->parent);
+            auto parent = bones.getBone(bone->parentId);
 
             while (parent.hasResult)
             {
-                matrix = boneTransformations.at(parent.result->name) * matrix;
+                matrix = boneTransformations.at(parent.result->id) * matrix;
 
-                parent = bones.getBone(parent.result->parent);
+                parent = bones.getBone(parent.result->parentId);
             }
         }
     }
@@ -576,7 +579,7 @@ namespace PB
         sequenceTime_ = fmod(sequenceTime_, sequenceDuration_);
     }
 
-    const std::unordered_map<std::string, mat4>& Animator::getBoneTransformations() const
+    const std::unordered_map<std::uint32_t, mat4>& Animator::getBoneTransformations() const
     {
         return boneTransformations_;
     }

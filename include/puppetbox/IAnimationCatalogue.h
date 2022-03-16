@@ -31,6 +31,7 @@ namespace PB
     {
         std::uint8_t frameIndex;
         std::string boneName;
+        std::uint32_t boneId;
         Transform transform;
 
         bool operator==(const TransformKeyframe& rhs) const
@@ -59,11 +60,15 @@ namespace PB
          *
          * <p>Every bone will have a keyframe for the given index.</p>
          *
-         * \param currentFrame The frame index to get keyframes for.
-         * \param boneName     The name of the bone to get the keyframe data for.
+         * \param currentFrame  The frame index to get keyframes for.
+         * \param boneId        The ID of the bone to get the keyframe data for.
+         * \param boneName      The name of the bone to get the keyframe data for.
          * \return A map of the keyframes for the given bones, keyed per bone.
          */
-        virtual TransformKeyframe& getKeyFrameForBone(std::uint8_t currentFrame, const std::string& boneName) const = 0;
+        virtual TransformKeyframe& getKeyFrameForBone(
+                std::uint8_t currentFrame,
+                std::uint32_t boneId,
+                const std::string& boneName) const = 0;
 
         /**
          * \brief Returns the path associated with the animation.
@@ -106,7 +111,7 @@ namespace PB
          * \param bones     The bones for the target skeleton to apply the animation to.
          * \param overrides The bone overrides to use when calculating transformations.
          */
-        virtual void update(float deltaTime, BoneMap& bones, std::unordered_map<std::string, mat4> overrides) = 0;
+        virtual void update(float deltaTime, BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides) = 0;
 
         /**
          * \brief Sets the current frame for the animation.
@@ -119,9 +124,9 @@ namespace PB
          * \brief Gets the previously calculated bone transformation matrices
          * for the attached animation.
          *
-         * \return A map of the bone transformations, keyed on each bone name.
+         * \return A map of the bone transformations, keyed on each bone ID.
          */
-        virtual const std::unordered_map<std::string, mat4>& getBoneTransformations() const = 0;
+        virtual const std::unordered_map<std::uint32_t, mat4>& getBoneTransformations() const = 0;
     };
 
     class PUPPET_BOX_API IAnimationCatalogue

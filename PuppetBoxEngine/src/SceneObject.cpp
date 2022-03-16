@@ -20,7 +20,7 @@ namespace PB
 
     }
 
-    void SceneObject::attachTo(SceneObject* sceneObject, const std::string& attachPoint)
+    void SceneObject::attachTo(SceneObject* sceneObject, std::uint32_t attachPoint)
     {
         attachedTo_ = sceneObject;
         attachPoint_ = attachPoint;
@@ -36,9 +36,9 @@ namespace PB
         return *attachedTo_;
     }
 
-    mat4 SceneObject::getAbsolutePositionForBone(const std::string& boneName) const
+    mat4 SceneObject::getAbsolutePositionForBone(std::uint32_t boneId) const
     {
-        return GfxMath::CreateTransformation(rotation, scale, position) * model_->getAbsolutePositionForBone(boneName);
+        return GfxMath::CreateTransformation(rotation, scale, position) * model_->getAbsolutePositionForBone(boneId);
     }
 
     void SceneObject::update(float deltaTime)
@@ -95,19 +95,19 @@ namespace PB
         isUpdated = false;
     }
 
-    void SceneObject::overrideBoneRotation(const std::string& boneName, vec3 rotation)
+    void SceneObject::overrideBoneRotation(std::uint32_t boneId, vec3 rotation)
     {
         if (model_ != nullptr)
         {
-            model_->overrideBoneRotation(boneName, rotation);
+            model_->overrideBoneRotation(boneId, rotation);
         }
     }
 
-    void SceneObject::clearBoneOverrides(const std::string& boneName)
+    void SceneObject::clearBoneOverrides(std::uint32_t boneId)
     {
         if (model_ != nullptr)
         {
-            model_->clearBoneOverrides(boneName);
+            model_->clearBoneOverrides(boneId);
         }
     }
 
@@ -166,6 +166,11 @@ namespace PB
                 scale.y * baseScale_.y,
                 scale.z * baseScale_.z
         };
+    }
+
+    const std::uint32_t SceneObject::getBoneId(const std::string& boneName) const
+    {
+        return model_->getBoneId(boneName);
     }
 
     const BoneMap& SceneObject::getBones() const

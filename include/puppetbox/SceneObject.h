@@ -78,9 +78,9 @@ namespace PB
          * matrices instead, creating the effect of it occupying the space space.
          *
          * \param sceneObject The object to attach to.
-         * \param attachPoint The bone to attach to on the target object.
+         * \param attachPoint The ID of the bone to attach to on the target object.
          */
-        void attachTo(SceneObject* sceneObject, const std::string& attachPoint);
+        void attachTo(SceneObject* sceneObject, std::uint32_t attachPoint);
 
         /**
          * \brief Denotes if this {\link SceneObject} is attached to another one.
@@ -100,10 +100,11 @@ namespace PB
          * \brief Gets the transformation matrix to position something exactly where
          * the bone associated with the given boneName is.
          *
-         * \param boneName The name associated to the desired bone.
+         * \param boneID The ID associated to the desired bone.
+         *
          * \return A transformation matrix for positioning on the same spot as the bone.
          */
-        mat4 getAbsolutePositionForBone(const std::string& boneName) const;
+        mat4 getAbsolutePositionForBone(std::uint32_t boneId) const;
 
         /**
         * \brief Calls updates() and updates model matrices.
@@ -120,17 +121,17 @@ namespace PB
         /**
          * \brief Rotates the specified bone to the given rotation values.
          *
-         * \param boneName The name of the bone to rotate.
-         * \param rotation The specific values to set the bone's rotations to, in radians.
+         * \param boneId    The ID of the bone to rotate.
+         * \param rotation  The specific values to set the bone's rotations to, in radians.
          */
-        void overrideBoneRotation(const std::string& boneName, vec3 rotation);
+        void overrideBoneRotation(std::uint32_t boneId, vec3 rotation);
 
         /**
          * \brief Clears any previously set overrides for this bone.
          *
-         * \param boneName The name of the bone to clear overrides for.
+         * \param boneId The ID of the bone to clear overrides for.
          */
-        void clearBoneOverrides(const std::string& boneName);
+        void clearBoneOverrides(std::uint32_t boneId);
 
         /**
         * \brief Set a predefined behavior on the object. AbstractBehavior#init() is called
@@ -205,6 +206,15 @@ namespace PB
         const UUID getId() const;
 
         /**
+         * \brief Gets the ID associated with the given bone name.
+         *
+         * \param boneName The name of the bone to get the associated ID for.
+         *
+         * \return The ID associated with the given bone name, or 0 if the bone doesn't exist.
+         */
+        const std::uint32_t getBoneId(const std::string& boneName) const;
+
+        /**
          * \brief Fetches the skeletal data associated with the model for this scene object.
          *
          * \return The skeletal data associated with the model for this scene object.
@@ -242,6 +252,6 @@ namespace PB
         std::unique_ptr<AbstractBehavior> behaviorToAdd_ = nullptr;
         bool clearBehavior_ = false;
         SceneObject* attachedTo_ = nullptr;
-        std::string attachPoint_ = "";
+        std::uint32_t attachPoint_ = 0;
     };
 }

@@ -27,4 +27,13 @@ private:
     const float timeBetweenUpdates_ = (1.0f / 30.0f);
     PB::mat3 restingJointPositions_[2]{};
     const ScreenTranslator& screenTranslator_;
+    struct
+    {
+        std::uint32_t rightShoulder;
+        std::uint32_t rightElbow;
+        std::uint32_t rightHand;
+        std::uint32_t leftShoulder;
+        std::uint32_t leftElbow;
+        std::uint32_t leftHand;
+    } boneIds_;
 };

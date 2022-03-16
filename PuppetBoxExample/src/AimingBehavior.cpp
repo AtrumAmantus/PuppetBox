@@ -18,12 +18,10 @@ AimingBehavior::~AimingBehavior()
     }
 
     // Clear all the overrides
-    sceneObject()->clearBoneOverrides("right_shoulder");
-    sceneObject()->clearBoneOverrides("right_elbow");
-    sceneObject()->clearBoneOverrides("right_hand");
-    sceneObject()->clearBoneOverrides("left_shoulder");
-    sceneObject()->clearBoneOverrides("left_elbow");
-    sceneObject()->clearBoneOverrides("left_hand");
+    sceneObject()->clearBoneOverrides(boneIds_.rightShoulder);
+    sceneObject()->clearBoneOverrides(boneIds_.rightElbow);
+    sceneObject()->clearBoneOverrides(boneIds_.leftShoulder);
+    sceneObject()->clearBoneOverrides(boneIds_.leftElbow);
 }
 
 void AimingBehavior::update(float deltaTime)
@@ -71,11 +69,11 @@ void AimingBehavior::update(float deltaTime)
 
         //TODO: Flip the angles if the root rotation is 180 on y-axis
 
-        sceneObject()->overrideBoneRotation("right_shoulder", jointRotations[0][0]);
-        sceneObject()->overrideBoneRotation("right_elbow", jointRotations[0][1]);
+        sceneObject()->overrideBoneRotation(boneIds_.rightShoulder, jointRotations[0][0]);
+        sceneObject()->overrideBoneRotation(boneIds_.rightElbow, jointRotations[0][1]);
 
-        sceneObject()->overrideBoneRotation("left_shoulder", jointRotations[1][0]);
-        sceneObject()->overrideBoneRotation("left_elbow", jointRotations[1][1]);
+        sceneObject()->overrideBoneRotation(boneIds_.leftShoulder, jointRotations[1][0]);
+        sceneObject()->overrideBoneRotation(boneIds_.leftElbow, jointRotations[1][1]);
     }
 }
 
@@ -86,17 +84,24 @@ const PB::vec3 AimingBehavior::getTargetPosition() const
 
 void AimingBehavior::inits()
 {
+    boneIds_.leftShoulder = sceneObject()->getBoneId("left_shoulder");
+    boneIds_.leftElbow = sceneObject()->getBoneId("left_elbow");
+    boneIds_.leftHand = sceneObject()->getBoneId("left_hand");
+    boneIds_.rightShoulder = sceneObject()->getBoneId("right_shoulder");
+    boneIds_.rightElbow = sceneObject()->getBoneId("right_elbow");
+    boneIds_.rightHand = sceneObject()->getBoneId("right_hand");
+
     // Get the resting position of all the bones
     // For the sake of the IK calculations, the origin joint (restingJointPositions_[*][0])
     // is considered to be at [0,0,0]
 
-    restingJointPositions_[0][1] = sceneObject()->getBones().getBone("right_elbow").result->bone.position.vec3()
+    restingJointPositions_[0][1] = sceneObject()->getBones().getBone(boneIds_.rightElbow).result->bone.position.vec3()
                                    + restingJointPositions_[0][0];
-    restingJointPositions_[0][2] = sceneObject()->getBones().getBone("right_hand").result->bone.position.vec3()
+    restingJointPositions_[0][2] = sceneObject()->getBones().getBone(boneIds_.rightHand).result->bone.position.vec3()
                                    + restingJointPositions_[0][1];
 
-    restingJointPositions_[1][1] = sceneObject()->getBones().getBone("left_elbow").result->bone.position.vec3()
+    restingJointPositions_[1][1] = sceneObject()->getBones().getBone(boneIds_.leftElbow).result->bone.position.vec3()
                                    + restingJointPositions_[1][0];
-    restingJointPositions_[1][2] = sceneObject()->getBones().getBone("left_hand").result->bone.position.vec3()
+    restingJointPositions_[1][2] = sceneObject()->getBones().getBone(boneIds_.leftHand).result->bone.position.vec3()
                                    + restingJointPositions_[1][1];
 }

@@ -185,13 +185,14 @@ namespace PB
          * \param depth     The depth of the current child data.
          * \param bones     The map of {\link BoneMap} objects to add created bone data to.
          * \param meshes    The map of {\link RenderedMesh} objects to add created mesh data to.
+         *
          * \return True if the mesh and bone objects were created successfully, False otherwise.
          */
         bool buildMeshAndBones(
                 ModelData modelData,
                 const std::string& parentName,
                 BoneMap& bones,
-                std::unordered_map<std::string, RenderedMesh*>& meshes
+                std::unordered_map<std::uint32_t, RenderedMesh*>& meshes
         );
     };
 }

@@ -292,11 +292,11 @@ namespace Singleplayer
                 event->action = [boneName, rotation](Entity* entity) {
                     if (rotation == PB::vec3{0, 0, 0})
                     {
-                        entity->clearBoneOverrides(boneName);
+                        entity->clearBoneOverrides(entity->getBoneId(boneName));
                     }
                     else
                     {
-                        entity->overrideBoneRotation(boneName, (rotation * RADS_PER_DEG));
+                        entity->overrideBoneRotation(entity->getBoneId(boneName), (rotation * RADS_PER_DEG));
                     }
                 };
 
@@ -630,7 +630,7 @@ private:
             weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
-            weapon->attachTo(playerToControl_, "weapon_attach_right");
+            weapon->attachTo(playerToControl_, playerToControl_->getBoneId("weapon_attach_right"));
         }
 
         auto* chain = new Entity();

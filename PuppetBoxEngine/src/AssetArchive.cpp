@@ -272,24 +272,6 @@ namespace PB
             return material;
         }
 
-        BoneMap mapToBones(PropertyTree* pTree, const std::string& parentName, bool* error)
-        {
-            BoneMap boneMap{};
-
-            if (!pTree->children().empty())
-            {
-                for (auto& p: pTree->children())
-                {
-                    auto childMap = mapToBones(pTree->get(p).result, pTree->name(), error);
-                    boneMap.addBones(childMap);
-                }
-            }
-
-            boneMap.addBone(pTree->name(), parentName, Bone{});
-
-            return std::move(boneMap);
-        }
-
         RawKeyframe mapToKeyframe(PropertyTree* pTree, bool* error)
         {
             RawKeyframe keyframe{};

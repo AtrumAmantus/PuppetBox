@@ -473,7 +473,7 @@ namespace PB
         {
             IModel* model;
 
-            std::unordered_map<std::string, RenderedMesh*> meshes{};
+            std::unordered_map<std::uint32_t, RenderedMesh*> meshes{};
             BoneMap bones{};
             error = !buildMeshAndBones(modelData, "", bones, meshes);
 
@@ -516,7 +516,7 @@ namespace PB
             ModelData modelData,
             const std::string& parentName,
             BoneMap& bones,
-            std::unordered_map<std::string, RenderedMesh*>& meshes
+            std::unordered_map<std::uint32_t, RenderedMesh*>& meshes
     )
     {
         bool error = false;
@@ -538,7 +538,7 @@ namespace PB
                 bone.position.vec3()
         );
 
-        bones.addBone(modelData.name, parentName, bone);
+        std::uint32_t boneId = bones.addBone(modelData.name, parentName, bone);
 
         if (!modelData.mesh.dataPath.empty())
         {
@@ -571,8 +571,9 @@ namespace PB
                             mesh.transform = meshOffset * meshScale;
 
                             meshes.insert(
-                                    std::pair<std::string, RenderedMesh*>{modelData.name,
-                                                                          new Rendered2DMesh(mesh, material)}
+                                    std::pair<std::uint32_t , RenderedMesh*>{
+                                        boneId,
+                                        new Rendered2DMesh(mesh, material)}
                             );
                         }
                         else

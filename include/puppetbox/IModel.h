@@ -44,10 +44,11 @@ namespace PB
          * \brief Gets the transformation matrix to position something exactly where
          * the bone associated with the given boneName is.
          *
-         * \param boneName The name associated to the desired bone.
+         * \param boneId The ID associated to the desired bone.
+         *
          * \return A transformation matrix for positioning on the same spot as the bone.
          */
-        virtual mat4 getAbsolutePositionForBone(const std::string& boneName) const = 0;
+        virtual mat4 getAbsolutePositionForBone(std::uint32_t boneId) const = 0;
 
         /**
          * \brief Method used by application logic to update the state of the model prior to the render()
@@ -66,17 +67,26 @@ namespace PB
         /**
          * \brief Rotates the specified bone to the given rotation values, negating animation logic.
          *
-         * \param boneName The name of the bone to rotate.
-         * \param rotation The specific values to set the bone's rotations to, in radians.
+         * \param boneId    The ID of the bone to rotate.
+         * \param rotation  The specific values to set the bone's rotations to, in radians.
          */
-        virtual void overrideBoneRotation(const std::string& boneName, vec3 rotation) = 0;
+        virtual void overrideBoneRotation(std::uint32_t boneId, vec3 rotation) = 0;
 
         /**
          * \brief Clears any override transformations for the specified bone.
          *
-         * \param boneName  The bone to clear overrides for.
+         * \param boneId The ID of the bone to clear overrides for.
          */
-        virtual void clearBoneOverrides(const std::string& boneName) = 0;
+        virtual void clearBoneOverrides(std::uint32_t boneId) = 0;
+
+        /**
+         * \brief Gets the ID associated with the given bone name.
+         *
+         * \param boneName The name of the bone to get the associated ID for.
+         *
+         * \return The ID associated with the given bone name, or 0 if the bone doesn't exist.
+         */
+        virtual const std::uint32_t getBoneId(const std::string& boneName) const = 0;
 
         /**
          * \brief Grabs the skeletal data associated with this {\link PB::IModel}.

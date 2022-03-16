@@ -812,7 +812,9 @@ namespace PB
     struct BoneNode
     {
         std::string name;
+        std::uint32_t id;
         std::string parent;
+        std::uint32_t parentId;
         Bone bone{};
     };
 
@@ -823,28 +825,59 @@ namespace PB
 
         BoneMap(const BoneMap& boneMap)
         {
-            map_.insert(boneMap.map_.begin(), boneMap.map_.end());
+            for (auto& entry : boneMap.boneMap_)
+            {
+                boneIds_.insert(
+                        std::pair<std::string, std::uint32_t>{entry.second.name, entry.first}
+                );
+            }
+
+            boneMap_.insert(boneMap.boneMap_.begin(), boneMap.boneMap_.end());
         };
 
-        void addBone(const std::string& name, const std::string& parent, const Bone& bone)
+        std::uint32_t addBone(const std::string& name, const std::string& parent, const Bone& bone)
         {
-            map_.insert(
-                    std::pair<std::string, BoneNode>{name, BoneNode{name, parent, bone}}
+            //TODO: Need a better hashing algo, account for bone hierarchy to protect against duplicate bone names?
+            std::uint32_t boneId = std::hash<std::string>()(name);
+
+            boneIds_.insert(
+                    std::pair<std::string, std::uint32_t>{name, boneId}
             );
+
+            std::uint32_t parentId = getBoneId(parent);
+
+            boneMap_.insert(
+                    std::pair<std::uint32_t, BoneNode>{boneId, BoneNode{name, boneId, parent, parentId, bone}}
+            );
+
+            return boneId;
         };
 
-        void addBones(const BoneMap& bones)
+        std::uint32_t getBoneId(const std::string& boneName) const
         {
-            map_.insert(bones.map_.begin(), bones.map_.end());
+            std::uint32_t boneId;
+
+            auto itr = boneIds_.find(boneName);
+
+            if (itr != boneIds_.end())
+            {
+                boneId = itr->second;
+            }
+            else
+            {
+                boneId = 0;
+            }
+
+            return boneId;
         };
 
-        Result<const BoneNode*> getBone(const std::string& boneName) const
+        Result<const BoneNode*> getBone(std::uint32_t boneId) const
         {
             Result<const BoneNode*> result{};
 
-            auto itr = map_.find(boneName);
+            auto itr = boneMap_.find(boneId);
 
-            if (itr != map_.end())
+            if (itr != boneMap_.end())
             {
                 result.hasResult = true;
                 result.result = &itr->second;
@@ -853,17 +886,13 @@ namespace PB
             return result;
         };
 
-        std::unordered_map<std::string, BoneNode>& getAllBones()
+        std::unordered_map<std::uint32_t, BoneNode>& getAllBones()
         {
-            return map_;
-        };
-
-        const std::unordered_map<std::string, BoneNode>& getAllBones() const
-        {
-            return map_;
+            return boneMap_;
         };
     private:
-        std::unordered_map<std::string, BoneNode> map_{};
+        std::unordered_map<std::string, std::uint32_t> boneIds_{};
+        std::unordered_map<std::uint32_t, BoneNode> boneMap_{};
     };
 
     struct UUID

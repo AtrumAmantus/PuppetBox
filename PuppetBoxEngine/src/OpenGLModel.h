@@ -26,12 +26,13 @@ namespace PB
         * \brief Creates an OpenGL implementation specific object used for storing rendering specific data.
         *
         * \param bones              Skeletal data associated with this model.
-        * \param renderedMeshes     Vector of {@link RenderedMesh} objects to use for model rendering.
+        * \param renderedMeshes     Map of {@link RenderedMesh} objects to use for model rendering, keyed by their
+         * bone ID.
         * \param animationCatalogue The {\link PB::IAnimationCatalogue} to use with this model for loading animations.
         */
         OpenGLModel(
                 BoneMap& bones,
-                std::unordered_map<std::string, RenderedMesh*> renderedMeshes,
+                std::unordered_map<std::uint32_t, RenderedMesh*> renderedMeshes,
                 IAnimationCatalogue* animationCatalogue);
 
         /**
@@ -65,10 +66,10 @@ namespace PB
          * \brief Gets the transformation matrix to position something exactly where
          * the bone associated with the given boneName is.
          *
-         * \param boneName The name associated to the desired bone.
+         * \param boneName The ID associated to the desired bone.
          * \return A transformation matrix for positioning on the same spot as the bone.
          */
-        mat4 getAbsolutePositionForBone(const std::string& boneName) const override;
+        mat4 getAbsolutePositionForBone(std::uint32_t boneId) const override;
 
         /**
          * \brief Updates the object's state prior to the render() call.
@@ -85,17 +86,26 @@ namespace PB
         /**
          * \brief Rotates the specified bone to the given rotation values, negating animation logic.
          *
-         * \param boneName The name of the bone to rotate.
-         * \param rotation The specific values to set the bone's rotations to, in radians.
+         * \param boneId    The ID of the bone to rotate.
+         * \param rotation  The specific values to set the bone's rotations to, in radians.
          */
-        void overrideBoneRotation(const std::string& boneName, vec3 rotation) override;
+        void overrideBoneRotation(std::uint32_t boneId, vec3 rotation) override;
 
         /**
          * \brief Clears any override transformations for the specified bone.
          *
-         * \param boneName  The bone to clear overrides for.
+         * \param boneId The ID of the bone to clear overrides for.
          */
-        void clearBoneOverrides(const std::string& boneName) override;
+        void clearBoneOverrides(std::uint32_t boneId) override;
+
+        /**
+         * \brief Gets the ID associated with the given bone name.
+         *
+         * \param boneName The name of the bone to get the associated ID for.
+         *
+         * \return The ID associated with the given bone name, or 0 if the bone doesn't exist.
+         */
+        const std::uint32_t getBoneId(const std::string& boneName) const override;
 
         /**
          * \brief Fetches the skeletal data associated with this model.
@@ -106,10 +116,10 @@ namespace PB
 
     private:
         BoneMap bones_{};
-        std::unordered_map<std::string, mat4> boneTransformations_{};
-        std::unordered_map<std::string, mat4> boneTransformationOverrides_{};
+        std::unordered_map<std::uint32_t, mat4> boneTransformations_{};
+        std::unordered_map<std::uint32_t, mat4> boneTransformationOverrides_{};
         std::unique_ptr<IAnimator> animator_{nullptr};
-        std::unordered_map<std::string, RenderedMesh*> renderedMeshes_{};
+        std::unordered_map<std::uint32_t, RenderedMesh*> renderedMeshes_{};
         IAnimationCatalogue* animationCatalogue_ = nullptr;
     };
 }

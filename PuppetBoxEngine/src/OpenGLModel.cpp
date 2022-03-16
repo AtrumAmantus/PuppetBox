@@ -8,7 +8,7 @@ namespace PB
 {
     OpenGLModel::OpenGLModel(
             BoneMap& bones,
-            std::unordered_map<std::string, RenderedMesh*> renderedMeshes,
+            std::unordered_map<std::uint32_t, RenderedMesh*> renderedMeshes,
             IAnimationCatalogue* animationCatalogue) :
             bones_(std::move(bones)),
             animationCatalogue_(animationCatalogue),
@@ -45,9 +45,9 @@ namespace PB
         return animator_ != nullptr;
     }
 
-    mat4 OpenGLModel::getAbsolutePositionForBone(const std::string& boneName) const
+    mat4 OpenGLModel::getAbsolutePositionForBone(std::uint32_t boneId) const
     {
-        return boneTransformations_.at(boneName);
+        return boneTransformations_.at(boneId);
     }
 
     void OpenGLModel::update(float deltaTime)
@@ -92,16 +92,16 @@ namespace PB
             {
                 mat4 transform = itr.second.bone.transform;
 
-                std::string parentName = itr.second.parent;
+                std::uint32_t parentId = itr.second.parentId;
 
-                while (!parentName.empty())
+                while (parentId > 0)
                 {
-                    transform = bones_.getBone(parentName).result->bone.transform * transform;
-                    parentName = bones_.getBone(parentName).result->parent;
+                    transform = bones_.getBone(parentId).result->bone.transform * transform;
+                    parentId = bones_.getBone(parentId).result->parentId;
                 }
 
                 boneTransformations_.insert(
-                        std::pair<std::string, mat4>(itr.first, transform)
+                        std::pair<std::uint32_t, mat4>(itr.first, transform)
                 );
             }
         }
@@ -120,18 +120,23 @@ namespace PB
         }
     }
 
-    void OpenGLModel::overrideBoneRotation(const std::string& boneName, vec3 rotation)
+    void OpenGLModel::overrideBoneRotation(std::uint32_t boneId, vec3 rotation)
     {
         //TODO: Need to translate over the scaling values from the animation frame
-        boneTransformationOverrides_[boneName] = GfxMath::CreateTransformation(
+        boneTransformationOverrides_[boneId] = GfxMath::CreateTransformation(
                 rotation,
                 {1, 1, 1},
-                bones_.getBone(boneName).result->bone.position.vec3());
+                bones_.getBone(boneId).result->bone.position.vec3());
     }
 
-    void OpenGLModel::clearBoneOverrides(const std::string& boneName)
+    void OpenGLModel::clearBoneOverrides(std::uint32_t boneId)
     {
-        boneTransformationOverrides_.erase(boneName);
+        boneTransformationOverrides_.erase(boneId);
+    }
+
+    const std::uint32_t OpenGLModel::getBoneId(const std::string& boneName) const
+    {
+        return bones_.getBoneId(boneName);
     }
 
     const BoneMap& OpenGLModel::getBones() const
