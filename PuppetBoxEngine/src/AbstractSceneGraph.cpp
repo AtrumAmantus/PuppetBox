@@ -77,35 +77,93 @@ namespace PB
         // Update implementing application first in case new objects were added or modified.
         preLoopUpdates(deltaTime);
 
-        // Add queued objects
-        Result<SceneObject*> addSceneObject = objectsToAdd_.pop();
-        while (addSceneObject.hasResult)
+        // Scene object add/remove behind mutex lock to avoid race conditions
         {
-            sceneObjects_.insert(
-                    std::pair<UUID, SceneObject*>{addSceneObject.result->getId(), addSceneObject.result}
-            );
+            std::unique_lock<std::mutex> mlock(mutex_);
 
-            addSceneObject = objectsToAdd_.pop();
-        }
-
-        // Remove queued objects
-        Result<UUID> removeSceneObject = objectsToRemove_.pop();
-        while (removeSceneObject.hasResult)
-        {
-            auto itr = sceneObjects_.find(removeSceneObject.result);
-
-            if (itr != sceneObjects_.end())
+            // Add queued objects
+            Result<UUID> movedByUUID = moveToScene_.pop();
+            while (movedByUUID.hasResult)
             {
-                SceneObject* object = itr->second;
-                sceneObjects_.erase(itr);
-                delete object;
+                auto itr = parkedSceneObjects_.find(movedByUUID.result);
+
+                if (itr != parkedSceneObjects_.end())
+                {
+                    SceneObject* objectToMove = itr->second;
+                    parkedSceneObjects_.erase(itr);
+
+                    if (activeSceneObjects_.find(movedByUUID.result) != activeSceneObjects_.end())
+                    {
+                        LOGGER_ERROR("Can't add, active scene object with the given UUID already exists");
+                    }
+                    else
+                    {
+                        activeSceneObjects_.insert(
+                                std::pair<UUID, SceneObject*>{movedByUUID.result, objectToMove}
+                        );
+                    }
+                }
+                else
+                {
+                    LOGGER_ERROR("Can't move, no parked scene objects exist with the given UUID");
+                }
+
+                movedByUUID = moveToScene_.pop();
             }
 
-            removeSceneObject = objectsToRemove_.pop();
+            // Remove queued objects
+            Result<UUID> removedByUUID = removeFromScene_.pop();
+            while (removedByUUID.hasResult)
+            {
+                auto itr = activeSceneObjects_.find(removedByUUID.result);
+
+                if (itr != activeSceneObjects_.end())
+                {
+                    SceneObject* objectToRemove = itr->second;
+                    activeSceneObjects_.erase(itr);
+
+                    if (parkedSceneObjects_.find(objectToRemove->getId()) != parkedSceneObjects_.end())
+                    {
+                        LOGGER_ERROR("Can't remove, parked scene object already exists with that UUID");
+                    }
+                    else
+                    {
+                        parkedSceneObjects_.insert(
+                                std::pair<UUID, SceneObject*>{removedByUUID.result, objectToRemove}
+                        );
+                    }
+                }
+                else
+                {
+                    LOGGER_WARN("Can't remove, no active scene object exists with that UUID");
+                }
+
+                removedByUUID = removeFromScene_.pop();
+            }
+
+            // Destroy queued objects
+            Result<UUID> destroyByUUID = objectsToDestroy_.pop();
+            while (removedByUUID.hasResult)
+            {
+                auto itr = parkedSceneObjects_.find(destroyByUUID.result);
+
+                if (itr != parkedSceneObjects_.end())
+                {
+                    SceneObject* tmp = itr->second;
+                    parkedSceneObjects_.erase(itr);
+                    delete tmp;
+                }
+                else
+                {
+                    LOGGER_WARN("Can't destroy, no parked scene object exists with that UUID");
+                }
+
+                destroyByUUID = removeFromScene_.pop();
+            }
         }
 
         // Update all scene objects
-        for (auto& e: sceneObjects_)
+        for (auto& e : activeSceneObjects_)
         {
             if (!e.second->isAttached() || e.second->getAttached().isUpdated)
             {
@@ -158,7 +216,7 @@ namespace PB
 
     void AbstractSceneGraph::render() const
     {
-        for (auto& e: sceneObjects_)
+        for (auto& e : activeSceneObjects_)
         {
             e.second->render();
         }
@@ -228,11 +286,20 @@ namespace PB
 
     SceneObject* AbstractSceneGraph::getSceneObject(UUID uuid)
     {
-        auto itr = sceneObjects_.find(uuid);
+        auto itr = activeSceneObjects_.find(uuid);
 
-        if (itr != sceneObjects_.end())
+        if (itr != activeSceneObjects_.end())
         {
             return itr->second;
+        }
+        else
+        {
+            itr = parkedSceneObjects_.find(uuid);
+
+            if (itr != parkedSceneObjects_.end())
+            {
+                return itr->second;
+            }
         }
 
         return nullptr;
@@ -265,12 +332,39 @@ namespace PB
 
     void AbstractSceneGraph::addSceneObject(SceneObject* sceneObject)
     {
-        objectsToAdd_.push(sceneObject);
+        std::unique_lock<std::mutex> mlock(mutex_);
+
+        if (parkedSceneObjects_.find(sceneObject->getId()) != parkedSceneObjects_.end())
+        {
+            LOGGER_ERROR("Can't add, parked scene object already exists with that UUID");
+        }
+        else
+        {
+            parkedSceneObjects_.insert(
+                    std::pair<UUID, SceneObject*>{sceneObject->getId(), sceneObject}
+            );
+        }
     }
 
-    void AbstractSceneGraph::removeSceneObject(UUID uuid)
+    void AbstractSceneGraph::moveToScene(UUID uuid)
     {
-        objectsToRemove_.push(uuid);
+        std::unique_lock<std::mutex> mlock(mutex_);
+
+        moveToScene_.push(uuid);
+    }
+
+    void AbstractSceneGraph::removeFromScene(UUID uuid)
+    {
+        std::unique_lock<std::mutex> mlock(mutex_);
+
+        removeFromScene_.push(uuid);
+    }
+
+    void AbstractSceneGraph::destroySceneObject(UUID uuid)
+    {
+        std::unique_lock<std::mutex> mlock(mutex_);
+
+        objectsToDestroy_.push(uuid);
     }
 
     void AbstractSceneGraph::clearScene()
@@ -280,12 +374,12 @@ namespace PB
 
     void AbstractSceneGraph::clearSceneNow()
     {
-        std::unordered_map<PB::UUID, SceneObject*>::iterator iter = sceneObjects_.begin();
+        std::unordered_map<PB::UUID, SceneObject*>::iterator iter = activeSceneObjects_.begin();
 
-        while (iter != sceneObjects_.end())
+        while (iter != activeSceneObjects_.end())
         {
             SceneObject* object = iter->second;
-            iter = sceneObjects_.erase(iter);
+            iter = activeSceneObjects_.erase(iter);
             delete object;
         }
 

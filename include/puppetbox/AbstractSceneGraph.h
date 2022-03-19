@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <queue>
 #include <string>
 #include <unordered_map>
@@ -188,11 +189,26 @@ namespace PB
         void addSceneObject(SceneObject* sceneObject);
 
         /**
+         * \brief Moves a parked {\link PB::SceneObject} object into the active scene object collection.
+         *
+         * \param uuid The UUID of the parked {\link PB::SceneObject} to move.
+         */
+        void moveToScene(UUID uuid);
+
+        /**
          * \brief Remove a {\link PB::SceneObject} associated with the given {\link PB::UUID}.
          *
          * \param uuid  The {\link PB::UUID} associated with the {\link PB::SceneObject} to destroy.
          */
-        void removeSceneObject(UUID uid);
+        void removeFromScene(UUID uuid);
+
+        /**
+         * \brief Destroys a scene object that has been placed in the ParkedSceneObjects collection.  If no
+         * object exists in the ParkedSceneObjects collection, nothing happens.
+         *
+         * \param uuid The {\link PB::UUID} of the parked scene object to destroy.
+         */
+        void destroySceneObject(UUID uuid);
 
         /**
          * \brief Flags the scene to be cleared of all {\link PB::SceneObject}s on the next {\link #update()} cycle.
@@ -222,10 +238,13 @@ namespace PB
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
-        Concurrent::NonBlocking::Queue<SceneObject*> objectsToAdd_{};
-        Concurrent::NonBlocking::Queue<UUID> objectsToRemove_{};
-        std::unordered_map<UUID, SceneObject*> sceneObjects_{};
+        Concurrent::NonBlocking::Queue<UUID> moveToScene_{};
+        Concurrent::NonBlocking::Queue<UUID> removeFromScene_{};
+        Concurrent::NonBlocking::Queue<UUID> objectsToDestroy_{};
+        std::unordered_map<UUID, SceneObject*> activeSceneObjects_{};
+        std::unordered_map<UUID, SceneObject*> parkedSceneObjects_{};
         std::queue<SceneObject*> processLater_{};
+        std::mutex mutex_;
 
     public:
         AbstractSceneGraph& operator=(const AbstractSceneGraph& rhv)

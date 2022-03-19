@@ -626,6 +626,7 @@ private:
             entity->position = PB::vec3{150.0f, 50.0f, -50.0f};
             //            myEntity->setBehavior(PB::AI::Behavior::WANDER);
             addSceneObject(entity);
+            moveToScene(entity->getId());
         }
 
         playerToControl_ = entity->getId();
@@ -637,6 +638,7 @@ private:
             weapon->name = "weapon";
             weapon->position = {0.0f, 0.0f, 0.0f};
             addSceneObject(weapon);
+            moveToScene(weapon->getId());
             weapon->attachTo(entity, entity->getBoneId("weapon_attach_right"));
         }
 
@@ -647,6 +649,7 @@ private:
             chain->name = "chain";
             chain->position = {0.0f, 0.0f, -40.0f};
             addSceneObject(chain);
+            moveToScene(chain->getId());
         }
 
         return success;

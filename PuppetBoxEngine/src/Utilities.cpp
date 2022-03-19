@@ -367,7 +367,11 @@ namespace PB
             static std::mt19937 gen(rd());
             static std::uniform_int_distribution<> dis(INT_MIN, INT_MAX);
 
-            return UUID(dis(gen), dis(gen), dis(gen), dis(gen));
+            return UUID{
+                static_cast<std::uint32_t>(dis(gen)),
+                static_cast<std::uint32_t>(dis(gen)),
+                static_cast<std::uint32_t>(dis(gen)),
+                static_cast<std::uint32_t>(dis(gen))};
         }
 
         float perlinValue(std::uint64_t offset)

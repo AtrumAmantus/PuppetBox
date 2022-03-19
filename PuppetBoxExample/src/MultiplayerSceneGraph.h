@@ -415,6 +415,7 @@ private:
                 entity->name = "Fred";
                 entity->position = createEntityEvent->position;
                 addSceneObject(entity);
+                moveToScene(entity->getId());
             }
         });
 
@@ -424,7 +425,8 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_DESTROY_ENTITY, [this](std::shared_ptr<void> data) {
             auto destroyEntityEvent = std::static_pointer_cast<DestroyEntityEvent>(data);
 
-            removeSceneObject(destroyEntityEvent->uuid);
+            removeFromScene(destroyEntityEvent->uuid);
+            destroySceneObject(destroyEntityEvent->uuid);
         });
 
         subscriptions_.push(uuid);
@@ -452,7 +454,12 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_UPDATE_ENTITY_LOC, [this](std::shared_ptr<void> data) {
             auto updateEntityEvent = std::static_pointer_cast<UpdateEntityLocationEvent>(data);
 
-            ((Entity*) getSceneObject(updateEntityEvent->uuid))->setPosition(updateEntityEvent->location);
+            Entity* entity = (Entity*) getSceneObject(updateEntityEvent->uuid);
+
+            if (entity != nullptr)
+            {
+                entity->setPosition(updateEntityEvent->location);
+            }
         });
 
         subscriptions_.push(uuid);
