@@ -2,8 +2,8 @@
 
 #include <atomic>
 #include <functional>
+#include <mutex>
 #include <string>
-#include <concurrent_unordered_map.h>
 #include <vector>
 
 #include "Utilities.h"
@@ -39,9 +39,41 @@ namespace PB
          */
         std::uint32_t publish(std::string topicName, std::shared_ptr<void> event)
         {
-            std::uint32_t topicId = registerTopic(topicName);
+            std::unique_lock<std::mutex> mlock{mutex_};
 
-            publish(topicId, event);
+            std::uint32_t topicId;
+
+            auto topicItr = topicIds_.find(topicName);
+
+            // Duplicating registration logic to maintain thread safety
+            if (topicItr == topicIds_.end())
+            {
+                topicIds_.insert(std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_});
+
+                topicId = lastTopicId_;
+
+                LOGGER_DEBUG(
+                        "Event '" + topicName + "' now registered with ID (" + std::to_string(lastTopicId_) + ")");
+            }
+            else
+            {
+                topicId = topicItr->second;
+            }
+
+            // Duplicating publish logic to maintain thread safety
+            auto subscriberItr = subscribers_.find(topicId);
+
+            if (subscriberItr != subscribers_.end())
+            {
+                auto& topicSubscribers = subscriberItr->second;
+
+                for (auto& f: topicSubscribers)
+                {
+                    mlock.unlock();
+                    f.second(event);
+                    mlock.lock();
+                }
+            }
 
             return topicId;
         }
@@ -55,13 +87,19 @@ namespace PB
          */
         void publish(std::uint32_t topicId, std::shared_ptr<void> event)
         {
-            if (subscribers_.find(topicId) != subscribers_.end())
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            auto itr = subscribers_.find(topicId);
+
+            if (itr != subscribers_.end())
             {
-                auto& topicSubscribers = subscribers_.at(topicId);
+                auto& topicSubscribers = itr->second;
 
                 for (auto& f: topicSubscribers)
                 {
+                    mlock.unlock();
                     f.second(event);
+                    mlock.lock();
                 }
             }
             else
@@ -82,7 +120,8 @@ namespace PB
                         }
                     }
 
-                    LOGGER_WARN("Event published to registered topic, '" + topicName + "', but no one is listening!");
+                    LOGGER_WARN(
+                            "Event published to registered topic, '" + topicName + "', but no one is listening!");
                 }
             }
         };
@@ -97,15 +136,29 @@ namespace PB
          */
         UUID subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
         {
-            std::uint32_t topicId = registerTopic(topicName);
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            // Duplicate registration logic to maintain thread safety
+            auto itr = topicIds_.find(topicName);
+
+            if (itr == topicIds_.end())
+            {
+                itr = topicIds_.insert(
+                        std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_}
+                ).first;
+
+                LOGGER_DEBUG(
+                        "Event '" + topicName + "' now registered with ID (" + std::to_string(lastTopicId_) + ")");
+            }
 
             LOGGER_DEBUG("Now listening for '" + topicName + "' events");
 
-            if (subscribers_.find(topicId) == subscribers_.end())
+            if (subscribers_.find(itr->second) == subscribers_.end())
             {
                 subscribers_.insert(
-                        std::pair<std::uint32_t, std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>>(
-                                topicId,
+                        std::pair<std::uint32_t, std::unordered_map<UUID, std::function<void(
+                                std::shared_ptr<void>)>>>(
+                                itr->second,
                                 std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>{}
                         )
                 );
@@ -113,12 +166,12 @@ namespace PB
 
             UUID uuid = RandomUtils::uuid();
 
-            subscribers_.at(topicId).insert(
+            subscribers_.at(itr->second).insert(
                     std::pair<UUID, std::function<void(std::shared_ptr<void>)>>{uuid, consumer}
             );
 
             subscriptionToTopicId_.insert(
-                    std::pair<UUID, std::uint32_t>{uuid, topicId}
+                    std::pair<UUID, std::uint32_t>{uuid, itr->second}
             );
 
             return uuid;
@@ -131,12 +184,17 @@ namespace PB
          */
         void unsubscribe(UUID uuid)
         {
+            std::unique_lock<std::mutex> mlock{mutex_};
             auto iter = subscriptionToTopicId_.find(uuid);
 
             if (iter != subscriptionToTopicId_.end())
             {
                 std::uint32_t topicId = iter->second;
 
+                subscribers_.at(topicId).erase(uuid);
+                subscriptionToTopicId_.erase(uuid);
+
+#ifdef _DEBUG
                 std::string topicName;
 
                 for (auto t : topicIds_)
@@ -147,10 +205,8 @@ namespace PB
                     }
                 }
 
-                subscribers_.at(topicId).erase(uuid);
-                subscriptionToTopicId_.unsafe_erase(uuid);
-
                 LOGGER_DEBUG("Stopped listening for '" + topicName + "' events");
+#endif
             }
         };
 
@@ -163,16 +219,21 @@ namespace PB
          */
         std::uint32_t registerTopic(std::string topicName)
         {
-            if (topicIds_.find(topicName) == topicIds_.end())
-            {
-                topicIds_.insert(
-                        std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_}
-                );
+            std::unique_lock<std::mutex> mlock{mutex_};
 
-                LOGGER_DEBUG("Event '" + topicName + "' now registered with ID (" + std::to_string(lastTopicId_) + ")");
+            auto itr = topicIds_.find(topicName);
+
+            if (itr == topicIds_.end())
+            {
+                itr = topicIds_.insert(
+                        std::pair<std::string, std::uint32_t>{topicName, ++lastTopicId_}
+                ).first;
+
+                LOGGER_DEBUG(
+                        "Event '" + topicName + "' now registered with ID (" + std::to_string(lastTopicId_) + ")");
             }
 
-            return topicIds_.at(topicName);
+            return itr->second;
         };
 
     public:
@@ -181,11 +242,12 @@ namespace PB
         void operator=(MessageBroker const&) = delete;
 
     private:
-        Concurrency::concurrent_unordered_map<std::string, std::uint32_t> topicIds_{};
-        Concurrency::concurrent_unordered_map
+        std::unordered_map<std::string, std::uint32_t> topicIds_{};
+        std::unordered_map
                 <std::uint32_t, std::unordered_map<UUID, std::function<void(std::shared_ptr<void>)>>> subscribers_{};
-        Concurrency::concurrent_unordered_map<UUID, std::uint32_t> subscriptionToTopicId_{};
-        std::atomic<uint32_t> lastTopicId_ = 0;
+        std::unordered_map<UUID, std::uint32_t> subscriptionToTopicId_{};
+        std::uint32_t lastTopicId_ = 0;
+        std::mutex mutex_;
 
     private:
         MessageBroker() = default;

@@ -454,7 +454,7 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_UPDATE_ENTITY_LOC, [this](std::shared_ptr<void> data) {
             auto updateEntityEvent = std::static_pointer_cast<UpdateEntityLocationEvent>(data);
 
-            Entity* entity = (Entity*) getSceneObject(updateEntityEvent->uuid);
+            auto entity = (Entity*) getSceneObject(updateEntityEvent->uuid);
 
             if (entity != nullptr)
             {
@@ -468,8 +468,12 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_BONE_OVERRIDE, [this](std::shared_ptr<void> data) {
             auto boneOverrideEvent = std::static_pointer_cast<BoneOverrideEvent>(data);
 
-            ((Entity*) getSceneObject(boneOverrideEvent->uuid))
-                    ->overrideBoneRotation(boneOverrideEvent->boneId, boneOverrideEvent->rotation);
+            auto entity = (Entity*) getSceneObject(boneOverrideEvent->uuid);
+
+            if (entity != nullptr)
+            {
+                entity->overrideBoneRotation(boneOverrideEvent->boneId, boneOverrideEvent->rotation);
+            }
         });
 
         subscriptions_.push(uuid);
@@ -478,8 +482,12 @@ private:
         uuid = PB::SubscribeEvent(PBEX_EVENT_BONE_CLEAR_OVERRIDE, [this](std::shared_ptr<void> data) {
             auto boneClearOverrideEvent = std::static_pointer_cast<BoneClearOverrideEvent>(data);
 
-            ((Entity*) getSceneObject(boneClearOverrideEvent->uuid))
-                    ->clearBoneOverrides(boneClearOverrideEvent->boneId);
+            auto entity = (Entity*) getSceneObject(boneClearOverrideEvent->uuid);
+
+            if (entity != nullptr)
+            {
+                entity->clearBoneOverrides(boneClearOverrideEvent->boneId);
+            }
         });
 
         subscriptions_.push(uuid);
