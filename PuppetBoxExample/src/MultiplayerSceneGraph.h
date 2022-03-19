@@ -1,5 +1,11 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
+#include <queue>
+#include <string>
+#include <unordered_set>
+
 #include <puppetbox/AbstractSceneGraph.h>
 
 #include "AbstractInputProcessor.h"
@@ -103,7 +109,9 @@ class MultiplayerSceneGraph : public PB::AbstractSceneGraph
 {
 public:
     MultiplayerSceneGraph(const std::string& sceneName) : PB::AbstractSceneGraph(sceneName)
-    {};
+    {
+
+    };
 
 protected:
     bool setUps() override
@@ -402,7 +410,7 @@ private:
 
             auto entity = new Entity{};
 
-            if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", entity, createEntityEvent->uuid))
+            if (PB::CreateSceneObject(createEntityEvent->type, entity, createEntityEvent->uuid))
             {
                 entity->name = "Fred";
                 entity->position = createEntityEvent->position;

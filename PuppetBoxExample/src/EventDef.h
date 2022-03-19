@@ -130,6 +130,7 @@ struct CreateEntityEvent
 {
     PB::UUID uuid{};
     PB::vec3 position{};
+    std::string type;
 };
 
 struct DestroyEntityEvent

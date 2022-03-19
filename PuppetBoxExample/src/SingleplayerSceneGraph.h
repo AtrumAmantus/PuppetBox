@@ -516,7 +516,7 @@ private:
 
         Event::Topic::UI_TOPIC = PB::RegisterTopic(PBEX_EVENT_UI);
         uuid = PB::SubscribeEvent(PBEX_EVENT_UI, [this](std::shared_ptr<void> data) {
-            std::shared_ptr<UIControllerEvent> uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
+            auto uiEvent = std::static_pointer_cast<UIControllerEvent>(data);
 
             uiEvent->action(uiController_);
         });
