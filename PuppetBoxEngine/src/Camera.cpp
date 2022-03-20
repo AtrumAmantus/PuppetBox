@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "puppetbox/Camera.h"
 #include "GfxMath.h"
 

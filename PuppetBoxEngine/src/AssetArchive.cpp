@@ -214,7 +214,7 @@ namespace PB
                 {
                     ModelData child = mapToModelData(*childrenProperties->get(childName).result, error);
 
-                    model.children[childName] = child;
+                    model.children.push_back(child);
                 }
             }
 

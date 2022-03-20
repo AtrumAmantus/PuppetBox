@@ -593,10 +593,10 @@ namespace PB
             }
         }
 
-        for (auto itr = modelData.children.begin(); !error && itr != modelData.children.end(); ++itr)
+        for (std::uint32_t i = 0; !error && i < modelData.children.size(); ++i)
         {
             error = !buildMeshAndBones(
-                    modelData.children.at(itr->first),
+                    modelData.children.at(i),
                     modelData.name,
                     bones,
                     meshes

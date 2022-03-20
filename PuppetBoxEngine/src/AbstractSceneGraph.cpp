@@ -198,7 +198,7 @@ namespace PB
             // Check if even one thing processed successfully
             if (queueCount == processLater_.size())
             {
-                throw std::exception("Circular dependency, can't update objects");
+                throw std::runtime_error("Circular dependency, can't update objects");
             }
         }
 

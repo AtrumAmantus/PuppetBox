@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <condition_variable>
 #include <cstdint>
 #include <functional>
 #include <mutex>
@@ -796,16 +797,12 @@ namespace PB
 
         //TODO: This structure seems confusing, revisit
         mat4 transform{};
-
-        struct
+        vec4 rotation{};
+        vec4 scale{};
+        vec4 unused{};
+        union
         {
-            vec4 rotation;
-            vec4 scale;
-            vec4 unused;
-            union
-            {
-                vec4 position, offset;
-            };
+            vec4 position, offset;
         };
     };
 
@@ -1060,7 +1057,7 @@ namespace std
      * \brief Define hashing operation for {\link PB::UUID} objects.
      */
     template<>
-    struct std::hash<PB::UUID>
+    struct hash<PB::UUID>
     {
         std::size_t operator()(const PB::UUID& value) const noexcept
         {

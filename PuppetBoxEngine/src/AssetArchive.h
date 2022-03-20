@@ -37,7 +37,7 @@ namespace PB
         vec3 scale{1.0f, 1.0f, 1.0f};
         MeshData mesh{};
         std::string name;
-        std::unordered_map<std::string, ModelData> children{};
+        std::vector<ModelData> children{};
     };
 
     /**

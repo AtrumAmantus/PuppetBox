@@ -13,6 +13,8 @@
 
 namespace PB
 {
+    class AbstractBehavior;
+    
     /**
      * \brief The basic container for renderable objects in a scene.  Derived classes should be used to extend with additional needed attributes
      * such as name, health, etc.

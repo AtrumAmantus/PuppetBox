@@ -1,6 +1,9 @@
 #pragma once
 
+#include <iosfwd>
 #include <memory>
+#include <sstream>
+#include <string>
 
 #include <PuppetBox.h>
 #include <puppetbox/DataStructures.h>
