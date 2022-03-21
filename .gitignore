@@ -12,7 +12,7 @@ x64
 # Cmake
 build/
 build_*/
-bin/
+bin*/
 out/
 
 # Deps
