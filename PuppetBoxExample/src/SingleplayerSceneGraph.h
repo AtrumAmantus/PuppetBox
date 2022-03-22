@@ -523,6 +523,30 @@ private:
 
         subscriptions_.push(uuid);
 
+        Event::Topic::PLAYER_EQUIP_ITEM_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_EQUIP_ITEM);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_PLAYER_EQUIP_ITEM, [this](std::shared_ptr<void> data) {
+            if (player_ != nullptr)
+            {
+                auto equipEvent = std::static_pointer_cast<PlayerEquipItemEvent>(data);
+
+                auto itr = player_->inventory.find(equipEvent->equipSlot);
+
+                if (itr != player_->inventory.end() && player_->equippedItem != itr->second)
+                {
+                    moveToScene(itr->second);
+
+                    if (player_->equippedItem != PB::UUID::nullUUID())
+                    {
+                        removeFromScene(player_->equippedItem);
+                    }
+
+                    player_->equippedItem = itr->second;
+                }
+            }
+        });
+
+        subscriptions_.push(uuid);
+
         Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_SET_BEHAVIOR);
         uuid = PB::SubscribeEvent(
                 PBEX_EVENT_PLAYER_SET_BEHAVIOR,
@@ -631,15 +655,60 @@ private:
 
         playerToControl_ = entity->getId();
 
-        auto* weapon = new Entity();
+        auto* knife = new Entity();
 
-        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", weapon))
+        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Knife", knife))
         {
-            weapon->name = "weapon";
-            weapon->position = {0.0f, 0.0f, 0.0f};
-            addSceneObject(weapon);
-            moveToScene(weapon->getId());
-            weapon->attachTo(entity, entity->getBoneId("weapon_attach_right"));
+            knife->name = "knife";
+            knife->position = {0.0f, 0.0f, 0.0f};
+            attachToObject(knife->getId(), entity->getId(), entity->getBoneId("weapon_attach_right"));
+            addSceneObject(knife);
+        }
+
+        entity->inventory.insert(
+                std::pair<std::uint32_t, PB::UUID>{1, knife->getId()}
+        );
+
+        auto* bat = new Entity();
+
+        if (PB::CreateSceneObject("Assets1/Sprites/Weapons/Bat", bat))
+        {
+            bat->name = "bat";
+            bat->position = {0.0f, 0.0f, 0.0f};
+            attachToObject(bat->getId(), entity->getId(), entity->getBoneId("weapon_attach_right"));
+            addSceneObject(bat);
+        }
+
+        entity->inventory.insert(
+                std::pair<std::uint32_t, PB::UUID>{2, bat->getId()}
+        );
+
+        PB::BoneMap boneMap = entity->getBones();
+
+        //TODO: These load times are long, separate thread and maybe some optimizations
+        PB::PreloadAnimationFrames(Constants::Animation::kIdle0, boneMap);
+        PB::PreloadAnimationFrames(Constants::Animation::kWalk, boneMap);
+
+        auto entity1 = new Entity{};
+
+        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", entity1))
+        {
+            entity1->name = "Bill";
+            entity1->position = PB::vec3{0.0f, 50.0f, -50.0f};
+            addSceneObject(entity1);
+            moveToScene(entity1->getId());
+            entity1->playAnimation(Constants::Animation::kIdle0, 0);
+        }
+
+        auto entity2 = new Entity{};
+
+        if (PB::CreateSceneObject("Assets1/Sprites/GenericMob", entity2))
+        {
+            entity2->name = "John";
+            entity2->position = PB::vec3{-100.0f, 50.0f, -50.0f};
+            addSceneObject(entity2);
+            moveToScene(entity2->getId());
+            entity2->playAnimation(Constants::Animation::kWalk, 0);
         }
 
         auto* chain = new Entity();

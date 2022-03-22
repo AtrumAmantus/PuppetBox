@@ -73,7 +73,7 @@ namespace PB
         * \param baseScale	The scale values used as a baseline for the object, SceneObject#scale values multiply this.
         * \param model		Pointer to the IModel assets applied to this object.
         */
-        SceneObject(UUID uuid, vec3 baseScale, IModel* model);
+        SceneObject(UUID uuid, vec3 baseScale, std::unique_ptr<IModel> model);
 
         /**
          * \brief Attaches the object to another object, causing it to use it's transformation
@@ -249,7 +249,7 @@ namespace PB
         UUID id_{};
         vec3 baseScale_{1.0f, 1.0f, 1.0f};
         mat4 transform_{};
-        IModel* model_ = nullptr;
+        std::unique_ptr<IModel> model_ = nullptr;
         std::unique_ptr<AbstractBehavior> behavior_ = nullptr;
         std::unique_ptr<AbstractBehavior> behaviorToAdd_ = nullptr;
         bool clearBehavior_ = false;

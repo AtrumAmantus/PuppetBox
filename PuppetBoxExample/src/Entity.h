@@ -12,11 +12,14 @@
 #include "Constants.h"
 #include "MathUtils.h"
 
+//TODO: Need to refactor to composition rather then add all these static properties
 class Entity : public PB::SceneObject
 {
 public:
+    PB::UUID equippedItem = PB::UUID::nullUUID();
     std::string name;
     std::uint8_t health = 50;
+    std::unordered_map<std::uint32_t, PB::UUID> inventory{};
     //TODO: Hacky?
     bool isPlayerControlled = false;
 public:

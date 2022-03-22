@@ -135,7 +135,7 @@ namespace PB
      * \param data      The data related to the event to send.
      * \return The topic id associated to the topic of the event that was submitted.
      */
-    extern PUPPET_BOX_API std::uint32_t PublishEvent(std::string topicName, std::shared_ptr<void> data);
+    extern PUPPET_BOX_API std::uint32_t PublishEvent(const std::string& topicName, std::shared_ptr<void> data);
 
     /**
      * \brief Publish an event on the internal messaging system using the topic id.
@@ -154,7 +154,7 @@ namespace PB
      * \return The topic id associated to the subscribed topic name.
      */
     extern PUPPET_BOX_API UUID SubscribeEvent(
-            std::string topicName,
+            const std::string& topicName,
             std::function<void(std::shared_ptr<void>)> callback);
 
     /**
@@ -170,7 +170,7 @@ namespace PB
      * \param topicName The topic name to register
      * \return The newly registered topic ID, or the existing topic ID if the topic name was already registered.
      */
-    extern PUPPET_BOX_API std::uint32_t RegisterTopic(std::string topicName);
+    extern PUPPET_BOX_API std::uint32_t RegisterTopic(const std::string& topicName);
 
     /**
      * \brief Registers an event listener to be used with the network thread for sending events over the
@@ -180,7 +180,7 @@ namespace PB
      * \param topicName The topic name for events to listen for.
      * \param writer    The transformer to use to convert the event into network data.
      */
-    extern PUPPET_BOX_API void RegisterNetworkEventWriter(std::string topicName, pb_NetworkEventWriter writer);
+    extern PUPPET_BOX_API void RegisterNetworkEventWriter(const std::string& topicName, pb_NetworkEventWriter writer);
 
     /**
      * \brief Registers a network reader function to be used for reading data off the network.  Only one

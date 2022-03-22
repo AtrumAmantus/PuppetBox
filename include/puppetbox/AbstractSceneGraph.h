@@ -15,6 +15,13 @@
 
 namespace PB
 {
+    struct Attachment
+    {
+        PB::UUID attach;
+        PB::UUID attachedTo;
+        std::uint32_t attachPoint;
+    };
+
     /**
     * \brief AbstractSceneGraph represents a single rendering scene within an application.  This could be a
     * title menu, or the game itself, allowing for switching between different scenes.
@@ -211,6 +218,16 @@ namespace PB
         void destroySceneObject(UUID uuid);
 
         /**
+         * \brief Attaches one object to another object by their UUIDs at a specific location on the
+         * "host" object.
+         *
+         * \param attachment The {\link PB::UUID} of the object to attach.
+         * \param host       The {\link PB::UUID} of the object being attached to (the host).
+         * \param locationId The location (bone id) where the object is attached on the host.
+         */
+        void attachToObject(PB::UUID attachment, PB::UUID host, std::uint32_t locationId);
+
+        /**
          * \brief Flags the scene to be cleared of all {\link PB::SceneObject}s on the next {\link #update()} cycle.
          */
         void clearScene();
@@ -238,13 +255,38 @@ namespace PB
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
-        Concurrent::NonBlocking::Queue<UUID> moveToScene_{};
-        Concurrent::NonBlocking::Queue<UUID> removeFromScene_{};
-        Concurrent::NonBlocking::Queue<UUID> objectsToDestroy_{};
+        std::queue<UUID> moveToScene_{};
+        std::queue<UUID> removeFromScene_{};
+        std::queue<UUID> objectsToDestroy_{};
         std::unordered_map<UUID, SceneObject*> activeSceneObjects_{};
         std::unordered_map<UUID, SceneObject*> parkedSceneObjects_{};
         std::queue<SceneObject*> processLater_{};
+        std::queue<Attachment> attachObjectsTo_{};
+        std::unordered_map<PB::UUID, Attachment> objectAttachedTo_{};
+        std::unordered_map<PB::UUID, std::unordered_map<PB::UUID, std::uint32_t>> objectAttachedWith_{};
         std::mutex mutex_;
+
+    private:
+        /**
+         * \brief Recursively moves the given object and it's attachments to the active scene.
+         *
+         * \param objectToMove The {\link PB::UUID} of the base object to move.
+         */
+        void recursiveSceneObjectMove(UUID objectToMove);
+
+        /**
+         * \brief Recursively removes the given object and it's attachments from the active scene.
+         *
+         * \param objectToRemove The {\link PB::UUID} of the base object to remove.
+         */
+        void recursiveSceneObjectRemove(UUID objectToRemove);
+
+        /**
+         * \brief Recursively destroys the given object and it's attachments.
+         *
+         * \param objectToDestroy The {\link PB::UUID} of the base object to destroy.
+         */
+        void recursiveSceneObjectDestroy(UUID objectToDestroy);
 
     public:
         AbstractSceneGraph& operator=(const AbstractSceneGraph& rhv)

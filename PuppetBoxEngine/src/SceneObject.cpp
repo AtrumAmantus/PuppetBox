@@ -14,8 +14,8 @@ namespace PB
 
     }
 
-    SceneObject::SceneObject(UUID uuid, vec3 baseScale, IModel* model)
-            : id_(uuid), baseScale_(baseScale), model_(model)
+    SceneObject::SceneObject(UUID uuid, vec3 baseScale, std::unique_ptr<IModel> model)
+            : id_(uuid), baseScale_(baseScale), model_(std::move(model))
     {
 
     }

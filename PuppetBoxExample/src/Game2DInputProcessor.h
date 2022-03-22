@@ -104,6 +104,17 @@ public:
             );
         }
 
+        for (std::uint32_t i = 0; i < 5; ++i)
+        {
+            if (inputActions().isCommandActivated((Command::Command)(Command::EQUIP_SLOT_1 + i)))
+            {
+                auto event = std::make_shared<PlayerEquipItemEvent>();
+                event->equipSlot = i + 1;
+
+                PB::PublishEvent(Event::Topic::PLAYER_EQUIP_ITEM_TOPIC, event);
+            }
+        }
+
         auto cameraEvent = std::make_shared<CameraEvent>();
         cameraEvent->action = [cameraMoveVec](PB::Camera& camera) {
             camera.move(cameraMoveVec);

@@ -1064,4 +1064,11 @@ namespace std
             return (((((value.bytes[0] * 37) + value.bytes[1]) * 37) + value.bytes[2]) * 37) + value.bytes[3];
         }
     };
+
+    inline string to_string(const PB::UUID& uuid)
+    {
+        std::ostringstream ss;
+        ss << uuid;
+        return ss.str();
+    }
 }

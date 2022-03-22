@@ -108,7 +108,7 @@ static inline PB::UUID getUuidFromBytes(std::uint8_t* data, std::uint32_t* offse
     const std::uint32_t c = getUInt32FromBytes(data, offset);
     const std::uint32_t d = getUInt32FromBytes(data, offset);
 
-    return PB::UUID(a, b, c, d);
+    return PB::UUID{a, b, c, d};
 }
 
 static inline float getFloatFromBytes(std::uint8_t* data, std::uint32_t* offset)
@@ -165,6 +165,24 @@ static inline void parseEventActionEnded(std::uint8_t* data, std::uint32_t dataO
     PB::PublishEvent(Event::Topic::ENTITY_UPDATE_ACTION_TOPIC, event);
 }
 
+static inline void parseEventAddToInventory(std::uint8_t* data, std::uint32_t dataOffset, std::uint32_t dataLength)
+{
+    auto event = std::make_shared<AddToInventoryEvent>();
+    event->mobUUID = getUuidFromBytes(data, &dataOffset);
+    event->itemUUID = getUuidFromBytes(data, &dataOffset);
+    event->equipSlot = getUInt32FromBytes(data, &dataOffset);
+    event->itemType = getStringFromBytes(data, &dataOffset, dataLength);
+
+    PB::PublishEvent(Event::Topic::ADD_TO_INVENTORY_TOPIC, event);
+
+#ifdef _DEBUG
+    std::cout << "Add item with UUID: " << event->itemUUID << ", "
+              << "To mob with UUID: " << event->mobUUID << ", "
+              << "Slot: {" << event->equipSlot << "}, "
+              << "Type: '" << event->itemType << "'" << std::endl;
+#endif
+}
+
 static inline void parseBoneClearOverride(std::uint8_t* data, std::uint32_t dataOffset)
 {
     auto event = std::make_shared<BoneClearOverrideEvent>();
@@ -198,6 +216,22 @@ static inline void parseEventDisconnect(std::uint8_t* data, std::uint32_t dataOf
     std::uint32_t userId = getUInt32FromBytes(data, &dataOffset);
 
     std::cout << "User (" << userId << ") Disconnected" << std::endl;
+}
+
+static inline void parseEventEquipItem(std::uint8_t* data, std::uint32_t dataOffset, std::uint32_t dataLength)
+{
+    auto event = std::make_shared<EquipItemEvent>();
+    event->mobUUID = getUuidFromBytes(data, &dataOffset);
+    event->itemUUID = getUuidFromBytes(data, &dataOffset);
+    event->itemType = getStringFromBytes(data, &dataOffset, dataLength);
+
+#ifdef _DEBUG
+    std::cout << "Equip item on entity with UUID: " << event->mobUUID << ", "
+              << "Item UUID: " << event->itemUUID
+              << "Item Type: '" << event->itemType << "'" << std::endl;
+#endif
+
+    PB::PublishEvent(Event::Topic::EQUIP_ITEM_TOPIC, event);
 }
 
 static inline void parseEventLocationUpdate(std::uint8_t* data, std::uint32_t dataOffset)
@@ -293,6 +327,9 @@ extern void networkReader(std::uint8_t* data, std::uint32_t dataLength)
         case ADD_ENTITY:
             parseEventCreateEntity(data, dataOffset, dataLength);
             break;
+        case ADD_TO_INVENTORY:
+            parseEventAddToInventory(data, dataOffset, dataLength);
+            break;
         case BONE_CLEAR_OVERRIDE:
             parseBoneClearOverride(data, dataOffset);
             break;
@@ -304,6 +341,9 @@ extern void networkReader(std::uint8_t* data, std::uint32_t dataLength)
             break;
         case DISCONNECT:
             parseEventDisconnect(data, dataOffset);
+            break;
+        case EQUIP_ITEM:
+            parseEventEquipItem(data, dataOffset, dataLength);
             break;
         case LOCATION_UPDATE:
             parseEventLocationUpdate(data, dataOffset);
@@ -418,6 +458,21 @@ extern void networkWriterPlayerClearBoneOverrideEvent(
     writeUInt32(data->boneId, *dataOut, &dataOffset);
 }
 
+extern void networkWriterPlayerEquipItem(std::shared_ptr<void> event, std::uint8_t** dataOut, std::uint32_t* dataLength)
+{
+    auto data = std::static_pointer_cast<PlayerEquipItemEvent>(event);
+    std::uint8_t bytes[4];
+
+    // 4 bytes eventId, +4 bytes for equip slot
+    *dataLength = 4 + 4;
+    *dataOut = new uint8_t[*dataLength];
+    std::uint32_t dataOffset = 0;
+
+    std::uint32_t eventID = EQUIP_ITEM;
+    writeUInt32(eventID, *dataOut, &dataOffset);
+    writeUInt32(data->equipSlot, *dataOut, &dataOffset);
+}
+
 extern void networkReadyStatusEvent(std::shared_ptr<void> event)
 {
     auto networkEvent = std::static_pointer_cast<PB::NetworkStatusEvent>(event);
@@ -443,6 +498,7 @@ extern void networkReadyStatusEvent(std::shared_ptr<void> event)
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_LOC, &networkWriterPlayerLocationEvent);
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_BONE_OVERRIDE, &networkWriterPlayerBoneOverrideEvent);
                 PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_BONE_CLEAR_OVERRIDE, &networkWriterPlayerClearBoneOverrideEvent);
+                PB::RegisterNetworkEventWriter(PBEX_EVENT_PLAYER_EQUIP_ITEM, &networkWriterPlayerEquipItem);
             }
             break;
         case PB::Event::NetworkStatus::CONNECTED:

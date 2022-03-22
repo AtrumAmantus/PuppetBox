@@ -25,6 +25,11 @@ extern inline void controlRegistration(InputActions& controls)
     controls.registerCommand(Command::LEFT, KEY_A);
     controls.registerCommand(Command::RIGHT, KEY_D);
     controls.registerCommand(Command::QUIT, KEY_ESCAPE);
+    controls.registerCommand(Command::EQUIP_SLOT_1, KEY_1);
+    controls.registerCommand(Command::EQUIP_SLOT_2, KEY_2);
+    controls.registerCommand(Command::EQUIP_SLOT_3, KEY_3);
+    controls.registerCommand(Command::EQUIP_SLOT_4, KEY_4);
+    controls.registerCommand(Command::EQUIP_SLOT_5, KEY_5);
 }
 
 inline std::uint32_t calculateAverageFps(float frameTimes[], std::uint8_t frameCount)

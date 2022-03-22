@@ -402,7 +402,7 @@ namespace PB
         return component;
     }
 
-    std::uint32_t PublishEvent(std::string topicName, std::shared_ptr<void> data)
+    std::uint32_t PublishEvent(const std::string& topicName, std::shared_ptr<void> data)
     {
         return MessageBroker::instance().publish(topicName, data);
     }
@@ -412,7 +412,7 @@ namespace PB
         MessageBroker::instance().publish(topicId, data);
     }
 
-    UUID SubscribeEvent(std::string topicName, std::function<void(std::shared_ptr<void>)> callback)
+    UUID SubscribeEvent(const std::string& topicName, std::function<void(std::shared_ptr<void>)> callback)
     {
         return MessageBroker::instance().subscribe(topicName, callback);
     }
@@ -422,12 +422,12 @@ namespace PB
         MessageBroker::instance().unsubscribe(uuid);
     }
 
-    std::uint32_t RegisterTopic(std::string topicName)
+    std::uint32_t RegisterTopic(const std::string& topicName)
     {
         return MessageBroker::instance().registerTopic(topicName);
     }
 
-    void RegisterNetworkEventWriter(std::string topicName, pb_NetworkEventWriter writer)
+    void RegisterNetworkEventWriter(const std::string& topicName, pb_NetworkEventWriter writer)
     {
         auto listenerEvent = std::make_shared<NetworkEventWriterEvent>();
         listenerEvent->topicName = topicName;

@@ -37,7 +37,7 @@ namespace PB
          * \param event The event to send to all subscriber's callbacks.
          * \return The topic id for the published event name.
          */
-        std::uint32_t publish(std::string topicName, std::shared_ptr<void> event)
+        std::uint32_t publish(const std::string& topicName, std::shared_ptr<void> event)
         {
             std::unique_lock<std::mutex> mlock{mutex_};
 
@@ -134,7 +134,7 @@ namespace PB
          * \param consumer  The callback to be invoked for published events of this topic.
          * \return A UUID representing the subscription that can be used to remove it again later.
          */
-        UUID subscribe(std::string topicName, std::function<void(std::shared_ptr<void>)> consumer)
+        UUID subscribe(const std::string& topicName, std::function<void(std::shared_ptr<void>)> consumer)
         {
             std::unique_lock<std::mutex> mlock{mutex_};
 
@@ -217,7 +217,7 @@ namespace PB
          * \param topicName The name of the topic to register.
          * \return The new or existing topic ID that is associated with the topic name.
          */
-        std::uint32_t registerTopic(std::string topicName)
+        std::uint32_t registerTopic(const std::string& topicName)
         {
             std::unique_lock<std::mutex> mlock{mutex_};
 

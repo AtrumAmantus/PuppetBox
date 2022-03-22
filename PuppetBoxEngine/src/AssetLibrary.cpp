@@ -471,7 +471,7 @@ namespace PB
 
         if (!error)
         {
-            IModel* model;
+            std::unique_ptr<IModel> model;
 
             std::unordered_map<std::uint32_t, RenderedMesh*> meshes{};
             BoneMap bones{};
@@ -479,7 +479,7 @@ namespace PB
 
             if (!error)
             {
-                model = new OpenGLModel{bones, meshes, animationCatalogue};
+                model = std::make_unique<OpenGLModel>(bones, meshes, animationCatalogue);
 
                 /**
                 * Make a copy of the previous SceneObject property data so that
@@ -492,7 +492,7 @@ namespace PB
                 vec3 velocity = sceneObject->velocity;
 
                 //TODO: Revisit "base scale"
-                *sceneObject = SceneObject{uuid, vec3{1.0f, 1.0f, 1.0f}, model};
+                *sceneObject = SceneObject{uuid, vec3{1.0f, 1.0f, 1.0f}, std::move(model)};
                 sceneObject->position = position;
                 sceneObject->rotation = rotation;
                 sceneObject->scale = scale;

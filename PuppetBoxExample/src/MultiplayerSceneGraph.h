@@ -325,6 +325,105 @@ private:
 
         subscriptions_.push(uuid);
 
+        Event::Topic::ADD_TO_INVENTORY_TOPIC = PB::RegisterTopic(PBEX_EVENT_ADD_TO_INVENTORY);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_ADD_TO_INVENTORY, [this](std::shared_ptr<void> data) {
+            auto addToInvEvent = std::static_pointer_cast<AddToInventoryEvent>(data);
+
+            Entity* entity = (Entity*) getSceneObject(addToInvEvent->mobUUID);
+
+            if (entity != nullptr)
+            {
+                auto itr = entity->inventory.find(addToInvEvent->equipSlot);
+
+                if (itr != entity->inventory.end())
+                {
+                    // If this slot already has an item
+
+                    if (entity->equippedItem == itr->second)
+                    {
+                        // If it's currently equipped, remove it from the scene, then destroy
+                        removeFromScene(itr->second);
+                    }
+
+                    destroySceneObject(itr->second);
+                    entity->inventory.erase(itr);
+                }
+
+                auto item = new Entity{};
+
+                if (PB::CreateSceneObject(addToInvEvent->itemType, item, addToInvEvent->itemUUID))
+                {
+                    item->name = "Some Equipment Item";
+                    item->position = {0, 0, 0};
+                    addSceneObject(item);
+                    attachToObject(item->getId(), entity->getId(), entity->getBoneId("weapon_attach_right"));
+                }
+
+                entity->equippedItem = addToInvEvent->itemUUID;
+                entity->inventory.insert(
+                        std::pair<std::uint8_t, PB::UUID>{addToInvEvent->equipSlot, addToInvEvent->itemUUID}
+                );
+            }
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::EQUIP_ITEM_TOPIC = PB::RegisterTopic(PBEX_EVENT_EQUIP_ITEM);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_EQUIP_ITEM, [this](std::shared_ptr<void> data) {
+            auto equipEvent = std::static_pointer_cast<EquipItemEvent>(data);
+
+            Entity* entity = (Entity*) getSceneObject(equipEvent->mobUUID);
+
+            if (entity != nullptr && entity->equippedItem != equipEvent->itemUUID)
+            {
+                // Destroy previous item
+                if (entity->equippedItem != PB::UUID::nullUUID())
+                {
+                    removeFromScene(entity->equippedItem);
+                    destroySceneObject(entity->equippedItem);
+                    entity->equippedItem = PB::UUID::nullUUID();
+                }
+
+                auto item = new Entity{};
+
+                if (PB::CreateSceneObject(equipEvent->itemType, item, equipEvent->itemUUID))
+                {
+                    item->name = "Some Item";
+                    item->position = {0, 0, 0};
+                    addSceneObject(item);
+                    attachToObject(item->getId(), entity->getId(), entity->getBoneId("weapon_attach_right"));
+                    moveToScene(item->getId());
+                    entity->equippedItem = equipEvent->itemUUID;
+                }
+            }
+        });
+
+        subscriptions_.push(uuid);
+
+        Event::Topic::PLAYER_EQUIP_ITEM_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_EQUIP_ITEM);
+        uuid = PB::SubscribeEvent(PBEX_EVENT_PLAYER_EQUIP_ITEM, [this](std::shared_ptr<void> data) {
+            if (player_ != nullptr)
+            {
+                auto equipEvent = std::static_pointer_cast<PlayerEquipItemEvent>(data);
+
+                auto itr = player_->inventory.find(equipEvent->equipSlot);
+
+                if (itr != player_->inventory.end() && player_->equippedItem != itr->second)
+                {
+                    moveToScene(itr->second);
+
+                    if (player_->equippedItem != PB::UUID::nullUUID())
+                    {
+                        removeFromScene(player_->equippedItem);
+                    }
+
+                    player_->equippedItem = itr->second;
+                }
+            }
+        });
+
+        subscriptions_.push(uuid);
+
         Event::Topic::PLAYER_SET_BEHAVIOR_TOPIC = PB::RegisterTopic(PBEX_EVENT_PLAYER_SET_BEHAVIOR);
         uuid = PB::SubscribeEvent(
                 PBEX_EVENT_PLAYER_SET_BEHAVIOR,

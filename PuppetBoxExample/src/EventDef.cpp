@@ -25,4 +25,7 @@ namespace Event::Topic
     std::uint32_t MOUSE_CLICK_TOPIC = 0;
     std::uint32_t BONE_OVERRIDE_TOPIC = 0;
     std::uint32_t BONE_CLEAR_OVERRIDE_TOPIC = 0;
+    std::uint32_t PLAYER_EQUIP_ITEM_TOPIC = 0;
+    std::uint32_t ADD_TO_INVENTORY_TOPIC = 0;
+    std::uint32_t EQUIP_ITEM_TOPIC = 0;
 }
