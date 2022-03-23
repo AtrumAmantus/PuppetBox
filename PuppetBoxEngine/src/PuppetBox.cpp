@@ -232,22 +232,13 @@ namespace PB
 
             pbInitialized = true;
 
-            bool error = false;
             //TODO: Using globally instanced font loader?
             assetLibrary = std::make_shared<AssetLibrary>("../", gfxApi, &fontLoader);
-            animationCatalogue = AnimationCatalogue(assetLibrary);
-            LoadAssetPack("Assets1");
-            //TODO: This needs to go somewhere else, or otherwise not hardcoded with a path.
-            //TODO: Perhaps build a default path for default assets
-            Shader glyphShader = assetLibrary->loadShaderAsset("Assets1/Shaders/UI/Glyph", &error);
 
-            if (error)
+            if (assetLibrary->init())
             {
-                LOGGER_ERROR("Failed to load glyph shader");
-            }
-            else
-            {
-                LOGGER_DEBUG("Glyph shader loaded");
+                animationCatalogue = AnimationCatalogue(assetLibrary);
+
                 fontLoader = FontLoader{gfxApi};
                 LOGGER_DEBUG("FontLoader initialized");
             }

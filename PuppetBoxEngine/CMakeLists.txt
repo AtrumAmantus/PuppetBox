@@ -5,6 +5,28 @@ project(PuppetBoxEngine
 set(DEP_INCLUDES_DIR ${DEP_DIRECTORY}/include CACHE PATH "Dependency Includes" FORCE)
 set(DEP_SLIBRARY_DIR ${DEP_DIRECTORY}/lib/${ARCH_TYPE}/${CMAKE_BUILD_TYPE} CACHE PATH "Dependency Static Libs" FORCE)
 
+# Generate asset data
+function(create_resources dir output)
+    # Create / overwrite file
+    file(WRITE ${output} "")
+    # Read each file in target dir
+    file(GLOB bins ${dir}/*)
+    foreach(bin ${bins})
+        # Create macro variable
+        string(REGEX MATCH "([^/]+)$" filename ${bin})
+        string(REGEX REPLACE "\\.| |-" "_" filename ${filename})
+        string(TOUPPER ${filename} macro_variable)
+        # Parse file data
+        file(READ ${bin} filedata)
+        string(REGEX REPLACE "(\r\n)|\n" "\\\\n" filedata "${filedata}")
+        # Add macro definition
+        file(APPEND ${output} "#define DEFAULT_ASSET_${macro_variable} \"${filedata}\"\n")
+    endforeach()
+endfunction()
+
+# Parse all default asset data to header
+create_resources("assets/" "generated/DefaultAssets.h")
+
 file(GLOB_RECURSE SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c)

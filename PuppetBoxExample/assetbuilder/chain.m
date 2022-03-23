@@ -8,7 +8,7 @@ root:
       x: 40
       y: 25
     material: Assets1/Materials/Chain-Open
-    data: Assets1/Mesh/Sprite
+    data: Default/Mesh/Sprite
   children:
     linka:
       offset:
@@ -25,7 +25,7 @@ root:
           x: 40
           y: 10
         material: Assets1/Materials/Chain-Closed
-        data: Assets1/Mesh/Sprite
+        data: Default/Mesh/Sprite
       children:
         linkb:
           offset:
@@ -42,7 +42,7 @@ root:
               x: 40
               y: 25
             material: Assets1/Materials/Chain-Open
-            data: Assets1/Mesh/Sprite
+            data: Default/Mesh/Sprite
           children:
             linkc:
               offset:
@@ -59,7 +59,7 @@ root:
                   x: 40
                   y: 10
                 material: Assets1/Materials/Chain-Closed
-                data: Assets1/Mesh/Sprite
+                data: Default/Mesh/Sprite
               children:
                 linkd:
                   offset:
@@ -76,4 +76,4 @@ root:
                       x: 40
                       y: 25
                     material: Assets1/Materials/Chain-Open
-                    data: Assets1/Mesh/Sprite
+                    data: Default/Mesh/Sprite

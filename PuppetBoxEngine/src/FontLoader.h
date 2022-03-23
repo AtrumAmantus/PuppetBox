@@ -30,7 +30,7 @@ namespace PB
          * \param error     Error flag indicating if there was an issue loading the font.
          * \return A {\link Font} object containing references to the renderable glyphs of the loaded font.
          */
-        Font loadFontFromBytes(SizedArray<char> bytes, std::uint32_t fontSize, bool* error);
+        Font loadFontFromBytes(SizedArray<std::uint8_t> bytes, std::uint32_t fontSize, bool* error);
 
     private:
         std::shared_ptr<IGfxApi> gfxApi_;

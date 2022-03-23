@@ -133,19 +133,14 @@ namespace PB
                                 std::unordered_map<std::string, IAnimation*>& animationMap);
 
         /**
-         * \brief Load the given font asset.
-         *
-         * <p>On the first load of a font, the given size dictates how large to create it's associated
-         * glyph images.  Future calls used these cached images and the requested size is ignored.</p>
+         * \brief Load the given asset's data as raw bytes.
          *
          * \param assetPath  The path of the font to load.
-         * \param fontSize   The size to load the font at.
-         * \param fontLoader The {\link FontLoader} to use to load the font with.
          * \param error      Error flag to indicate if there was an issue loading the font.
          * \return The {\link Font} object associated with the loaded font.  Returns an uninitialized {\link Font}
          * object if the font failed to load.
          */
-        Font loadFontAsset(const std::string& assetPath, std::uint8_t fontSize, FontLoader* fontLoader, bool* error);
+        SizedArray<std::uint8_t> loadAssetBytes(const std::string& assetPath, bool* error);
 
         /**
          * Loads mesh data assets as a {\link std::vector} of {\link Vertex} elements.

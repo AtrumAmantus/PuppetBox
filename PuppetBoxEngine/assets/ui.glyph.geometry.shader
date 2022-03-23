@@ -29,7 +29,7 @@ uniform float instanceData[225];
 
 void main()
 {
-    // This will re-map all the UV coordinate values to what they should actually be for each vertex, per isntance
+    /* This will re-map all the UV coordinate values to what they should actually be for each vertex, per instance */
     for (int i = 0; i < 3; ++i)
     {
         gl_Position = gl_in[i].gl_Position;

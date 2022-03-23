@@ -10,7 +10,7 @@ namespace PB
 
     }
 
-    Font FontLoader::loadFontFromBytes(SizedArray<char> bytes, std::uint32_t fontSize, bool* error)
+    Font FontLoader::loadFontFromBytes(SizedArray<std::uint8_t> bytes, std::uint32_t fontSize, bool* error)
     {
         Font font{};
 

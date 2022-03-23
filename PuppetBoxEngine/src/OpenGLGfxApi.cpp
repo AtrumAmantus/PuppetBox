@@ -387,7 +387,8 @@ namespace PB
     {
         Mesh mesh{};
 
-        mesh.stride = 3 + 3 + 2 + (3 * vertexData[0].useColour);
+        // 3 axis position, +3 axis normal, +2 axis UV coord
+        mesh.stride = 3 + 3 + 2;
 
         std::vector<Vertex> uniqueVertices{};
         std::vector<std::uint32_t> indices{};
@@ -425,13 +426,6 @@ namespace PB
 
             vboData.push_back(v.uv.x);
             vboData.push_back(v.uv.y);
-
-            if (vertexData[0].useColour)
-            {
-                vboData.push_back(v.colour.x);
-                vboData.push_back(v.colour.y);
-                vboData.push_back(v.colour.z);
-            }
         }
 
         // Create buffers

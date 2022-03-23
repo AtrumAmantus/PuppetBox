@@ -13,15 +13,16 @@ namespace PB
     bool TextAreaComponent::init()
     {
         bool error = false;
-        shader_ = library()->loadShaderAsset("Assets1/Shaders/UI/Glyph", &error);
+        shader_ = library()->loadShaderAsset("Default/Shader/UI/Glyph", &error);
 
         if (error)
         {
-            LOGGER_ERROR("Failed to load shader asset 'Assets1/Shaders/UI/Glyph'");
+            LOGGER_ERROR("Failed to load shader asset 'Default/Shader/UI/Glyph'");
         }
 
         // Setting both Vertex and UV origin to 0 to make shader calculations simpler
         //TODO: This may need to be revisited, offset origin could get weird later
+        //TODO: Utilize the default sprite asset
         float vertices[] = {
                 // Vertex                           // UV
                 0.0f, 1.0f, 0.0f,       0.0f, 1.0f, // Top left

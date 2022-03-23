@@ -4,7 +4,7 @@ root:
       x: 32
       y: 32
     material: Assets1/Materials/TestBody
-    data: Assets1/Mesh/Sprite
+    data: Default/Mesh/Sprite
   children:
     collar:
       offset:
@@ -23,7 +23,7 @@ root:
                   x: 32
                   y: 32
                 material: Assets1/Materials/TestHead
-                data: Assets1/Mesh/Sprite
+                data: Default/Mesh/Sprite
     left_shoulder:
       offset:
         x: 16
@@ -41,7 +41,7 @@ root:
                   x: 16
                   y: 16
                 material: Assets1/Materials/TestHand
-                data: Assets1/Mesh/Sprite
+                data: Default/Mesh/Sprite
     right_shoulder:
       offset:
         x: -16
@@ -59,7 +59,7 @@ root:
                   x: 16
                   y: 16
                 material: Assets1/Materials/TestHand
-                data: Assets1/Mesh/Sprite
+                data: Default/Mesh/Sprite
               children:
                 weapon_attach_right:
                   offset:

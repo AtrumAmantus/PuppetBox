@@ -29,24 +29,28 @@ namespace PB::GfxMath
         }
     }
 
+    bool BasicallyEqual(float f1, float f2)
+    {
+        return abs(f1 - f2) < FLOAT_EQUALITY_THRESHOLD;
+    }
+
     bool BasicallyEqual(vec2 v1, vec2 v2)
     {
-        return abs(v1.x - v2.x) < FLOAT_EQUALITY_THRESHOLD
-               && abs(v1.y - v2.y) < FLOAT_EQUALITY_THRESHOLD;
+        return BasicallyEqual(v1.x, v2.x)
+               && BasicallyEqual(v1.y, v2.y);
     }
 
     bool BasicallyEqual(vec3 v1, vec3 v2)
     {
-        return abs(v1.x - v2.x) < FLOAT_EQUALITY_THRESHOLD
-               && abs(v1.y - v2.y) < FLOAT_EQUALITY_THRESHOLD
-               && abs(v1.z - v2.z) < FLOAT_EQUALITY_THRESHOLD;
+        return BasicallyEqual(v1.x, v2.x)
+               && BasicallyEqual(v1.y, v2.y)
+               && BasicallyEqual(v1.z, v2.z);
     }
 
-    bool BasicallyEqual(Vertex v1, Vertex v2)
+    bool BasicallyEqual(const Vertex& v1, const Vertex& v2)
     {
         return BasicallyEqual(v1.position, v2.position)
                && BasicallyEqual(v1.normal, v2.normal)
-               //&& BasicallyEqual(v1.colour, v2.colour)
                && BasicallyEqual(v1.uv, v2.uv);
     }
 

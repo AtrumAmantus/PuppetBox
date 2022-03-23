@@ -18,15 +18,9 @@ Materials/Weapons/Bat bat.mat
 Materials/Weapons/Knife knife.mat
 Materials/Chain-Open Chain-Open.mat
 Materials/Chain-Closed Chain-Closed.mat
-Mesh/Sprite sprite.mesh
-Mesh/Glyph glyph.mesh
 Shaders/Basic/Vertex basic.vertex.shader
 Shaders/Basic/Fragment basic.fragment.shader
 Shaders/Basic basic.program.shader
-Shaders/UI/Glyph/Vertex ui.glyph.vertex.shader
-Shaders/UI/Glyph/Geometry ui.glyph.geometry.shader
-Shaders/UI/Glyph/Fragment ui.glyph.fragment.shader
-Shaders/UI/Glyph ui.glyph.program.shader
 Animations/BasicHuman BasicHuman.anims
 Animations/BasicHuman/Walk BasicHuman_Walk.anim
 Animations/BasicHuman/Idle_0 BasicHuman_Idle0.anim

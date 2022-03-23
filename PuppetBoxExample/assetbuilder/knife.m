@@ -8,4 +8,4 @@ root:
       x: 8
       y: 30
     material: Assets1/Materials/Weapons/Knife
-    data: Assets1/Mesh/Sprite
+    data: Default/Mesh/Sprite

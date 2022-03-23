@@ -40,6 +40,13 @@ namespace PB
         AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi, FontLoader* fontLoader);
 
         /**
+         * \brief Initializes the asset library, such as loading default assets.
+         *
+         * \return True if the initialization was successful, False otherwise.
+         */
+        bool init();
+
+        /**
         * \brief Attempts to load the archive with the given name so that it's contained assets can be used in future
         * asset load calls.
         *

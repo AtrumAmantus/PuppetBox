@@ -1,6 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec2 uv;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 uv;
 
 out VS_OUT
 {
@@ -34,7 +35,7 @@ void main()
     int instanceIndex = gl_InstanceID * 9;
     vec3 adjustedPosition;
 
-    // This remaps all the vertex positions to what they should actually be based on the instance data
+    /* This remaps all the vertex positions to what they should actually be based on the instance data */
     adjustedPosition.x = instanceData[instanceIndex] + (instanceData[instanceIndex + 3] * position.x);
     adjustedPosition.y = instanceData[instanceIndex + 1] + (instanceData[instanceIndex + 4] * position.y);
     adjustedPosition.z = instanceData[instanceIndex + 2];

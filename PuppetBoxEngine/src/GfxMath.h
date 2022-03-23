@@ -12,6 +12,17 @@ namespace PB::GfxMath
     const float RADS_PER_DEGREE = PI / 180;
 
     /**
+     * \brief Compares two float values to see if they are "basically" equal.  Comparisons use a
+     * defined threshold for equality.
+     *
+     * \param f1 The first float to compare.
+     * \param f2 The second float to compare.
+     *
+     * \return True if they are "basically" equal, False otherwise.
+     */
+    bool BasicallyEqual(float f1, float f2);
+
+    /**
     * \brief Compares two vec2 objects to see if they are "basically" equal.  Comparisons use a
     * defined threshold for equality.
     *
@@ -42,13 +53,13 @@ namespace PB::GfxMath
     *
     * \return True if they are "basically" equal, False otherwise.
     */
-    bool BasicallyEqual(Vertex v1, Vertex v2);
+    bool BasicallyEqual(const Vertex& v1, const Vertex& v2);
 
     /**
     * \brief Finds the dot product of two vectors.
     *
-    * \param v  The first vector.
-    * \param v  The second vector.
+    * \param v1  The first vector.
+    * \param v2  The second vector.
     *
     * \return The dot product of the two vectors.
     */

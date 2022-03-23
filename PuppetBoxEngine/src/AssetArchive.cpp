@@ -19,9 +19,9 @@ namespace PB
          * \param stream The stream to read from.
          * \return A {\link SizedArray} loaded with the given stream data.
          */
-        SizedArray<char> mapStreamToByteArray(std::istream* stream)
+        SizedArray<std::uint8_t> mapStreamToByteArray(std::istream* stream)
         {
-            SizedArray<char> bytes{};
+            SizedArray<std::uint8_t> bytes{};
 
             stream->seekg(0, std::istream::end);
             bytes.length = stream->tellg();
@@ -31,7 +31,7 @@ namespace PB
 
             stream->read(buffer, bytes.length);
 
-            bytes.array = buffer;
+            bytes.array = (std::uint8_t*) buffer;
 
             return bytes;
         }
@@ -872,14 +872,9 @@ namespace PB
         return !error;
     }
 
-    Font AssetArchive::loadFontAsset(
-            const std::string& assetPath,
-            std::uint8_t fontSize,
-            FontLoader* fontLoader,
-            bool* error
-    )
+    SizedArray<std::uint8_t> AssetArchive::loadAssetBytes(const std::string& assetPath, bool* error)
     {
-        Font font;
+        SizedArray<std::uint8_t> bytesArray;
 
         std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
@@ -891,9 +886,7 @@ namespace PB
 
             if (!*error)
             {
-                SizedArray<char> bytesArray = mapStreamToByteArray(stream);
-
-                font = fontLoader->loadFontFromBytes(bytesArray, fontSize, error);
+                bytesArray = mapStreamToByteArray(stream);
             }
         }
         else
@@ -902,7 +895,7 @@ namespace PB
             LOGGER_ERROR("Failed to retrieve font asset, '" + assetPath + "'");
         }
 
-        return font;
+        return bytesArray;
     }
 
     std::vector<Vertex> AssetArchive::loadMeshDataAsset(const std::string& assetPath, bool* error)

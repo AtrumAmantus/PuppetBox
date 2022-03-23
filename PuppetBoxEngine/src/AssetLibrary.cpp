@@ -3,6 +3,8 @@
 
 #include <utility>
 
+#include "../generated/DefaultAssets.h"
+
 #include "GfxMath.h"
 #include "OpenGLModel.h"
 #include "Rendered2DMesh.h"
@@ -20,21 +22,6 @@ namespace PB
             std::string archiveName;
             std::string assetName;
         };
-
-        /**
-        * \brief Helper function for placing values into a map for terser code.
-        *
-        * \param key	The key to use for a value reference in the map.
-        * \param value	The value to place at the specified key reference in the map.
-        * \param map	The unordered_map to place the key-value pair into.
-        */
-        template<class T>
-        void insertIntoMap(std::string key, T& value, std::unordered_map<std::string, T>& map)
-        {
-            map.insert(
-                    std::pair<std::string, T>{key, value}
-            );
-        }
 
         /**
         * \brief Helper function to break up a given virtual asset path into it's separate archive and asset paths.
@@ -105,12 +92,89 @@ namespace PB
 
             return "";
         }
+
+        Mesh loadDefaultSpriteMesh(const std::shared_ptr<IGfxApi>& gfxApi)
+        {
+            float spriteMeshData[] = {
+                    -0.5,  0.5, 0.0,    0.0, 0.0, 1.0,      0.0, 1.0,
+                    -0.5, -0.5, 0.0,    0.0, 0.0, 1.0,      0.0, 0.0,
+                    0.5, -0.5, 0.0,     0.0, 0.0, 1.0,      1.0, 0.0,
+                    -0.5,  0.5, 0.0,    0.0, 0.0, 1.0,      0.0, 1.0,
+                    0.5, -0.5, 0.0,     0.0, 0.0, 1.0,      1.0, 0.0,
+                    0.5,  0.5, 0.0,     0.0, 0.0, 1.0,      1.0, 1.0
+            };
+
+            std::vector<Vertex> spriteMeshVertices{};
+
+            std::uint32_t dataSize = sizeof(spriteMeshData) / sizeof(float);
+
+            for (std::uint32_t i = 0; i < dataSize; i += 8)
+            {
+                spriteMeshVertices.push_back(Vertex {
+                        {spriteMeshData[i], spriteMeshData[i + 1], spriteMeshData[i + 2]},
+                        {spriteMeshData[i + 3], spriteMeshData[i + 4], spriteMeshData[i + 5]},
+                        {spriteMeshData[i + 6], spriteMeshData[i + 7]}
+                });
+            }
+
+            return gfxApi->loadMesh(&spriteMeshVertices[0], spriteMeshVertices.size());
+        }
+
+        Shader loadDefaultGlyphShader(const std::shared_ptr<IGfxApi>& gfxApi, bool* error)
+        {
+            const std::string defaultAssetPath = "Default/Shader/UI/Glyph";
+
+            Shader shader = Shader{
+                    defaultAssetPath,
+                    defaultAssetPath + "/Vertex",
+                    defaultAssetPath + "/Geometry",
+                    defaultAssetPath + "/Fragment"};
+
+            bool loaded;
+            loaded = shader.loadVertexShader(DEFAULT_ASSET_UI_GLYPH_VERTEX_SHADER);
+            loaded = loaded && shader.loadGeometryShader(DEFAULT_ASSET_UI_GLYPH_GEOMETRY_SHADER);
+            loaded = loaded && shader.loadFragmentShader(DEFAULT_ASSET_UI_GLYPH_FRAGMENT_SHADER);
+
+            if (loaded)
+            {
+                if (shader.init())
+                {
+                    LOGGER_INFO("Shader program '" + defaultAssetPath + "' loaded.");
+                }
+                else
+                {
+                    LOGGER_ERROR("Failed to compile shader program '" + defaultAssetPath + "'");
+                }
+            }
+            else
+            {
+                *error = true;
+                LOGGER_ERROR("Failed to load shader '" + defaultAssetPath + "'");
+            }
+
+            return shader;
+        }
     }
 
     AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi, FontLoader* fontLoader)
             : archiveRoot_(std::move(archiveRoot)), gfxApi_(std::move(gfxApi)), fontLoader_(fontLoader)
     {
 
+    }
+
+    bool AssetLibrary::init()
+    {
+        bool error = false;
+
+        loadedMeshes_.insert(
+                std::pair<std::string, Mesh>{"Default/Mesh/Sprite", loadDefaultSpriteMesh(gfxApi_)}
+        );
+
+        loadedShaders_.insert(
+                std::pair<std::string, Shader>{"Default/Shader/UI/Glyph", loadDefaultGlyphShader(gfxApi_, &error)}
+        );
+
+        return !error;
     }
 
     bool AssetLibrary::loadArchive(const std::string& archiveName)
@@ -185,7 +249,9 @@ namespace PB
                     if (shader.init())
                     {
                         LOGGER_INFO("Shader program '" + assetPath + "' loaded.");
-                        insertIntoMap(assetPath, shader, loadedShaders_);
+                        loadedShaders_.insert(
+                                std::pair<std::string, Shader>{assetPath, shader}
+                        );
                     }
                     else
                     {
@@ -282,9 +348,13 @@ namespace PB
 
             if (!*error)
             {
-                font = assetArchives_
+                SizedArray<std::uint8_t> fontBytes = assetArchives_
                         .at(asset.archiveName)
-                        .loadFontAsset(asset.assetName, fontSize, fontLoader_, error);
+                        .loadAssetBytes(asset.assetName, error);
+
+                font = fontLoader_->loadFontFromBytes(fontBytes, fontSize, error);
+
+                delete[] fontBytes.array;
 
                 if (!*error)
                 {
@@ -363,7 +433,9 @@ namespace PB
 
                 if (!*error)
                 {
-                    insertIntoMap(assetPath, imageReference, loadedImages_);
+                    loadedImages_.insert(
+                            std::pair<std::string, ImageReference>{assetPath, imageReference}
+                    );
                 }
                 else
                 {
@@ -414,7 +486,9 @@ namespace PB
                         }
                     }
 
-                    insertIntoMap(assetPath, material, loadedMaterials_);
+                    loadedMaterials_.insert(
+                            std::pair<std::string, Material>{assetPath, material}
+                    );
                 }
                 else
                 {
