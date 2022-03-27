@@ -881,6 +881,11 @@ namespace PB
             return result;
         };
 
+        const std::unordered_map<std::uint32_t, BoneNode>& getAllBones() const
+        {
+            return boneMap_;
+        }
+
         std::unordered_map<std::uint32_t, BoneNode>& getAllBones()
         {
             return boneMap_;

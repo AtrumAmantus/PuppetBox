@@ -1,13 +1,25 @@
 #pragma once
 
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+
 #include <puppetbox/AbstractBehavior.h>
 
 #include "ScreenTranslator.h"
 
+
+struct AimingModifier
+{
+    bool flipHozitonal = false;
+    std::string animationName;
+    std::unordered_map<std::uint32_t, float> frameInterpolations{};
+};
+
 class AimingBehavior : public PB::AbstractBehavior
 {
 public:
-    AimingBehavior(const ScreenTranslator& screenTranslator);
+    AimingBehavior(const ScreenTranslator& screenTranslator, AimingModifier aimingModifier);
 
     ~AimingBehavior();
 
@@ -19,6 +31,7 @@ protected:
     void inits() override;
 
 private:
+    std::unique_ptr<PB::IAnimator> animator_ = nullptr;
     PB::UUID eventUuid_{};
     PB::vec3 targetPosition_{};
     PB::vec2 direction_{};

@@ -314,7 +314,13 @@ namespace PB
 
     bool LoadAnimationsPack(const std::string& assetPath)
     {
-        return animationCatalogue.load(assetPath);
+        return animationCatalogue.loadSet(assetPath);
+    }
+
+    std::unique_ptr<IAnimator> LoadAnimation(const std::string& assetPath)
+    {
+        animationCatalogue.load(assetPath);
+        return animationCatalogue.get(assetPath);
     }
 
     bool PreloadAnimationFrames(const std::string& animationPath, BoneMap& boneMap)

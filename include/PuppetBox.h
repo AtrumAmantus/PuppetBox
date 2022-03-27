@@ -91,6 +91,15 @@ namespace PB
     extern PUPPET_BOX_API bool LoadAnimationsPack(const std::string& assetPath);
 
     /**
+     * \brief Loads an animation, returning an {\link PB::IAnimator} object containing it.
+     *
+     * \param assetPath The asset path to the animation to load.
+     *
+     * \return An {\link PB::IAnimation} wrapped in an {\link PB::IAnimator}.
+     */
+    extern PUPPET_BOX_API std::unique_ptr<IAnimator> LoadAnimation(const std::string& assetPath);
+
+    /**
      * \brief Preloads the animation keyframes into memory.
      *
      * \param animationPath The path to the desired animation to preload.

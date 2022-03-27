@@ -485,7 +485,7 @@ namespace PB
         return animation_->getPath();
     }
 
-    void Animator::update(float deltaTime, BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides)
+    void Animator::update(float deltaTime, const BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides)
     {
         //TODO: Animations never stop, need to create an animation event.
         sequenceTime_ += deltaTime;
@@ -590,9 +590,14 @@ namespace PB
 
     }
 
-    bool AnimationCatalogue::load(const std::string& assetPath)
+    bool AnimationCatalogue::loadSet(const std::string& assetPath)
     {
         return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
+    }
+
+    bool AnimationCatalogue::load(const std::string& assetPath)
+    {
+        return assetLibrary_->loadAnimationAsset(assetPath, animations_);
     }
 
     bool AnimationCatalogue::preloadAnimation(BoneMap& boneMap, const std::string& animationPath)

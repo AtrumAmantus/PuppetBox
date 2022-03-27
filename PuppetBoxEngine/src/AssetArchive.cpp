@@ -757,7 +757,6 @@ namespace PB
     }
 
     bool AssetArchive::loadAnimationAsset(
-            const std::string& name,
             const std::string& assetPath,
             std::unordered_map<std::string, IAnimation*>& animationMap
     )

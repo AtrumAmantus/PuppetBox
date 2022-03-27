@@ -4,10 +4,10 @@
 #include "EventDef.h"
 #include "MathUtils.h"
 
-AimingBehavior::AimingBehavior(const ScreenTranslator& screenTranslator)
+AimingBehavior::AimingBehavior(const ScreenTranslator& screenTranslator, AimingModifier aimingModifier)
         : PB::AbstractBehavior("aiming_behavior"), screenTranslator_(screenTranslator)
 {
-
+    animator_ = PB::LoadAnimation(aimingModifier.animationName);
 }
 
 AimingBehavior::~AimingBehavior()
@@ -42,6 +42,7 @@ AimingBehavior::~AimingBehavior()
 
 void AimingBehavior::update(float deltaTime)
 {
+    animator_->update(deltaTime, sceneObject()->getBones(), {});
     timeSinceLastUpdate_ += deltaTime;
 
     // Limit update frequency to save frames

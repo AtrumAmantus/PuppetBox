@@ -14,7 +14,7 @@ float _timeSinceGfxFpsCheck = 0.0f;
 std::uint32_t _frameIndex = 0;
 float _frameRates[FPS_MAX_FRAME_COUNT]{};
 
-extern inline void controlRegistration(InputActions& controls)
+extern inline void registerControls(InputActions& controls)
 {
     controls.registerCommand(Command::CAMERA_UP, KEY_UP);
     controls.registerCommand(Command::CAMERA_DOWN, KEY_DOWN);

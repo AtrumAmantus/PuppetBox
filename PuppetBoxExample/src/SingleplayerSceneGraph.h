@@ -340,11 +340,19 @@ protected:
 
         if (PB::LoadAssetPack("Assets1"))
         {
+            std::unordered_map<std::uint32_t, float> frameInterpolations{};
+            frameInterpolations.insert({0, 0});
+            frameInterpolations.insert({7, 100});
+
+            defaultModifier_.flipHozitonal = true;
+            defaultModifier_.animationName = "Assets1/Animations/BasicHuman/Punch";
+            defaultModifier_.frameInterpolations = frameInterpolations;
+
             eventSubscriptions();
 
             inputActions_ = InputActions{input()};
 
-            controlRegistration(inputActions_);
+            registerControls(inputActions_);
 
             camera().moveTo({0.0f, 0.0f, 3.0f});
 
@@ -470,6 +478,7 @@ private:
     AbstractInputProcessor* inputProcessor_ = nullptr;
     ScreenTranslator screenTranslator_{};
     std::queue<PB::UUID> subscriptions_{};
+    AimingModifier defaultModifier_{};
 
 private:
     /**
@@ -558,7 +567,7 @@ private:
                         switch (event->behavior)
                         {
                             case Constants::Behavior::AIM:
-                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_));
+                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_, defaultModifier_));
                                 break;
                             case Constants::Behavior::WANDER:
                                 player_->setBehavior(PB::AI::WANDER);

@@ -49,7 +49,7 @@ namespace PB
 
         std::string getAnimationName() const override;
 
-        void update(float deltaTime, BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides) override;
+        void update(float deltaTime, const BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides) override;
 
         void setCurrentFrame(std::uint32_t frame) override;
 
@@ -67,6 +67,8 @@ namespace PB
     {
     public:
         explicit AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary);
+
+        bool loadSet(const std::string& assetPath) override;
 
         bool load(const std::string& assetPath) override;
 

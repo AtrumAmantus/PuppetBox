@@ -24,3 +24,4 @@ Shaders/Basic basic.program.shader
 Animations/BasicHuman BasicHuman.anims
 Animations/BasicHuman/Walk BasicHuman_Walk.anim
 Animations/BasicHuman/Idle_0 BasicHuman_Idle0.anim
+Animations/BasicHuman/Punch BasicHuman_Punch.anim

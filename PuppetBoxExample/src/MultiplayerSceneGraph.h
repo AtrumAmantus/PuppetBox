@@ -129,7 +129,7 @@ protected:
 
             inputActions_ = InputActions{input()};
 
-            controlRegistration(inputActions_);
+            registerControls(inputActions_);
 
             camera().moveTo({0.0f, 0.0f, 3.0f});
 
@@ -435,7 +435,7 @@ private:
                         switch (event->behavior)
                         {
                             case Constants::Behavior::AIM:
-                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_));
+                                player_->setBehavior(std::make_unique<AimingBehavior>(screenTranslator_, AimingModifier{}));
                                 break;
                             case Constants::Behavior::WANDER:
                                 player_->setBehavior(PB::AI::WANDER);

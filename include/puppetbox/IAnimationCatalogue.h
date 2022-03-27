@@ -111,7 +111,10 @@ namespace PB
          * \param bones     The bones for the target skeleton to apply the animation to.
          * \param overrides The bone overrides to use when calculating transformations.
          */
-        virtual void update(float deltaTime, BoneMap& bones, std::unordered_map<std::uint32_t, mat4> overrides) = 0;
+        virtual void update(
+                float deltaTime,
+                const BoneMap& bones,
+                std::unordered_map<std::uint32_t, mat4> overrides) = 0;
 
         /**
          * \brief Sets the current frame for the animation.
@@ -135,13 +138,14 @@ namespace PB
         //TODO: The relationship between loading animation sets and getting a single
         // animation is a messy one.
         /**
-         * \brief Loads the animations defined at the given path reference.
+         * \brief Loads the animation set defined at the given path reference.
          *
          * \param assetPath The path reference to the desired animations to load.
          * \return True if the animations were loaded successfully, False otherwise.
          */
-        virtual bool load(const std::string& assetPath) = 0;
+        virtual bool loadSet(const std::string& assetPath) = 0;
 
+        virtual bool load(const std::string& assetPath) = 0;
         /**
          * \brief Preloads the animation into memory.
          *

@@ -296,7 +296,7 @@ namespace PB
             {
                 for (const auto& entry: animMap)
                 {
-                    error = error || !loadAnimationAsset(entry.first, entry.second, animationMap);
+                    error = error || !loadAnimationAsset(entry.second, animationMap);
                 }
             }
             else
@@ -314,10 +314,8 @@ namespace PB
     }
 
     bool AssetLibrary::loadAnimationAsset(
-            const std::string& animName,
             const std::string& assetPath,
-            std::unordered_map<std::string, IAnimation*>& animationMap
-    )
+            std::unordered_map<std::string, IAnimation*>& animationMap)
     {
         bool error = false;
 
@@ -326,7 +324,7 @@ namespace PB
         if (!error)
         {
             error = error ||
-                    !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, animationMap);
+                    !assetArchives_.at(asset.archiveName).loadAnimationAsset(asset.assetName, animationMap);
         }
         else
         {
