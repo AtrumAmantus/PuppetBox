@@ -8,13 +8,17 @@
 #include "GfxMath.h"
 #include "Logger.h"
 #include "OpenGLGfxApi.h"
+#include "Shader.h"
 
 namespace PB
 {
     namespace
     {
+        std::vector<Mesh> RENDER_REFERENCES{};
+        std::vector<Shader> SHADER_PROGRAM_REFERENCES{};
+
         /**
-        * \brief Searches for the provided vertex in the provided vector.  Two ertices are considered equal if each of
+        * \brief Searches for the provided vertex in the provided vector.  Two vertices are considered equal if each of
         * their matching attributes fall within a certain defined tolerance.
         *
         * \param vertex The vertex to search for
@@ -124,6 +128,42 @@ namespace PB
             std::cout << std::endl;
         }
     }
+
+    class OpenglRenderComponent : public AbstractRenderComponent
+    {
+        void render(
+                const std::unordered_map<std::uint32_t, mat4>& boneTransforms,
+                const Model& model) const override
+        {
+            //TODO: Revisit this, just leave it on? Material specific?
+            glEnable(GL_BLEND);
+
+            const Shader& shader = SHADER_PROGRAM_REFERENCES.at(model.shaderProgramID);
+            shader.use();
+
+            // Bind each image to the shader program
+            for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
+            {
+                const auto& imageMap = model.imageMaps.at(i);
+
+                glActiveTexture((GL_TEXTURE0 + i));
+                glBindTexture(GL_TEXTURE_2D, imageMap.imageMapID);
+
+                switch (imageMap.mapType)
+                {
+                    case DIFFUSE:
+                        shader.setInt("material.diffuseMap", i);
+                        break;
+                    case EMISSION:
+                        shader.setInt("material.emissionMap", i);
+                        break;
+                }
+            }
+
+
+            shader.setMat4("boneTransforms")
+        }
+    };
 
     bool OpenGLGfxApi::init(const PB::ProcAddress procAddress)
     {
@@ -383,7 +423,7 @@ namespace PB
         return success;
     }
 
-    Mesh OpenGLGfxApi::loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const
+    std::uint32_t OpenGLGfxApi::loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const
     {
         Mesh mesh{};
 
@@ -465,7 +505,9 @@ namespace PB
         // TODO: Hardcoded to only support EBO, revisit this? reason?
         mesh.drawCount = static_cast<std::int32_t>(indices.size());
 
-        return mesh;
+        RENDER_REFERENCES.push_back(mesh);
+
+        return RENDER_REFERENCES.size();
     }
 
     void OpenGLGfxApi::initializeUBORanges()
@@ -532,5 +574,10 @@ namespace PB
         }
 
         return false;
+    }
+
+    std::unique_ptr<AbstractRenderComponent> createRenderComponent() const
+    {
+
     }
 }

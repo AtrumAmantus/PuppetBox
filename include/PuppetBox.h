@@ -8,7 +8,7 @@
 #include "puppetbox/AbstractSceneGraph.h"
 #include "puppetbox/Constants.h"
 #include "puppetbox/Event.h"
-#include "puppetbox/SceneObject.h"
+#include ObjectData.h
 #include "puppetbox/TypeDef.h"
 #include "puppetbox/UIComponent.h"
 

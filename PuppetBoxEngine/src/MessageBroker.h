@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "Utilities.h"
+#include "puppetbox/Utilities.h"
 
 /**
  * Handles messaging communication within the base engine and implementing application.

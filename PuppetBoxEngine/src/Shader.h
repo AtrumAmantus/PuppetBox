@@ -211,6 +211,8 @@ namespace PB
         */
         void setMat4(const std::string& name, const mat4& mat) const;
 
+        void setMat4(const std::string& name, const std::uint8_t count, const mat4* mat) const;
+
         /**
          * \brief Cleans up all shader resources.
          */

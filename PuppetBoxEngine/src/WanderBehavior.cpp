@@ -1,7 +1,7 @@
 #include "puppetbox/WanderBehavior.h"
 
 #include "GfxMath.h"
-#include "Utilities.h"
+#include "puppetbox/Utilities.h"
 
 namespace PB
 {

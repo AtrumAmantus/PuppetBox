@@ -255,6 +255,11 @@ namespace PB
         glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
+    void Shader::setMat4(const std::string& name, const std::uint8_t count, const mat4* mat) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(programId_, name.c_str()), count, GL_FALSE, &((*mat)[0][0]));
+    }
+
     void Shader::destroy()
     {
         glDetachShader(programId_, vertexShaderId_);

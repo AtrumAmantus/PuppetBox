@@ -1,27 +1,20 @@
 #pragma once
 
-#include <mutex>
-#include <queue>
+#include <memory>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 #include "AbstractInputReader.h"
+#include "AbstractRenderComponent.h"
 #include "Camera.h"
 #include "Constants.h"
 #include "DataStructures.h"
+#include "IObjectComponent.h"
 #include "RenderWindow.h"
-#include "SceneObject.h"
 #include "TypeDef.h"
 
 namespace PB
 {
-    struct Attachment
-    {
-        PB::UUID attach;
-        PB::UUID attachedTo;
-        std::uint32_t attachPoint;
-    };
-
     /**
     * \brief AbstractSceneGraph represents a single rendering scene within an application.  This could be a
     * title menu, or the game itself, allowing for switching between different scenes.
@@ -41,7 +34,8 @@ namespace PB
         AbstractSceneGraph(
                 const std::string& sceneName,
                 RenderWindow renderWindow,
-                std::shared_ptr<AbstractInputReader> inputReader);
+                std::shared_ptr<AbstractInputReader> inputReader,
+                std::unique_ptr<AbstractRenderComponent> renderComponent);
 
         /**
          * \brief Invokes the implementing class's setUps() method, checking first if the
@@ -142,14 +136,6 @@ namespace PB
         virtual void processInputs();
 
         /**
-         * \brief Gets a {\link PB::SceneObject} based on it's {\link PB::UUID}
-         *
-         * \param uuid The {\link PB::UUID} associated to the desired {\link PB::SceneObject} to fetch.
-         * \return The {\link PB::SceneObject} that was associated with the given {\link PB::UUID}.
-         */
-        SceneObject* getSceneObject(UUID uuid);
-
-        /**
          * \brief Provides access to the {\link AbstractInputReader} object from the implementing scene class.
          *
          * \return Reference to the {\link AbstractInputReader} object instance.
@@ -187,116 +173,20 @@ namespace PB
         const RenderWindow& renderWindow() const;
 
         /**
-         * \brief Adds a scene object to the base {\link PB::AbstractSceneGraph} to
-         * allow the base logic to be invoked on it.
-         *
-         * \param sceneObject The {\link PB::SceneObject} to add to the base
-         * {\link PB::AbstractSceneGraph}.
+         * \brief Creates a new scene object with the given {\link PB::UUID}.
          */
-        void addSceneObject(SceneObject* sceneObject);
-
-        /**
-         * \brief Moves a parked {\link PB::SceneObject} object into the active scene object collection.
-         *
-         * \param uuid The UUID of the parked {\link PB::SceneObject} to move.
-         */
-        void moveToScene(UUID uuid);
-
-        /**
-         * \brief Remove a {\link PB::SceneObject} associated with the given {\link PB::UUID}.
-         *
-         * \param uuid  The {\link PB::UUID} associated with the {\link PB::SceneObject} to destroy.
-         */
-        void removeFromScene(UUID uuid);
-
-        /**
-         * \brief Destroys a scene object that has been placed in the ParkedSceneObjects collection.  If no
-         * object exists in the ParkedSceneObjects collection, nothing happens.
-         *
-         * \param uuid The {\link PB::UUID} of the parked scene object to destroy.
-         */
-        void destroySceneObject(UUID uuid);
-
-        /**
-         * \brief Attaches one object to another object by their UUIDs at a specific location on the
-         * "host" object.
-         *
-         * \param attachment The {\link PB::UUID} of the object to attach.
-         * \param host       The {\link PB::UUID} of the object being attached to (the host).
-         * \param locationId The location (bone id) where the object is attached on the host.
-         */
-        void attachToObject(PB::UUID attachment, PB::UUID host, std::uint32_t locationId);
-
-        /**
-         * \brief Flags the scene to be cleared of all {\link PB::SceneObject}s on the next {\link #update()} cycle.
-         */
-        void clearScene();
-
-        /**
-         * \brief Clears all the {\link PB::SceneObject}s from the scene immediately and resetting the
-         * clear scene flag.
-         */
-        void clearSceneNow();
-
-        /**
-         * \brief Indicates if {\link #clearScene()} was invoked recently.
-         *
-         * \return True if {\link #clearScene()} has been invoked but the scene has not yet been cleared.
-         */
-        bool wasClearSceneInvoked();
+        void createSceneObject(UUID uuid);
 
     private:
         bool isInitialized_ = false;
         bool isSetup_ = false;
-        bool clearSceneInvoked_ = false;
-        bool clearSceneCompleted_ = false;
         Camera camera_{};
         RenderWindow renderWindow_{};
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
-        std::queue<UUID> moveToScene_{};
-        std::queue<UUID> removeFromScene_{};
-        std::queue<UUID> objectsToDestroy_{};
-        std::unordered_map<UUID, SceneObject*> activeSceneObjects_{};
-        std::unordered_map<UUID, SceneObject*> parkedSceneObjects_{};
-        std::queue<SceneObject*> processLater_{};
-        std::queue<Attachment> attachObjectsTo_{};
-        std::unordered_map<PB::UUID, Attachment> objectAttachedTo_{};
-        std::unordered_map<PB::UUID, std::unordered_map<PB::UUID, std::uint32_t>> objectAttachedWith_{};
-        std::mutex mutex_;
-
-    private:
-        /**
-         * \brief Recursively moves the given object and it's attachments to the active scene.
-         *
-         * \param objectToMove The {\link PB::UUID} of the base object to move.
-         */
-        void recursiveSceneObjectMove(UUID objectToMove);
-
-        /**
-         * \brief Recursively removes the given object and it's attachments from the active scene.
-         *
-         * \param objectToRemove The {\link PB::UUID} of the base object to remove.
-         */
-        void recursiveSceneObjectRemove(UUID objectToRemove);
-
-        /**
-         * \brief Recursively destroys the given object and it's attachments.
-         *
-         * \param objectToDestroy The {\link PB::UUID} of the base object to destroy.
-         */
-        void recursiveSceneObjectDestroy(UUID objectToDestroy);
-
-    public:
-        AbstractSceneGraph& operator=(const AbstractSceneGraph& rhv)
-        {
-            this->camera_ = rhv.camera_;
-            this->renderWindow_ = rhv.renderWindow_;
-            this->inputReader_ = std::move(rhv.inputReader_);
-            this->viewMode_ = rhv.viewMode_;
-            this->isInitialized_ = rhv.isInitialized_;
-            return *this;
-        };
+        std::vector<PB::UUID> sceneObjects_{};
+        std::vector<IObjectComponent> objectComponents_{};
+        std::unique_ptr<AbstractRenderComponent> renderComponent_ = nullptr;
     };
 }

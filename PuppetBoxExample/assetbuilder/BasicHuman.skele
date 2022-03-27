@@ -1,0 +1,42 @@
+root:
+  children:
+    collar:
+      offset:
+        y: 16
+        z: 1
+      children:
+        neck:
+          offset:
+            z: -10
+          children:
+            head:
+              offset:
+                z: 10
+    left_shoulder:
+      offset:
+        x: 16
+        z: 2
+      children:
+        left_elbow:
+          offset:
+            y: -16
+          children:
+            left_hand:
+              offset:
+                y: 16
+    right_shoulder:
+      offset:
+        x: -16
+        z: 2
+      children:
+        right_elbow:
+          offset:
+            y: -16
+          children:
+            right_hand:
+              offset:
+                y: 16
+              children:
+                weapon_attach_right:
+                  offset:
+                    z: 1

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "puppetbox/IAnimationCatalogue.h"
-#include "puppetbox/SceneObject.h"
+#include "puppetbox/ObjectData.h"
 
 #include "puppetbox/IModel.h"
 #include "AssetArchive.h"
@@ -55,6 +55,8 @@ namespace PB
         * \return True if the archive was loaded successfully, False otherwise.
         */
         bool loadArchive(const std::string& archiveName);
+
+        BoneMap loadSkeleton(const std::string& assetName);
 
         /**
         * \brief Loads the given scene object with asset data.
@@ -128,13 +130,13 @@ namespace PB
         /**
         * \brief Loads a Mesh asset given by the provided virtual asset path.
          *
-        * \pa&ram assetPath	Virtual path to the requested asset.
+        * \param assetPath	Virtual path to the requested asset.
         * \param error		Flag indicating an error occurred if set to True.
         *
-        * \return The loaded Mesh object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
+        * \return A reference to the render data for the loaded mesh of the given
+        * virtual asset path, or a 0 if an error occurred loading the asset.
         */
-        Mesh loadMeshAsset(const std::string& assetPath, bool* error);
+        std::uint32_t loadMeshAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Loads an ImageReference asset given by the provided virtual asset path.
@@ -153,7 +155,8 @@ namespace PB
         std::shared_ptr<IGfxApi> gfxApi_;
         FontLoader* fontLoader_;
         std::unordered_map<std::string, AssetArchive> assetArchives_{};
-        std::unordered_map<std::string, Mesh> loadedMeshes_{};
+        std::unordered_map<std::string, BoneMap> loadedSkeletons_{};
+        std::unordered_map<std::string, std::uint32_t> loadedMeshes_{};
         std::unordered_map<std::string, Material> loadedMaterials_{};
         std::unordered_map<std::string, ImageReference> loadedImages_{};
         std::unordered_map<std::string, ModelData> loadedModelData_{};

@@ -8,7 +8,7 @@
 #include "GfxMath.h"
 #include "OpenGLModel.h"
 #include "Rendered2DMesh.h"
-#include "Utilities.h"
+#include "puppetbox/Utilities.h"
 
 namespace PB
 {
@@ -93,7 +93,7 @@ namespace PB
             return "";
         }
 
-        Mesh loadDefaultSpriteMesh(const std::shared_ptr<IGfxApi>& gfxApi)
+        std::uint32_t loadDefaultSpriteMesh(const std::shared_ptr<IGfxApi>& gfxApi)
         {
             float spriteMeshData[] = {
                     -0.5,  0.5, 0.0,    0.0, 0.0, 1.0,      0.0, 1.0,
@@ -167,7 +167,7 @@ namespace PB
         bool error = false;
 
         loadedMeshes_.insert(
-                std::pair<std::string, Mesh>{"Default/Mesh/Sprite", loadDefaultSpriteMesh(gfxApi_)}
+                std::pair<std::string, std::uint32_t>{"Default/Mesh/Sprite", loadDefaultSpriteMesh(gfxApi_)}
         );
 
         loadedShaders_.insert(
@@ -204,6 +204,35 @@ namespace PB
         }
 
         return !error;
+    }
+
+    BoneMap AssetLibrary::loadSkeleton(const std::string& assetPath)
+    {
+        bool error = false;
+
+        BoneMap boneMap{};
+
+        const auto& itr = loadedSkeletons_.find(assetPath);
+
+        if (itr == loadedSkeletons_.end())
+        {
+            AssetStruct asset = parseAssetPath(assetPath, &error);
+
+            if (!error)
+            {
+                assetArchives_.at(asset.archiveName).loadSkeleton(asset.assetName, &error);
+            }
+            else
+            {
+                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            boneMap = BoneMap{itr->second};
+        }
+
+        return boneMap;
     }
 
     Shader AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
@@ -382,9 +411,9 @@ namespace PB
         return font;
     }
 
-    Mesh AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
+    std::uint32_t AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
     {
-        Mesh mesh{};
+        std::uint32_t referenceId;
 
         if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
         {
@@ -396,9 +425,10 @@ namespace PB
                         .at(asset.archiveName)
                         .loadMeshDataAsset(asset.assetName, error);
 
-                mesh = gfxApi_->loadMesh(&meshData[0], meshData.size());
+                referenceId = gfxApi_->loadMesh(&meshData[0], meshData.size());
+
                 loadedMeshes_.insert(
-                        std::pair<std::string, Mesh>{assetPath, mesh}
+                        std::pair<std::string, std::uint32_t>{assetPath, referenceId}
                 );
             }
             else
@@ -408,10 +438,10 @@ namespace PB
         }
         else
         {
-            mesh = loadedMeshes_.at(assetPath);
+            referenceId = loadedMeshes_.at(assetPath);
         }
 
-        return mesh;
+        return referenceId;
     }
 
     ImageReference AssetLibrary::loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error)

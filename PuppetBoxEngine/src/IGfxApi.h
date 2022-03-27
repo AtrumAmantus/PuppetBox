@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "AbstractRenderComponent.h"
+
 //TODO: This is coupled to the FreeType library and it shouldn't be.
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -74,11 +76,12 @@ namespace PB
          * \brief Generates textures for each glyph of the given font face, adding references to them
          * within the loaded characters {\link unordered_map}.
          *
-         * @param face              The font face to generate textures for.
-         * @param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
+         * \param face              The font face to generate textures for.
+         * \param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
          * glyph images.
-         * @param fontSize          The requested font size to load the font at.
-         * @return True if the glyph textures were successfully generated and loaded, False otherwise.
+         * \param fontSize          The requested font size to load the font at.
+         *
+         * \return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
         virtual bool buildCharacterMap(
                 FT_Face face,
@@ -89,8 +92,10 @@ namespace PB
         *
         * \param vertexData		The vertex data to load into memory.
         * \param vertexCount	The number of entries in the vertexData array.
+        *
+        * \return Reference to the render details to use for rendering this mesh.
         */
-        virtual Mesh loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const = 0;
+        virtual std::uint32_t loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const = 0;
 
         /**
         * \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.
@@ -112,5 +117,7 @@ namespace PB
         * \return True if the debugger was found and enabled, False otherwise.
         */
         virtual bool initGfxDebug() const = 0;
+
+        virtual std::unique_ptr<AbstractRenderComponent> createRenderComponent() const = 0;
     };
 }

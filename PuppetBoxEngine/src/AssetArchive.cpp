@@ -3,9 +3,11 @@
 #include <STBI/stb_image.h>
 
 #include "puppetbox/IAnimationCatalogue.h"
+#include "puppetbox/Utilities.h"
 
 #include "AnimationCatalogue.h"
 #include "AssetArchive.h"
+#include "FileUtils.h"
 #include "GfxMath.h"
 #include "PropertyTree.h"
 
@@ -681,6 +683,15 @@ namespace PB
         }
 
         return data;
+    }
+
+    BoneMap AssetArchive::loadSkeleton(const std::string& assetPath, bool* error)
+    {
+        BoneMap boneMap{};
+
+
+
+        return boneMap;
     }
 
     ShaderProgram AssetArchive::loadShaderAsset(const std::string& assetPath, bool* error)

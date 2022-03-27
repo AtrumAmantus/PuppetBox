@@ -15,7 +15,6 @@
 #include "ImageData.h"
 #include "Logger.h"
 #include "Material.h"
-#include "Utilities.h"
 
 namespace PB
 {
@@ -100,6 +99,8 @@ namespace PB
         * error occurred.
         */
         std::string loadAsciiData(const std::string& assetPath, bool* error);
+
+        BoneMap loadSkeleton(const std::string& assetPath, bool* error);
 
         /**
         * \brief Returns a ShaderProgram for the given shader asset.

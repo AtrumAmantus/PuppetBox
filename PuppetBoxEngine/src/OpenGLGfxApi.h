@@ -72,7 +72,8 @@ namespace PB
          * \param face              The font face to generate textures for.
          * \param loadedCharacters  The {\link unordered_map} to store texture references in for the generated
          * glyph images.
-         * @param fontSize          The requested font size to load the font at.
+         * \param fontSize          The requested font size to load the font at.
+         *
          * \return True if the glyph textures were successfully generated and loaded, False otherwise.
          */
         bool buildCharacterMap(
@@ -84,8 +85,10 @@ namespace PB
         *
         * \param vertexData		The vertex data to load into memory.
         * \param vertexCount	The number of entries in the vertexData array.
+        *
+        * \return Reference to the render details to use for rendering this mesh
         */
-        Mesh loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const override;
+        std::uint32_t loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const override;
 
         /**
         * \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.
@@ -107,6 +110,8 @@ namespace PB
         * \return True if the debugger was enabled, False otherwise.
         */
         bool initGfxDebug() const override;
+
+        std::unique_ptr<AbstractRenderComponent> createRenderComponent() const override;
 
     private:
         std::uint32_t width_ = 0;
