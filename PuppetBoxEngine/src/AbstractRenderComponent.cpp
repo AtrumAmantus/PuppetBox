@@ -6,11 +6,10 @@ namespace PB
     struct PipelineBoneTransformEvent
     {
         UUID uuid;
-        std::uint32_t boneId;
-        mat4 transform;
+        std::unordered_map<std::uint32_t, mat4> transforms;
     };
 
-    void AbstractRenderComponent::init() const
+    void AbstractRenderComponent::init()
     {
         // Set up listener for pipeline updates to bone transforms for a given object by its UUID
         MessageBroker::instance().subscribe("PB_PIPELINE_BONE_TRANSFORM", [this](std::shared_ptr<void> data){
@@ -18,7 +17,11 @@ namespace PB
 
             std::uint32_t entryIndex = renderDataMap_.at(event->uuid);
             auto& renderData = renderData_.at(entryIndex);
-            renderData.boneTransformations[event->boneId] = event->transform;
+
+            for (auto& entry : event->transforms)
+            {
+                renderData.boneTransformations[entry.first] = entry.second;
+            }
         });
     }
 

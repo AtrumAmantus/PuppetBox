@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -44,14 +45,14 @@ namespace PB
      */
     struct RenderData
     {
-        std::unordered_map<std::uint32_t, mat4> boneTransformations;
+        std::map<std::uint32_t, mat4> boneTransformations;
         std::vector<Model> model;
     };
 
     class AbstractRenderComponent
     {
     public:
-        void init() const;
+        void init();
 
         void render() const;
 
@@ -61,7 +62,7 @@ namespace PB
 
     private:
         virtual void render(
-                const std::unordered_map<std::uint32_t, mat4>& boneTransforms,
+                const std::map<std::uint32_t, mat4>& boneTransforms,
                 const Model& model) const = 0;
     };
 }

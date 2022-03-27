@@ -160,6 +160,12 @@ namespace PB
                 }
             }
 
+            mat4* transformArray = new mat4[boneTransforms.size()];
+
+            for (auto& boneTransform : boneTransforms)
+            {
+                transformArray
+            }
 
             shader.setMat4("boneTransforms")
         }
