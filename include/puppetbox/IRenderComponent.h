@@ -7,6 +7,8 @@ namespace PB
     public:
         virtual ~IRenderComponent() = default;
 
+        virtual void tearDown() = 0;
+
         virtual void render() const = 0;
     };
 }

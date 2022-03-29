@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 
 #include "puppetbox/Camera.h"
 #include "GfxMath.h"

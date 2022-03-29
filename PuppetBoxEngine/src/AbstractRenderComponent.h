@@ -18,11 +18,14 @@ namespace PB
     public:
         void init();
 
+        void tearDown() override;
+
         void render() const override;
 
     private:
         std::vector<RenderData> renderData_;
         std::unordered_map<UUID, std::uint32_t> renderDataMap_;
+        std::vector<UUID> subscriptions_;
 
     private:
         virtual void render(

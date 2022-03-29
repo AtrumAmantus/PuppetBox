@@ -9,19 +9,23 @@ namespace PB
     class PUPPET_BOX_API AbstractObjectComponent
     {
     public:
-        AbstractObjectComponent() : mutex_(nullptr) {};
+        AbstractObjectComponent();
 
-        AbstractObjectComponent(std::mutex* mutex) : mutex_(mutex) {};
+        AbstractObjectComponent(std::mutex* mutex);
 
-        virtual void update(float deltaTime) {};
+        void init();
+
+        virtual void tearDown();
+
+        virtual void update(float deltaTime);
 
     protected:
-        std::unique_lock<std::mutex> lock()
-        {
-            return std::unique_lock<std::mutex>(*mutex_);
-        };
+        virtual void inits();
+
+        std::unique_lock<std::mutex> lock();
 
     private:
+        bool isInitialized_ = false;
         std::mutex* mutex_ = nullptr;
     };
 }

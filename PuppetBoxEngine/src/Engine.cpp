@@ -3,6 +3,7 @@
 #include "EventDef.h"
 #include "MessageBroker.h"
 #include "Networking.h"
+#include "PipelineComponents.h"
 
 #define MAX_BUFFER_SIZE 0xffff
 #define MAX_PACKET_SIZE 0xff
@@ -312,6 +313,13 @@ namespace PB
                             gfxApi_->getRenderWindow(),
                             inputReader_,
                             gfxApi_->createRenderComponent()};
+
+                    //TODO: This is currently order dependent, revisit
+                    event->scene->addComponent(std::make_unique<PhysicsComponent>());
+                    event->scene->addComponent(std::make_unique<AIComponent>());
+                    event->scene->addComponent(std::make_unique<ActionComponent>());
+                    event->scene->addComponent(std::make_unique<PositionComponent>());
+                    event->scene->addComponent(std::make_unique<AnimationComponent>());
 
                     sceneGraphs_.insert(
                             std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{

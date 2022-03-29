@@ -1,6 +1,9 @@
 #include "puppetbox/AbstractSceneGraph.h"
+
 #include "GfxMath.h"
 #include "Logger.h"
+#include "MessageBroker.h"
+#include "PipelineEvents.h"
 
 namespace PB
 {
@@ -54,6 +57,13 @@ namespace PB
         {
             if (isInitialized_)
             {
+                for (auto& component : objectComponents_)
+                {
+                    component->tearDown();
+                }
+
+                renderComponent_->tearDown();
+
                 success = tearDowns();
             }
             else
@@ -79,10 +89,7 @@ namespace PB
 
             for (auto& objectComponent: objectComponents_)
             {
-                for (auto& objectData: sceneObjects_)
-                {
-                    objectComponent->update(deltaTime);
-                }
+                objectComponent->update(deltaTime);
             }
         }
 
@@ -96,6 +103,8 @@ namespace PB
     {
         // Add reference to mutex
         *component = AbstractObjectComponent{&mutex_};
+        component->init();
+
         objectComponents_.push_back(std::move(component));
     }
 
@@ -191,7 +200,10 @@ namespace PB
 
     void AbstractSceneGraph::createSceneObject(UUID uuid)
     {
-        sceneObjects_.push_back(uuid);
+        auto event = std::make_shared<PipelineAddEntityEvent>();
+        event->uuid = uuid;
+
+        MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC, event);
     }
 
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)
@@ -203,7 +215,6 @@ namespace PB
 		this->inputReader_ = std::move(rhs.inputReader_);
 		this->viewMode_ = rhs.viewMode_;
 		this->nextViewMode_ = rhs.nextViewMode_;
-		this->sceneObjects_ = std::move(rhs.sceneObjects_);
 		this->objectComponents_ = std::move(rhs.objectComponents_);
 		this->renderComponent_ = std::move(rhs.renderComponent_);
         return *this;

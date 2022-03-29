@@ -45,12 +45,16 @@ namespace PB
     class AnimationComponent : public AbstractObjectComponent
     {
     public:
-        void init();
-
         void update(float deltaTime) override;
+
+        void tearDown() override;
+
+    protected:
+        void inits() override;
 
     private:
         std::unordered_map<UUID, std::uint32_t> animatorMap_{};
         std::vector<EntityAnimator> animators_{};
+        std::vector<UUID> subscriptions_{};
     };
 }
