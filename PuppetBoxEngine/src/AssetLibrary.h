@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "puppetbox/IAnimationCatalogue.h"
-#include "puppetbox/ObjectData.h"
 
 #include "puppetbox/IModel.h"
 #include "AssetArchive.h"
@@ -57,22 +56,6 @@ namespace PB
         bool loadArchive(const std::string& archiveName);
 
         BoneMap loadSkeleton(const std::string& assetName);
-
-        /**
-        * \brief Loads the given scene object with asset data.
-        *
-        * \param assetPath		    Virtual path to the requested asset.
-        * \param sceneObject	    The instantiated scene object to load with asset data.
-        * \param uuid               The UUID to use for the created {\link SceneObject}
-        * \param animationCatalogue The {\link PB::IAnimationCatalogue} to use with the object model.
-        *
-        * \return True if the scene object was successfully loaded with assets, False otherwise.
-        */
-        bool loadSceneObject(
-                const std::string& assetPath,
-                SceneObject* sceneObject,
-                UUID uuid,
-                IAnimationCatalogue* animationCatalogue);
 
         /**
         * \brief Loads a Shader asset given by the provided virtual asset path.
@@ -185,24 +168,5 @@ namespace PB
         * object if an error occurred loading the asset.
         */
         ModelData loadModelDataAsset(const std::string& assetPath, bool* error);
-
-        /**
-         * Builds the {\link RenderedMesh} and {\link BoneMap} objects infered by the given
-         * {\link ModelData} object.
-         *
-         * \param modelData The model data to use to build the {\link RenderedMesh} and {\link BoneMap} objects.
-         * \param parent    The name of the parent to the current {\link ModelData} object.
-         * \param depth     The depth of the current child data.
-         * \param bones     The map of {\link BoneMap} objects to add created bone data to.
-         * \param meshes    The map of {\link RenderedMesh} objects to add created mesh data to.
-         *
-         * \return True if the mesh and bone objects were created successfully, False otherwise.
-         */
-        bool buildMeshAndBones(
-                ModelData modelData,
-                const std::string& parentName,
-                BoneMap& bones,
-                std::unordered_map<std::uint32_t, RenderedMesh*>& meshes
-        );
     };
 }

@@ -11,7 +11,8 @@ namespace PB
         DefaultSceneGraph(
                 const std::string sceneName,
                 RenderWindow renderWindow,
-                std::shared_ptr<AbstractInputReader> reader)
-                : AbstractSceneGraph(sceneName, renderWindow, reader) {};
+                std::shared_ptr<AbstractInputReader> reader,
+                std::unique_ptr<AbstractRenderComponent> renderComponent)
+                : AbstractSceneGraph(sceneName, renderWindow, reader, std::move(renderComponent)) {};
     };
 }

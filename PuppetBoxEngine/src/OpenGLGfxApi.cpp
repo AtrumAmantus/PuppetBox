@@ -131,9 +131,7 @@ namespace PB
 
     class OpenglRenderComponent : public AbstractRenderComponent
     {
-        void render(
-                const std::unordered_map<std::uint32_t, mat4>& boneTransforms,
-                const Model& model) const override
+        void render(const std::vector<mat4>& boneTransforms, const Model& model) const override
         {
             //TODO: Revisit this, just leave it on? Material specific?
             glEnable(GL_BLEND);
@@ -157,17 +155,39 @@ namespace PB
                     case EMISSION:
                         shader.setInt("material.emissionMap", i);
                         break;
+                    default:
+                        LOGGER_ERROR("Unsupported ImageMapType");
+                        break;
                 }
             }
 
-            mat4* transformArray = new mat4[boneTransforms.size()];
+            shader.setMat4("boneTransforms",boneTransforms.size(), &boneTransforms[0]);
+            shader.setMat4("meshTransform", model.meshTransform);
 
-            for (auto& boneTransform : boneTransforms)
+            Mesh mesh = RENDER_REFERENCES.at(model.meshID);
+
+            if (mesh.EBO != 0)
             {
-                transformArray
+                //                           v-- number of indices to draw
+                glDrawElements(GL_TRIANGLES, mesh.drawCount, GL_UNSIGNED_INT, 0); // NOLINT(modernize-use-nullptr)
+            }
+            else
+            {
+                //                            v-- number of vertices to draw
+                glDrawArrays(GL_TRIANGLES, 0, mesh.drawCount);
             }
 
-            shader.setMat4("boneTransforms")
+            // Unset VAO for next render
+            glBindVertexArray(0);
+
+            // Bind each image to the shader program
+            for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
+            {
+                glActiveTexture((GL_TEXTURE0 + i));
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+
+            shader.unuse();
         }
     };
 
@@ -582,8 +602,8 @@ namespace PB
         return false;
     }
 
-    std::unique_ptr<AbstractRenderComponent> createRenderComponent() const
+    std::unique_ptr<AbstractRenderComponent> OpenGLGfxApi::createRenderComponent() const
     {
-
+        return std::make_unique<OpenglRenderComponent>();
     }
 }

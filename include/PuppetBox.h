@@ -8,7 +8,6 @@
 #include "puppetbox/AbstractSceneGraph.h"
 #include "puppetbox/Constants.h"
 #include "puppetbox/Event.h"
-#include ObjectData.h
 #include "puppetbox/TypeDef.h"
 #include "puppetbox/UIComponent.h"
 
@@ -60,27 +59,6 @@ namespace PB
      * \return True if the font asset was loaded successfully, False otherwise.
      */
     extern PUPPET_BOX_API bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize);
-
-    /**
-     * \brief Injects the base assets into the given {\link PB::SceneObject}.
-     *
-     * \param assetPath     The path to the asset to inject
-     * \param sceneObject   The SceneObject to inject assets into, must not be a nullptr.
-     *
-     * \return True if the {\link PB::SceneObject} was successfully injected with assets, False otherwise.
-     */
-    extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject);
-
-    /**
-     * \brief Injects the base asset into the given {\link PB::SceneObject} with the given UUID.
-     *
-     * \param assetPath     The path to the asset to inject
-     * \param sceneObject   The SceneObject to inject assets into, must not be a nullptr.
-     * \param uuid          The {\link PB::UUID} to use for the {\link PB::SceneObject}.
-     *
-     * \return True if the {\link PB::SceneObject} was successfully injected with assets, False otherwise.
-     */
-    extern PUPPET_BOX_API bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid);
 
     /**
      * \brief Loads the animations associated with the given asset path.

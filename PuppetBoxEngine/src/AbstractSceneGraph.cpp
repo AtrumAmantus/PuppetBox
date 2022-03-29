@@ -74,11 +74,15 @@ namespace PB
         // Update implementing application first in case new objects were added or modified.
         preLoopUpdates(deltaTime);
 
-        for (auto& objectComponent : objectComponents_)
         {
-            for (auto& objectData : sceneObjects_)
+            std::unique_lock<std::mutex> mlock(mutex_);
+
+            for (auto& objectComponent: objectComponents_)
             {
-                objectComponent.update(deltaTime);
+                for (auto& objectData: sceneObjects_)
+                {
+                    objectComponent->update(deltaTime);
+                }
             }
         }
 
@@ -86,6 +90,13 @@ namespace PB
         postLoopUpdates(deltaTime);
 
         camera_.update(deltaTime);
+    }
+
+    void AbstractSceneGraph::addComponent(std::unique_ptr<AbstractObjectComponent> component)
+    {
+        // Add reference to mutex
+        *component = AbstractObjectComponent{&mutex_};
+        objectComponents_.push_back(std::move(component));
     }
 
     void AbstractSceneGraph::render() const
@@ -181,5 +192,20 @@ namespace PB
     void AbstractSceneGraph::createSceneObject(UUID uuid)
     {
         sceneObjects_.push_back(uuid);
+    }
+
+    AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph& rhs)
+    {
+		this->isInitialized_ = rhs.isInitialized_;
+		this->isSetup_ = rhs.isSetup_;
+		this->camera_ = rhs.camera_;
+		this->renderWindow_ = rhs.renderWindow_;
+		this->inputReader_ = std::move(rhs.inputReader_);
+		this->viewMode_ = rhs.viewMode_;
+		this->nextViewMode_ = rhs.nextViewMode_;
+		this->sceneObjects_ = std::move(rhs.sceneObjects_);
+		this->objectComponents_ = std::move(rhs.objectComponents_);
+		this->renderComponent_ = std::move(rhs.renderComponent_);
+        return *this;
     }
 }

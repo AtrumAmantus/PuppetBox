@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -9,7 +10,7 @@
 #include "Camera.h"
 #include "Constants.h"
 #include "DataStructures.h"
-#include "IObjectComponent.h"
+#include "AbstractObjectComponent.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
 
@@ -60,6 +61,8 @@ namespace PB
         */
         void update(const float deltaTime);
 
+        void addComponent(std::unique_ptr<AbstractObjectComponent> component);
+
         /**
         * \brief Invokes the render() method of the sceneHandler, rendering out any desired SceneObjects
         * for the current frame in the scene.
@@ -93,6 +96,8 @@ namespace PB
          * \return The UIProjection matrix for the current scene.
          */
         mat4 getUIProjection() const;
+
+        AbstractSceneGraph& operator=(AbstractSceneGraph rhs);
 
     protected:
         /**
@@ -177,6 +182,8 @@ namespace PB
          */
         void createSceneObject(UUID uuid);
 
+        AbstractSceneGraph& operator=(AbstractSceneGraph& rhs);
+
     private:
         bool isInitialized_ = false;
         bool isSetup_ = false;
@@ -186,7 +193,8 @@ namespace PB
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
         std::vector<PB::UUID> sceneObjects_{};
-        std::vector<IObjectComponent> objectComponents_{};
+        std::vector<std::unique_ptr<AbstractObjectComponent>> objectComponents_{};
         std::unique_ptr<AbstractRenderComponent> renderComponent_ = nullptr;
+        std::mutex mutex_;
     };
 }

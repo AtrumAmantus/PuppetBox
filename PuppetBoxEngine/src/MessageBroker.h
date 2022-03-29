@@ -8,6 +8,8 @@
 
 #include "puppetbox/Utilities.h"
 
+#include "Logger.h"
+
 /**
  * Handles messaging communication within the base engine and implementing application.
  */

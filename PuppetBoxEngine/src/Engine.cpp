@@ -286,7 +286,11 @@ namespace PB
 
     void Engine::init()
     {
-        currentScene_ = std::make_shared<DefaultSceneGraph>("default", gfxApi_->getRenderWindow(), inputReader_);
+        currentScene_ = std::make_shared<DefaultSceneGraph>(
+                "default",
+                gfxApi_->getRenderWindow(),
+                inputReader_,
+                gfxApi_->createRenderComponent());
 
         sceneGraphs_.insert(
                 std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
@@ -302,10 +306,12 @@ namespace PB
                 [this](std::shared_ptr<void> data) {
                     auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
 
+                    // Re-initialize base class properties to required values
                     *(event->scene) = AbstractSceneGraph{
                             event->scene->name,
                             gfxApi_->getRenderWindow(),
-                            inputReader_};
+                            inputReader_,
+                            gfxApi_->createRenderComponent()};
 
                     sceneGraphs_.insert(
                             std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{

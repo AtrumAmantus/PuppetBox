@@ -14,9 +14,6 @@ int main(int argc, char** argv)
         PB::CreateScene(singleplayerScene);
         PB::SetActiveScene("Singleplayer");
 
-        auto multiplayerScene = std::make_shared<MultiplayerSceneGraph>("Multiplayer");
-        PB::CreateScene(multiplayerScene);
-
         return true;
     });
 

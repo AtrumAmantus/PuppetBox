@@ -29,7 +29,6 @@ protected:
 
             PB::UUID uuid = PB::RandomUtils::uuid();
             createSceneObject(uuid);
-
         }
         else
         {

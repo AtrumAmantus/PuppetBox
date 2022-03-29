@@ -290,28 +290,6 @@ namespace PB
         return !error;
     }
 
-    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject)
-    {
-        return CreateSceneObject(assetPath, sceneObject, RandomUtils::uuid());
-    }
-
-    bool CreateSceneObject(const std::string& assetPath, SceneObject* sceneObject, UUID uuid)
-    {
-        bool success;
-
-        if (sceneObject == nullptr)
-        {
-            success = false;
-            LOGGER_ERROR("SceneObject must be instantiated prior to invoking CreateSceneObject");
-        }
-        else
-        {
-            success = assetLibrary->loadSceneObject(assetPath, sceneObject, uuid, &animationCatalogue);
-        }
-
-        return success;
-    }
-
     bool LoadAnimationsPack(const std::string& assetPath)
     {
         return animationCatalogue.load(assetPath);
