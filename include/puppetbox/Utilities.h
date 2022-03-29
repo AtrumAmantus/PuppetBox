@@ -8,6 +8,7 @@
 #include <unordered_set>
 
 #include "DataStructures.h"
+#include "TypeDef.h"
 
 namespace PB
 {
@@ -22,7 +23,7 @@ namespace PB
         *
         * \param Pointer to the original string to trim.
         */
-        void trim(std::string* str);
+        extern PUPPET_BOX_API void trim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the beginning and the end of the string, returning a new string.
@@ -31,7 +32,7 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string trim(std::string str);
+        extern PUPPET_BOX_API std::string trim(std::string str);
 
         /**
         * \brief Trims the specified character from the beginning and the end of the string, altering the original string.
@@ -39,7 +40,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void trim(std::string* str, const char& c);
+        extern PUPPET_BOX_API void trim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the beginning and the end of the string, returning a new string.
@@ -49,14 +50,14 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string trim(std::string str, const char& c);
+        extern PUPPET_BOX_API std::string trim(std::string str, const char& c);
 
         /**
         * \brief Trims all whitespace from the beginning of the string, altering the original string.
         *
         * \param str	Pointer to the original string to trim.
         */
-        void ltrim(std::string* str);
+        extern PUPPET_BOX_API void ltrim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the beginning of the string, returning a new string.
@@ -65,7 +66,7 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string ltrim(std::string str);
+        extern PUPPET_BOX_API std::string ltrim(std::string str);
 
         /**
         * \brief Trims the specified character from the beginning of the string, altering the original string.
@@ -73,7 +74,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void ltrim(std::string* str, const char& c);
+        extern PUPPET_BOX_API void ltrim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the beginning of the string, returning a new string.
@@ -83,14 +84,14 @@ namespace PB
         *
         * \return  The new trimmed string.
         */
-        std::string ltrim(std::string str, const char& c);
+        extern PUPPET_BOX_API std::string ltrim(std::string str, const char& c);
 
         /**
         * \brief Trims all whitespace from the end of the string, altering the original string.
         *
         * \param str	Pointer to the original string to trim.
         */
-        void rtrim(std::string* str);
+        extern PUPPET_BOX_API void rtrim(std::string* str);
 
         /**
         * \brief Trims all whitespace from the end of the string, returning a new string.
@@ -99,7 +100,7 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string rtrim(std::string str);
+        extern PUPPET_BOX_API std::string rtrim(std::string str);
 
         /**
         * \brief Trims the specified character from the end of the string, altering the original string.
@@ -107,7 +108,7 @@ namespace PB
         * \param str	Pointer to the original string to trim.
         * \param c		The character to trim.
         */
-        void rtrim(std::string* str, const char& c);
+        extern PUPPET_BOX_API void rtrim(std::string* str, const char& c);
 
         /**
         * \brief Trims the specified character from the end of the string, returning a new string.
@@ -117,7 +118,7 @@ namespace PB
         *
         * \return The new trimmed string.
         */
-        std::string rtrim(std::string str, const char& c);
+        extern PUPPET_BOX_API std::string rtrim(std::string str, const char& c);
 
         /**
         * \brief Determines if the given string starts with the given prefix.
@@ -127,7 +128,7 @@ namespace PB
         *
         * \return True if the given string starts with the given prefix, False otherwise.
         */
-        bool startsWith(const std::string& str, const std::string& prefix);
+        extern PUPPET_BOX_API bool startsWith(const std::string& str, const std::string& prefix);
 
         /**
         * \brief Splits the given string by whitespace values, with an option to allow or disallow null values
@@ -139,7 +140,7 @@ namespace PB
         * \param excludeNull	If true, allows null values in the array of split values due to repeating whitespace characters.
         * in the original string, otherwise null values will be omitted.
         */
-        void split(
+        extern PUPPET_BOX_API void split(
                 const std::string& str,
                 std::string** splitValues,
                 std::uint32_t* splitCount,
@@ -157,7 +158,7 @@ namespace PB
         * \param excludeNull	If true, allows null values in the array of split values due to repeating delimiter characters.
         * in the original string, otherwise null values will be omitted.
         */
-        void split(
+        extern PUPPET_BOX_API void split(
                 const std::string& str,
                 const std::string& delimiter,
                 std::uint32_t splitLimit,
@@ -176,7 +177,7 @@ namespace PB
         * \param excludeNull	If true, allows null values in the array of split values due to repeating delimiter characters.
         * in the original string, otherwise null values will be omitted.
         */
-        void split(
+        extern PUPPET_BOX_API void split(
                 const std::string& str,
                 const std::string& delimiter,
                 std::string** splitValues,
@@ -189,7 +190,7 @@ namespace PB
          * \param original The original string to transform.
          * \return The new string with all characters transformed to lower case equivalents.
          */
-        std::string toLowerCase(const std::string& original);
+        extern PUPPET_BOX_API std::string toLowerCase(const std::string& original);
     }
 
     /**
@@ -241,18 +242,18 @@ namespace PB
          *
          * \return A random {\link PB::UUID} object.
          */
-        UUID uuid();
+        extern PUPPET_BOX_API UUID uuid();
 
         /**
         * \brief Returns values based on preloaded perlin noise values.
         *
         * \param offset	The offset value to draw from the preloaded perlin values.
         */
-        float perlinValue(std::uint64_t offset);
+        extern PUPPET_BOX_API float perlinValue(std::uint64_t offset);
 
         /**
         * \brief Returns pseudo random values with uniform distribution.
         */
-        float pseudoRand();
+        extern PUPPET_BOX_API float pseudoRand();
     }
 }

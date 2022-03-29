@@ -97,7 +97,7 @@ namespace PB
          */
         mat4 getUIProjection() const;
 
-        AbstractSceneGraph& operator=(AbstractSceneGraph rhs);
+        AbstractSceneGraph& operator=(AbstractSceneGraph& rhs);
 
     protected:
         /**
@@ -181,8 +181,6 @@ namespace PB
          * \brief Creates a new scene object with the given {\link PB::UUID}.
          */
         void createSceneObject(UUID uuid);
-
-        AbstractSceneGraph& operator=(AbstractSceneGraph& rhs);
 
     private:
         bool isInitialized_ = false;

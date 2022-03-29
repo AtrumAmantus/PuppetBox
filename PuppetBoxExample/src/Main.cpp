@@ -1,6 +1,5 @@
 #include <PuppetBox.h>
 
-#include "MultiplayerSceneGraph.h"
 #include "SingleplayerSceneGraph.h"
 
 // Required signature, Entry point is in SDL2
