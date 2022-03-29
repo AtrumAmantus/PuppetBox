@@ -12,7 +12,7 @@ namespace PB
                 const std::string sceneName,
                 RenderWindow renderWindow,
                 std::shared_ptr<AbstractInputReader> reader,
-                std::unique_ptr<AbstractRenderComponent> renderComponent)
+                std::unique_ptr<IRenderComponent> renderComponent)
                 : AbstractSceneGraph(sceneName, renderWindow, reader, std::move(renderComponent)) {};
     };
 }

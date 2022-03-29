@@ -13,7 +13,7 @@ namespace PB
             const std::string& sceneName,
             RenderWindow renderWindow,
             std::shared_ptr<AbstractInputReader> inputReader,
-            std::unique_ptr<AbstractRenderComponent> renderComponent)
+            std::unique_ptr<IRenderComponent> renderComponent)
             : name(sceneName),
             renderWindow_(renderWindow),
             inputReader_(inputReader),

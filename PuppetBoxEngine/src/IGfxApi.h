@@ -9,6 +9,7 @@
 #include FT_FREETYPE_H
 
 #include "puppetbox/DataStructures.h"
+#include "puppetbox/IRenderComponent.h"
 #include "puppetbox/RenderWindow.h"
 
 #include "Font.h"
@@ -118,6 +119,6 @@ namespace PB
         */
         virtual bool initGfxDebug() const = 0;
 
-        virtual std::unique_ptr<AbstractRenderComponent> createRenderComponent() const = 0;
+        virtual std::unique_ptr<IRenderComponent> createRenderComponent() const = 0;
     };
 }

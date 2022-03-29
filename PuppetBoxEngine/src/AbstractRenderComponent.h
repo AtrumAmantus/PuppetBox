@@ -7,17 +7,18 @@
 #include <vector>
 
 #include "puppetbox/DataStructures.h"
+#include "puppetbox/IRenderComponent.h"
 
 #include "RenderData.h"
 
 namespace PB
 {
-    class AbstractRenderComponent
+    class AbstractRenderComponent : public IRenderComponent
     {
     public:
         void init();
 
-        void render() const;
+        void render() const override;
 
     private:
         std::vector<RenderData> renderData_;

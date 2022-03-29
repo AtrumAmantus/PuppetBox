@@ -5,6 +5,7 @@
 
 #include "puppetbox/DataStructures.h"
 
+#include "AbstractRenderComponent.h"
 #include "GfxMath.h"
 #include "Logger.h"
 #include "OpenGLGfxApi.h"
@@ -602,8 +603,11 @@ namespace PB
         return false;
     }
 
-    std::unique_ptr<AbstractRenderComponent> OpenGLGfxApi::createRenderComponent() const
+    std::unique_ptr<IRenderComponent> OpenGLGfxApi::createRenderComponent() const
     {
-        return std::make_unique<OpenglRenderComponent>();
+        std::unique_ptr<OpenglRenderComponent> component = std::make_unique<OpenglRenderComponent>();
+        component->init();
+
+        return component;
     }
 }

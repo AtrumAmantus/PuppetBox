@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "AbstractInputReader.h"
-#include "AbstractRenderComponent.h"
+#include "AbstractObjectComponent.h"
 #include "Camera.h"
 #include "Constants.h"
 #include "DataStructures.h"
-#include "AbstractObjectComponent.h"
+#include "IRenderComponent.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
 
@@ -36,7 +36,7 @@ namespace PB
                 const std::string& sceneName,
                 RenderWindow renderWindow,
                 std::shared_ptr<AbstractInputReader> inputReader,
-                std::unique_ptr<AbstractRenderComponent> renderComponent);
+                std::unique_ptr<IRenderComponent> renderComponent);
 
         /**
          * \brief Invokes the implementing class's setUps() method, checking first if the
@@ -194,7 +194,7 @@ namespace PB
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
         std::vector<PB::UUID> sceneObjects_{};
         std::vector<std::unique_ptr<AbstractObjectComponent>> objectComponents_{};
-        std::unique_ptr<AbstractRenderComponent> renderComponent_ = nullptr;
+        std::unique_ptr<IRenderComponent> renderComponent_ = nullptr;
         std::mutex mutex_;
     };
 }

@@ -111,7 +111,7 @@ namespace PB
         */
         bool initGfxDebug() const override;
 
-        std::unique_ptr<AbstractRenderComponent> createRenderComponent() const override;
+        std::unique_ptr<IRenderComponent> createRenderComponent() const override;
 
     private:
         std::uint32_t width_ = 0;
