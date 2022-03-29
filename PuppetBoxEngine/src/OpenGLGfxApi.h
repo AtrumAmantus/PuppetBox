@@ -55,7 +55,7 @@ namespace PB
          *
          * \return Object holding references to the window dimensions.
          */
-        const RenderWindow getRenderWindow();
+        const RenderWindow getRenderWindow() override;
 
         /**
         * \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.

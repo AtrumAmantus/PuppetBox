@@ -26,11 +26,11 @@ namespace PB
                 std::uint32_t boneId,
                 const std::string& boneName) const override;
 
-        std::string getPath() const;
+        std::string getPath() const override;
 
-        std::uint8_t getFps() const;
+        std::uint8_t getFps() const override;
 
-        std::uint8_t getFrameCount() const;
+        std::uint8_t getFrameCount() const override;
 
     private:
         std::string animationPath_;

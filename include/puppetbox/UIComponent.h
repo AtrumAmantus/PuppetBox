@@ -152,6 +152,8 @@ namespace PB
     class PUPPET_BOX_API UIComponentAttributes
     {
     public:
+        virtual ~UIComponentAttributes() = default;
+
         virtual void setUIntAttribute(UI::Attribute attributeName, std::uint32_t value) = 0;
 
         virtual Result<std::uint32_t> getUIntAttribute(UI::Attribute attributeName) const = 0;

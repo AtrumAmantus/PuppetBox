@@ -97,6 +97,8 @@ namespace PB
     class PUPPET_BOX_API IAnimator
     {
     public:
+        virtual ~IAnimator() = default;
+
         /**
          * \brief Gets the path name for the animation attached to this animator.
          *

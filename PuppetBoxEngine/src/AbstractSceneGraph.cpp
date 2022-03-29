@@ -194,7 +194,7 @@ namespace PB
         sceneObjects_.push_back(uuid);
     }
 
-    AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph& rhs)
+    AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)
     {
 		this->isInitialized_ = rhs.isInitialized_;
 		this->isSetup_ = rhs.isSetup_;

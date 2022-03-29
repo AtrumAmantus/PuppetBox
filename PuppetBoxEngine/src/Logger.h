@@ -20,6 +20,8 @@ namespace PB
     class LoggingAppender
     {
     public:
+        virtual ~LoggingAppender() = default;
+
         virtual void send(const std::string& message) = 0;
     };
 

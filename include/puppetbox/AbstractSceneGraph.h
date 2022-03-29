@@ -97,7 +97,7 @@ namespace PB
          */
         mat4 getUIProjection() const;
 
-        AbstractSceneGraph& operator=(AbstractSceneGraph& rhs);
+        AbstractSceneGraph& operator=(AbstractSceneGraph rhs);
 
     protected:
         /**
@@ -192,7 +192,7 @@ namespace PB
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
         std::vector<PB::UUID> sceneObjects_{};
         std::vector<std::unique_ptr<AbstractObjectComponent>> objectComponents_{};
-        std::unique_ptr<IRenderComponent> renderComponent_ = nullptr;
+        std::unique_ptr<IRenderComponent> renderComponent_{nullptr};
         std::mutex mutex_;
     };
 }

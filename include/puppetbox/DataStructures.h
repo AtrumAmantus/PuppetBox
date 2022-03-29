@@ -8,6 +8,7 @@
 #include <ostream>
 #include <queue>
 #include <string>
+#include <sstream>
 #include <unordered_map>
 
 #include "Constants.h"

@@ -358,7 +358,7 @@ namespace PB
                 component->setAttributes(std::move(attributes));
                 break;
             default:
-                LOGGER_ERROR("Unrecognized component type: " + uiComponentType);
+                LOGGER_ERROR("Unrecognized component type: " + std::to_string(uiComponentType));
         }
 
         *error = component == nullptr || !component->init();
