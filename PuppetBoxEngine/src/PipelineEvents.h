@@ -8,7 +8,7 @@
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/IAnimationCatalogue.h"
 
-#include "RenderData.h"
+#include "puppetbox/RenderData.h"
 
 namespace PB
 {

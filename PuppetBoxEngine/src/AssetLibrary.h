@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "puppetbox/IAnimationCatalogue.h"
+#include "puppetbox/ImageMapReference.h"
 
 #include "puppetbox/IModel.h"
 #include "AssetArchive.h"
@@ -13,7 +14,6 @@
 #include "Logger.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "RenderedMesh.h"
 #include "Shader.h"
 
 namespace PB
@@ -58,15 +58,19 @@ namespace PB
         BoneMap loadSkeleton(const std::string& assetName);
 
         /**
-        * \brief Loads a Shader asset given by the provided virtual asset path.
-        *
+        * \brief Loads a Mesh asset given by the provided virtual asset path.
+         *
         * \param assetPath	Virtual path to the requested asset.
         * \param error		Flag indicating an error occurred if set to True.
         *
-        * \return The loaded Shader object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
+        * \return A reference to the render data for the loaded mesh of the given
+        * virtual asset path, or a 0 if an error occurred loading the asset.
         */
-        Shader loadShaderAsset(const std::string& assetPath, bool* error);
+        std::uint32_t loadMeshAsset(const std::string& assetPath, bool* error);
+
+        std::uint32_t loadImageMapAsset(const std::string& assetPath, bool* error);
+
+        std::uint32_t loadShaderAsset(const std::string& assetPath, bool* error);
 
         /**
          * \brief Loads a set of animation assets, sets are a collection of animations associated with
@@ -110,29 +114,6 @@ namespace PB
          */
         Font loadFontAsset(const std::string& fontPath, std::uint8_t fontSize, bool* error);
 
-        /**
-        * \brief Loads a Mesh asset given by the provided virtual asset path.
-         *
-        * \param assetPath	Virtual path to the requested asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return A reference to the render data for the loaded mesh of the given
-        * virtual asset path, or a 0 if an error occurred loading the asset.
-        */
-        std::uint32_t loadMeshAsset(const std::string& assetPath, bool* error);
-
-        /**
-        * \brief Loads an ImageReference asset given by the provided virtual asset path.
-        *
-        * \param assetPath		Virtual path to the requested asset.
-        * \param imageOptions	Image loading options to use when loading into memory.
-        * \param error			Flag indicating an error occurred if set to True.
-        *
-        * \return The loaded ImageReference object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
-        */
-        ImageReference loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error);
-
     private:
         std::string archiveRoot_;
         std::shared_ptr<IGfxApi> gfxApi_;
@@ -140,33 +121,8 @@ namespace PB
         std::unordered_map<std::string, AssetArchive> assetArchives_{};
         std::unordered_map<std::string, BoneMap> loadedSkeletons_{};
         std::unordered_map<std::string, std::uint32_t> loadedMeshes_{};
-        std::unordered_map<std::string, Material> loadedMaterials_{};
-        std::unordered_map<std::string, ImageReference> loadedImages_{};
-        std::unordered_map<std::string, ModelData> loadedModelData_{};
-        std::unordered_map<std::string, Shader> loadedShaders_{};
+        std::unordered_map<std::string, std::uint32_t> loadedImageMaps_{};
+        std::unordered_map<std::string, std::uint32_t> loadedShaders_{};
         std::unordered_map<std::string, Font> loadedFonts_{};
-    private:
-
-        /**
-        * \brief Loads a Material asset given by the provided virtual asset path.
-        *
-        * \param assetPath	Virtual path to the requested asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return The loaded Material object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
-        */
-        Material loadMaterialAsset(const std::string& assetPath, bool* error);
-
-        /**
-        * \brief Loads a ModelData2D asset given by the provided virtual asset path.
-        *
-        * \param assetPath	Virtual path to the requested asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return The loaded ModelData2D object for the respective virtual asset path, or an empty
-        * object if an error occurred loading the asset.
-        */
-        ModelData loadModelDataAsset(const std::string& assetPath, bool* error);
     };
 }

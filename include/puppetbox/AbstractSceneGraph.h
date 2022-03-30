@@ -11,6 +11,7 @@
 #include "Constants.h"
 #include "DataStructures.h"
 #include "IRenderComponent.h"
+#include "RenderData.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
 
@@ -181,6 +182,8 @@ namespace PB
          * \brief Creates a new scene object with the given {\link PB::UUID}.
          */
         void createSceneObject(UUID uuid);
+
+        void addModelToSceneObject(const std::string& modelName, UUID uuid, Model model);
 
     private:
         bool isInitialized_ = false;

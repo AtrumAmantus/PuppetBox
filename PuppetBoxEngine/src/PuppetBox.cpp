@@ -283,6 +283,21 @@ namespace PB
         return assetLibrary->loadArchive(archiveName);
     }
 
+    std::uint32_t GetMeshAsset(const std::string& assetPath, bool* error)
+    {
+        return assetLibrary->loadMeshAsset(assetPath, error);
+    }
+
+    std::uint32_t GetImageMapAsset(const std::string& assetPath, bool* error)
+    {
+        return assetLibrary->loadImageMapAsset(assetPath, error);
+    }
+
+    std::uint32_t GetShaderAsset(const std::string& assetPath, bool* error)
+    {
+        return assetLibrary->loadShaderAsset(assetPath, error);
+    }
+
     bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize)
     {
         bool error = false;

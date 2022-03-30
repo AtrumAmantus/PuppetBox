@@ -1,7 +1,7 @@
 #include <unordered_map>
 
 #include "puppetbox/UIComponent.h"
-#include "Logger.h"
+#include "../Logger.h"
 
 namespace PB
 {

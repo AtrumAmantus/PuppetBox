@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "puppetbox/DataStructures.h"
+#include "DataStructures.h"
 
 namespace PB
 {

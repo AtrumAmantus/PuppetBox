@@ -49,6 +49,12 @@ namespace PB
      */
     extern PUPPET_BOX_API bool LoadAssetPack(const std::string& archiveName);
 
+    extern PUPPET_BOX_API std::uint32_t GetMeshAsset(const std::string& assetPath, bool* error);
+
+    extern PUPPET_BOX_API std::uint32_t GetImageMapAsset(const std::string& assetPath, bool* error);
+
+    extern PUPPET_BOX_API std::uint32_t GetShaderAsset(const std::string& assetPath, bool* error);
+
     /**
      * \brief Loads a font asset from the given fully qualified asset path.
      *

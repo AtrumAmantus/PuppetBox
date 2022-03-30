@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 #include <glad/glad.h>
 
@@ -16,6 +17,7 @@ namespace PB
     namespace
     {
         std::vector<Mesh> RENDER_REFERENCES{};
+        std::vector<ImageMapReference> IMAGE_MAP_REFERENCES{};
         std::vector<Shader> SHADER_PROGRAM_REFERENCES{};
 
         /**
@@ -137,16 +139,17 @@ namespace PB
             //TODO: Revisit this, just leave it on? Material specific?
             glEnable(GL_BLEND);
 
-            const Shader& shader = SHADER_PROGRAM_REFERENCES.at(model.shaderProgramID);
+            const Shader& shader = SHADER_PROGRAM_REFERENCES[model.shaderProgramID - 1];
             shader.use();
 
             // Bind each image to the shader program
             for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
             {
                 const auto& imageMap = model.imageMaps.at(i);
+                const auto& imageReference = IMAGE_MAP_REFERENCES[imageMap.imageMapID - 1];
 
                 glActiveTexture((GL_TEXTURE0 + i));
-                glBindTexture(GL_TEXTURE_2D, imageMap.imageMapID);
+                glBindTexture(GL_TEXTURE_2D, imageReference.imageMapId);
 
                 switch (imageMap.mapType)
                 {
@@ -165,7 +168,7 @@ namespace PB
             shader.setMat4("boneTransforms",boneTransforms.size(), &boneTransforms[0]);
             shader.setMat4("meshTransform", model.meshTransform);
 
-            Mesh mesh = RENDER_REFERENCES.at(model.meshID);
+            Mesh mesh = RENDER_REFERENCES[model.meshID - 1];
 
             if (mesh.EBO != 0)
             {
@@ -259,31 +262,25 @@ namespace PB
         };
     }
 
-    ImageReference OpenGLGfxApi::loadImage(ImageData imageData, ImageOptions options) const
+    std::uint32_t OpenGLGfxApi::loadImage(ImageData imageData) const
     {
-        ImageReference imageReference{0};
+        std::uint32_t imageMapId;
+
+        ImageMapReference reference{};
 
         if (imageData.bufferData)
         {
-            std::uint32_t openGLId;
+            std::uint32_t openGLID;
 
-            glGenTextures(1, &openGLId);
-            glBindTexture(GL_TEXTURE_2D, openGLId);
+            glGenTextures(1, &openGLID);
+            glBindTexture(GL_TEXTURE_2D, openGLID);
 
-            if (options.repeatMode == ImageOptions::Mode::CLAMP_TO_BORDER)
-            {
-                // Repeat texture
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            // Clamp border
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, options.colour);
-            }
-            else
-            {
-                // Repeat texture
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            }
+            const float BLACK[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, BLACK);
 
             // Linear sampling
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -300,10 +297,20 @@ namespace PB
             // Free up binding after we create it
             glBindTexture(GL_TEXTURE_2D, 0);
 
-            imageReference = ImageReference{openGLId};
+            reference.imageMapId = openGLID;
+            reference.width = imageData.width;
+            reference.height = imageData.height;
+            reference.requiresAlphaBlending = imageData.numChannels == 4;
+
+            IMAGE_MAP_REFERENCES.push_back(reference);
+            imageMapId = IMAGE_MAP_REFERENCES.size();
+        }
+        else
+        {
+            imageMapId = 0;
         }
 
-        return imageReference;
+        return imageMapId;
     }
 
     bool OpenGLGfxApi::buildCharacterMap(
@@ -535,6 +542,13 @@ namespace PB
         RENDER_REFERENCES.push_back(mesh);
 
         return RENDER_REFERENCES.size();
+    }
+
+    std::uint32_t OpenGLGfxApi::loadShader(const Shader& shader) const
+    {
+        SHADER_PROGRAM_REFERENCES.push_back(shader);
+
+        return SHADER_PROGRAM_REFERENCES.size();
     }
 
     void OpenGLGfxApi::initializeUBORanges()

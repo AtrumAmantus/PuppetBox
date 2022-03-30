@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "puppetbox/ImageMapReference.h"
+
 #include "AbstractRenderComponent.h"
 
 //TODO: This is coupled to the FreeType library and it shouldn't be.
@@ -17,6 +19,7 @@
 #include "ImageOptions.h"
 #include "ImageReference.h"
 #include "Mesh.h"
+#include "Shader.h"
 #include "TypeDef.h"
 
 namespace PB
@@ -65,13 +68,7 @@ namespace PB
          */
         virtual const RenderWindow getRenderWindow() = 0;
 
-        /**
-        * \brief Used to execute the GFX API specific commands to load an image into GFX memory.
-        *
-        * \param imageData	The image data to be loaded into memory.
-        * \param options	Image loading options to use when loading into memory.
-        */
-        virtual ImageReference loadImage(ImageData imageData, ImageOptions options) const = 0;
+        virtual std::uint32_t loadImage(ImageData imageData) const = 0;
 
         /**
          * \brief Generates textures for each glyph of the given font face, adding references to them
@@ -97,6 +94,8 @@ namespace PB
         * \return Reference to the render details to use for rendering this mesh.
         */
         virtual std::uint32_t loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const = 0;
+
+        virtual std::uint32_t loadShader(const Shader& shader) const = 0;
 
         /**
         * \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.

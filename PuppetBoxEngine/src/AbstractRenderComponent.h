@@ -9,7 +9,7 @@
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/IRenderComponent.h"
 
-#include "RenderData.h"
+#include "puppetbox/RenderData.h"
 
 namespace PB
 {

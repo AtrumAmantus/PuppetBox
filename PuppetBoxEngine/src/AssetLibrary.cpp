@@ -5,9 +5,6 @@
 
 #include "../generated/DefaultAssets.h"
 
-#include "GfxMath.h"
-#include "OpenGLModel.h"
-#include "Rendered2DMesh.h"
 #include "puppetbox/Utilities.h"
 
 namespace PB
@@ -120,8 +117,10 @@ namespace PB
             return gfxApi->loadMesh(&spriteMeshVertices[0], spriteMeshVertices.size());
         }
 
-        Shader loadDefaultGlyphShader(const std::shared_ptr<IGfxApi>& gfxApi, bool* error)
+        std::uint32_t loadDefaultGlyphShader(const std::shared_ptr<IGfxApi>& gfxApi, bool* error)
         {
+            std::uint32_t shaderId;
+
             const std::string defaultAssetPath = "Default/Shader/UI/Glyph";
 
             Shader shader = Shader{
@@ -140,19 +139,23 @@ namespace PB
                 if (shader.init())
                 {
                     LOGGER_INFO("Shader program '" + defaultAssetPath + "' loaded.");
+                    shaderId = gfxApi->loadShader(shader);
                 }
                 else
                 {
+                    *error = true;
+                    shaderId = 0;
                     LOGGER_ERROR("Failed to compile shader program '" + defaultAssetPath + "'");
                 }
             }
             else
             {
                 *error = true;
+                shaderId = 0;
                 LOGGER_ERROR("Failed to load shader '" + defaultAssetPath + "'");
             }
 
-            return shader;
+            return shaderId;
         }
     }
 
@@ -171,7 +174,7 @@ namespace PB
         );
 
         loadedShaders_.insert(
-                std::pair<std::string, Shader>{"Default/Shader/UI/Glyph", loadDefaultGlyphShader(gfxApi_, &error)}
+                std::pair<std::string, std::uint32_t>{"Default/Shader/UI/Glyph", loadDefaultGlyphShader(gfxApi_, &error)}
         );
 
         return !error;
@@ -235,9 +238,85 @@ namespace PB
         return boneMap;
     }
 
-    Shader AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
+    std::uint32_t AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
     {
-        Shader shader{assetPath};
+        std::uint32_t meshReferenceId;
+
+        if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
+        {
+            AssetStruct asset = parseAssetPath(assetPath, error);
+
+            if (!*error)
+            {
+                std::vector<Vertex> meshData = assetArchives_
+                        .at(asset.archiveName)
+                        .loadMeshDataAsset(asset.assetName, error);
+
+                meshReferenceId = gfxApi_->loadMesh(&meshData[0], meshData.size());
+
+                loadedMeshes_.insert(
+                        std::pair<std::string, std::uint32_t>{assetPath, meshReferenceId}
+                );
+            }
+            else
+            {
+                meshReferenceId = 0;
+                LOGGER_ERROR("Invalid mesh asset, '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            meshReferenceId = loadedMeshes_.at(assetPath);
+        }
+
+        return meshReferenceId;
+    }
+
+    std::uint32_t AssetLibrary::loadImageMapAsset(const std::string& assetPath, bool* error)
+    {
+        std::uint32_t imageMapReferenceId;
+
+        auto itr = loadedImageMaps_.find(assetPath);
+
+        if (itr == loadedImageMaps_.end())
+        {
+            AssetStruct asset = parseAssetPath(assetPath, error);
+
+            if (!*error)
+            {
+                ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
+                imageMapReferenceId = gfxApi_->loadImage(imageData);
+                imageData.clear();
+
+                if (!*error)
+                {
+                    loadedImageMaps_.insert(
+                            std::pair<std::string, std::uint32_t>{assetPath, imageMapReferenceId}
+                    );
+                }
+                else
+                {
+                    imageMapReferenceId = 0;
+                    LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
+                }
+            }
+            else
+            {
+                imageMapReferenceId = 0;
+                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
+            }
+        }
+        else
+        {
+            imageMapReferenceId = itr->second;
+        }
+
+        return imageMapReferenceId;
+    }
+
+    std::uint32_t AssetLibrary::loadShaderAsset(const std::string& assetPath, bool* error)
+    {
+        std::uint32_t shaderReferenceId;
 
         if (loadedShaders_.find(assetPath) == loadedShaders_.end())
         {
@@ -266,7 +345,7 @@ namespace PB
                     fragmentCode = loadShaderCode(program.fragmentShaderPath, assetArchives_, error);
                 }
 
-                shader = Shader{assetPath, program.vertexShaderPath, program.geometryShaderPath,
+                Shader shader = Shader{assetPath, program.vertexShaderPath, program.geometryShaderPath,
                                 program.fragmentShaderPath};
                 bool loaded;
                 loaded = shader.loadVertexShader(vertexCode);
@@ -277,32 +356,37 @@ namespace PB
                 {
                     if (shader.init())
                     {
-                        LOGGER_INFO("Shader program '" + assetPath + "' loaded.");
+                        shaderReferenceId = gfxApi_->loadShader(shader);
+
                         loadedShaders_.insert(
-                                std::pair<std::string, Shader>{assetPath, shader}
+                                std::pair<std::string, std::uint32_t>{assetPath, shaderReferenceId}
                         );
+                        LOGGER_INFO("Shader program '" + assetPath + "' loaded.");
                     }
                     else
                     {
+                        shaderReferenceId = 0;
                         LOGGER_ERROR("Failed to compile shader program '" + assetPath + "'");
                     }
                 }
                 else
                 {
+                    shaderReferenceId = 0;
                     LOGGER_ERROR("Failed to load shader '" + assetPath + "'");
                 }
             }
             else
             {
+                shaderReferenceId = 0;
                 LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
             }
         }
         else
         {
-            shader = loadedShaders_.at(assetPath);
+            shaderReferenceId = loadedShaders_.at(assetPath);
         }
 
-        return shader;
+        return shaderReferenceId;
     }
 
     bool AssetLibrary::loadAnimationSetAsset(
@@ -409,157 +493,5 @@ namespace PB
         }
 
         return font;
-    }
-
-    std::uint32_t AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)
-    {
-        std::uint32_t referenceId;
-
-        if (loadedMeshes_.find(assetPath) == loadedMeshes_.end())
-        {
-            AssetStruct asset = parseAssetPath(assetPath, error);
-
-            if (!*error)
-            {
-                std::vector<Vertex> meshData = assetArchives_
-                        .at(asset.archiveName)
-                        .loadMeshDataAsset(asset.assetName, error);
-
-                referenceId = gfxApi_->loadMesh(&meshData[0], meshData.size());
-
-                loadedMeshes_.insert(
-                        std::pair<std::string, std::uint32_t>{assetPath, referenceId}
-                );
-            }
-            else
-            {
-                LOGGER_ERROR("Invalid mesh asset, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            referenceId = loadedMeshes_.at(assetPath);
-        }
-
-        return referenceId;
-    }
-
-    ImageReference AssetLibrary::loadImageAsset(const std::string& assetPath, ImageOptions imageOptions, bool* error)
-    {
-        ImageReference imageReference{0};
-
-        if (loadedImages_.find(assetPath) == loadedImages_.end())
-        {
-            AssetStruct asset = parseAssetPath(assetPath, error);
-
-            if (!*error)
-            {
-                ImageData imageData = assetArchives_.at(asset.archiveName).loadImageAsset(asset.assetName, error);
-                imageReference = gfxApi_->loadImage(imageData, imageOptions);
-                imageReference.width = imageData.width;
-                imageReference.height = imageData.height;
-                imageReference.requiresAlphaBlending = imageData.numChannels == 4;
-                imageData.clear();
-
-                if (!*error)
-                {
-                    loadedImages_.insert(
-                            std::pair<std::string, ImageReference>{assetPath, imageReference}
-                    );
-                }
-                else
-                {
-                    LOGGER_ERROR("Failed to load asset '" + assetPath + "'");
-                }
-            }
-            else
-            {
-                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            imageReference = loadedImages_.at(assetPath);
-        }
-
-        return imageReference;
-    }
-
-    Material AssetLibrary::loadMaterialAsset(const std::string& assetPath, bool* error)
-    {
-        Material material{};
-
-        if (loadedMaterials_.find(assetPath) == loadedMaterials_.end())
-        {
-            AssetStruct asset = parseAssetPath(assetPath, error);
-
-            if (!*error)
-            {
-                material = assetArchives_.at(asset.archiveName).loadMaterialAsset(asset.assetName, error);
-
-                if (!*error)
-                {
-                    if (!material.diffuseData.image.empty())
-                    {
-                        ImageReference imageReference = loadImageAsset(material.diffuseData.image,
-                                                                       {ImageOptions::Mode::CLAMP_TO_BORDER}, error);
-
-                        if (!*error)
-                        {
-                            material.diffuseMap = imageReference;
-                            material.requiresAlphaBlending = imageReference.requiresAlphaBlending;
-                        }
-                        else
-                        {
-                            LOGGER_ERROR("Failed to load image, '" + material.diffuseData.image + "' for asset '" +
-                                         assetPath + "'");
-                        }
-                    }
-
-                    loadedMaterials_.insert(
-                            std::pair<std::string, Material>{assetPath, material}
-                    );
-                }
-                else
-                {
-                    LOGGER_ERROR("Failed to load material, '" + assetPath + "'");
-                }
-            }
-            else
-            {
-                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            material = loadedMaterials_.at(assetPath);
-        }
-
-        return material;
-    }
-
-    ModelData AssetLibrary::loadModelDataAsset(const std::string& assetPath, bool* error)
-    {
-        ModelData data;
-
-        if (loadedModelData_.find(assetPath) == loadedModelData_.end())
-        {
-            AssetStruct asset = parseAssetPath(assetPath, error);
-
-            if (!*error)
-            {
-                data = assetArchives_.at(asset.archiveName).loadModelAsset(asset.assetName, error);
-            }
-            else
-            {
-                LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            data = loadedModelData_.at(assetPath);
-        }
-
-        return data;
     }
 }

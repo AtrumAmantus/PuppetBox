@@ -206,6 +206,15 @@ namespace PB
         MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC, event);
     }
 
+    void AbstractSceneGraph::addModelToSceneObject(const std::string& modelName, UUID uuid, Model model)
+    {
+        auto event = std::make_shared<PipelineAddModelEvent>();
+        event->uuid = uuid;
+        event->model = model;
+
+        MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_MODEL_TOPIC, event);
+    }
+
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)
     {
 		this->isInitialized_ = rhs.isInitialized_;

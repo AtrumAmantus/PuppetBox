@@ -13,7 +13,8 @@ namespace PB
     bool TextAreaComponent::init()
     {
         bool error = false;
-        shader_ = library()->loadShaderAsset("Default/Shader/UI/Glyph", &error);
+        //TODO: Fix this broken reference
+        shader_ = Shader{""};//library()->loadShaderAsset("Default/Shader/UI/Glyph", &error);
 
         if (error)
         {

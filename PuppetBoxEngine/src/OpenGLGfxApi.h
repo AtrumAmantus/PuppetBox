@@ -57,13 +57,7 @@ namespace PB
          */
         const RenderWindow getRenderWindow() override;
 
-        /**
-        * \brief Used to execute the OpenGL API specific commands to load an image into GFX memory.
-        *
-        * \param imageData	The image data to be loaded into memory.
-        * \param options	Image loading options to use when loading into memory.
-        */
-        ImageReference loadImage(ImageData imageData, ImageOptions options) const override;
+        std::uint32_t loadImage(ImageData imageData) const override;
 
         /**
          * \brief Generates textures for each glyph of the given font face, adding references to them
@@ -89,6 +83,8 @@ namespace PB
         * \return Reference to the render details to use for rendering this mesh
         */
         std::uint32_t loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const override;
+
+        std::uint32_t loadShader(const Shader& shader) const override;
 
         /**
         * \brief Initializes the UBO buffer, defining the data ranges.  This is needed before use.

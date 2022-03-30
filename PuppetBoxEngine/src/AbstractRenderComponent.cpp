@@ -11,7 +11,9 @@ namespace PB
             auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
 
             renderDataMap_[event->uuid] = renderData_.size();
-            renderData_.push_back(RenderData{event->uuid, {}, {}});
+            std::vector<mat4> boneTransforms{};
+            boneTransforms.push_back(mat4::eye());
+            renderData_.push_back(RenderData{event->uuid, std::move(boneTransforms), {}});
         });
 
         subscriptions_.push_back(uuid);
@@ -31,7 +33,7 @@ namespace PB
 
             std::uint32_t entryIndex = renderDataMap_.at(event->uuid);
             auto& renderData = renderData_.at(entryIndex);
-            renderData.boneTransformations = event->transforms;
+            renderData.boneTransformations = std::move(event->transforms);
         });
 
         subscriptions_.push_back(uuid);

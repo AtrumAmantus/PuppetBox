@@ -5,6 +5,7 @@
 
 #include <puppetbox/AbstractSceneGraph.h>
 #include <puppetbox/Constants.h>
+#include <puppetbox/RenderData.h>
 #include <puppetbox/Utilities.h>
 
 #include "ScreenTranslator.h"
@@ -29,6 +30,45 @@ protected:
 
             PB::UUID uuid = PB::RandomUtils::uuid();
             createSceneObject(uuid);
+            bool error = false;
+            std::uint32_t meshId = PB::GetMeshAsset("Default/Mesh/Sprite", &error);
+
+            if (!error)
+            {
+                std::uint32_t imageMapId = PB::GetImageMapAsset("Assets1/Textures/TestHead", &error);
+
+                if (!error)
+                {
+                    std::uint32_t shaderId = PB::GetShaderAsset("Assets1/Shaders/Basic", &error);
+
+                    if (!error)
+                    {
+                        std::vector<PB::ImageMap> imageMaps{};
+                        imageMaps.push_back(PB::ImageMap{imageMapId, PB::DIFFUSE});
+
+                        addModelToSceneObject(
+                                "Face",
+                                uuid,
+                                PB::Model{
+                                        meshId,
+                                        PB::mat4::eye(),
+                                        shaderId,
+                                        std::move(imageMaps)});
+                    }
+                    else
+                    {
+                        std::cout << "Failed to load Shader";
+                    }
+                }
+                else
+                {
+                    std::cout << "Failed to load ImageMap";
+                }
+            }
+            else
+            {
+                std::cout << "Failed to load Mesh";
+            }
         }
         else
         {
