@@ -10,7 +10,9 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
             animatorMap_[event->uuid] = animators_.size();
-            animators_.push_back(EntityAnimator{event->uuid, nullptr});
+            BoneMap boneMap{};
+            boneMap.addBone("root", "", Bone{});
+            animators_.push_back(EntityAnimator{event->uuid, boneMap, nullptr});
         });
 
         subscriptions_.push_back(uuid);
@@ -36,6 +38,9 @@ namespace PB
 
     void AnimationComponent::update(float deltaTime)
     {
-
+        for (auto& entityAnimator : animators_)
+        {
+            entityAnimator.animator->update(deltaTime, entityAnimator.boneMap, {});
+        }
     }
 }

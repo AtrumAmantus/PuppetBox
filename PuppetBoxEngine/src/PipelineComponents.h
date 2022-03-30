@@ -39,6 +39,7 @@ namespace PB
     struct EntityAnimator
     {
         UUID uuid;
+        BoneMap boneMap;
         std::unique_ptr<IAnimator> animator;
     };
 
