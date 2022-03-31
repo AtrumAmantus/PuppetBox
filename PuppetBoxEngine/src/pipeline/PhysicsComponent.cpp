@@ -2,7 +2,7 @@
 
 namespace PB
 {
-    void PhysicsComponent::update(float deltaTime)
+    void PhysicsComponent::updates(float deltaTime)
     {
 
     }

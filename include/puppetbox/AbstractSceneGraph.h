@@ -183,6 +183,8 @@ namespace PB
          */
         void createSceneObject(UUID uuid);
 
+        void setSceneObjectPosition(UUID uuid, vec3 position);
+
         void addModelToSceneObject(const std::string& modelName, UUID uuid, Model model);
 
     private:

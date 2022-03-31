@@ -2,16 +2,6 @@
 
 namespace PB
 {
-    AbstractObjectComponent::AbstractObjectComponent() : mutex_(nullptr)
-    {
-
-    }
-
-    AbstractObjectComponent::AbstractObjectComponent(std::mutex* mutex) : mutex_(mutex)
-    {
-
-    }
-
     void AbstractObjectComponent::init()
     {
         if (!isInitialized_)
@@ -29,7 +19,10 @@ namespace PB
 
     void AbstractObjectComponent::update(float deltaTime)
     {
+        // Lock this component while it runs its updates
+        std::unique_lock<std::mutex> mlock{mutex_};
 
+        updates(deltaTime);
     }
 
     void AbstractObjectComponent::inits()
@@ -37,8 +30,13 @@ namespace PB
 
     }
 
-    std::unique_lock<std::mutex> AbstractObjectComponent::lock()
+    void AbstractObjectComponent::updates(float deltaTime)
     {
-        return std::unique_lock<std::mutex>(*mutex_);
+
+    }
+
+    std::unique_lock<std::mutex> AbstractObjectComponent::createLock()
+    {
+        return std::unique_lock<std::mutex>(mutex_);
     }
 }

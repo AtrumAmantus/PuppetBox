@@ -2,7 +2,7 @@
 
 namespace PB
 {
-    void AIComponent::update(float deltaTime)
+    void AIComponent::updates(float deltaTime)
     {
 
     }

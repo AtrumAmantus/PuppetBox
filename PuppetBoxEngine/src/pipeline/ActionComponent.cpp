@@ -2,7 +2,7 @@
 
 namespace PB
 {
-    void ActionComponent::update(float deltaTime)
+    void ActionComponent::updates(float deltaTime)
     {
 
     }

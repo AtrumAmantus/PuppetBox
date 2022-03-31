@@ -30,6 +30,8 @@ protected:
 
             PB::UUID uuid = PB::RandomUtils::uuid();
             createSceneObject(uuid);
+            setSceneObjectPosition(uuid, {0.0f, 0.0f, -40.0f});
+
             bool error = false;
             std::uint32_t meshId = PB::GetMeshAsset("Default/Mesh/Sprite", &error);
 
@@ -51,7 +53,11 @@ protected:
                                 uuid,
                                 PB::Model{
                                         meshId,
-                                        PB::mat4::eye(),
+                                        PB::mat4{
+                                            32.0f, 0.0f, 0.0f, 0.0f,
+                                            0.0f, 32.0f, 0.0f, 0.0f,
+                                            0.0f, 0.0f, 1.0f, 0.0f,
+                                            0.0f, 0.0f, 0.0f, 1.0f },
                                         shaderId,
                                         std::move(imageMaps)});
                     }

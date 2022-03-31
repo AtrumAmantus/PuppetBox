@@ -84,13 +84,9 @@ namespace PB
         // Update implementing application first in case new objects were added or modified.
         preLoopUpdates(deltaTime);
 
+        for (auto& objectComponent: objectComponents_)
         {
-            std::unique_lock<std::mutex> mlock(mutex_);
-
-            for (auto& objectComponent: objectComponents_)
-            {
-                objectComponent->update(deltaTime);
-            }
+            objectComponent->update(deltaTime);
         }
 
         // Update implementing application's post loop updates
@@ -101,8 +97,6 @@ namespace PB
 
     void AbstractSceneGraph::addComponent(std::unique_ptr<AbstractObjectComponent> component)
     {
-        // Add reference to mutex
-        *component = AbstractObjectComponent{&mutex_};
         component->init();
 
         objectComponents_.push_back(std::move(component));
@@ -204,6 +198,15 @@ namespace PB
         event->uuid = uuid;
 
         MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC, event);
+    }
+
+    void AbstractSceneGraph::setSceneObjectPosition(UUID uuid, vec3 position)
+    {
+        auto event = std::make_shared<PipelineSetObjectPositionEvent>();
+        event->uuid = uuid;
+        event->position = position;
+
+        MessageBroker::instance().publish(PB_EVENT_PIPELINE_SET_ENTITY_POSITION_TOPIC, event);
     }
 
     void AbstractSceneGraph::addModelToSceneObject(const std::string& modelName, UUID uuid, Model model)

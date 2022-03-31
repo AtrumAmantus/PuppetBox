@@ -44,6 +44,7 @@ namespace PB
     struct RenderData
     {
         UUID uuid;
+        mat4 transform;
         std::vector<mat4> boneTransformations;
         std::vector<Model> model;
     };

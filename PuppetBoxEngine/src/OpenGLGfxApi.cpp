@@ -134,7 +134,7 @@ namespace PB
 
     class OpenglRenderComponent : public AbstractRenderComponent
     {
-        void render(const std::vector<mat4>& boneTransforms, const Model& model) const override
+        void render(const std::vector<mat4>& boneTransforms, const Model& model, const mat4 transform) const override
         {
             //TODO: Revisit this, just leave it on? Material specific?
             glEnable(GL_BLEND);
@@ -167,8 +167,10 @@ namespace PB
 
             shader.setMat4("boneTransforms",boneTransforms.size(), &boneTransforms[0]);
             shader.setMat4("meshTransform", model.meshTransform);
-
+            shader.setMat4("model", transform);
             Mesh mesh = RENDER_REFERENCES[model.meshID - 1];
+
+            glBindVertexArray(mesh.VAO);
 
             if (mesh.EBO != 0)
             {
@@ -184,7 +186,7 @@ namespace PB
             // Unset VAO for next render
             glBindVertexArray(0);
 
-            // Bind each image to the shader program
+            // Unbind each image to the shader program
             for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
             {
                 glActiveTexture((GL_TEXTURE0 + i));
@@ -509,27 +511,26 @@ namespace PB
 
         glBindVertexArray(mesh.VAO);
 
+        std::uint32_t vboBufferSize = static_cast<std::uint32_t>(sizeof(vboData[0]) * vboData.size());
         glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-        glBufferData(GL_ARRAY_BUFFER, static_cast<std::intmax_t>(sizeof(vboData[0]) * vboData.size()), &vboData[0],
-                     GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vboBufferSize, &vboData[0], GL_STATIC_DRAW);
 
+        std::uint32_t eboBufferSize = static_cast<std::uint32_t>(sizeof(indices[0]) * indices.size());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<std::intmax_t>(sizeof(indices[0]) * indices.size()),
-                     &indices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, eboBufferSize, &indices[0], GL_STATIC_DRAW);
+
+        std::int32_t offsetSize = static_cast<std::int32_t>(mesh.stride * sizeof(float));
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
-                              (void*) 0); // NOLINT(modernize-use-nullptr)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, offsetSize, (void*) 0); // NOLINT(modernize-use-nullptr)
         glEnableVertexAttribArray(0);
 
         // normal attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
-                              (void*) (3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, offsetSize, (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // texture attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, static_cast<std::int32_t>(mesh.stride * sizeof(float)),
-                              (void*) (6 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, offsetSize, (void*) (6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         // These could be unbound now, because glVertexAttribPointer registers the buffers already

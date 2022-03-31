@@ -14,26 +14,44 @@ namespace PB
 {
     class PhysicsComponent : public AbstractObjectComponent
     {
-    public:
-        void update(float deltaTime) override;
+    protected:
+        void updates(float deltaTime) override;
     };
 
     class AIComponent : public AbstractObjectComponent
     {
-    public:
-        void update(float deltaTime) override;
+    protected:
+        void updates(float deltaTime) override;
     };
 
     class ActionComponent : public AbstractObjectComponent
     {
-    public:
-        void update(float deltaTime) override;
+    protected:
+        void updates(float deltaTime) override;
+    };
+
+    struct EntityTransform
+    {
+        UUID uuid;
+        vec3 position;
+        vec3 rotation;
+        vec3 scale;
     };
 
     class PositionComponent : public AbstractObjectComponent
     {
     public:
-        void update(float deltaTime) override;
+        void tearDown() override;
+
+    protected:
+        void inits() override;
+
+        void updates(float deltaTime) override;
+
+    private:
+        std::unordered_map<UUID, EntityTransform> transformsMap_{};
+        Concurrent::NonBlocking::Queue<EntityTransform> queuedTransforms_{};
+        std::vector<UUID> subscriptions_{};
     };
 
     struct EntityAnimator
@@ -46,12 +64,12 @@ namespace PB
     class AnimationComponent : public AbstractObjectComponent
     {
     public:
-        void update(float deltaTime) override;
-
         void tearDown() override;
 
     protected:
         void inits() override;
+
+        void updates(float deltaTime) override;
 
     private:
         std::unordered_map<UUID, std::uint32_t> animatorMap_{};

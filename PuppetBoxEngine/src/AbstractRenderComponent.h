@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <map>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -20,16 +21,18 @@ namespace PB
 
         void tearDown() override;
 
-        void render() const override;
+        void render() override;
 
     private:
         std::vector<RenderData> renderData_;
         std::unordered_map<UUID, std::uint32_t> renderDataMap_;
         std::vector<UUID> subscriptions_;
+        std::mutex mutex_;
 
     private:
         virtual void render(
                 const std::vector<mat4>& boneTransforms,
-                const Model& model) const = 0;
+                const Model& model,
+                const mat4 transform) const = 0;
     };
 }
