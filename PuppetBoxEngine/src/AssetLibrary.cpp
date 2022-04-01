@@ -101,6 +101,17 @@ namespace PB
                     0.5,  0.5, 0.0,     0.0, 0.0, 1.0,      1.0, 1.0
             };
 
+            // Bind everything to a root node
+            //TODO: These probably shouldn't be on the default sprite mesh?
+            std::vector<std::vector<BoneWeight>> meshBoneWeights{};
+
+            for (std::uint32_t i = 0; i < 6; ++i)
+            {
+                std::vector<BoneWeight> vertexBoneWeights{};
+                vertexBoneWeights.push_back({0, 1.0f});
+                meshBoneWeights.push_back(std::move(vertexBoneWeights));
+            }
+
             std::vector<Vertex> spriteMeshVertices{};
 
             std::uint32_t dataSize = sizeof(spriteMeshData) / sizeof(float);
@@ -114,7 +125,7 @@ namespace PB
                 });
             }
 
-            return gfxApi->loadMesh(&spriteMeshVertices[0], spriteMeshVertices.size());
+            return gfxApi->loadMesh(&spriteMeshVertices[0], spriteMeshVertices.size(), std::move(meshBoneWeights));
         }
 
         std::uint32_t loadDefaultGlyphShader(const std::shared_ptr<IGfxApi>& gfxApi, bool* error)
@@ -252,7 +263,9 @@ namespace PB
                         .at(asset.archiveName)
                         .loadMeshDataAsset(asset.assetName, error);
 
-                meshReferenceId = gfxApi_->loadMesh(&meshData[0], meshData.size());
+                //TODO: These needs to be finished implementing (add to mesh binaries)
+                std::vector<std::vector<BoneWeight>> boneWeights(meshData.size());
+                meshReferenceId = gfxApi_->loadMesh(&meshData[0], meshData.size(), boneWeights);
 
                 loadedMeshes_.insert(
                         std::pair<std::string, std::uint32_t>{assetPath, meshReferenceId}

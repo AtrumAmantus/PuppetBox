@@ -93,7 +93,10 @@ namespace PB
         *
         * \return Reference to the render details to use for rendering this mesh.
         */
-        virtual std::uint32_t loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const = 0;
+        virtual std::uint32_t loadMesh(
+                Vertex* vertexData,
+                std::uint32_t vertexCount,
+                std::vector<std::vector<BoneWeight>> meshBoneWeights) const = 0;
 
         virtual std::uint32_t loadShader(const Shader& shader) const = 0;
 

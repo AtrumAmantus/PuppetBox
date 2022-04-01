@@ -12,6 +12,8 @@
 #include "OpenGLGfxApi.h"
 #include "Shader.h"
 
+const std::uint32_t MAX_BONE_WEIGHTS = 4;
+
 namespace PB
 {
     namespace
@@ -459,9 +461,15 @@ namespace PB
         return success;
     }
 
-    std::uint32_t OpenGLGfxApi::loadMesh(Vertex* vertexData, std::uint32_t vertexCount) const
+    std::uint32_t OpenGLGfxApi::loadMesh(
+            Vertex* vertexData,
+            std::uint32_t vertexCount,
+            std::vector<std::vector<BoneWeight>> meshBoneWeights) const
     {
         Mesh mesh{};
+
+        std::vector<std::uint32_t> indexBoneIds{};
+        std::vector<float> indexBoneWeights{};
 
         // 3 axis position, +3 axis normal, +2 axis UV coord
         mesh.stride = 3 + 3 + 2;
@@ -480,6 +488,20 @@ namespace PB
             {
                 uniqueVertices.push_back(vertexData[i]);
                 indices.push_back(indexCounter++);
+
+                for (std::uint32_t j = 0; j < MAX_BONE_WEIGHTS; ++j)
+                {
+                    if (j < meshBoneWeights[i].size())
+                    {
+                        indexBoneIds.push_back(meshBoneWeights[i][j].boneId);
+                        indexBoneWeights.push_back(meshBoneWeights[i][j].weight);
+                    }
+                    else
+                    {
+                        indexBoneIds.push_back(0);
+                        indexBoneWeights.push_back(0.0f);
+                    }
+                }
             }
             else
             {
@@ -487,51 +509,86 @@ namespace PB
             }
         }
 
-        std::vector<float> vboData{};
+        std::vector<float> vertexVBOData{};
+        std::vector<float> normalVBOData{};
+        std::vector<float> uvVBOData{};
 
         // Convert unique vertex vector to float array
         for (auto& v: uniqueVertices)
         {
-            vboData.push_back(v.position.x);
-            vboData.push_back(v.position.y);
-            vboData.push_back(v.position.z);
+            vertexVBOData.push_back(v.position.x);
+            vertexVBOData.push_back(v.position.y);
+            vertexVBOData.push_back(v.position.z);
 
-            vboData.push_back(v.normal.x);
-            vboData.push_back(v.normal.y);
-            vboData.push_back(v.normal.z);
+            normalVBOData.push_back(v.normal.x);
+            normalVBOData.push_back(v.normal.y);
+            normalVBOData.push_back(v.normal.z);
 
-            vboData.push_back(v.uv.x);
-            vboData.push_back(v.uv.y);
+            uvVBOData.push_back(v.uv.x);
+            uvVBOData.push_back(v.uv.y);
         }
 
         // Create buffers
         glGenVertexArrays(1, &(mesh.VAO));
-        glGenBuffers(1, &mesh.VBO);
-        glGenBuffers(1, &mesh.EBO);
 
         glBindVertexArray(mesh.VAO);
 
-        std::uint32_t vboBufferSize = static_cast<std::uint32_t>(sizeof(vboData[0]) * vboData.size());
-        glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-        glBufferData(GL_ARRAY_BUFFER, vboBufferSize, &vboData[0], GL_STATIC_DRAW);
+        // Indices buffer
+        glGenBuffers(1, &mesh.EBO);
 
         std::uint32_t eboBufferSize = static_cast<std::uint32_t>(sizeof(indices[0]) * indices.size());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, eboBufferSize, &indices[0], GL_STATIC_DRAW);
 
-        std::int32_t offsetSize = static_cast<std::int32_t>(mesh.stride * sizeof(float));
+        // Vertices VBO
+        glGenBuffers(1, &mesh.vertexVBO);
 
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, offsetSize, (void*) 0); // NOLINT(modernize-use-nullptr)
+        std::uint32_t vertexVboBufferSize = static_cast<std::uint32_t>(sizeof(vertexVBOData[0]) * vertexVBOData.size());
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexVBO);
+        glBufferData(GL_ARRAY_BUFFER, vertexVboBufferSize, &vertexVBOData[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexVBOData[0]), (void*) 0); // NOLINT(modernize-use-nullptr)
         glEnableVertexAttribArray(0);
 
-        // normal attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, offsetSize, (void*) (3 * sizeof(float)));
+        // Normals VBO
+        glGenBuffers(1, &mesh.normalVBO);
+
+        std::uint32_t normalVboBufferSize = static_cast<std::uint32_t>(sizeof(normalVBOData[0]) * normalVBOData.size());
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.normalVBO);
+        glBufferData(GL_ARRAY_BUFFER, normalVboBufferSize, &normalVBOData[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(normalVBOData[0]), (void*) 0); // NOLINT(modernize-use-nullptr)
         glEnableVertexAttribArray(1);
 
-        // texture attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, offsetSize, (void*) (6 * sizeof(float)));
+        // UVs VBO
+        glGenBuffers(1, &mesh.uvVBO);
+
+        std::uint32_t uvVboBufferSize = static_cast<std::uint32_t>(sizeof(uvVBOData[0]) * uvVBOData.size());
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.uvVBO);
+        glBufferData(GL_ARRAY_BUFFER, uvVboBufferSize, &uvVBOData[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(uvVBOData[0]), (void*) 0); // NOLINT(modernize-use-nullptr)
         glEnableVertexAttribArray(2);
+
+        // Bone Indices VBO
+        glGenBuffers(1, &mesh.boneIndexVBO);
+
+        std::uint32_t boneIndexVBOBufferSize = static_cast<std::uint32_t>(sizeof(indexBoneIds[0]) * indexBoneIds.size());
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.boneIndexVBO);
+        glBufferData(GL_ARRAY_BUFFER, boneIndexVBOBufferSize, &indexBoneIds[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(3, MAX_BONE_WEIGHTS, GL_INT, GL_FALSE, MAX_BONE_WEIGHTS * sizeof(indexBoneIds[0]), (void*) 0); // NOLINT(modernize-use-nullptr)
+        glEnableVertexAttribArray(3);
+
+        // Bone Weights VBO
+        glGenBuffers(1, &mesh.boneWeightVBO);
+
+        std::uint32_t boneWeightVBOBufferSize = static_cast<std::uint32_t>(sizeof(indexBoneWeights[0]) * indexBoneWeights.size());
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.boneWeightVBO);
+        glBufferData(GL_ARRAY_BUFFER, boneWeightVBOBufferSize, &indexBoneWeights[0], GL_STATIC_DRAW);
+
+        glVertexAttribPointer(4, MAX_BONE_WEIGHTS, GL_FLOAT, GL_FALSE, MAX_BONE_WEIGHTS * sizeof(indexBoneWeights[0]), (void*) 0); // NOLINT(modernize-use-nullptr)
+        glEnableVertexAttribArray(4);
 
         // These could be unbound now, because glVertexAttribPointer registers the buffers already
         glBindBuffer(GL_ARRAY_BUFFER, 0);
