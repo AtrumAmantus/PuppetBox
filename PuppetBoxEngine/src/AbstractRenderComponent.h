@@ -17,7 +17,7 @@ namespace PB
     class AbstractRenderComponent : public IRenderComponent
     {
     public:
-        void init();
+        void init() override;
 
         void tearDown() override;
 

@@ -677,9 +677,6 @@ namespace PB
 
     std::unique_ptr<IRenderComponent> OpenGLGfxApi::createRenderComponent() const
     {
-        std::unique_ptr<OpenglRenderComponent> component = std::make_unique<OpenglRenderComponent>();
-        component->init();
-
-        return component;
+        return std::make_unique<OpenglRenderComponent>();
     }
 }

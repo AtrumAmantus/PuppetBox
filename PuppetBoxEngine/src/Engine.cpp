@@ -293,6 +293,8 @@ namespace PB
                 inputReader_,
                 gfxApi_->createRenderComponent());
 
+        currentScene_->setUp();
+
         sceneGraphs_.insert(
                 std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
                         "default",

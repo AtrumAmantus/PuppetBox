@@ -187,6 +187,8 @@ namespace PB
 
         void addModelToSceneObject(const std::string& modelName, UUID uuid, Model model);
 
+        void setSceneObjectSkeleton(UUID uuid, BoneMap boneMap);
+
     private:
         bool isInitialized_ = false;
         bool isSetup_ = false;

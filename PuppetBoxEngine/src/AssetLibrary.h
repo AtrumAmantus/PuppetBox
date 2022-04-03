@@ -55,7 +55,7 @@ namespace PB
         */
         bool loadArchive(const std::string& archiveName);
 
-        BoneMap loadSkeleton(const std::string& assetName);
+        BoneMap loadSkeletonAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Loads a Mesh asset given by the provided virtual asset path.

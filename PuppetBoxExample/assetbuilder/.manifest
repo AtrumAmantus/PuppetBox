@@ -6,6 +6,7 @@ Textures/Weapons/Bat bat.png
 Textures/Weapons/Knife knife.png
 Textures/Chain-Open link-open.png
 Textures/Chain-Closed link-closed.png
+Skeletons/BasicHuman BasicHuman.skele
 SpriteSheet SpriteSheet1.png
 Sprites/GenericMob GenericMob.m
 Sprites/Weapons/Bat bat.m

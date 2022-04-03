@@ -792,17 +792,12 @@ namespace PB
     {
         Bone() {};
 
-        Bone(vec4 offset, vec4 scale, vec4 rotation) : offset(offset), scale(scale), rotation(rotation) {};
+        Bone(vec3 offset, vec3 scale, vec3 rotation) : offset(offset), scale(scale), rotation(rotation) {};
 
-        //TODO: This structure seems confusing, revisit
-        mat4 transform{};
-        vec4 rotation{};
-        vec4 scale{};
-        vec4 unused{};
-        union
-        {
-            vec4 position, offset;
-        };
+        vec3 rotation{};
+        vec3 scale{1.0f, 1.0f, 1.0f};
+        vec3 offset{};
+        mat4 defaultTransform{};
     };
 
     struct BoneNode
@@ -811,6 +806,7 @@ namespace PB
         std::uint32_t id;
         std::string parent;
         std::uint32_t parentId;
+        std::uint32_t depth;
         Bone bone{};
     };
 
@@ -842,8 +838,12 @@ namespace PB
 
             std::uint32_t parentId = getBoneId(parent);
 
+            std::uint32_t boneDepth = parentId == 0 ? 0 : boneMap_[parentId].depth + 1;
+
             boneMap_.insert(
-                    std::pair<std::uint32_t, BoneNode>{boneId, BoneNode{name, boneId, parent, parentId, bone}}
+                    std::pair<std::uint32_t, BoneNode>{
+                        boneId,
+                        BoneNode{name, boneId, parent, parentId, boneDepth, bone}}
             );
 
             return boneId;
@@ -886,9 +886,11 @@ namespace PB
         {
             return boneMap_;
         };
+
     private:
         std::unordered_map<std::string, std::uint32_t> boneIds_{};
         std::unordered_map<std::uint32_t, BoneNode> boneMap_{};
+
     };
 
     struct UUID

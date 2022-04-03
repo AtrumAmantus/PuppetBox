@@ -100,7 +100,7 @@ namespace PB
         */
         std::string loadAsciiData(const std::string& assetPath, bool* error);
 
-        BoneMap loadSkeleton(const std::string& assetPath, bool* error);
+        BoneMap loadSkeletonAsset(const std::string& assetPath, bool* error);
 
         /**
         * \brief Returns a ShaderProgram for the given shader asset.
@@ -161,26 +161,6 @@ namespace PB
         * \return A ImageData of the requested asset, or an empty object if an error occurred.
         */
         ImageData loadImageAsset(const std::string& assetPath, bool* error);
-
-        /**
-        * \brief Returns a Material for the given shader asset.
-        *
-        * \param assetPath	The virtual asset path of the desired asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return A Material of the requested asset, or an empty object if an error occurred.
-        */
-        Material loadMaterialAsset(const std::string& assetPath, bool* error);
-
-        /**
-        * \brief Returns a Model2D for the given shader asset.
-        *
-        * \param assetPath	The virtual asset path of the desired asset.
-        * \param error		Flag indicating an error occurred if set to True.
-        *
-        * \return A Model2D of the requested asset, or an empty object if an error occurred.
-        */
-        ModelData loadModelAsset(const std::string& assetPath, bool* error);
 
     private:
         std::string archiveName_;

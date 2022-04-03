@@ -220,21 +220,23 @@ namespace PB
         return !error;
     }
 
-    BoneMap AssetLibrary::loadSkeleton(const std::string& assetPath)
+    BoneMap AssetLibrary::loadSkeletonAsset(const std::string& assetPath, bool* error)
     {
-        bool error = false;
-
         BoneMap boneMap{};
 
         const auto& itr = loadedSkeletons_.find(assetPath);
 
         if (itr == loadedSkeletons_.end())
         {
-            AssetStruct asset = parseAssetPath(assetPath, &error);
+            AssetStruct asset = parseAssetPath(assetPath, error);
 
-            if (!error)
+            if (!*error)
             {
-                assetArchives_.at(asset.archiveName).loadSkeleton(asset.assetName, &error);
+                boneMap = assetArchives_.at(asset.archiveName).loadSkeletonAsset(asset.assetName, error);
+
+                loadedSkeletons_.insert(
+                        std::pair<std::string, BoneMap>{assetPath, boneMap}
+                );
             }
             else
             {
@@ -246,7 +248,7 @@ namespace PB
             boneMap = BoneMap{itr->second};
         }
 
-        return boneMap;
+        return std::move(boneMap);
     }
 
     std::uint32_t AssetLibrary::loadMeshAsset(const std::string& assetPath, bool* error)

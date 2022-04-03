@@ -45,21 +45,32 @@ protected:
 
                     if (!error)
                     {
-                        std::vector<PB::ImageMap> imageMaps{};
-                        imageMaps.push_back(PB::ImageMap{imageMapId, PB::DIFFUSE});
+                        PB::BoneMap boneMap = PB::GetSkeletonAsset("Assets1/Skeletons/BasicHuman", &error);
 
-                        addModelToSceneObject(
-                                "Face",
-                                uuid,
-                                PB::Model{
-                                        meshId,
-                                        PB::mat4{
-                                            32.0f, 0.0f, 0.0f, 0.0f,
-                                            0.0f, 32.0f, 0.0f, 0.0f,
-                                            0.0f, 0.0f, 1.0f, 0.0f,
-                                            0.0f, 0.0f, 0.0f, 1.0f },
-                                        shaderId,
-                                        std::move(imageMaps)});
+                        if (!error)
+                        {
+                            std::vector<PB::ImageMap> imageMaps{};
+                            imageMaps.push_back(PB::ImageMap{imageMapId, PB::DIFFUSE});
+
+                            setSceneObjectSkeleton(uuid, std::move(boneMap));
+
+                            addModelToSceneObject(
+                                    "Face",
+                                    uuid,
+                                    PB::Model{
+                                            meshId,
+                                            PB::mat4{
+                                                    32.0f, 0.0f, 0.0f, 0.0f,
+                                                    0.0f, 32.0f, 0.0f, 0.0f,
+                                                    0.0f, 0.0f, 1.0f, 0.0f,
+                                                    0.0f, 0.0f, 0.0f, 1.0f},
+                                            shaderId,
+                                            std::move(imageMaps)});
+                        }
+                        else
+                        {
+                            std::cout << "Failed to load Skeleton";
+                        }
                     }
                     else
                     {

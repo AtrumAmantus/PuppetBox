@@ -298,6 +298,11 @@ namespace PB
         return assetLibrary->loadShaderAsset(assetPath, error);
     }
 
+    BoneMap GetSkeletonAsset(const std::string& assetPath, bool* error)
+    {
+        return std::move(assetLibrary->loadSkeletonAsset(assetPath, error));
+    }
+
     bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize)
     {
         bool error = false;

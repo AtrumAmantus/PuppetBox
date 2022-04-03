@@ -34,6 +34,7 @@ namespace PB
         {
             if (isInitialized_)
             {
+                renderComponent_->init();
                 success = setUps();
             }
             else
@@ -216,6 +217,15 @@ namespace PB
         event->model = model;
 
         MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_MODEL_TOPIC, event);
+    }
+
+    void AbstractSceneGraph::setSceneObjectSkeleton(UUID uuid, BoneMap boneMap)
+    {
+        auto event = std::make_shared<PipelineSetBoneMapEvent>();
+        event->uuid = uuid;
+        event->boneMap = std::move(boneMap);
+
+        MessageBroker::instance().publish(PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC, event);
     }
 
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)

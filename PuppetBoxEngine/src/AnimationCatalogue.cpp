@@ -536,7 +536,7 @@ namespace PB
                     mat4 matrix = GfxMath::CreateTransformation(
                             boneKeyframe.transform.rotation,
                             boneKeyframe.transform.scale,
-                            boneNode->bone.position.vec3());
+                            boneNode->bone.offset);
 
                     // Create a transformation matrix for the bone
                     boneTransformations.insert(

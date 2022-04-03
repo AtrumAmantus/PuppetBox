@@ -99,179 +99,76 @@ namespace PB
         }
 
         /**
-        * \brief Helper function to map a properties map to a Model2D object.
+        * \brief Helper function to map a skeletal properties map to a {\link PB::BoneMap} object.
         *
-        * \param properties	The properties map to use to map to a Model2D object.
-        * \param bool		Flag indicating an error occurred if set to True.
+        * \param boneMap    The {\link PB::BoneMap} to add the skeleton data to.
+        * \param properties	The properties map to use to map to a {\link PB::BoneMap} object.
+        * \param parentName The name of the bone the current iteration's bone is a child of.
+        * \param error		Flag indicating an error occurred when set to True.
         *
-        * \return The Model2D object built from the given properties map.
+        * \return The {\link PB::BoneMap} object built from the given skeletal properties map.
         */
-        ModelData mapToModelData(PropertyTree& rootProperties, bool* error)
+        void mapToBoneMap(BoneMap& boneMap, PropertyTree& properties, const std::string& parentName, bool* error)
         {
-            ModelData model{};
+            std::string boneName = properties.name();
 
-            auto scaleNode = rootProperties.get("scale");
+            auto offsetNode = properties.get("offset");
 
-            if (scaleNode.hasResult)
-            {
-                PropertyTree* scaleProperties = scaleNode.result;
-
-                model.scale.x = getNumericResultAtNode<float>("x", *scaleProperties, error).orElse(1.0f);
-                model.scale.y = getNumericResultAtNode<float>("y", *scaleProperties, error).orElse(1.0f);
-                model.scale.z = getNumericResultAtNode<float>("z", *scaleProperties, error).orElse(1.0f);
-            }
-
-            auto offsetNode = rootProperties.get("offset");
+            vec3 offset{};
 
             if (offsetNode.hasResult)
             {
                 PropertyTree* offsetProperties = offsetNode.result;
 
-                model.offset.x = getNumericResultAtNode<float>("x", *offsetProperties, error).orElse(0.0f);
-                model.offset.y = getNumericResultAtNode<float>("y", *offsetProperties, error).orElse(0.0f);
-                model.offset.z = getNumericResultAtNode<float>("z", *offsetProperties, error).orElse(0.0f);
+                offset.x = getNumericResultAtNode<float>("x", *offsetProperties, error).orElse(0.0f);
+                offset.y = getNumericResultAtNode<float>("y", *offsetProperties, error).orElse(0.0f);
+                offset.z = getNumericResultAtNode<float>("z", *offsetProperties, error).orElse(0.0f);
             }
 
-            auto rotationNode = rootProperties.get("rotation");
+            vec3 scale{1.0f, 1.0f, 1.0f};
 
-            if (rotationNode.hasResult)
+            // Create bone, adding a default transform for faster calculations in the pipeline
+            Bone bone{offset, scale, {}};
+            bone.defaultTransform = GfxMath::CreateTransformation({}, scale, offset);
+
+            if (!parentName.empty())
             {
-                PropertyTree* rotationProperties = rotationNode.result;
+                std::uint32_t parentId = boneMap.getBoneId(parentName);
 
-                model.rotation.x = getNumericResultAtNode<float>("x", *rotationProperties, error).orElse(0.0f);
-                model.rotation.y = getNumericResultAtNode<float>("y", *rotationProperties, error).orElse(0.0f);
-                model.rotation.z = getNumericResultAtNode<float>("z", *rotationProperties, error).orElse(0.0f);
-
-                model.rotation *= GfxMath::RADS_PER_DEGREE;
+                bone.defaultTransform = boneMap.getBone(parentId).result->bone.defaultTransform * bone.defaultTransform;
             }
 
-            auto meshNode = rootProperties.get("mesh");
+            boneMap.addBone(boneName, parentName, bone);
 
-            if (meshNode.hasResult)
-            {
-                PropertyTree* meshProperties = meshNode.result;
+            auto rootChildrenNode = properties.get("children");
 
-                auto dataNode = meshProperties->get("data");
-
-                if (dataNode.hasResult)
-                {
-                    model.mesh.dataPath = dataNode.result->value();
-                }
-
-                auto materialNode = meshProperties->get("material");
-
-                if (materialNode.hasResult)
-                {
-                    model.mesh.materialPath = materialNode.result->value();
-
-                    auto meshOffsetNode = meshProperties->get("offset");
-
-                    if (meshOffsetNode.hasResult)
-                    {
-                        PropertyTree* meshOffsetProperties = meshOffsetNode.result;
-
-                        model.mesh.offset.x = getNumericResultAtNode<float>("x", *meshOffsetProperties,
-                                                                            error).orElse(
-                                0.0f);
-                        model.mesh.offset.y = getNumericResultAtNode<float>("y", *meshOffsetProperties,
-                                                                            error).orElse(
-                                0.0f);
-                        model.mesh.offset.z = getNumericResultAtNode<float>("z", *meshOffsetProperties,
-                                                                            error).orElse(
-                                0.0f);
-                    }
-
-                    auto meshScaleNode = meshProperties->get("scale");
-
-                    if (meshScaleNode.hasResult)
-                    {
-                        PropertyTree* meshScaleProperties = meshScaleNode.result;
-
-                        model.mesh.scale.x = getNumericResultAtNode<float>(
-                                "x",
-                                *meshScaleProperties, error).orElse(1.0f);
-                        model.mesh.scale.y = getNumericResultAtNode<float>(
-                                "y",
-                                *meshScaleProperties, error).orElse(1.0f);
-                        model.mesh.scale.z = getNumericResultAtNode<float>(
-                                "z",
-                                *meshScaleProperties, error).orElse(1.0f);
-                    }
-                }
-                else
-                {
-                    LOGGER_WARN("No material specified for asset");
-                }
-            }
-
-            model.name = rootProperties.name();
-
-            auto rootChildrenNode = rootProperties.get("children");
-
-            if (rootChildrenNode.hasResult)
+            if (!*error && rootChildrenNode.hasResult)
             {
                 PropertyTree* childrenProperties = rootChildrenNode.result;
 
                 for (auto& childName: childrenProperties->children())
                 {
-                    ModelData child = mapToModelData(*childrenProperties->get(childName).result, error);
-
-                    model.children.push_back(child);
+                    mapToBoneMap(
+                            boneMap,
+                            *childrenProperties->get(childName).result,
+                            boneName,
+                            error);
                 }
             }
+        }
+
+        BoneMap mapToBoneMap(PropertyTree& rootProperties, bool* error)
+        {
+            BoneMap boneMap{};
+
+            mapToBoneMap(boneMap, rootProperties, "", error);
 
             if (*error)
             {
-                LOGGER_ERROR("Failed to parse values for Model2D object");
-                return {};
+                LOGGER_ERROR("Failed to parse values for BoneMap object");
             }
 
-            return model;
-        }
-
-        /**
-        * \brief Helper function to map a PropertyTree to a Material object.
-        *
-        * \param properties	The PropertyTree to use to map to a Material object.
-        * \param bool		Flag indicating an error occurred if set to True.
-        *
-        * \return The Material object built from the given properties map.
-        */
-        Material mapToMaterial(PropertyTree& materialProperties, bool* error)
-        {
-            Material material;
-
-            auto diffuseNode = materialProperties.get("diffuse");
-
-            if (diffuseNode.hasResult)
-            {
-                PropertyTree* diffuseProperties = diffuseNode.result;
-
-                std::string image = getStringResultAtNode("image", *diffuseProperties).orElse("");
-                std::uint32_t width = getNumericResultAtNode<std::uint32_t>("width", *diffuseProperties, error).orElse(
-                        0);
-                std::uint32_t height = getNumericResultAtNode<std::uint32_t>("height", *diffuseProperties,
-                                                                             error).orElse(0);
-                std::uint32_t xOffset = getNumericResultAtNode<std::uint32_t>("xOffset", *diffuseProperties,
-                                                                              error).orElse(0);
-                std::uint32_t yOffset = getNumericResultAtNode<std::uint32_t>("yOffset", *diffuseProperties,
-                                                                              error).orElse(0);
-                std::string shader = getStringResultAtNode("shader", *diffuseProperties).orElse("");
-
-                material.diffuseData = {
-                        image,
-                        width,
-                        height,
-                        xOffset,
-                        yOffset
-                };
-            }
-
-            std::string shader = getStringResultAtNode("shader", materialProperties).orElse("");
-
-            material.shaderId = shader;
-
-            return material;
+            return std::move(boneMap);
         }
 
         RawKeyframe mapToKeyframe(PropertyTree* pTree, bool* error)
@@ -685,13 +582,49 @@ namespace PB
         return data;
     }
 
-    BoneMap AssetArchive::loadSkeleton(const std::string& assetPath, bool* error)
+    BoneMap AssetArchive::loadSkeletonAsset(const std::string& assetPath, bool* error)
     {
         BoneMap boneMap{};
 
+        std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
 
+        if (hasAsset(fileName))
+        {
+            std::istream* stream = nullptr;
 
-        return boneMap;
+            PropertyTree propertyData{"skeleton"};
+
+            *error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
+            *error = *error || !getPropertyTreeFromStream(stream, &propertyData);
+
+            delete stream;
+            if (!*error)
+            {
+                auto rootNode = propertyData.get("root");
+
+                if (rootNode.hasResult)
+                {
+                    boneMap = mapToBoneMap(*rootNode.result, error);
+                }
+                else
+                {
+                    *error = true;
+                    LOGGER_ERROR("Invalid skeleton data, must contain root node.");
+                }
+
+                if (*error)
+                {
+                    LOGGER_ERROR("Failed to load skeleton data for asset '" + assetPath + "'");
+                }
+            }
+        }
+        else
+        {
+            *error = true;
+            LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
+        }
+
+        return std::move(boneMap);
     }
 
     ShaderProgram AssetArchive::loadShaderAsset(const std::string& assetPath, bool* error)
@@ -1002,81 +935,6 @@ namespace PB
         }
 
         return data;
-    }
-
-    Material AssetArchive::loadMaterialAsset(const std::string& assetPath, bool* error)
-    {
-        std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
-
-        if (hasAsset(fileName))
-        {
-            std::istream* stream = nullptr;
-
-            PropertyTree propertyData{"material"};
-
-            *error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-            *error = *error || !getPropertyTreeFromStream(stream, &propertyData);
-
-            delete stream;
-            if (!*error)
-            {
-                return mapToMaterial(propertyData, error);
-            }
-        }
-        else
-        {
-            *error = true;
-            LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
-        }
-
-        return {};
-    }
-
-    ModelData AssetArchive::loadModelAsset(const std::string& assetPath, bool* error)
-    {
-        std::string fileName = fileNameOfAsset(assetPath, archiveAssetIds_, archiveAssets_);
-
-        if (hasAsset(fileName))
-        {
-            std::istream* stream = nullptr;
-
-            PropertyTree propertyData{"model"};
-
-            *error = *error || !FileUtils::getStreamFromArchivedFile(archivePath(), fileName, &stream);
-            *error = *error || !getPropertyTreeFromStream(stream, &propertyData);
-
-            delete stream;
-            if (!*error)
-            {
-                ModelData model{};
-
-                auto rootNode = propertyData.get("root");
-
-                if (rootNode.hasResult)
-                {
-                    model = mapToModelData(*rootNode.result, error);
-                }
-                else
-                {
-                    *error = true;
-                    LOGGER_ERROR("Invalid Model2D data, must contain root node.");
-                }
-
-                if (*error)
-                {
-                    LOGGER_ERROR("Failed to load Model2D data for asset '" + assetPath + "'");
-                }
-
-                return model;
-            }
-        }
-        else
-        {
-            *error = true;
-            LOGGER_ERROR("Failed to retrieve asset '" + assetPath + "'");
-        }
-
-        return {};
     }
 
     std::string AssetArchive::archivePath()

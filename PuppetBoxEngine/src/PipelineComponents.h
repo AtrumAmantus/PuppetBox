@@ -58,6 +58,7 @@ namespace PB
     {
         UUID uuid;
         BoneMap boneMap;
+        std::vector<std::uint32_t> boneOrder{};
         std::unique_ptr<IAnimator> animator;
     };
 
