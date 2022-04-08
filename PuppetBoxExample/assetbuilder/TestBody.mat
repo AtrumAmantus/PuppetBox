@@ -1,7 +1,0 @@
-diffuse:
-  image: Assets1/Textures/TestBody
-  width: 32
-  height: 32
-  xOffset: 0
-  yOffset: 0
-shader: Assets1/Shaders/Basic
