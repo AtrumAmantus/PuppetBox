@@ -1,6 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
+#include "puppetbox/DataStructures.h"
 #include "puppetbox/RenderData.h"
+#include "puppetbox/IValueReference.h"
 
 namespace PB
 {
@@ -11,6 +16,7 @@ namespace PB
     {
         UUID uuid;
         mat4 transform;
+        std::shared_ptr<IValueReference> transformReference;
         std::vector<mat4> boneTransformations;
         std::vector<Model> model;
     };

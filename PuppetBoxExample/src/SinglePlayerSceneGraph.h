@@ -25,32 +25,35 @@ protected:
 
         if (PB::LoadAssetPack("Assets1"))
         {
+            bool error = false;
+
             camera().moveTo({0.0f, 0.0f, 3.0f});
             camera().setPanSpeed(100.0f);
             camera().setZoomSpeed(2.0f);
 
             SceneObject object = SceneObjectBuilder::newObject()
                     .position({0.0f, 0.0f, -40.0f})
-                    .skeleton("Assets1/Skeletons/BasicHuman")
-                    .addModel(
-                            SceneObjectModelBuilder::newModel("Head")
-                            .mesh("Default/Mesh/Sprite")
-                            .transform({
-                                               32.0f, 0.0f, 0.0f, 0.0f,
-                                               0.0f, 32.0f, 0.0f, 0.0f,
-                                               0.0f, 0.0f, 1.0f, 0.0f,
-                                               0.0f, 0.0f, 0.0f, 1.0f})
-                            .shader("Default/Shader/Basic")
-                            .addImageMap("Assets1/Textures/TestHead", PB::DIFFUSE)
-                            .build()
-                            )
+                    .skeleton("Assets1/Skeleton/BasicHuman")
                     .build();
 
+            PB::BoneMap boneMap = PB::GetSkeletonAsset("Assets1/Skeleton/BasicHuman", &error);
 
             if (!buildSceneObject(object))
             {
                 std::cout << "Failed to create scene object" << std::endl;
             }
+
+            PB::UUID headSpriteUUID = createSprite("Assets1/Textures/TestHead", {32.0f, 32.0f, 1.0f}, &error);
+            attachToSceneObject(headSpriteUUID, object.uuid, boneMap.getBoneId("head"));
+
+            PB::UUID bodySpriteUUID = createSprite("Assets1/Textures/TestBody", {32.0f, 32.0f, 1.0f}, &error);
+            attachToSceneObject(bodySpriteUUID, object.uuid, boneMap.getBoneId("root"));
+
+            PB::UUID lhSpriteUUID = createSprite("Assets1/Textures/TestHand", {16.0f, 16.0f, 1.0f}, &error);
+            attachToSceneObject(lhSpriteUUID, object.uuid, boneMap.getBoneId("left_hand"));
+
+            PB::UUID rhSpriteUUID = createSprite("Assets1/Textures/TestHand", {16.0f, 16.0f, 1.0f}, &error);
+            attachToSceneObject(rhSpriteUUID, object.uuid, boneMap.getBoneId("right_hand"));
         }
         else
         {
@@ -188,6 +191,30 @@ private:
         }
 
         return !error;
+    };
+
+    PB::UUID createSprite(const std::string& texturePath, PB::vec3 scale, bool* error)
+    {
+        PB::UUID uuid = PB::RandomUtils::uuid();
+
+        createSceneObject(uuid);
+        setSceneObjectPosition(uuid, {0.0f, 150.0f, -40.0f});
+
+        addModelToSceneObject(
+                "root",
+                uuid,
+                PB::Model{
+                        PB::GetMeshAsset("Default/Mesh/Sprite", error),
+                        PB::mat4{
+                                scale.x, 0.0f, 0.0f, 0.0f,
+                                0.0f, scale.y, 0.0f, 0.0f,
+                                0.0f, 0.0f, scale.z, 0.0f,
+                                0.0f, 0.0f, 0.0f, 1.0f},
+                        PB::GetShaderAsset("Default/Shader/Basic", error),
+                        {PB::ImageMap{PB::GetImageMapAsset(texturePath, error), PB::DIFFUSE}}
+                });
+
+        return uuid;
     };
 
 };

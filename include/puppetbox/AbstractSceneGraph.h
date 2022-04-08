@@ -189,6 +189,8 @@ namespace PB
 
         void setSceneObjectSkeleton(UUID uuid, BoneMap boneMap);
 
+        void attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint);
+
     private:
         bool isInitialized_ = false;
         bool isSetup_ = false;

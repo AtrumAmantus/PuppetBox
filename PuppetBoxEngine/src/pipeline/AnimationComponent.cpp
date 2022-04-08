@@ -1,8 +1,47 @@
+#include "puppetbox/IValueReference.h"
+
 #include "../GfxMath.h"
 #include "../PipelineComponents.h"
 
 namespace PB
 {
+    class BoneTransformMatrixReference : public IValueReference
+    {
+    public:
+        BoneTransformMatrixReference(
+                const UUID uuid,
+                const std::uint32_t boneId,
+                const std::unordered_map<UUID, std::uint32_t>& animatorMap,
+                const std::vector<EntityAnimator>& animators
+        ) : uuid_(uuid), boneId_(boneId), animatorMap_(animatorMap), animators_(animators)
+        {
+
+        }
+
+        mat4 getMat4() const override
+        {
+            mat4 m = mat4::eye();
+
+            auto itr = animatorMap_.find(uuid_);
+
+            if (itr != animatorMap_.end())
+            {
+                auto& animator = animators_[itr->second];
+
+                m = animator.boneTransformations.at(boneId_);
+            }
+
+            return m;
+        }
+
+    private:
+        const UUID uuid_;
+        const std::uint32_t boneId_;
+        const std::unordered_map<UUID, std::uint32_t>& animatorMap_;
+        const std::vector<EntityAnimator>& animators_;
+
+    };
+
     class DefaultAnimator : public IAnimator
     {
     public:
@@ -97,6 +136,22 @@ namespace PB
             }
 
             animator.boneMap = std::move(event->boneMap);
+        });
+
+        subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline requests for bone transform references
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_GET_BONE_TRANSFORM_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock = createLock();
+
+            auto event = std::static_pointer_cast<PipelineGetBoneTransformReferenceEvent>(data);
+            auto reference = std::make_shared<BoneTransformMatrixReference>(
+                    event->uuid,
+                    event->boneId,
+                    animatorMap_,
+                    animators_);
+
+            event->callback(std::move(reference));
         });
 
         subscriptions_.push_back(uuid);

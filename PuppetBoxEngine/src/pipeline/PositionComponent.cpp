@@ -1,8 +1,40 @@
+#include "puppetbox/IValueReference.h"
+
 #include "../GfxMath.h"
 #include "../PipelineComponents.h"
 
 namespace PB
 {
+    class ModelTransformMatrixReference : public IValueReference
+    {
+    public:
+        ModelTransformMatrixReference(
+                const UUID uuid,
+                const std::unordered_map<UUID, EntityTransform>& transformMap
+        ) : uuid_(uuid), transformsMap_(transformMap)
+        {
+
+        }
+
+        mat4 getMat4() const override
+        {
+            mat4 m = mat4::eye();
+
+            auto itr = transformsMap_.find(uuid_);
+
+            if (itr != transformsMap_.end())
+            {
+                m = itr->second.transformMatrix;
+            }
+
+            return m;
+        }
+
+    private:
+        const UUID uuid_;
+        const std::unordered_map<UUID, EntityTransform>& transformsMap_;
+    };
+
     void PositionComponent::inits()
     {
         // Set up listener for pipeline updates to add an entity by its UUID
@@ -27,6 +59,20 @@ namespace PB
             transform.transform.position = event->position;
 
             queuedTransforms_.push(transform);
+        });
+
+        subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline requests for model transform references
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_GET_MODEL_LOCATION_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock = createLock();
+
+            auto event = std::static_pointer_cast<PipelineGetModelTransformReferenceEvent>(data);
+            auto reference = std::make_shared<ModelTransformMatrixReference>(
+                    event->uuid,
+                    transformsMap_);
+
+            event->callback(std::move(reference));
         });
 
         subscriptions_.push_back(uuid);

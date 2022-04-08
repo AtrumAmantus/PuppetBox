@@ -217,6 +217,23 @@ namespace PB
         MessageBroker::instance().publish(PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC, event);
     }
 
+    void AbstractSceneGraph::attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint)
+    {
+        auto referenceEvent = std::make_shared<PipelineGetAbsoluteBoneTransformMatrixReferenceEvent>();
+        referenceEvent->uuid = host;
+        referenceEvent->boneId = attachPoint;
+        referenceEvent->callback = [parasite, host](std::shared_ptr<IValueReference> reference) {
+            auto event = std::make_shared<PipelineAttachObjectTo>();
+            event->parasiteUUID = parasite;
+            event->hostUUID = host;
+            event->reference = std::move(reference);
+
+            MessageBroker::instance().publish(PB_EVENT_PIPELINE_ATTACH_OBJECT_TO_TOPIC, event);
+        };
+
+        MessageBroker::instance().publish(PB_EVENT_PIPELINE_GET_ABS_BONE_TRANSFORM_TOPIC, referenceEvent);
+    }
+
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)
     {
 		this->isInitialized_ = rhs.isInitialized_;
