@@ -11,6 +11,8 @@ namespace PB
 
         virtual void tearDown() = 0;
 
+        virtual void update(float deltaTime) = 0;
+
         virtual void render() = 0;
     };
 }

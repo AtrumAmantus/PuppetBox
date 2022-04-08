@@ -21,7 +21,7 @@ namespace PB
      */
     struct ImageMap
     {
-        std::uint32_t imageMapID;
+        std::uint32_t imageMapID = 0;
         ImageMapType mapType = DIFFUSE;
     };
 
@@ -32,20 +32,9 @@ namespace PB
      */
     struct Model
     {
-        std::uint32_t meshID;
-        mat4 meshTransform;
-        std::uint32_t shaderProgramID;
-        std::vector<ImageMap> imageMaps;
-    };
-
-    /**
-     * \brief Contains the render data for a single complete object, which can be referenced with a {\link PB::UUID}.
-     */
-    struct RenderData
-    {
-        UUID uuid;
-        mat4 transform;
-        std::vector<mat4> boneTransformations;
-        std::vector<Model> model;
+        std::uint32_t meshID = 0;
+        mat4 meshTransform{};
+        std::uint32_t shaderProgramID = 0;
+        std::vector<ImageMap> imageMaps{};
     };
 }

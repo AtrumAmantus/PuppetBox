@@ -12,10 +12,10 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
 
-            renderDataMap_[event->uuid] = renderData_.size();
+            singleRenderDataMap_[event->uuid] = singleRenderData_.size();
             std::vector<mat4> boneTransforms{};
             boneTransforms.push_back(mat4::eye());
-            renderData_.push_back(RenderData{event->uuid, mat4::eye(), std::move(boneTransforms), {}});
+            singleRenderData_.push_back(SingleRenderData{event->uuid, mat4::eye(), std::move(boneTransforms), {}});
         });
 
         subscriptions_.push_back(uuid);
@@ -26,7 +26,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineAddModelEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].model.push_back(event->model);
+            singleRenderData_[singleRenderDataMap_[event->uuid]].model.push_back(event->model);
         });
 
         subscriptions_.push_back(uuid);
@@ -37,7 +37,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineBoneTransformEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].boneTransformations = std::move(event->transforms);
+            singleRenderData_[singleRenderDataMap_[event->uuid]].boneTransformations = std::move(event->transforms);
         });
 
         subscriptions_.push_back(uuid);
@@ -48,7 +48,40 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineEntityTransformEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].transform = event->transform;
+            singleRenderData_[singleRenderDataMap_[event->uuid]].transform = event->transform;
+        });
+
+        subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline updates to add an instance set by its UUID
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            auto event = std::static_pointer_cast<PipelineAddInstanceSetEvent>(data);
+
+            instanceRenderDataMap_[event->uuid] = instanceRenderData_.size();
+            instanceRenderData_.push_back(
+                    InstanceRenderData {
+                            event->uuid,
+                            UUID::nullUUID(),
+                            nullptr,
+                            {},
+                            mat4::eye(),
+                            Model{}
+                    }
+            );
+        });
+
+        subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline updates to add an instance to a set by its UUID
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_INSTANCE_TO_SET_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            auto event = std::static_pointer_cast<PipelineAddInstanceToSetEvent>(data);
+
+            auto instanceSetIndex = instanceRenderDataMap_[event->instanceSetUUID];
+            instanceRenderData_[instanceSetIndex].instanceData
         });
 
         subscriptions_.push_back(uuid);
@@ -62,12 +95,17 @@ namespace PB
         }
     }
 
+    void AbstractRenderComponent::update(float deltaTime)
+    {
+
+    }
+
     void AbstractRenderComponent::render()
     {
         // Lock the component while renders are running
         std::unique_lock<std::mutex> mlock{mutex_};
 
-        for (auto& data : renderData_)
+        for (auto& data : singleRenderData_)
         {
             for (auto& model : data.model)
             {
