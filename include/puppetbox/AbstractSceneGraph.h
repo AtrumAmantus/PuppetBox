@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "AbstractInputReader.h"
-#include "AbstractObjectComponent.h"
 #include "Camera.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "IRenderComponent.h"
+#include "Pipeline.h"
 #include "RenderData.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
@@ -197,8 +197,7 @@ namespace PB
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
-        std::vector<std::unique_ptr<AbstractObjectComponent>> objectComponents_{};
-        std::unique_ptr<IRenderComponent> renderComponent_{nullptr};
+        Pipeline pipeline_{};
         std::mutex mutex_;
     };
 }

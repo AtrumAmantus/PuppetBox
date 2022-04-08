@@ -28,9 +28,9 @@ protected:
             camera().setPanSpeed(100.0f);
             camera().setZoomSpeed(2.0f);
 
-            PB::UUID uuid = PB::RandomUtils::uuid();
-            createSceneObject(uuid);
-            setSceneObjectPosition(uuid, {0.0f, 0.0f, -40.0f});
+            PB::UUID entityUUID = PB::RandomUtils::uuid();
+            createSceneObject(entityUUID);
+            setSceneObjectPosition(entityUUID, {0.0f, 0.0f, -40.0f});
 
             bool error = false;
             std::uint32_t meshId = PB::GetMeshAsset("Default/Mesh/Sprite", &error);
@@ -52,11 +52,11 @@ protected:
                             std::vector<PB::ImageMap> imageMaps{};
                             imageMaps.push_back(PB::ImageMap{imageMapId, PB::DIFFUSE});
 
-                            setSceneObjectSkeleton(uuid, std::move(boneMap));
+                            setSceneObjectSkeleton(entityUUID, std::move(boneMap));
 
                             addModelToSceneObject(
                                     "Face",
-                                    uuid,
+                                    entityUUID,
                                     PB::Model{
                                             meshId,
                                             PB::mat4{

@@ -6,7 +6,6 @@
 #include "puppetbox/IAnimationCatalogue.h"
 #include "puppetbox/ImageMapReference.h"
 
-#include "puppetbox/IModel.h"
 #include "AssetArchive.h"
 #include "Font.h"
 #include "IGfxApi.h"

@@ -10,7 +10,10 @@ namespace PB
             std::unique_lock<std::mutex> mlock = createLock();
 
             auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
-            transformsMap_[event->uuid] = EntityTransform{event->uuid, {}, {}, {1.0f, 1.0f, 1.0f}};
+            transformsMap_[event->uuid] = EntityTransform{
+                event->uuid,
+                {{}, {}, {1.0f, 1.0f, 1.0f}},
+                mat4::eye()};
         });
 
         subscriptions_.push_back(uuid);
@@ -21,7 +24,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineSetObjectPositionEvent>(data);
             auto& transform = transformsMap_[event->uuid];
-            transform.position = event->position;
+            transform.transform.position = event->position;
 
             queuedTransforms_.push(transform);
         });
@@ -43,11 +46,13 @@ namespace PB
 
         while (transform.hasResult)
         {
-            auto& t = transform.result;
+            auto& entityTransform = transform.result;
+            auto& t = entityTransform.transform;
 
             auto event = std::make_shared<PipelineEntityTransformEvent>();
-            event->uuid = t.uuid;
-            event->transform = GfxMath::CreateTransformation(t.rotation, t.scale, t.position);
+            event->uuid = entityTransform.uuid;
+            entityTransform.transformMatrix = GfxMath::CreateTransformation(t.rotation, t.scale, t.position);
+            event->transform = entityTransform.transformMatrix;
 
             MessageBroker::instance().publish(PB_EVENT_PIPELINE_ENTITY_TRANSFORM_TOPIC, event);
 

@@ -3,9 +3,10 @@
 #include <memory>
 #include <unordered_map>
 
+#include "puppetbox/AbstractObjectComponent.h"
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/IAnimationCatalogue.h"
-#include "puppetbox/AbstractObjectComponent.h"
+#include "puppetbox/IRenderComponent.h"
 
 #include "MessageBroker.h"
 #include "PipelineEvents.h"
@@ -33,9 +34,8 @@ namespace PB
     struct EntityTransform
     {
         UUID uuid;
-        vec3 position;
-        vec3 rotation;
-        vec3 scale;
+        Transform transform;
+        mat4 transformMatrix;
     };
 
     class PositionComponent : public AbstractObjectComponent
@@ -58,6 +58,7 @@ namespace PB
     {
         UUID uuid;
         BoneMap boneMap;
+        std::unordered_map<std::uint32_t, mat4> boneTransformations{};
         std::vector<std::uint32_t> boneOrder{};
         std::unique_ptr<IAnimator> animator;
     };

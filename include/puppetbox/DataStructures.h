@@ -773,9 +773,9 @@ namespace PB
 
     struct Transform
     {
-        vec3 position;
-        vec3 rotation;
-        vec3 scale;
+        vec3 position{};
+        vec3 rotation{1.0f, 1.0f, 1.0f};
+        vec3 scale{};
     };
 
     /**

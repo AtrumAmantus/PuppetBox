@@ -20,10 +20,9 @@ namespace PB
             : name(sceneName),
             renderWindow_(renderWindow),
             inputReader_(inputReader),
-            isInitialized_(true),
-            renderComponent_(std::move(renderComponent))
+            isInitialized_(true)
     {
-
+        pipeline_.setRenderComponent(std::move(renderComponent));
     }
 
     bool AbstractSceneGraph::setUp()
@@ -34,7 +33,7 @@ namespace PB
         {
             if (isInitialized_)
             {
-                renderComponent_->init();
+                pipeline_.init();
                 success = setUps();
             }
             else
@@ -58,12 +57,7 @@ namespace PB
         {
             if (isInitialized_)
             {
-                for (auto& component : objectComponents_)
-                {
-                    component->tearDown();
-                }
-
-                renderComponent_->tearDown();
+                pipeline_.tearDown();
 
                 success = tearDowns();
             }
@@ -85,10 +79,7 @@ namespace PB
         // Update implementing application first in case new objects were added or modified.
         preLoopUpdates(deltaTime);
 
-        for (auto& objectComponent: objectComponents_)
-        {
-            objectComponent->update(deltaTime);
-        }
+        pipeline_.update(deltaTime);
 
         // Update implementing application's post loop updates
         postLoopUpdates(deltaTime);
@@ -98,14 +89,12 @@ namespace PB
 
     void AbstractSceneGraph::addComponent(std::unique_ptr<AbstractObjectComponent> component)
     {
-        component->init();
-
-        objectComponents_.push_back(std::move(component));
+        pipeline_.addComponent(std::move(component));
     }
 
     void AbstractSceneGraph::render() const
     {
-        renderComponent_->render();
+        pipeline_.render();
     }
 
     void AbstractSceneGraph::processInput()
@@ -237,8 +226,7 @@ namespace PB
 		this->inputReader_ = std::move(rhs.inputReader_);
 		this->viewMode_ = rhs.viewMode_;
 		this->nextViewMode_ = rhs.nextViewMode_;
-		this->objectComponents_ = std::move(rhs.objectComponents_);
-		this->renderComponent_ = std::move(rhs.renderComponent_);
+		this->pipeline_ = std::move(rhs.pipeline_);
         return *this;
     }
 }

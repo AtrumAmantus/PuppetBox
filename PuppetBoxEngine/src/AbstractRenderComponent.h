@@ -9,8 +9,9 @@
 
 #include "puppetbox/DataStructures.h"
 #include "puppetbox/IRenderComponent.h"
-
 #include "puppetbox/RenderData.h"
+
+#include "PipelineRenderData.h"
 
 namespace PB
 {
@@ -24,8 +25,8 @@ namespace PB
         void render() override;
 
     private:
-        std::vector<RenderData> renderData_;
-        std::unordered_map<UUID, std::uint32_t> renderDataMap_;
+        std::vector<SingleRenderData> singleRenderData_{};
+        std::unordered_map<UUID, std::uint32_t> singleRenderDataMap_{};
         std::vector<UUID> subscriptions_;
         std::mutex mutex_;
 

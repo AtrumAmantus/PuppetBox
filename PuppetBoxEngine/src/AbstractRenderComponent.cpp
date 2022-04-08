@@ -12,10 +12,10 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
 
-            renderDataMap_[event->uuid] = renderData_.size();
+            singleRenderDataMap_[event->uuid] = singleRenderData_.size();
             std::vector<mat4> boneTransforms{};
             boneTransforms.push_back(mat4::eye());
-            renderData_.push_back(RenderData{event->uuid, mat4::eye(), std::move(boneTransforms), {}});
+            singleRenderData_.push_back(SingleRenderData{event->uuid, mat4::eye(), std::move(boneTransforms), {}});
         });
 
         subscriptions_.push_back(uuid);
@@ -26,7 +26,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineAddModelEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].model.push_back(event->model);
+            singleRenderData_[singleRenderDataMap_[event->uuid]].model.push_back(event->model);
         });
 
         subscriptions_.push_back(uuid);
@@ -37,7 +37,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineBoneTransformEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].boneTransformations = std::move(event->transforms);
+            singleRenderData_[singleRenderDataMap_[event->uuid]].boneTransformations = std::move(event->transforms);
         });
 
         subscriptions_.push_back(uuid);
@@ -48,7 +48,7 @@ namespace PB
 
             auto event = std::static_pointer_cast<PipelineEntityTransformEvent>(data);
 
-            renderData_[renderDataMap_[event->uuid]].transform = event->transform;
+            singleRenderData_[singleRenderDataMap_[event->uuid]].transform = event->transform;
         });
 
         subscriptions_.push_back(uuid);
@@ -67,7 +67,7 @@ namespace PB
         // Lock the component while renders are running
         std::unique_lock<std::mutex> mlock{mutex_};
 
-        for (auto& data : renderData_)
+        for (auto& data : singleRenderData_)
         {
             for (auto& model : data.model)
             {

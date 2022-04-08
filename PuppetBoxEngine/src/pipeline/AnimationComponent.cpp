@@ -46,11 +46,13 @@ namespace PB
             Bone bone{{}, defaultScale, {}};
             bone.defaultTransform = GfxMath::CreateTransformation({}, defaultScale, {});
             boneMap.addBone("root", "", bone);
+            std::uint32_t boneId = boneMap.getBoneId("root");
             animators_.push_back(
                     EntityAnimator{
                         event->uuid,
                         boneMap,
-                        {boneMap.getBoneId("root")},
+                        {{boneId, mat4::eye()}},
+                        {boneId},
                         std::make_unique<DefaultAnimator>()});
         });
 
@@ -117,11 +119,11 @@ namespace PB
             auto event = std::make_shared<PipelineBoneTransformEvent>();
             event->uuid = entityAnimator.uuid;
 
-            auto boneTransformationsMap = entityAnimator.animator->getBoneTransformations();
+            entityAnimator.boneTransformations = entityAnimator.animator->getBoneTransformations();
 
             for (const auto boneId : entityAnimator.boneOrder)
             {
-                event->transforms.push_back(boneTransformationsMap[boneId]);
+                event->transforms.push_back(entityAnimator.boneTransformations[boneId]);
             }
 
             MessageBroker::instance().publish(PB_EVENT_PIPELINE_BONE_TRANSFORM_TOPIC, event);
