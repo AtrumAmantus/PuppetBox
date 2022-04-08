@@ -19,9 +19,6 @@ Materials/Weapons/Bat bat.mat
 Materials/Weapons/Knife knife.mat
 Materials/Chain-Open Chain-Open.mat
 Materials/Chain-Closed Chain-Closed.mat
-Shaders/Basic/Vertex basic.vertex.shader
-Shaders/Basic/Fragment basic.fragment.shader
-Shaders/Basic basic.program.shader
 Animations/BasicHuman BasicHuman.anims
 Animations/BasicHuman/Walk BasicHuman_Walk.anim
 Animations/BasicHuman/Idle_0 BasicHuman_Idle0.anim

@@ -31,21 +31,31 @@ namespace PB
         */
         AssetStruct parseAssetPath(const std::string& assetPath, bool* error)
         {
+            AssetStruct asset{};
+
             std::uint32_t splitCount;
             std::string* splitValues = nullptr;
             StringUtils::split(assetPath, "/", 1, &splitValues, &splitCount);
 
             if (splitCount > 1)
             {
-                return AssetStruct{splitValues[0], splitValues[1]};
+                if (StringUtils::toLowerCase(splitValues[0]) != "default")
+                {
+                    asset = {splitValues[0], splitValues[1]};
+                }
+                else
+                {
+                    *error = true;
+                    LOGGER_ERROR("Use of reserved asset path, '" + assetPath + "', but this is not a default resource.");
+                }
             }
             else
             {
+                *error = true;
                 LOGGER_ERROR("Invalid asset path name, '" + assetPath + "'");
             }
 
-            *error = true;
-            return AssetStruct{};
+            return asset;
         }
 
         /**
@@ -168,6 +178,46 @@ namespace PB
 
             return shaderId;
         }
+
+        std::uint32_t loadDefaultBasicShader(const std::shared_ptr<IGfxApi>& gfxApi, bool* error)
+        {
+            std::uint32_t shaderId;
+
+            const std::string defaultAssetPath = "Default/Shader/Basic";
+
+            Shader shader = Shader{
+                    defaultAssetPath,
+                    defaultAssetPath + "/Vertex",
+                    "",
+                    defaultAssetPath + "/Fragment"};
+
+            bool loaded;
+            loaded = shader.loadVertexShader(DEFAULT_ASSET_BASIC_VERTEX_SHADER);
+            loaded = loaded && shader.loadFragmentShader(DEFAULT_ASSET_BASIC_FRAGMENT_SHADER);
+
+            if (loaded)
+            {
+                if (shader.init())
+                {
+                    LOGGER_INFO("Shader program '" + defaultAssetPath + "' loaded.");
+                    shaderId = gfxApi->loadShader(shader);
+                }
+                else
+                {
+                    *error = true;
+                    shaderId = 0;
+                    LOGGER_ERROR("Failed to compile shader program '" + defaultAssetPath + "'");
+                }
+            }
+            else
+            {
+                *error = true;
+                shaderId = 0;
+                LOGGER_ERROR("Failed to load shader '" + defaultAssetPath + "'");
+            }
+
+            return shaderId;
+        }
     }
 
     AssetLibrary::AssetLibrary(std::string archiveRoot, std::shared_ptr<IGfxApi> gfxApi, FontLoader* fontLoader)
@@ -186,6 +236,10 @@ namespace PB
 
         loadedShaders_.insert(
                 std::pair<std::string, std::uint32_t>{"Default/Shader/UI/Glyph", loadDefaultGlyphShader(gfxApi_, &error)}
+        );
+
+        loadedShaders_.insert(
+                std::pair<std::string, std::uint32_t>{"Default/Shader/Basic", loadDefaultBasicShader(gfxApi_, &error)}
         );
 
         return !error;

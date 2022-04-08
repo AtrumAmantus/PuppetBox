@@ -41,7 +41,7 @@ protected:
 
                 if (!error)
                 {
-                    std::uint32_t shaderId = PB::GetShaderAsset("Assets1/Shaders/Basic", &error);
+                    std::uint32_t shaderId = PB::GetShaderAsset("Default/Shader/Basic", &error);
 
                     if (!error)
                     {
@@ -55,7 +55,7 @@ protected:
                             setSceneObjectSkeleton(entityUUID, std::move(boneMap));
 
                             addModelToSceneObject(
-                                    "Face",
+                                    "Head",
                                     entityUUID,
                                     PB::Model{
                                             meshId,
