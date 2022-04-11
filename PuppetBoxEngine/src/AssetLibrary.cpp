@@ -458,45 +458,7 @@ namespace PB
         return shaderReferenceId;
     }
 
-    bool AssetLibrary::loadAnimationSetAsset(
-            const std::string& assetPath,
-            std::unordered_map<std::string, IAnimation*>& animationMap
-    )
-    {
-        bool error = false;
-
-//        if (loadedAnimationSets_.find(assetPath) == loadedAnimationSets_.end())
-//        {
-        AssetStruct asset = parseAssetPath(assetPath, &error);
-
-        if (!error)
-        {
-            std::unordered_map<std::string, std::string> animMap{};
-            error = error || !assetArchives_.at(asset.archiveName).loadAnimationSetAsset(asset.assetName, animMap);
-
-            if (!error)
-            {
-                for (const auto& entry: animMap)
-                {
-                    error = error || !loadAnimationAsset(entry.first, entry.second, animationMap);
-                }
-            }
-            else
-            {
-                LOGGER_ERROR("Failed to load animation set, '" + assetPath + "'");
-            }
-        }
-        else
-        {
-            LOGGER_ERROR("Invalid asset, '" + assetPath + "'");
-        }
-//        }
-
-        return !error;
-    }
-
     bool AssetLibrary::loadAnimationAsset(
-            const std::string& animName,
             const std::string& assetPath,
             std::unordered_map<std::string, IAnimation*>& animationMap
     )
@@ -508,7 +470,7 @@ namespace PB
         if (!error)
         {
             error = error ||
-                    !assetArchives_.at(asset.archiveName).loadAnimationAsset(animName, asset.assetName, animationMap);
+                    !assetArchives_.at(asset.archiveName).loadAnimationAsset(asset.assetName, animationMap);
         }
         else
         {

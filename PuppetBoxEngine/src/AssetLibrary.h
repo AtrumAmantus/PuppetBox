@@ -72,19 +72,6 @@ namespace PB
         std::uint32_t loadShaderAsset(const std::string& assetPath, bool* error);
 
         /**
-         * \brief Loads a set of animation assets, sets are a collection of animations associated with
-         * a particular skeleton.
-         *
-         * \param assetPath     Path to the animation set.
-         * \param animationMap  The animationMap to add the animations of the animation set to.
-         * \return True if the animation set was loaded successfully, False otherwise.
-         */
-        bool loadAnimationSetAsset(
-                const std::string& assetPath,
-                std::unordered_map<std::string, IAnimation*>& animationMap
-        );
-
-        /**
          * \brief Loads an individual animation asset.
          *
          * \param name          The desired reference name for the animation.
@@ -93,7 +80,6 @@ namespace PB
          * \return True if the animation was loaded and added to the animationMap successfully, False otherwise.
          */
         bool loadAnimationAsset(
-                const std::string& animName,
                 const std::string& assetPath,
                 std::unordered_map<std::string, IAnimation*>& animationMap
         );

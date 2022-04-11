@@ -1,10 +1,12 @@
 #include "AnimationCatalogue.h"
+#include "MessageBroker.h"
 
 #include <cmath>
 #include <functional>
 
 #include <utility>
 
+#include "EventDef.h"
 #include "GfxMath.h"
 
 namespace PB
@@ -590,9 +592,31 @@ namespace PB
 
     }
 
-    bool AnimationCatalogue::load(const std::string& assetPath)
+    AnimationCatalogue::~AnimationCatalogue() noexcept
     {
-        return assetLibrary_->loadAnimationSetAsset(assetPath, animations_);
+        for (auto subscription : subscriptions_)
+        {
+            MessageBroker::instance().unsubscribe(subscription);
+        }
+    }
+
+    bool AnimationCatalogue::init()
+    {
+        auto uuid = MessageBroker::instance().subscribe(PB_EVENT_ANIMATION_GET_ANIMATOR_TOPIC, [this](std::shared_ptr<void> data){
+            auto event = std::static_pointer_cast<AnimationGetAnimatorEvent>(data);
+            auto animator = get(event->animationName);
+
+            event->callback(std::move(animator));
+        });
+
+        subscriptions_.push_back(uuid);
+
+        return true;
+    }
+
+    bool AnimationCatalogue::loadAnimationAsset(const std::string& assetPath)
+    {
+        return assetLibrary_->loadAnimationAsset(assetPath, animations_);
     }
 
     bool AnimationCatalogue::preloadAnimation(BoneMap& boneMap, const std::string& animationPath)
@@ -620,6 +644,7 @@ namespace PB
         else
         {
             animator = nullptr;
+            LOGGER_WARN("Animation '" + animationPath + "' not found!");
         }
 
         return animator;

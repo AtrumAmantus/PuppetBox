@@ -130,8 +130,9 @@ namespace PB
          * \param animationMap       The animationMap to add the animation to, using the given name.
          * \return True if the animation was loaded and added to the animationMap successfully, False otherwise.
          */
-        bool loadAnimationAsset(const std::string& name, const std::string& assetPath,
-                                std::unordered_map<std::string, IAnimation*>& animationMap);
+        bool loadAnimationAsset(
+                const std::string& assetPath,
+                std::unordered_map<std::string, IAnimation*>& animationMap);
 
         /**
          * \brief Load the given asset's data as raw bytes.

@@ -134,15 +134,17 @@ namespace PB
     class PUPPET_BOX_API IAnimationCatalogue
     {
     public:
-        //TODO: The relationship between loading animation sets and getting a single
-        // animation is a messy one.
+        virtual ~IAnimationCatalogue() noexcept {}
+
+        virtual bool init() = 0;
+
         /**
-         * \brief Loads the animations defined at the given path reference.
+         * \brief Loads the animation defined at the given path reference.
          *
-         * \param assetPath The path reference to the desired animations to load.
-         * \return True if the animations were loaded successfully, False otherwise.
+         * \param assetPath The path reference to the desired animation to load.
+         * \return True if the animation was loaded successfully, False otherwise.
          */
-        virtual bool load(const std::string& assetPath) = 0;
+        virtual bool loadAnimationAsset(const std::string& assetPath) = 0;
 
         /**
          * \brief Preloads the animation into memory.

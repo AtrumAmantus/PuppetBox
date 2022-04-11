@@ -191,6 +191,8 @@ namespace PB
 
         void attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint);
 
+        void animateSceneObject(UUID uuid, const std::string& animationName);
+
     private:
         bool isInitialized_ = false;
         bool isSetup_ = false;

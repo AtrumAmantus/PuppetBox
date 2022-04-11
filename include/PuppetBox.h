@@ -58,6 +58,14 @@ namespace PB
     extern PUPPET_BOX_API BoneMap GetSkeletonAsset(const std::string& assetPath, bool* error);
 
     /**
+     * \brief Loads the animation associated with the given asset path.
+     *
+     * \param assetPath The path to the animation asset to load.
+     * \return True if the animation asset was loaded successfully, False otherwise.
+     */
+    extern PUPPET_BOX_API bool LoadAnimationAsset(const std::string& assetPath);
+
+    /**
      * \brief Loads a font asset from the given fully qualified asset path.
      *
      * <p>The given font-size is only considered the first time the font is loaded.
@@ -67,14 +75,6 @@ namespace PB
      * \return True if the font asset was loaded successfully, False otherwise.
      */
     extern PUPPET_BOX_API bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize);
-
-    /**
-     * \brief Loads the animations associated with the given asset path.
-     *
-     * \param assetPath The path to the animation assets to load.
-     * \return True if the animation asset was loaded successfully, False otherwise.
-     */
-    extern PUPPET_BOX_API bool LoadAnimationsPack(const std::string& assetPath);
 
     /**
      * \brief Preloads the animation keyframes into memory.

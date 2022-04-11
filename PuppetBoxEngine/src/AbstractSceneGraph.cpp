@@ -1,5 +1,6 @@
 #include "puppetbox/AbstractSceneGraph.h"
 
+#include "EventDef.h"
 #include "GfxMath.h"
 #include "Logger.h"
 #include "MessageBroker.h"
@@ -187,7 +188,7 @@ namespace PB
         auto event = std::make_shared<PipelineAddEntityEvent>();
         event->uuid = uuid;
 
-        MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC, event);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::ADD_ENTITY_TOPIC, event);
     }
 
     void AbstractSceneGraph::setSceneObjectPosition(UUID uuid, vec3 position)
@@ -196,7 +197,7 @@ namespace PB
         event->uuid = uuid;
         event->position = position;
 
-        MessageBroker::instance().publish(PB_EVENT_PIPELINE_SET_ENTITY_POSITION_TOPIC, event);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::SET_ENTITY_POSITION_TOPIC, event);
     }
 
     void AbstractSceneGraph::addModelToSceneObject(const std::string& modelName, UUID uuid, Model model)
@@ -205,7 +206,7 @@ namespace PB
         event->uuid = uuid;
         event->model = model;
 
-        MessageBroker::instance().publish(PB_EVENT_PIPELINE_ADD_MODEL_TOPIC, event);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::ADD_MODEL_TOPIC, event);
     }
 
     void AbstractSceneGraph::setSceneObjectSkeleton(UUID uuid, BoneMap boneMap)
@@ -214,7 +215,7 @@ namespace PB
         event->uuid = uuid;
         event->boneMap = std::move(boneMap);
 
-        MessageBroker::instance().publish(PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC, event);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::SET_BONE_MAP_TOPIC, event);
     }
 
     void AbstractSceneGraph::attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint)
@@ -228,10 +229,25 @@ namespace PB
             event->hostUUID = host;
             event->reference = std::move(reference);
 
-            MessageBroker::instance().publish(PB_EVENT_PIPELINE_ATTACH_OBJECT_TO_TOPIC, event);
+            MessageBroker::instance().publish(Event::Pipeline::Topic::ATTACH_OBJECT_TO_TOPIC, event);
         };
 
-        MessageBroker::instance().publish(PB_EVENT_PIPELINE_GET_ABS_BONE_TRANSFORM_TOPIC, referenceEvent);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::GET_ABS_BONE_TRANSFORM_TOPIC, referenceEvent);
+    }
+
+    void AbstractSceneGraph::animateSceneObject(UUID uuid, const std::string& animationName)
+    {
+        auto getAnimatorEvent = std::make_shared<AnimationGetAnimatorEvent>();
+        getAnimatorEvent->animationName = animationName;
+        getAnimatorEvent->callback = [uuid](std::unique_ptr<IAnimator> animator) {
+            auto addAnimatorEvent = std::make_shared<PipelineAddAnimatorEvent>();
+            addAnimatorEvent->uuid = uuid;
+            addAnimatorEvent->animator = std::move(animator);
+
+            MessageBroker::instance().publish(Event::Pipeline::Topic::ADD_ANIMATOR_TOPIC, addAnimatorEvent);
+        };
+
+        MessageBroker::instance().publish(Event::Topic::ANIMATION_GET_ANIMATOR_TOPIC, getAnimatorEvent);
     }
 
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)

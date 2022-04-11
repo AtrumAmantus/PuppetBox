@@ -238,6 +238,7 @@ namespace PB
             if (assetLibrary->init())
             {
                 animationCatalogue = AnimationCatalogue(assetLibrary);
+                animationCatalogue.init();
 
                 fontLoader = FontLoader{gfxApi};
                 LOGGER_DEBUG("FontLoader initialized");
@@ -303,16 +304,16 @@ namespace PB
         return std::move(assetLibrary->loadSkeletonAsset(assetPath, error));
     }
 
+    bool LoadAnimationAsset(const std::string& assetPath)
+    {
+        return animationCatalogue.loadAnimationAsset(assetPath);
+    }
+
     bool LoadFontAsset(const std::string& fontPath, std::uint8_t fontSize)
     {
         bool error = false;
         assetLibrary->loadFontAsset(fontPath, fontSize, &error);
         return !error;
-    }
-
-    bool LoadAnimationsPack(const std::string& assetPath)
-    {
-        return animationCatalogue.load(assetPath);
     }
 
     bool PreloadAnimationFrames(const std::string& animationPath, BoneMap& boneMap)

@@ -12,20 +12,6 @@
 namespace PB
 {
     /**
-     * \brief Interface for defining an appender.
-     *
-     * <p>Appenders offer a means to modify logging behavior, such as defining alternative
-     * output targets.</p>
-     */
-    class LoggingAppender
-    {
-    public:
-        virtual ~LoggingAppender() = default;
-
-        virtual void send(const std::string& message) = 0;
-    };
-
-    /**
     * \brief Logging class for application logging needs.
      *
      * TODO: Add concurrency protection
@@ -40,8 +26,6 @@ namespace PB
         static void warn(const std::string& message, const std::string& filePath, std::uint32_t line);
 
         static void error(const std::string& message, const std::string& filePath, std::uint32_t line);
-
-        static void setAppender(std::unique_ptr<LoggingAppender> loggingAppender);
 
     private:
         static void log(

@@ -66,9 +66,13 @@ namespace PB
     class AnimationCatalogue : public IAnimationCatalogue
     {
     public:
+        ~AnimationCatalogue() noexcept override;
+
+        bool init() override;
+
         explicit AnimationCatalogue(std::shared_ptr<AssetLibrary> assetLibrary);
 
-        bool load(const std::string& assetPath) override;
+        bool loadAnimationAsset(const std::string& assetPath) override;
 
         bool preloadAnimation(BoneMap& boneMap, const std::string& animationPath) override;
 
@@ -77,5 +81,6 @@ namespace PB
     private:
         std::unordered_map<std::string, IAnimation*> animations_{};
         std::shared_ptr<AssetLibrary> assetLibrary_;
+        std::vector<UUID> subscriptions_{};
     };
 }

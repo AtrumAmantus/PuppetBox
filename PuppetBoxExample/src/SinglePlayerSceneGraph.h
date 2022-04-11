@@ -28,6 +28,8 @@ protected:
         {
             bool error = false;
 
+            PB::LoadAnimationAsset(Constant::Asset::Animation::kHumanWalk);
+
             camera().moveTo({0.0f, 0.0f, 3.0f});
             camera().setPanSpeed(100.0f);
             camera().setZoomSpeed(2.0f);
@@ -52,6 +54,8 @@ protected:
 
                 PB::UUID rhSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHand, {16.0f, 16.0f, 1.0f}, &error);
                 attachToSceneObject(rhSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kRightHand));
+
+                animateSceneObject(object.uuid, Constant::Asset::Animation::kHumanWalk);
             }
             else
             {

@@ -12,16 +12,6 @@
 
 namespace PB
 {
-    namespace Event::Topic
-    {
-        std::uint32_t NETWORK_TOPIC = 0;
-        std::uint32_t NETWORK_STATUS_TOPIC = 0;
-        std::uint32_t NETWORK_EVENT_WRITER_TOPIC = 0;
-        std::uint32_t NETWORK_EVENT_READER_TOPIC = 0;
-        std::uint32_t ENGINE_ADD_SCENE_TOPIC = 0;
-        std::uint32_t ENGINE_SET_SCENE_TOPIC = 0;
-    }
-
     namespace
     {
         void defaultReader(std::uint8_t* data, std::uint32_t dataLength)
@@ -60,7 +50,6 @@ namespace PB
             } connection;
 
             // Subscribe to listener events
-            Event::Topic::NETWORK_EVENT_WRITER_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_WRITER);
             MessageBroker::instance().subscribe(
                     PB_EVENT_NETWORK_WRITER,
                     [&connection, isHostBigEndian](std::shared_ptr<void> data) {
@@ -87,7 +76,6 @@ namespace PB
                                 });
                     });
 
-            Event::Topic::NETWORK_EVENT_READER_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_READER);
             MessageBroker::instance().subscribe(
                     PB_EVENT_NETWORK_READER,
                     [&networkReader](std::shared_ptr<void> data) {
@@ -98,8 +86,6 @@ namespace PB
                     });
 
             // Subscribe to network events
-            Event::Topic::NETWORK_STATUS_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK_STATUS);
-            Event::Topic::NETWORK_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_NETWORK);
             MessageBroker::instance().subscribe(
                     PB_EVENT_NETWORK,
                     [&connection, isHostBigEndian](std::shared_ptr<void> data) {
@@ -302,7 +288,6 @@ namespace PB
         );
 
         // Listener for adding new scenes.
-        Event::Topic::ENGINE_ADD_SCENE_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_SCENE_ADD);
         MessageBroker::instance().subscribe(
                 PB_EVENT_SCENE_ADD,
                 [this](std::shared_ptr<void> data) {
@@ -323,7 +308,6 @@ namespace PB
                 });
 
         // Listener for setting the current scene.
-        Event::Topic::ENGINE_SET_SCENE_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_SCENE_SET);
         MessageBroker::instance().subscribe(
                 PB_EVENT_SCENE_SET,
                 [this](std::shared_ptr<void> data) {

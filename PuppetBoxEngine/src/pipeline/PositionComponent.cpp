@@ -64,7 +64,7 @@ namespace PB
         subscriptions_.push_back(uuid);
 
         // Set up listener for pipeline requests for model transform references
-        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_GET_MODEL_LOCATION_TOPIC, [this](std::shared_ptr<void> data){
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_GET_ENTITY_TRANSFORM_TOPIC, [this](std::shared_ptr<void> data){
             std::unique_lock<std::mutex> mlock = createLock();
 
             auto event = std::static_pointer_cast<PipelineGetModelTransformReferenceEvent>(data);
@@ -100,7 +100,7 @@ namespace PB
             entityTransform.transformMatrix = GfxMath::CreateTransformation(t.rotation, t.scale, t.position);
             event->transform = entityTransform.transformMatrix;
 
-            MessageBroker::instance().publish(PB_EVENT_PIPELINE_ENTITY_TRANSFORM_TOPIC, event);
+            MessageBroker::instance().publish(Event::Pipeline::Topic::ENTITY_TRANSFORM_TOPIC, event);
 
             transform = queuedTransforms_.pop();
         }

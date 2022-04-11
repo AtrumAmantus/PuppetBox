@@ -56,10 +56,10 @@ namespace PB
                     event->callback(std::move(absoluteTransformReference));
                 };
 
-                MessageBroker::instance().publish(PB_EVENT_PIPELINE_GET_MODEL_LOCATION_TOPIC, modelTransformEvent);
+                MessageBroker::instance().publish(Event::Pipeline::Topic::GET_ENTITY_TRANSFORM_TOPIC, modelTransformEvent);
             };
 
-            MessageBroker::instance().publish(PB_EVENT_PIPELINE_GET_BONE_TRANSFORM_TOPIC, boneTransformEvent);
+            MessageBroker::instance().publish(Event::Pipeline::Topic::GET_BONE_TRANSFORM_TOPIC, boneTransformEvent);
         });
 
         subscriptions_.push_back(uuid);

@@ -102,7 +102,11 @@ namespace PB
             std::unique_lock<std::mutex> mlock = createLock();
 
             auto event = std::static_pointer_cast<PipelineAddAnimatorEvent>(data);
-            animators_[animatorMap_[event->uuid]].animator = std::move(event->animator);
+
+            if (event->animator != nullptr)
+            {
+                animators_[animatorMap_[event->uuid]].animator = std::move(event->animator);
+            }
         });
 
         subscriptions_.push_back(uuid);
@@ -181,7 +185,7 @@ namespace PB
                 event->transforms.push_back(entityAnimator.boneTransformations[boneId]);
             }
 
-            MessageBroker::instance().publish(PB_EVENT_PIPELINE_BONE_TRANSFORM_TOPIC, event);
+            MessageBroker::instance().publish(Event::Pipeline::Topic::BONE_TRANSFORM_TOPIC, event);
         }
     }
 }

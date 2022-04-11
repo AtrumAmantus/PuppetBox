@@ -4,19 +4,8 @@
 
 namespace PB
 {
-    class DefaultLoggingAppender : public LoggingAppender
-    {
-    public:
-        void send(const std::string& message)
-        {
-            std::cout << message << std::endl;
-        }
-    };
-
     namespace
     {
-        static std::unique_ptr<LoggingAppender> appender_ = std::make_unique<DefaultLoggingAppender>();
-
         static std::string getFileName(const std::string& filePath)
         {
             std::string fileName;
@@ -40,7 +29,7 @@ namespace PB
             }
 
             return fileName;
-        };
+        }
 
     }
 
@@ -54,8 +43,13 @@ namespace PB
         time_t now;
         time(&now);
         const std::string fileName = getFileName(filePath);
-        appender_->send(std::to_string(now) + " | " + level + " | " + fileName + " (" + std::to_string(line) + "): " + message);
-    };
+#       ifdef _DEBUG
+        std::cout << std::to_string(now)
+                  << " | " << level
+                  << " | " << fileName << " (" << line << "): "
+                  << message << std::endl;
+#       endif
+    }
 
     void DefaultLogger::debug(const std::string& message, const std::string& filePath, std::uint32_t line)
     {
@@ -75,10 +69,5 @@ namespace PB
     void DefaultLogger::error(const std::string& message, const std::string& filePath, std::uint32_t line)
     {
         log("ERROR", message, filePath, line);
-    }
-
-    void DefaultLogger::setAppender(std::unique_ptr<LoggingAppender> loggingAppender)
-    {
-        appender_ = std::move(loggingAppender);
     }
 }

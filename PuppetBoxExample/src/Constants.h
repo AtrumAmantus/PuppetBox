@@ -8,8 +8,8 @@ namespace Constant
     {
         namespace Animation
         {
-            const std::string kHumanWalk = "Assets1/Animation/Walk";
-            const std::string kIdle0 = "Assets1/Animation/Idle_0";
+            const std::string kHumanWalk = "Assets1/Animation/BasicHuman/Walk";
+            const std::string kIdle0 = "Assets1/Animation/BasicHuman/Idle_0";
         }
 
         namespace Skeleton

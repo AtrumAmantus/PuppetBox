@@ -15,10 +15,25 @@
 #define PB_EVENT_PIPELINE_GET_BONE_TRANSFORM_TOPIC      "pb_event_pipeline_get_bone_transform"
 #define PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC            "pb_event_pipeline_set_bone_map"
 #define PB_EVENT_PIPELINE_SET_ENTITY_POSITION_TOPIC     "pb_event_pipeline_set_entity_position"
-#define PB_EVENT_PIPELINE_GET_MODEL_LOCATION_TOPIC      "pb_event_pipeline_get_model_location"
+#define PB_EVENT_PIPELINE_GET_ENTITY_TRANSFORM_TOPIC    "pb_event_pipeline_get_model_transform"
 
 namespace PB
 {
+    namespace Event::Pipeline::Topic
+    {
+        extern std::uint32_t ADD_ANIMATOR_TOPIC;
+        extern std::uint32_t ADD_ENTITY_TOPIC;
+        extern std::uint32_t ADD_MODEL_TOPIC;
+        extern std::uint32_t ATTACH_OBJECT_TO_TOPIC;
+        extern std::uint32_t BONE_TRANSFORM_TOPIC;
+        extern std::uint32_t ENTITY_TRANSFORM_TOPIC;
+        extern std::uint32_t GET_ABS_BONE_TRANSFORM_TOPIC;
+        extern std::uint32_t GET_BONE_TRANSFORM_TOPIC;
+        extern std::uint32_t SET_BONE_MAP_TOPIC;
+        extern std::uint32_t SET_ENTITY_POSITION_TOPIC;
+        extern std::uint32_t GET_ENTITY_TRANSFORM_TOPIC;
+    }
+
     struct PipelineAddAnimatorEvent
     {
         UUID uuid;
