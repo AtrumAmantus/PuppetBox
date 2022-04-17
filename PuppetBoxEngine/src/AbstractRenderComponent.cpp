@@ -57,13 +57,13 @@ namespace PB
 
         subscriptions_.push_back(uuid);
 
-        // Set up listener for pipeline model additions by its UUID
+        // Set up listener for pipeline models additions by its UUID
         uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_MODEL_TOPIC, [this](std::shared_ptr<void> data){
             std::unique_lock<std::mutex> mlock{mutex_};
 
             auto event = std::static_pointer_cast<PipelineAddModelEvent>(data);
 
-            singleRenderData_[singleRenderDataMap_[event->uuid]].model.push_back(event->model);
+            singleRenderData_[singleRenderDataMap_[event->uuid]].models.push_back(event->model);
         });
 
         subscriptions_.push_back(uuid);
@@ -120,7 +120,7 @@ namespace PB
 
         for (auto& data : singleRenderData_)
         {
-            for (auto& model : data.model)
+            for (auto& model : data.models)
             {
                 PB::mat4 transform = data.transformReference->getMat4();
 

@@ -532,7 +532,7 @@ namespace PB
                     // Get the bone's Transform keyframe
                     auto& boneKeyframe = animation_->getKeyFrameForBone(currentFrame, entry.first, entry.second.name);
 
-                    //TODO: Need to validate the animation skeleton matches the model skeleton
+                    //TODO: Need to validate the animation skeleton matches the model's skeleton
                     const BoneNode* boneNode = bones.getBone(entry.first).result;
 
                     mat4 matrix = GfxMath::CreateTransformation(

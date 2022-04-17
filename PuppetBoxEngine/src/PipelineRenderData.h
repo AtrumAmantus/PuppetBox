@@ -18,6 +18,6 @@ namespace PB
         mat4 transform;
         std::shared_ptr<IValueReference> transformReference;
         std::vector<mat4> boneTransformations;
-        std::vector<Model> model;
+        std::vector<Model> models;
     };
 }

@@ -22,51 +22,8 @@ protected:
     {
         setViewMode(PB::SceneView::ORTHO);
 
-        bool success = true;
-
-        if (PB::LoadAssetPack("Assets1"))
-        {
-            bool error = false;
-
-            PB::LoadAnimationAsset(Constant::Asset::Animation::kHumanWalk);
-
-            camera().moveTo({0.0f, 0.0f, 3.0f});
-            camera().setPanSpeed(100.0f);
-            camera().setZoomSpeed(2.0f);
-
-            SceneObject object = SceneObjectBuilder::newObject()
-                    .position({0.0f, 0.0f, -40.0f})
-                    .skeleton(Constant::Asset::Skeleton::kHuman)
-                    .build();
-
-            PB::BoneMap boneMap = PB::GetSkeletonAsset(Constant::Asset::Skeleton::kHuman, &error);
-
-            if (buildSceneObject(object))
-            {
-                PB::UUID headSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHead, {32.0f, 32.0f, 1.0f}, &error);
-                attachToSceneObject(headSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kHead));
-
-                PB::UUID bodySpriteUUID = createSprite(Constant::Asset::Texture::kHumanBody, {32.0f, 32.0f, 1.0f}, &error);
-                attachToSceneObject(bodySpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kRoot));
-
-                PB::UUID lhSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHand, {16.0f, 16.0f, 1.0f}, &error);
-                attachToSceneObject(lhSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kLeftHand));
-
-                PB::UUID rhSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHand, {16.0f, 16.0f, 1.0f}, &error);
-                attachToSceneObject(rhSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kRightHand));
-
-                animateSceneObject(object.uuid, Constant::Asset::Animation::kHumanWalk);
-            }
-            else
-            {
-                std::cout << "Failed to create scene object" << std::endl;
-            }
-        }
-        else
-        {
-            success = false;
-            std::cout << "Failed to load assets" << std::endl;
-        }
+        bool success = uiSetup();
+        success = success && sceneSetup();
 
         return success;
     }
@@ -224,4 +181,66 @@ private:
         return uuid;
     };
 
+    bool sceneSetup()
+    {
+        bool success = true;
+
+        if (PB::LoadAssetPack("Assets1"))
+        {
+            bool error = false;
+
+            PB::BoneMap boneMap = PB::GetSkeletonAsset(Constant::Asset::Skeleton::kHuman, &error);
+
+            PB::LoadAnimationAsset(Constant::Asset::Animation::kHumanWalk);
+            PB::LoadAnimationAsset(Constant::Asset::Animation::kIdle0);
+            PB::PreloadAnimationFrames(Constant::Asset::Animation::kHumanWalk, boneMap);
+//            PB::PreloadAnimationFrames(Constant::Asset::Animation::kIdle0, boneMap);
+
+            camera().moveTo({0.0f, 0.0f, 3.0f});
+            camera().setPanSpeed(100.0f);
+            camera().setZoomSpeed(2.0f);
+
+            SceneObject object = SceneObjectBuilder::newObject()
+                    .position({0.0f, 0.0f, -40.0f})
+                    .skeleton(Constant::Asset::Skeleton::kHuman)
+                    .build();
+
+            if (buildSceneObject(object))
+            {
+                PB::UUID headSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHead, {32.0f, 32.0f, 1.0f}, &error);
+                attachToSceneObject(headSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kHead));
+
+                PB::UUID bodySpriteUUID = createSprite(Constant::Asset::Texture::kHumanBody, {32.0f, 32.0f, 1.0f}, &error);
+                attachToSceneObject(bodySpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kRoot));
+
+                PB::UUID lhSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHand, {16.0f, 16.0f, 1.0f}, &error);
+                attachToSceneObject(lhSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kLeftHand));
+
+                PB::UUID rhSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHand, {16.0f, 16.0f, 1.0f}, &error);
+                attachToSceneObject(rhSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kRightHand));
+
+                animateSceneObject(object.uuid, Constant::Asset::Animation::kHumanWalk);
+            }
+            else
+            {
+                std::cout << "Failed to create scene object" << std::endl;
+            }
+        }
+        else
+        {
+            success = false;
+            std::cout << "Failed to load assets" << std::endl;
+        }
+
+        return success;
+    };
+
+    bool uiSetup()
+    {
+        bool success = true;
+
+        
+
+        return success;
+    }
 };

@@ -345,7 +345,11 @@ namespace PB
                     }
 
                     currentScene_ = nextScene_;
-                    currentScene_->setUp();
+                    if (!currentScene_->setUp())
+                    {
+                        LOGGER_ERROR("Failed to set up scene");
+                        inputReader_->window.windowClose = true;
+                    }
                     nextScene_ = nullptr;
                 }
 
