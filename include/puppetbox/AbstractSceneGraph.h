@@ -14,6 +14,7 @@
 #include "RenderData.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
+#include "UIComponent.h"
 
 namespace PB
 {
@@ -192,6 +193,8 @@ namespace PB
         void attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint);
 
         void animateSceneObject(UUID uuid, const std::string& animationName);
+
+        bool createUIComponent(UI::Type componentType, UUID uuid);
 
     private:
         bool isInitialized_ = false;

@@ -362,36 +362,6 @@ namespace PB
         return '\0';
     }
 
-    //TODO: Does sending the UIComponentAttributes make sense if they can just be added after via the object?
-    UIComponent*
-    CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes, bool* error)
-    {
-        UIComponent* component{nullptr};
-
-        switch (uiComponentType)
-        {
-            case UI::TEXT_AREA:
-                component = new TextAreaComponent(assetLibrary, gfxApi);
-                component->setAttributes(std::move(attributes));
-                break;
-            case UI::GROUP:
-                component = new GroupComponent(assetLibrary, gfxApi);
-                component->setAttributes(std::move(attributes));
-                break;
-            default:
-                LOGGER_ERROR("Unrecognized component type: " + std::to_string(uiComponentType));
-        }
-
-        *error = component == nullptr || !component->init();
-
-        if (*error)
-        {
-            LOGGER_ERROR("Failed to load UI Component");
-        }
-
-        return component;
-    }
-
     std::uint32_t PublishEvent(const std::string& topicName, std::shared_ptr<void> data)
     {
         return MessageBroker::instance().publish(topicName, data);

@@ -7,6 +7,8 @@
 
 #define PB_EVENT_PIPELINE_ADD_ANIMATOR_TOPIC            "pb_event_pipeline_add_animator"
 #define PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC              "pb_event_pipeline_add_entity"
+#define PB_EVENT_PIPELINE_ADD_INSTANCE_TOPIC            "pb_event_pipeline_add_instance"
+#define PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC        "pb_event_pipeline_add_instance_set"
 #define PB_EVENT_PIPELINE_ADD_MODEL_TOPIC               "pb_event_pipeline_add_model"
 #define PB_EVENT_PIPELINE_ATTACH_OBJECT_TO_TOPIC        "pb_event_pipeline_attach_object_to"
 #define PB_EVENT_PIPELINE_BONE_TRANSFORM_TOPIC          "pb_event_pipeline_bone_transform"
@@ -43,6 +45,28 @@ namespace PB
     struct PipelineAddEntityEvent
     {
         UUID uuid;
+    };
+
+    struct PipelineAddInstanceEvent
+    {
+        UUID setUUID;
+        UUID instanceUUID;
+        mat4 transform;
+        mat4 data;
+    };
+
+    struct PipelineModifyInstanceTransformEvent
+    {
+        UUID setUUID;
+        UUID instanceUUID;
+        mat4 transform;
+    };
+
+    struct PipelineAddInstanceSetEvent
+    {
+        UUID uuid;
+        mat4 transform;
+        Model model;
     };
 
     struct PipelineAddModelEvent

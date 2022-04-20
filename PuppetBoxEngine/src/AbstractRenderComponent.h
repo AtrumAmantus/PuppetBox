@@ -27,6 +27,8 @@ namespace PB
     private:
         std::vector<SingleRenderData> singleRenderData_{};
         std::unordered_map<UUID, std::uint32_t> singleRenderDataMap_{};
+        std::vector<InstanceRenderData> instanceRenderData_{};
+        std::unordered_map<UUID, std::uint32_t> instanceRenderDataMap_{};
         std::vector<UUID> subscriptions_;
         std::mutex mutex_;
 
@@ -35,5 +37,11 @@ namespace PB
                 const std::vector<mat4>& boneTransforms,
                 const Model& model,
                 const mat4 transform) const = 0;
+
+        virtual void renderInstance(
+                const Model& model,
+                const mat4 transform,
+                const std::vector<mat4>& instanceTransforms,
+                const std::vector<mat4>& instanceData) const = 0;
     };
 }

@@ -35,26 +35,34 @@ namespace PB
      *
      * Accepted attributes:
      *
-     * FONT_SIZE
-     * FONT_TYPE
-     * HEIGHT
-     * ORIGIN
-     * POS_X
-     * POS_Y
-     * POS_Z
-     * TEXT_CONTENT
-     * WIDTH
+     * {\see PB::UI::Attribute::UInteger::FONT_SIZE}
+     * {\see PB::UI::Attribute::String::FONT_TYPE}
+     * {\see PB::UI::Attribute::UInteger::HEIGHT}
+     * {\see PB::UI::Attribute::UInteger::ORIGIN}
+     * {\see PB::UI::Attribute::UInteger::POS_X}
+     * {\see PB::UI::Attribute::UInteger::POS_Y}
+     * {\see PB::UI::Attribute::UInteger::POS_Z}
+     * {\see PB::UI::Attribute::String::TEXT_CONTENT}
+     * {\see PB::UI::Attribute::UInteger::WIDTH}
      */
     class TextAreaComponent : public GfxUIComponent
     {
     public:
-        TextAreaComponent(const std::shared_ptr<AssetLibrary>& assetLibrary, const std::shared_ptr<IGfxApi>& gfxApi);
-
-        bool init() override;
+        TextAreaComponent(
+                UUID uuid,
+                const std::shared_ptr<AssetLibrary>& assetLibrary,
+                const std::shared_ptr<IGfxApi>& gfxApi);
 
         void update(float deltaTime) override;
 
         void render() const override;
+
+    protected:
+        bool inits() override;
+
+        void updateStringAttribute(UI::Attribute::String attribute, std::string value) override;
+
+        void updateUIntegerAttribute(UI::Attribute::UInteger attribute, std::uint32_t value) override;
 
     private:
         Shader shader_{""};
@@ -67,13 +75,16 @@ namespace PB
     class GroupComponent : public GfxUIComponent
     {
     public:
-        GroupComponent(const std::shared_ptr<AssetLibrary>& assetLibrary, const std::shared_ptr<IGfxApi>& gfxApi);
+        GroupComponent(
+                UUID uuid,
+                const std::shared_ptr<AssetLibrary>& assetLibrary,
+                const std::shared_ptr<IGfxApi>& gfxApi);
 
         void update(float deltaTime) override;
 
         void render() const override;
 
-        bool addComponent(std::shared_ptr<UIComponent> component) override;
+        bool addComponent(UUID uuid) override;
 
     private:
         std::vector<std::shared_ptr<UIComponent>> components_;

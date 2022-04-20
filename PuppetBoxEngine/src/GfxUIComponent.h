@@ -20,8 +20,9 @@ namespace PB
     class GfxUIComponent : public UIComponent
     {
     public:
-        GfxUIComponent(std::shared_ptr<AssetLibrary> assetLibrary, std::shared_ptr<IGfxApi> gfxApi)
-                : assetLibrary_(std::move(assetLibrary)), gfxApi_(std::move(gfxApi)) {};
+        GfxUIComponent(UUID uuid, std::shared_ptr<AssetLibrary> assetLibrary, std::shared_ptr<IGfxApi> gfxApi)
+                : UIComponent(uuid), assetLibrary_(std::move(assetLibrary)), gfxApi_(std::move(gfxApi)) {};
+
     protected:
         /**
          * \brief Shared reference to the {\link AssetLibrary} instance for rendering UI components.

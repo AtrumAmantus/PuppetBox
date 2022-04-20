@@ -12,6 +12,11 @@ namespace Constant
             const std::string kIdle0 = "Assets1/Animation/BasicHuman/Idle_0";
         }
 
+        namespace Font
+        {
+            const std::string kMochiyPop = "Assets1/Fonts/MochiyPop/Regular";
+        }
+
         namespace Skeleton
         {
             const std::string kHuman = "Assets1/Skeleton/BasicHuman";

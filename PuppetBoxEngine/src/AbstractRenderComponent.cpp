@@ -6,6 +6,31 @@
 
 namespace PB
 {
+    class TransformInstanceReference : public IValueReference
+    {
+    public:
+        TransformInstanceReference(
+                const UUID uuid,
+                const std::vector<InstanceRenderData>& renderData,
+                const std::unordered_map<UUID, std::uint32_t>& renderDataMap
+        ) : uuid_(uuid), renderData_(renderData), renderDataMap_(renderDataMap)
+        {
+
+        };
+
+    private:
+        mat4 getMat4() const override
+        {
+            return renderData_[renderDataMap_.at(uuid_)].transform;
+        }
+
+    private:
+        const UUID uuid_;
+        const std::vector<InstanceRenderData>& renderData_{};
+        const std::unordered_map<UUID, std::uint32_t>& renderDataMap_{};
+
+    };
+
     class TransformReference : public IValueReference
     {
     public:
@@ -103,6 +128,42 @@ namespace PB
         });
 
         subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline updates to add instances sets
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            auto event = std::static_pointer_cast<PipelineAddInstanceSetEvent>(data);
+
+            instanceRenderDataMap_[event->uuid] = instanceRenderData_.size();
+            instanceRenderData_.push_back({
+                event->uuid,
+                event->transform,
+                std::make_shared<TransformInstanceReference>(
+                        event->uuid,
+                        instanceRenderData_,
+                        instanceRenderDataMap_),
+                event->model
+            });
+        });
+
+        subscriptions_.push_back(uuid);
+
+        // Set up listener for pipeline updates to add instances to instance sets
+        uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_INSTANCE_TOPIC, [this](std::shared_ptr<void> data){
+            std::unique_lock<std::mutex> mlock{mutex_};
+
+            auto event = std::static_pointer_cast<PipelineAddInstanceEvent>(data);
+
+            auto& set = instanceRenderData_[instanceRenderDataMap_[event->setUUID]];
+            set.instanceMap[event->instanceUUID] = set.instanceTransforms.size();
+            set.instanceTransforms.push_back(event->transform);
+            set.instanceData.push_back(event->data);
+            //TODO: This seems like it will be really slow, I think I need to have the pipeline components all
+            // accessing a single data set rather then passing information through events from one to the next.
+        });
+
+        subscriptions_.push_back(uuid);
     }
 
     void AbstractRenderComponent::tearDown()
@@ -126,6 +187,15 @@ namespace PB
 
                 render(data.boneTransformations, model, transform);
             }
+        }
+
+        for (auto& data : instanceRenderData_)
+        {
+            renderInstance(
+                    data.model,
+                    data.transformReference->getMat4(),
+                    data.instanceTransforms,
+                    data.instanceData);
         }
     }
 }

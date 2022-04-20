@@ -19,8 +19,12 @@ namespace PB
     namespace
     {
         std::vector<Mesh> RENDER_REFERENCES{};
+        std::vector<Mesh> INSTANCE_RENDER_REFERENCES{};
         std::vector<ImageMapReference> IMAGE_MAP_REFERENCES{};
         std::vector<Shader> SHADER_PROGRAM_REFERENCES{};
+
+        std::uint32_t INSTANCE_TRANSFORM_VBO = 0;
+        std::uint32_t INSTANCE_DATA_VBO = 0;
 
         /**
         * \brief Searches for the provided vertex in the provided vector.  Two vertices are considered equal if each of
@@ -197,6 +201,100 @@ namespace PB
 
             shader.unuse();
         }
+
+        void renderInstance(
+                const Model& model,
+                const mat4 transform,
+                const std::vector<mat4>& instanceTransforms,
+                const std::vector<mat4>& instanceData) const override
+        {
+            const Shader& shader = SHADER_PROGRAM_REFERENCES[model.shaderProgramID - 1];
+            shader.use();
+
+            // Bind each image to the shader program
+            for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
+            {
+                const auto& imageMap = model.imageMaps.at(i);
+                const auto& imageReference = IMAGE_MAP_REFERENCES[imageMap.imageMapID - 1];
+
+                glActiveTexture((GL_TEXTURE0 + i));
+                glBindTexture(GL_TEXTURE_2D, imageReference.imageMapId);
+
+                switch (imageMap.mapType)
+                {
+                    case DIFFUSE:
+                        shader.setInt("material.diffuseMap", i);
+                        break;
+                    case EMISSION:
+                        shader.setInt("material.emissionMap", i);
+                        break;
+                    default:
+                        LOGGER_ERROR("Unsupported ImageMapType");
+                        break;
+                }
+            }
+
+            shader.setMat4("model", transform);
+
+            auto mesh = INSTANCE_RENDER_REFERENCES[model.meshID];
+
+            glBindVertexArray(mesh.VAO);
+
+            glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_TRANSFORM_VBO);
+            glBufferData(GL_ARRAY_BUFFER, instanceTransforms.size() * sizeof(mat4), &instanceTransforms[0], GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(2);
+            glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*) 0);
+            glVertexAttribDivisor(2, 1);
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(mat4)));
+            glVertexAttribDivisor(3, 1);
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(2 * sizeof(mat4)));
+            glVertexAttribDivisor(4, 1);
+            glEnableVertexAttribArray(5);
+            glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(3 * sizeof(mat4)));
+            glVertexAttribDivisor(5, 1);
+
+            glBindBuffer(GL_ARRAY_BUFFER, INSTANCE_DATA_VBO);
+            glBufferData(GL_ARRAY_BUFFER, instanceData.size() * sizeof(mat4), &instanceData[0], GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*) 0);
+            glVertexAttribDivisor(6, 1);
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(mat4)));
+            glVertexAttribDivisor(7, 1);
+            glEnableVertexAttribArray(8);
+            glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(2 * sizeof(mat4)));
+            glVertexAttribDivisor(8, 1);
+            glEnableVertexAttribArray(9);
+            glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(3 * sizeof(mat4)));
+            glVertexAttribDivisor(9, 1);
+
+            shader.setMat4("meshTransform", model.meshTransform);
+
+            if (mesh.EBO != 0)
+            {
+                //                                    v-- number of indices to draw
+                glDrawElementsInstanced(GL_TRIANGLES, mesh.drawCount, GL_UNSIGNED_INT, 0, instanceData.size());
+            }
+            else
+            {
+                //                                     v-- number of vertices to draw
+                glDrawArraysInstanced(GL_TRIANGLES, 0, mesh.drawCount, instanceData.size());
+            }
+            glBindVertexArray(0);
+
+            // Unbind each image to the shader program
+            for (std::uint32_t i = 0; i < model.imageMaps.size(); ++i)
+            {
+                glActiveTexture((GL_TEXTURE0 + i));
+                glBindTexture(GL_TEXTURE_2D, 0);
+            }
+
+            shader.unuse();
+        }
     };
 
     bool OpenGLGfxApi::init(const PB::ProcAddress procAddress)
@@ -229,6 +327,8 @@ namespace PB
             std::int32_t value;
             glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &value);
             minimumUBOOffset_ = static_cast<std::uint32_t>(value);
+            glGenBuffers(1, &INSTANCE_TRANSFORM_VBO);
+            glGenBuffers(1, &INSTANCE_DATA_VBO);
         }
         else
         {

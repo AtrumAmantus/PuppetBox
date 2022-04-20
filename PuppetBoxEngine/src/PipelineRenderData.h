@@ -20,4 +20,15 @@ namespace PB
         std::vector<mat4> boneTransformations;
         std::vector<Model> models;
     };
+
+    struct InstanceRenderData
+    {
+        UUID uuid;
+        mat4 transform;
+        std::shared_ptr<IValueReference> transformReference;
+        Model model;
+        std::unordered_map<UUID, std::uint32_t> instanceMap{};
+        std::vector<mat4> instanceTransforms{};
+        std::vector<mat4> instanceData{};
+    };
 }

@@ -250,6 +250,23 @@ namespace PB
         MessageBroker::instance().publish(Event::Topic::ANIMATION_GET_ANIMATOR_TOPIC, getAnimatorEvent);
     }
 
+    bool AbstractSceneGraph::createUIComponent(UI::Type componentType, UUID uuid)
+    {
+        switch (componentType)
+        {
+            case UI::TEXT_AREA:
+                break;
+            case UI::GROUP:
+                break;
+            default:
+                break;
+        }
+        //TODO: Put ui components in a separate thread?  Separate pipeline?  I like handling them as objects, but
+        // that's not how the scene objects are handled.
+
+        return true;
+    }
+
     AbstractSceneGraph& AbstractSceneGraph::operator=(AbstractSceneGraph rhs)
     {
 		this->isInitialized_ = rhs.isInitialized_;

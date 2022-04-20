@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <functional>
+#include <iomanip>
 #include <mutex>
 #include <ostream>
 #include <queue>
@@ -944,11 +945,7 @@ namespace PB
 
         friend std::ostream& operator<<(std::ostream& output, const UUID& uuid)
         {
-            output << "UUID: {"
-                   << uuid.bytes[0] << ", "
-                   << uuid.bytes[1] << ", "
-                   << uuid.bytes[2] << ", "
-                   << uuid.bytes[3] << "}";
+            output << std::hex << uuid.bytes[0] << uuid.bytes[1] << uuid.bytes[2] << uuid.bytes[3];
             return output;
         }
 

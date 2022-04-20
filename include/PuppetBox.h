@@ -103,18 +103,6 @@ namespace PB
     extern PUPPET_BOX_API std::int8_t GetCharFromCode(std::uint8_t code, bool shifted = false);
 
     /**
-     * \brief Creates a {\link UIComponent} of the given {\link UI::Type}.
-     *
-     * \param uiComponentType The type of {\link UIComponent} to create.
-     * \param attributes      The {\link UIComponentAttributes} to associate with the created
-     * {\link UIComponent}.
-     * \param error           Error flag to indicate if the component was created successfully.
-     * \return The created {\link UIComponent}.
-     */
-    extern PUPPET_BOX_API UIComponent*
-    CreateUIComponent(UI::Type uiComponentType, std::unique_ptr<UIComponentAttributes> attributes, bool* error);
-
-    /**
      * \brief Publish an event on the internal messaging system using the topic name.
      *
      * \param topicName The event topic ID to publish to.

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <memory>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include "DataStructures.h"
 #include "TypeDef.h"
@@ -32,163 +33,101 @@ namespace PB
          * UI component without throwing an error, but each attribute is only checked using one type,
          * and each {\link UIComponent} implementation only checks for certain attributes.<p>
          */
-        enum Attribute
+        namespace Attribute
         {
-            /**
-             * \brief The size to render the component's text at.
-             *
-             * <p>Expected type: UInt</p>
-             */
-            FONT_SIZE,
-            /**
-             * \brief The font family to use for the component's text.
-             *
-             * <p>Expected type: String</p>
-             */
-            FONT_TYPE,
-            /**
-             * \brief The height of the component's renderable area.
-             *
-             * <p>Expected type: UInt</p>
-             */
-            HEIGHT,
-            /**
-             * \brief The layout direction for the component.
-             *
-             * <p>Expected type: UInt (enum)</p>
-             *
-             * \see PB:UI:Layout
-             */
-            LAYOUT,
-            /**
-             * \brief Spacing multiplier for spacing between letters.
-             *
-             * <p>1.0 means default spacing</p>
-             *
-             * <p>Expected type: Float</p>
-             */
-            LETTER_SPACE,
-            /**
-             * \brief The location from which POS_X, POS_Y are set by.
-             *
-             * <p>Expected type: UInt (enum)</p>
-             *
-             * \see PB:UI:Origin
-             */
-            ORIGIN,
-            /**
-             * \brief The component's distance from the edge of the screen on the X axis.
-             *
-             * <p>Affected by it's Origin location<p>
-             *
-             * <p>Expected type: UInt</p>
-             */
-            POS_X,
-            /**
-             * \brief The component's distance from the edge of the screen on the Y axis.
-             *
-             * <p>Affected by it's Origin location<p>
-             *
-             * <p>Expected type: UInt</p>
-             */
-            POS_Y,
-            /**
-             * \brief The layer order of the UI component.
-             *
-             * <p>Values closer to 0 make the component more "on top".</p>
-             *
-             * <p>Expected type: UInt</p>
-             */
-            POS_Z,
-            /**
-             * \brief The content of the component's text.
-             *
-             * <p>Expected type: String</p>
-             */
-            TEXT_CONTENT,
-            /**
-             * \brief The width of the component's renderable area.
-             *
-             * <p>Expected type: UInt</p>
-             */
-            WIDTH,
-            /**
-             * \brief Spacing multiplier for space between words (width of space character).
-             *
-             * <p>1.0 means default spacing</p>
-             *
-             * <p>Expected type: Float</p>
-             */
-            WORD_SPACE,
-            /**
-             * \brief Denotes if the text should "wrap" around to the next line or not.
-             *
-             * <p>Expected type: Bool</p>
-             */
-            WORD_WRAP,
-        };
+            enum String
+            {
+                /**
+                 * \brief The font family to use for the component's text.
+                 */
+                FONT_TYPE,
+                /**
+                 * \brief The content of the component's text.
+                 */
+                TEXT_CONTENT,
+            };
 
-        /**
-         * Allowed values for the Origin {\link PB::UI::Attribute}.
-         */
-        enum Origin
-        {
-            BOTTOM_LEFT,
-            TOP_LEFT,
-            TOP_RIGHT,
-            BOTTOM_RIGHT,
-        };
+            enum UInteger
+            {
+                /**
+                 * \brief The size to render the component's text at.
+                 */
+                FONT_SIZE,
+                /**
+                 * \brief The height of the component's renderable area.
+                 */
+                HEIGHT,
+                /**
+                 * \brief The layout direction for the component.
+                 *
+                 * \see PB:UI:Layout
+                 */
+                LAYOUT,
+                /**
+                 * \brief The location from which POS_X, POS_Y are set by.
+                 *
+                 * \see PB:UI:Origin
+                 */
+                ORIGIN,
+                /**
+                 * \brief The component's distance from the edge of the screen on the X axis.
+                 *
+                 * <p>Affected by it's Origin location<p>
+                 */
+                POS_X,
+                /**
+                 * \brief The component's distance from the edge of the screen on the Y axis.
+                 *
+                 * <p>Affected by it's Origin location<p>
+                 */
+                POS_Y,
+                /**
+                 * \brief The layer order of the UI component.
+                 *
+                 * <p>Values closer to 0 make the component more "on top".</p>
+                 */
+                POS_Z,
+                /**
+                 * \brief The width of the component's renderable area.
+                 */
+                WIDTH,
+            };
 
-        /**
-         * Allowed values for the Layout {\link PB::UI::Attribute}.
-         */
-        enum Layout
-        {
-            HORIZONTAL,
-            VERTICAL,
-        };
+            enum Float
+            {
+                /**
+                 * \brief Spacing multiplier for spacing between letters.
+                 *
+                 * <p>1.0 means default spacing</p>
+                 */
+                LETTER_SPACE,
+                /**
+                 * \brief Spacing multiplier for space between words (width of space character).
+                 *
+                 * <p>1.0 means default spacing</p>
+                 */
+                WORD_SPACE,
+            };
+
+            enum Boolean
+            {
+                /**
+                 * \brief Denotes if the text should "wrap" around to the next line or not.
+                 */
+                WORD_WRAP,
+            };
+        }
     }
 
-    class PUPPET_BOX_API UIComponentAttributes
-    {
-    public:
-        virtual ~UIComponentAttributes() = default;
-
-        virtual void setUIntAttribute(UI::Attribute attributeName, std::uint32_t value) = 0;
-
-        virtual Result<std::uint32_t> getUIntAttribute(UI::Attribute attributeName) const = 0;
-
-        virtual void setIntAttribute(UI::Attribute attributeName, std::int32_t value) = 0;
-
-        virtual Result<std::int32_t> getIntAttribute(UI::Attribute attributeName) const = 0;
-
-        virtual void setFloatAttribute(UI::Attribute attributeName, float value) = 0;
-
-        virtual Result<float> getFloatAttribute(UI::Attribute attributeName) const = 0;
-
-        virtual void setStringAttribute(UI::Attribute attributeName, const std::string& value) = 0;
-
-        virtual Result<std::string> getStringAttribute(UI::Attribute attributeName) const = 0;
-
-        virtual void setBoolAttribute(UI::Attribute attributeName, bool value) = 0;
-
-        virtual Result<bool> getBoolAttribute(UI::Attribute attributeName) const = 0;
-    };
-
     /**
-     * Basic interface for a UI component.
-     *
-     * <p>Adopts the {\link UIComponentAttributes} interface to allow further modification after
-     * instantiation.</p>
-     *
-     * TODO: UIComponentAttributes -> UIComponent is a messy relationship
+     * Base class for a UI component.
      */
-    class PUPPET_BOX_API UIComponent : public UIComponentAttributes
+    class PUPPET_BOX_API UIComponent
     {
     public:
-        UIComponent();
+        UIComponent(UUID id);
 
-        static std::unique_ptr<UIComponentAttributes> createUIComponentAttributes();
+        virtual ~UIComponent();
 
         /**
          * \brief Invoked to initialize the state of a component and esnure functionality.
@@ -196,13 +135,11 @@ namespace PB
          * @return True if the UI component successfully initialized and is ready to use, False
          * otherwise.
          */
-        virtual bool init();
+        bool init();
 
         /**
          * \brief The "Update" phase is where checks should be done to see if the component's
          * attributes have been changed, and update it's state.
-         *
-         * TODO: Implement listeners for the various attributes?
          *
          * \param deltaTime The amount of tie that has passed (in seconds) since the last update call.
          */
@@ -214,31 +151,21 @@ namespace PB
          */
         virtual void render() const = 0;
 
-        virtual bool addComponent(std::shared_ptr<UIComponent> component);
+        virtual bool addComponent(PB::UUID uuid);
 
-        void setAttributes(std::unique_ptr<UIComponentAttributes> attributes);
+    protected:
+        virtual bool inits();
 
-        void setUIntAttribute(UI::Attribute attributeName, std::uint32_t value) override;
+        virtual void updateStringAttribute(UI::Attribute::String attribute, std::string value);
 
-        Result<std::uint32_t> getUIntAttribute(UI::Attribute attributeName) const override;
+        virtual void updateUIntegerAttribute(UI::Attribute::UInteger attribute, std::uint32_t value);
 
-        void setIntAttribute(UI::Attribute attributeName, std::int32_t value) override;
+        virtual void updateFloatAttribute(UI::Attribute::Float attribute, float value);
 
-        Result<std::int32_t> getIntAttribute(UI::Attribute attributeName) const override;
-
-        void setFloatAttribute(UI::Attribute attributeName, float value) override;
-
-        Result<float> getFloatAttribute(UI::Attribute attributeName) const override;
-
-        void setStringAttribute(UI::Attribute attributeName, const std::string& value) override;
-
-        Result<std::string> getStringAttribute(UI::Attribute attributeName) const override;
-
-        void setBoolAttribute(UI::Attribute attributeName, bool value) override;
-
-        Result<bool> getBoolAttribute(UI::Attribute attributeName) const override;
+        virtual void updateBooleanAttribute(UI::Attribute::Boolean attribute, bool value);
 
     private:
-        std::unique_ptr<UIComponentAttributes> attributes_;
+        PB::UUID id_;
+        std::vector<UUID> subscriptions_{};
     };
 }
