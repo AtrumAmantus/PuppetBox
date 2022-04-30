@@ -2,41 +2,46 @@
 
 namespace PB
 {
+    AbstractObjectComponent::~AbstractObjectComponent() noexcept
+    {
+
+    }
+
     void AbstractObjectComponent::init()
     {
-        if (!isInitialized_)
-        {
-            isInitialized_ = true;
 
-            inits();
-        }
     }
 
-    void AbstractObjectComponent::tearDown()
+    void AbstractObjectComponent::addVectorReference(std::string referenceName, std::shared_ptr<void> reference)
     {
 
     }
 
-    void AbstractObjectComponent::update(float deltaTime)
+    void AbstractObjectComponent::setEntityMap(std::unordered_map<UUID, std::uint32_t>* entityMap)
     {
-        // Lock this component while it runs its updates
-        std::unique_lock<std::mutex> mlock{mutex_};
-
-        updates(deltaTime);
+        entityMap_ = entityMap;
     }
 
-    void AbstractObjectComponent::inits()
+    void AbstractObjectComponent::sync(const std::function<void()>& process)
     {
-
+        std::unique_lock<std::mutex> mlock(mutex_);
+        process();
     }
 
-    void AbstractObjectComponent::updates(float deltaTime)
+    void AbstractObjectComponent::lock()
     {
-
+        mutex_.lock();
+        isLocked_ = true;
     }
 
-    std::unique_lock<std::mutex> AbstractObjectComponent::createLock()
+    void AbstractObjectComponent::unlock()
     {
-        return std::unique_lock<std::mutex>(mutex_);
+        mutex_.unlock();
+        isLocked_ = false;
+    }
+
+    const std::unordered_map<UUID, std::uint32_t>& AbstractObjectComponent::entityMap()
+    {
+        return *entityMap_;
     }
 }

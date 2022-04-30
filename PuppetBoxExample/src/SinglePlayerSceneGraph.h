@@ -23,7 +23,7 @@ protected:
     {
         setViewMode(PB::SceneView::ORTHO);
 
-        bool success = uiSetup();
+        bool success = true;//uiSetup();
         success = success && sceneSetup();
 
         return success;
@@ -208,6 +208,7 @@ private:
 
             if (buildSceneObject(object))
             {
+                // TODO: Good to here.
                 PB::UUID headSpriteUUID = createSprite(Constant::Asset::Texture::kHumanHead, {32.0f, 32.0f, 1.0f}, &error);
                 attachToSceneObject(headSpriteUUID, object.uuid, boneMap.getBoneId(Constant::Reference::Skeleton::kHead));
 
@@ -236,81 +237,81 @@ private:
         return success;
     };
 
-    bool uiSetup()
-    {
-        bool error = false;
-
-        auto textBox = std::shared_ptr<PB::UIComponent>(
-                PB::CreateUIComponent(
-                        PB::UI::TEXT_AREA,
-                        std::move(UIAttributeBuilder{}
-                                          .dimensions({400, 200})
-                                          .fontSize(16)
-                                          .fontType(Constant::Asset::Font::kMochiyPop)
-                                          .build()
-                        ),
-                        &error
-                )
-        );
-
-        textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
-                                    "This is a long sentence that should wrap to the next line, followed by some "
-                                    "additional words to check to see how big the bounding box is, and if it is properly "
-                                    "clipping the text.\n"
-                                    "Another sentence that is not as long as the last one but still long enough to wrap.\n"
-                                    "Plus one more small one.\n");
-
-        auto inputBox = std::shared_ptr<PB::UIComponent>(
-                PB::CreateUIComponent(
-                        PB::UI::TEXT_AREA,
-                        std::move(UIAttributeBuilder{}
-                                          .dimensions({400, 24})
-                                          .fontSize(16)
-                                          .fontType(Constant::Asset::Font::kMochiyPop)
-                                          .build()
-                        ),
-                        &error
-                )
-        );
-
-        userInput.targetComponent(inputBox);
-
-        auto groupComponent = std::shared_ptr<PB::UIComponent>(
-                PB::CreateUIComponent(
-                        PB::UI::GROUP,
-                        std::move(UIAttributeBuilder{}
-                                          .origin(PB::UI::Origin::BOTTOM_LEFT)
-                                          .position(PB::vec3{10, 10, 1})
-                                          .layout(PB::UI::Layout::VERTICAL)
-                                          .build()
-                        ),
-                        &error
-                )
-        );
-
-        groupComponent->addComponent(textBox);
-        groupComponent->addComponent(inputBox);
-
-        uiController.addComponent(groupComponent, CHAT_BOX);
-        uiController.referenceComponent(textBox, CHAT_MESSAGES_BOX);
-        uiController.referenceComponent(inputBox, CHAT_INPUT_BOX);
-
-        auto fpsCounter = std::shared_ptr<PB::UIComponent>(
-                PB::CreateUIComponent(
-                        PB::UI::TEXT_AREA,
-                        std::move(UIAttributeBuilder{}
-                                          .origin(PB::UI::Origin::TOP_LEFT)
-                                          .fontSize(18)
-                                          .fontType(Constant::Asset::Font::kMochiyPop)
-                                          .dimensions(PB::vec2{100, 24})
-                                          .position(PB::vec3{10, 590, 1})
-                                          .build()),
-                        &error
-                )
-        );
-
-        uiController.addComponent(fpsCounter, FPS_BOX);
-
-        return !error;
-    }
+//    bool uiSetup()
+//    {
+//        bool error = false;
+//
+//        auto textBox = std::shared_ptr<PB::UIComponent>(
+//                PB::CreateUIComponent(
+//                        PB::UI::TEXT_AREA,
+//                        std::move(UIAttributeBuilder{}
+//                                          .dimensions({400, 200})
+//                                          .fontSize(16)
+//                                          .fontType(Constant::Asset::Font::kMochiyPop)
+//                                          .build()
+//                        ),
+//                        &error
+//                )
+//        );
+//
+//        textBox->setStringAttribute(PB::UI::TEXT_CONTENT,
+//                                    "This is a long sentence that should wrap to the next line, followed by some "
+//                                    "additional words to check to see how big the bounding box is, and if it is properly "
+//                                    "clipping the text.\n"
+//                                    "Another sentence that is not as long as the last one but still long enough to wrap.\n"
+//                                    "Plus one more small one.\n");
+//
+//        auto inputBox = std::shared_ptr<PB::UIComponent>(
+//                PB::CreateUIComponent(
+//                        PB::UI::TEXT_AREA,
+//                        std::move(UIAttributeBuilder{}
+//                                          .dimensions({400, 24})
+//                                          .fontSize(16)
+//                                          .fontType(Constant::Asset::Font::kMochiyPop)
+//                                          .build()
+//                        ),
+//                        &error
+//                )
+//        );
+//
+//        userInput.targetComponent(inputBox);
+//
+//        auto groupComponent = std::shared_ptr<PB::UIComponent>(
+//                PB::CreateUIComponent(
+//                        PB::UI::GROUP,
+//                        std::move(UIAttributeBuilder{}
+//                                          .origin(PB::UI::Origin::BOTTOM_LEFT)
+//                                          .position(PB::vec3{10, 10, 1})
+//                                          .layout(PB::UI::Layout::VERTICAL)
+//                                          .build()
+//                        ),
+//                        &error
+//                )
+//        );
+//
+//        groupComponent->addComponent(textBox);
+//        groupComponent->addComponent(inputBox);
+//
+//        uiController.addComponent(groupComponent, CHAT_BOX);
+//        uiController.referenceComponent(textBox, CHAT_MESSAGES_BOX);
+//        uiController.referenceComponent(inputBox, CHAT_INPUT_BOX);
+//
+//        auto fpsCounter = std::shared_ptr<PB::UIComponent>(
+//                PB::CreateUIComponent(
+//                        PB::UI::TEXT_AREA,
+//                        std::move(UIAttributeBuilder{}
+//                                          .origin(PB::UI::Origin::TOP_LEFT)
+//                                          .fontSize(18)
+//                                          .fontType(Constant::Asset::Font::kMochiyPop)
+//                                          .dimensions(PB::vec2{100, 24})
+//                                          .position(PB::vec3{10, 590, 1})
+//                                          .build()),
+//                        &error
+//                )
+//        );
+//
+//        uiController.addComponent(fpsCounter, FPS_BOX);
+//
+//        return !error;
+//    }
 };

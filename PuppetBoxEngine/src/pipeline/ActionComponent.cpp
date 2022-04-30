@@ -1,8 +1,8 @@
-#include "../PipelineComponents.h"
+#include "../Pipeline.h"
 
 namespace PB
 {
-    void ActionComponent::updates(float deltaTime)
+    void ActionComponent::update(float deltaTime)
     {
 
     }

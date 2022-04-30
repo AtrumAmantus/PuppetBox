@@ -38,6 +38,7 @@ namespace PB
             case UI::Attribute::TEXT_CONTENT:
                 break;
             default:
+                break;
         }
     }
 
@@ -63,6 +64,7 @@ namespace PB
             case UI::Attribute::WIDTH:
                 break;
             default:
+                break;
         }
     }
 }

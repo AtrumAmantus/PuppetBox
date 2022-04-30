@@ -775,8 +775,8 @@ namespace PB
     struct Transform
     {
         vec3 position{};
-        vec3 rotation{1.0f, 1.0f, 1.0f};
-        vec3 scale{};
+        vec3 rotation{};
+        vec3 scale{1.0f, 1.0f, 1.0f};
     };
 
     /**
@@ -818,20 +818,21 @@ namespace PB
 
         BoneMap(const BoneMap& boneMap)
         {
-            for (auto& entry : boneMap.boneMap_)
-            {
-                boneIds_.insert(
-                        std::pair<std::string, std::uint32_t>{entry.second.name, entry.first}
-                );
-            }
+            *this = boneMap;
+        };
 
-            boneMap_.insert(boneMap.boneMap_.begin(), boneMap.boneMap_.end());
+        BoneMap(BoneMap&& boneMap)
+        {
+            *this = std::move(boneMap);
         };
 
         std::uint32_t addBone(const std::string& name, const std::string& parent, const Bone& bone)
         {
             //TODO: Need a better hashing algo, account for bone hierarchy to protect against duplicate bone names?
             std::uint32_t boneId = std::hash<std::string>()(name);
+
+            boneOrder_.push_back(boneId);
+            std::sort(boneOrder_.begin(), boneOrder_.end());
 
             boneIds_.insert(
                     std::pair<std::string, std::uint32_t>{name, boneId}
@@ -888,9 +889,37 @@ namespace PB
             return boneMap_;
         };
 
+        const std::vector<std::uint32_t>& getBoneOrder() const
+        {
+            return boneOrder_;
+        };
+
+        BoneMap& operator=(BoneMap&& rhs)
+        {
+            boneIds_ = std::move(rhs.boneIds_);
+            boneMap_ = std::move(rhs.boneMap_);
+            boneOrder_ = std::move(rhs.boneOrder_);
+
+            return *this;
+        };
+
+        BoneMap& operator=(const BoneMap& rhs)
+        {
+            boneIds_.clear();
+            boneMap_.clear();
+            boneOrder_.clear();
+
+            boneIds_.insert(rhs.boneIds_.begin(), rhs.boneIds_.end());
+            boneMap_.insert(rhs.boneMap_.begin(), rhs.boneMap_.end());
+            boneOrder_.insert(boneOrder_.end(), rhs.boneOrder_.begin(), rhs.boneOrder_.end());
+
+            return *this;
+        };
+
     private:
         std::unordered_map<std::string, std::uint32_t> boneIds_{};
         std::unordered_map<std::uint32_t, BoneNode> boneMap_{};
+        std::vector<std::uint32_t> boneOrder_{};
 
     };
 

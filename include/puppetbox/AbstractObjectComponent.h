@@ -1,7 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <unordered_map>
 
+#include "DataStructures.h"
 #include "TypeDef.h"
 
 namespace PB
@@ -9,23 +14,29 @@ namespace PB
     class PUPPET_BOX_API AbstractObjectComponent
     {
     public:
+        virtual ~AbstractObjectComponent() noexcept;
 
-    public:
-        void init();
+        virtual void init();
 
-        virtual void tearDown();
+        virtual void update(float deltaTime) = 0;
 
-        void update(float deltaTime);
+        virtual void addVectorReference(std::string referenceName, std::shared_ptr<void> reference);
+
+        void setEntityMap(std::unordered_map<UUID, std::uint32_t>* entityMap);
+
+        void sync(const std::function<void()>& process);
+
+        void lock();
+
+        void unlock();
 
     protected:
-        virtual void inits();
-
-        virtual void updates(float deltaTime);
-
-        std::unique_lock<std::mutex> createLock();
+        const std::unordered_map<UUID, std::uint32_t>& entityMap();
 
     private:
-        bool isInitialized_ = false;
+        std::unordered_map<UUID, std::uint32_t>* entityMap_ = nullptr;
         std::mutex mutex_;
+        bool isLocked_ = false;
+
     };
 }

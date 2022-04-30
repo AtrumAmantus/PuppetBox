@@ -3,6 +3,7 @@
 #include "EventDef.h"
 #include "MessageBroker.h"
 #include "Networking.h"
+#include "Pipeline.h"
 
 #define MAX_BUFFER_SIZE 0xffff
 #define MAX_PACKET_SIZE 0xff
@@ -275,8 +276,8 @@ namespace PB
         currentScene_ = std::make_shared<DefaultSceneGraph>(
                 "default",
                 gfxApi_->getRenderWindow(),
-                inputReader_,
-                gfxApi_->createRenderComponent());
+                std::make_unique<Pipeline>(),
+                inputReader_);
 
         currentScene_->setUp();
 
@@ -293,12 +294,25 @@ namespace PB
                 [this](std::shared_ptr<void> data) {
                     auto event = std::static_pointer_cast<EngineAddSceneEvent>(data);
 
+                    auto pipeline = std::make_unique<Pipeline>();
+                    pipeline->addPipelineData(std::move(std::make_unique<TransformPipelineData>()));
+                    pipeline->addPipelineData(std::move(std::make_unique<SingleRenderPipelineData>()));
+                    pipeline->addPipelineData(std::move(std::make_unique<AnimatorPipelineData>()));
+
+                    pipeline->addComponent(std::move(std::make_unique<AIComponent>()), {"pb_single_render"});
+                    pipeline->addComponent(std::move(std::make_unique<ActionComponent>()), {"pb_transform", "pb_single_render"});
+                    pipeline->addComponent(std::move(std::make_unique<PositionComponent>()), {"pb_transform", "pb_single_render"});
+                    pipeline->addComponent(std::move(std::make_unique<PhysicsComponent>()), {"pb_single_render"});
+                    pipeline->addComponent(std::move(std::make_unique<AnimationComponent>()), {"pb_animator", "pb_single_render"});
+                    pipeline->setRenderComponent(std::move(gfxApi_->createRenderComponent()), {"pb_single_render"});
+
                     // Re-initialize base class properties to required values
                     *(event->scene) = AbstractSceneGraph{
                             event->scene->name,
                             gfxApi_->getRenderWindow(),
-                            inputReader_,
-                            gfxApi_->createRenderComponent()};
+                            std::move(pipeline),
+                            inputReader_};//,
+//                            gfxApi_->createRenderComponent()};
 
                     sceneGraphs_.insert(
                             std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{
@@ -357,6 +371,7 @@ namespace PB
 
                 gfxApi_->preLoopCommands();
 
+                currentScene_->lockPipeline();
                 currentScene_->update(deltaTime);
 
                 // Set common transforms for all shaders
@@ -366,6 +381,7 @@ namespace PB
                         currentScene_->getUIProjection());
 
                 currentScene_->render();
+                currentScene_->unlockPipeline();
 
                 hardwareInitializer_.postLoopCommands();
             }

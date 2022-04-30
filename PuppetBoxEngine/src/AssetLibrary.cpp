@@ -299,7 +299,7 @@ namespace PB
         }
         else
         {
-            boneMap = BoneMap{itr->second};
+            boneMap = itr->second;
         }
 
         return std::move(boneMap);

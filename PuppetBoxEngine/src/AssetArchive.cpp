@@ -604,7 +604,7 @@ namespace PB
 
                 if (rootNode.hasResult)
                 {
-                    boneMap = mapToBoneMap(*rootNode.result, error);
+                    boneMap = std::move(mapToBoneMap(*rootNode.result, error));
                 }
                 else
                 {

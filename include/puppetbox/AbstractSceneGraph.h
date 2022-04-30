@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "AbstractInputReader.h"
+#include "AbstractObjectComponent.h"
 #include "Camera.h"
 #include "Constants.h"
 #include "DataStructures.h"
 #include "IRenderComponent.h"
-#include "Pipeline.h"
+#include "IPipeline.h"
 #include "RenderData.h"
 #include "RenderWindow.h"
 #include "TypeDef.h"
@@ -26,6 +27,7 @@ namespace PB
     {
     public:
         std::string name;
+
     public:
         AbstractSceneGraph(const std::string& sceneName);
 
@@ -37,8 +39,8 @@ namespace PB
         AbstractSceneGraph(
                 const std::string& sceneName,
                 RenderWindow renderWindow,
-                std::shared_ptr<AbstractInputReader> inputReader,
-                std::unique_ptr<IRenderComponent> renderComponent);
+                std::unique_ptr<IPipeline> pipeline,
+                std::shared_ptr<AbstractInputReader> inputReader);
 
         /**
          * \brief Invokes the implementing class's setUps() method, checking first if the
@@ -98,6 +100,10 @@ namespace PB
          * \return The UIProjection matrix for the current scene.
          */
         mat4 getUIProjection() const;
+
+        void lockPipeline();
+
+        void unlockPipeline();
 
         AbstractSceneGraph& operator=(AbstractSceneGraph rhs);
 
@@ -190,7 +196,7 @@ namespace PB
 
         void setSceneObjectSkeleton(UUID uuid, BoneMap boneMap);
 
-        void attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint);
+        void attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPointId);
 
         void animateSceneObject(UUID uuid, const std::string& animationName);
 
@@ -204,7 +210,7 @@ namespace PB
         std::shared_ptr<AbstractInputReader> inputReader_{nullptr};
         SceneView::Mode viewMode_ = SceneView::ORTHO;
         SceneView::Mode nextViewMode_ = SceneView::ORTHO;
-        Pipeline pipeline_{};
+        std::unique_ptr<IPipeline> pipeline_;
         std::mutex mutex_;
     };
 }

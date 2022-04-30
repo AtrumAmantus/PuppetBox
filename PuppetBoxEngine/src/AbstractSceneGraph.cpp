@@ -16,14 +16,15 @@ namespace PB
     AbstractSceneGraph::AbstractSceneGraph(
             const std::string& sceneName,
             RenderWindow renderWindow,
-            std::shared_ptr<AbstractInputReader> inputReader,
-            std::unique_ptr<IRenderComponent> renderComponent)
+            std::unique_ptr<IPipeline> pipeline,
+            std::shared_ptr<AbstractInputReader> inputReader)
             : name(sceneName),
             renderWindow_(renderWindow),
+            pipeline_(std::move(pipeline)),
             inputReader_(inputReader),
             isInitialized_(true)
     {
-        pipeline_.setRenderComponent(std::move(renderComponent));
+
     }
 
     bool AbstractSceneGraph::setUp()
@@ -34,7 +35,7 @@ namespace PB
         {
             if (isInitialized_)
             {
-                pipeline_.init();
+                pipeline_->init();
                 success = setUps();
             }
             else
@@ -58,7 +59,7 @@ namespace PB
         {
             if (isInitialized_)
             {
-                pipeline_.tearDown();
+                pipeline_->tearDown();
 
                 success = tearDowns();
             }
@@ -80,7 +81,7 @@ namespace PB
         // Update implementing application first in case new objects were added or modified.
         preLoopUpdates(deltaTime);
 
-        pipeline_.update(deltaTime);
+        pipeline_->update(deltaTime);
 
         // Update implementing application's post loop updates
         postLoopUpdates(deltaTime);
@@ -90,12 +91,12 @@ namespace PB
 
     void AbstractSceneGraph::addComponent(std::unique_ptr<AbstractObjectComponent> component)
     {
-        pipeline_.addComponent(std::move(component));
+        pipeline_->addComponent(std::move(component), {});
     }
 
     void AbstractSceneGraph::render() const
     {
-        pipeline_.render();
+        pipeline_->render();
     }
 
     void AbstractSceneGraph::processInput()
@@ -126,6 +127,16 @@ namespace PB
                 *renderWindow_.depth,
                 SceneView::ORTHO
         );
+    }
+
+    void AbstractSceneGraph::lockPipeline()
+    {
+        pipeline_->lockPipeline();
+    }
+
+    void AbstractSceneGraph::unlockPipeline()
+    {
+        pipeline_->unlockPipeline();
     }
 
     bool AbstractSceneGraph::setUps()
@@ -218,21 +229,14 @@ namespace PB
         MessageBroker::instance().publish(Event::Pipeline::Topic::SET_BONE_MAP_TOPIC, event);
     }
 
-    void AbstractSceneGraph::attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPoint)
+    void AbstractSceneGraph::attachToSceneObject(UUID parasite, UUID host, std::uint32_t attachPointId)
     {
-        auto referenceEvent = std::make_shared<PipelineGetAbsoluteBoneTransformMatrixReferenceEvent>();
-        referenceEvent->uuid = host;
-        referenceEvent->boneId = attachPoint;
-        referenceEvent->callback = [parasite, host](std::shared_ptr<IValueReference> reference) {
-            auto event = std::make_shared<PipelineAttachObjectTo>();
-            event->parasiteUUID = parasite;
-            event->hostUUID = host;
-            event->reference = std::move(reference);
+        auto event = std::make_shared<PipelineAttachObjectTo>();
+        event->parasiteUUID = parasite;
+        event->hostUUID = host;
+        event->attachPointId = attachPointId;
 
-            MessageBroker::instance().publish(Event::Pipeline::Topic::ATTACH_OBJECT_TO_TOPIC, event);
-        };
-
-        MessageBroker::instance().publish(Event::Pipeline::Topic::GET_ABS_BONE_TRANSFORM_TOPIC, referenceEvent);
+        MessageBroker::instance().publish(Event::Pipeline::Topic::ATTACH_OBJECT_TO_TOPIC, event);
     }
 
     void AbstractSceneGraph::animateSceneObject(UUID uuid, const std::string& animationName)
