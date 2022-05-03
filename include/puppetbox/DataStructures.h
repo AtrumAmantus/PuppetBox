@@ -798,7 +798,7 @@ namespace PB
         vec3 rotation{};
         vec3 scale{1.0f, 1.0f, 1.0f};
         vec3 offset{};
-        mat4 defaultTransform{};
+        mat4 defaultTransform = mat4::eye();
     };
 
     struct BoneNode

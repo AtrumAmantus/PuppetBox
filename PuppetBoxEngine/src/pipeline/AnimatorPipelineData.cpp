@@ -4,7 +4,13 @@ namespace PB
 {
     void AnimatorPipelineData::addData(const UUID uuid)
     {
-        animatorVector_->push_back(EntityAnimator{});
+        BoneMap defaultBoneMap{};
+        defaultBoneMap.addBone("root", "", Bone{});
+
+        animatorVector_->push_back(EntityAnimator{
+            uuid,
+            std::move(defaultBoneMap)
+        });
     }
 
     void AnimatorPipelineData::removeDataAt(std::uint32_t index)

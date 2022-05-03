@@ -6,7 +6,7 @@ namespace PB
     {
         const std::uint32_t INDEX = singleRenderVector_->size();
 
-        singleRenderVector_->push_back(SingleRenderData{});
+        singleRenderVector_->push_back(SingleRenderData{uuid});
         singleRenderVector_->at(INDEX)
             .transformReference = std::move(std::make_shared<DefaultTransformMatrixReference>(
                 uuid,

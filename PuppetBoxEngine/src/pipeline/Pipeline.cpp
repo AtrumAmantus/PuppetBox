@@ -128,10 +128,14 @@ namespace PB
     {
         if (!componentsLocked_)
         {
+            renderComponent->init();
+
             for (auto& r: vectorReferences)
             {
                 renderComponent->addDataVector(r, dataVectorMap_[r]);
             }
+
+            renderComponent->setEntityMap(&entityMap_);
 
             renderComponent_ = std::move(renderComponent);
         }
