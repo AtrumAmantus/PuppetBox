@@ -56,10 +56,9 @@ namespace PB
     struct InstanceRenderData
     {
         UUID uuid;
-        mat4 transform;
-        std::shared_ptr<IValueReference> transformReference;
-        Model model;
-        std::unordered_map<UUID, std::uint32_t> instanceMap{};
+        mat4 transform = mat4::eye();
+        std::shared_ptr<IValueReference> transformReference{};
+        Model model{};
         std::vector<mat4> instanceTransforms{};
         std::vector<mat4> instanceData{};
     };
@@ -85,6 +84,29 @@ namespace PB
         const UUID uuid_;
         const std::unordered_map<UUID, std::uint32_t>& uuidMap_;
         const std::vector<SingleRenderData>& singleRenderVector_;
+    };
+
+    class DefaultInstanceTransformMatrixReference : public IValueReference
+    {
+    public:
+        DefaultInstanceTransformMatrixReference(
+                const UUID uuid,
+                const std::unordered_map<UUID, std::uint32_t>& uuidMap,
+                const std::vector<InstanceRenderData>& singleRenderVector
+        ) : uuid_(uuid), uuidMap_(uuidMap), instanceRenderVector_(singleRenderVector)
+        {
+
+        }
+
+        mat4 getMat4() const override
+        {
+            return instanceRenderVector_.at(uuidMap_.at(uuid_)).transform;
+        }
+
+    private:
+        const UUID uuid_;
+        const std::unordered_map<UUID, std::uint32_t>& uuidMap_;
+        const std::vector<InstanceRenderData>& instanceRenderVector_;
     };
 
     class ActionComponent : public AbstractObjectComponent
@@ -198,6 +220,27 @@ namespace PB
     private:
         std::shared_ptr<std::vector<SingleRenderData>> singleRenderVector_ =
                 std::make_shared<std::vector<SingleRenderData>>();
+    };
+
+    class InstanceRenderPipelineData : public AbstractPipelineData
+    {
+    public:
+        ~InstanceRenderPipelineData() noexcept;
+
+        void init() override;
+
+        void addData(const UUID uuid) override;
+
+        void removeDataAt(std::uint32_t index) override;
+
+        const std::string getReference() const override;
+
+        std::shared_ptr<void> getDataVector() const override;
+
+    private:
+        std::vector<UUID> subscriptions_{};
+        std::shared_ptr<std::vector<InstanceRenderData>> instanceRenderVector_ =
+                std::make_shared<std::vector<InstanceRenderData>>();
     };
 
     class Pipeline : public IPipeline

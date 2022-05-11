@@ -40,6 +40,7 @@ namespace PB
         std::vector<UUID> subscriptions_{};
         std::unordered_map<UUID, std::uint32_t>* entityMap_ = nullptr;
         std::shared_ptr<std::vector<SingleRenderData>> singleRenders_;
+        std::shared_ptr<std::vector<InstanceRenderData>> instanceRenders_;
         std::mutex mutex_;
         bool isLocked_ = false;
 

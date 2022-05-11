@@ -93,14 +93,14 @@ namespace PB
             }
         }
 
-//        for (auto& data : instanceRenderData_)
-//        {
-//            renderInstance(
-//                    data.model,
-//                    data.transformReference->getMat4(),
-//                    data.instanceTransforms,
-//                    data.instanceData);
-//        }
+        for (const auto& data : *instanceRenders_)
+        {
+            renderInstance(
+                    data.model,
+                    data.transformReference->getMat4(),
+                    data.instanceTransforms,
+                    data.instanceData);
+        }
     }
 
     void AbstractRenderComponent::addDataVector(std::string referenceName, std::shared_ptr<void> reference)
@@ -108,6 +108,10 @@ namespace PB
         if (referenceName == "pb_single_render")
         {
             singleRenders_ = std::move(std::static_pointer_cast<std::vector<SingleRenderData>>(reference));
+        }
+        else if (referenceName == "pb_instance_render")
+        {
+            instanceRenders_ = std::move(std::static_pointer_cast<std::vector<InstanceRenderData>>(reference));
         }
     }
 

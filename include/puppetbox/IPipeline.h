@@ -24,6 +24,8 @@ namespace PB
 
         virtual std::shared_ptr<void> getDataVector() const = 0;
 
+        virtual void init();
+
         void addDataSync(const UUID uuid);
 
         void removeDataAtSync(std::uint32_t index);

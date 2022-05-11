@@ -9,6 +9,11 @@ namespace PB
 
     }
 
+    void AbstractPipelineData::init()
+    {
+
+    }
+
     void AbstractPipelineData::addDataSync(const UUID uuid)
     {
         sync([this, uuid](){

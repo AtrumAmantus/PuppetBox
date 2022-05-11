@@ -298,21 +298,21 @@ namespace PB
                     pipeline->addPipelineData(std::move(std::make_unique<TransformPipelineData>()));
                     pipeline->addPipelineData(std::move(std::make_unique<SingleRenderPipelineData>()));
                     pipeline->addPipelineData(std::move(std::make_unique<AnimatorPipelineData>()));
+                    pipeline->addPipelineData(std::move(std::make_unique<InstanceRenderPipelineData>()));
 
                     pipeline->addComponent(std::move(std::make_unique<AIComponent>()), {"pb_single_render"});
                     pipeline->addComponent(std::move(std::make_unique<ActionComponent>()), {"pb_transform", "pb_single_render"});
                     pipeline->addComponent(std::move(std::make_unique<PositionComponent>()), {"pb_transform", "pb_single_render"});
                     pipeline->addComponent(std::move(std::make_unique<PhysicsComponent>()), {"pb_single_render"});
                     pipeline->addComponent(std::move(std::make_unique<AnimationComponent>()), {"pb_animator", "pb_single_render"});
-                    pipeline->setRenderComponent(std::move(gfxApi_->createRenderComponent()), {"pb_single_render"});
+                    pipeline->setRenderComponent(std::move(gfxApi_->createRenderComponent()), {"pb_single_render", "pb_instance_render"});
 
                     // Re-initialize base class properties to required values
                     *(event->scene) = AbstractSceneGraph{
                             event->scene->name,
                             gfxApi_->getRenderWindow(),
                             std::move(pipeline),
-                            inputReader_};//,
-//                            gfxApi_->createRenderComponent()};
+                            inputReader_};
 
                     sceneGraphs_.insert(
                             std::pair<std::string, std::shared_ptr<AbstractSceneGraph>>{

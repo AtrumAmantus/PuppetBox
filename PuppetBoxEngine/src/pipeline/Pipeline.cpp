@@ -146,6 +146,7 @@ namespace PB
         std::unique_lock<std::mutex> mlock{mutex_};
         isLocked_ = true;
 
+        pipelineData->init();
         pipelineData->setEntityMap(&entityMap_);
         dataVectorMap_[pipelineData->getReference()] = std::move(pipelineData->getDataVector());
         pipelineDataMap_[pipelineData->getReference()] = std::move(pipelineData);
