@@ -7,9 +7,10 @@
 
 #define PB_EVENT_PIPELINE_ADD_ANIMATOR_TOPIC            "pb_event_pipeline_add_animator"
 #define PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC              "pb_event_pipeline_add_entity"
-#define PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC        "pb_event_pipeline_add_instance_set"
 #define PB_EVENT_PIPELINE_ADD_MODEL_TOPIC               "pb_event_pipeline_add_model"
 #define PB_EVENT_PIPELINE_ATTACH_OBJECT_TO_TOPIC        "pb_event_pipeline_attach_object_to"
+#define PB_EVENT_PIPELINE_DELETE_INSTANCE_SET_TOPIC     "pb_event_pipeline_delete_instance_set"
+#define PB_EVENT_PIPELINE_NEW_INSTANCE_SET_TOPIC        "pb_event_pipeline_new_instance_set"
 #define PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC            "pb_event_pipeline_set_bone_map"
 #define PB_EVENT_PIPELINE_SET_ENTITY_POSITION_TOPIC     "pb_event_pipeline_set_entity_position"
 #define PB_EVENT_PIPELINE_SET_INSTANCE_MODEL_TOPIC      "pb_event_pipeline_set_instance_model"
@@ -23,8 +24,9 @@ namespace PB
         extern std::uint32_t ADD_ANIMATOR_TOPIC;
         extern std::uint32_t ADD_ENTITY_TOPIC;
         extern std::uint32_t ADD_MODEL_TOPIC;
+        extern std::uint32_t DELETE_INSTANCE_SET_TOPIC;
         extern std::uint32_t ATTACH_OBJECT_TO_TOPIC;
-        extern std::uint32_t INSTANCE_ADD_SET_TOPIC;
+        extern std::uint32_t INSTANCE_SET_NEW_TOPIC;
         extern std::uint32_t INSTANCE_SET_INSTANCE_SET_TOPIC;
         extern std::uint32_t INSTANCE_SET_MODEL_TOPIC;
         extern std::uint32_t SET_BONE_MAP_TOPIC;
@@ -38,7 +40,7 @@ namespace PB
         std::unique_ptr<IAnimator> animator;
     };
 
-    struct PipelineAddEntityEvent
+    struct PipelineUUIDReference
     {
         UUID uuid;
     };
@@ -56,7 +58,7 @@ namespace PB
         PipelineInstance instance[];
     };
 
-    struct PipelineAddInstanceSetEvent
+    struct PipelineNewInstanceSetEvent
     {
         UUID uuid;
         mat4 transform;
@@ -88,7 +90,7 @@ namespace PB
         vec3 position;
     };
 
-    struct PipelineSetInstanceModelEvent
+    struct PipelineInstanceSetModelEvent
     {
         UUID uuid;
         Model model;

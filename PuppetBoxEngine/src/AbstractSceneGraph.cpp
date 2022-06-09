@@ -196,7 +196,7 @@ namespace PB
 
     void AbstractSceneGraph::createSceneObject(UUID uuid)
     {
-        auto event = std::make_shared<PipelineAddEntityEvent>();
+        auto event = std::make_shared<PipelineUUIDReference>();
         event->uuid = uuid;
 
         MessageBroker::instance().publish(Event::Pipeline::Topic::ADD_ENTITY_TOPIC, event);

@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include "puppetbox/ImageMapReference.h"
-
 #include "AbstractRenderComponent.h"
 
 //TODO: This is coupled to the FreeType library and it shouldn't be.
@@ -17,7 +15,6 @@
 #include "Font.h"
 #include "ImageData.h"
 #include "ImageOptions.h"
-#include "ImageReference.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "TypeDef.h"

@@ -7,7 +7,6 @@
 
 #include "IGfxApi.h"
 #include "ImageOptions.h"
-#include "ImageReference.h"
 #include "Mesh.h"
 #include "TypeDef.h"
 

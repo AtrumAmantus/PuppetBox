@@ -8,6 +8,7 @@
 
 #include "AbstractRenderComponent.h"
 #include "GfxMath.h"
+#include "ImageReference.h"
 #include "Logger.h"
 #include "OpenGLGfxApi.h"
 #include "Shader.h"

@@ -14,8 +14,8 @@ namespace PB
 
     void InstanceRenderPipelineData::init()
     {
-        auto uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC, [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<PipelineAddInstanceSetEvent>(data);
+        auto uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_NEW_INSTANCE_SET_TOPIC, [this](std::shared_ptr<void> data) {
+            auto event = std::static_pointer_cast<PipelineNewInstanceSetEvent>(data);
 
             sync([event,this](){
                 const std::uint32_t INDEX = instanceRenderVector_->size();
@@ -53,7 +53,7 @@ namespace PB
         subscriptions_.push_back(uuid);
 
         uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_SET_INSTANCE_MODEL_TOPIC, [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<PipelineSetInstanceModelEvent>(data);
+            auto event = std::static_pointer_cast<PipelineInstanceSetModelEvent>(data);
 
             sync([event,this](){
                 const std::uint32_t INDEX = entityMap().at(event->uuid);

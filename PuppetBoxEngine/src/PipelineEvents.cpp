@@ -8,8 +8,9 @@ namespace PB
         std::uint32_t ADD_ANIMATOR_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_ADD_ANIMATOR_TOPIC);
         std::uint32_t ADD_ENTITY_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC);
         std::uint32_t ADD_MODEL_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_ADD_MODEL_TOPIC);
+        std::uint32_t DELETE_INSTANCE_SET = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_DELETE_INSTANCE_SET_TOPIC);
         std::uint32_t ATTACH_OBJECT_TO_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_ATTACH_OBJECT_TO_TOPIC);
-        std::uint32_t INSTANCE_ADD_SET_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_ADD_INSTANCE_SET_TOPIC);
+        std::uint32_t INSTANCE_SET_NEW_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_NEW_INSTANCE_SET_TOPIC);
         std::uint32_t INSTANCE_SET_INSTANCE_SET = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_SET_INSTANCE_SET_TOPIC);
         std::uint32_t INSTANCE_SET_MODEL_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_SET_INSTANCE_MODEL_TOPIC);
         std::uint32_t SET_BONE_MAP_TOPIC = MessageBroker::instance().registerTopic(PB_EVENT_PIPELINE_SET_BONE_MAP_TOPIC);

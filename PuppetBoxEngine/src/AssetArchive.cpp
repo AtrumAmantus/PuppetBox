@@ -280,9 +280,9 @@ namespace PB
         * \brief Helper function to map a properties map to a Shader object.
         *
         * \param shaderProperties	The properties tree to use to map to a Shader object.
-        * \param bool		Flag indicating an error occurred if set to True.
+        * \param bool		        Flag indicating an error occurred if set to True.
         *
-        * \return The Material object built from the given properties map.
+        * \return The {\link ShaderProgram} object built from the given properties map.
         */
         ShaderProgram mapToShaderProgram(PropertyTree& shaderProperties, bool* error)
         {

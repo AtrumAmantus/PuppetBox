@@ -37,7 +37,7 @@ namespace PB
     {
         // Set up listener for pipeline requests to add an entity
         auto uuid = MessageBroker::instance().subscribe(PB_EVENT_PIPELINE_ADD_ENTITY_TOPIC, [this](std::shared_ptr<void> data) {
-            auto event = std::static_pointer_cast<PipelineAddEntityEvent>(data);
+            auto event = std::static_pointer_cast<PipelineUUIDReference>(data);
 
             entityMap_.insert({event->uuid, entityCount_++});
 

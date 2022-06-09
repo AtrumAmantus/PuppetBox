@@ -4,14 +4,11 @@
 #include <vector>
 
 #include "puppetbox/IAnimationCatalogue.h"
-#include "puppetbox/ImageMapReference.h"
 
 #include "AssetArchive.h"
 #include "Font.h"
 #include "IGfxApi.h"
-#include "ImageReference.h"
 #include "Logger.h"
-#include "Material.h"
 #include "Mesh.h"
 #include "Shader.h"
 
