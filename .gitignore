@@ -5,18 +5,19 @@
 *.filters
 *.user
 .ruleset
-x64
-[Dd]ebug*/
-[Rr]elease*/
+./x64
+./[Dd]ebug*/
+./[Rr]elease*/
 
 # Cmake
-build/
-build_*/
-bin*/
-out/
+./build/
+./build_*/
+./bin*/
+./out/
+./cmake-build*/
 
 # Deps
-dependencies/
+./dependencies/
 
 # Assets (for now)
 *.zip
