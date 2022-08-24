@@ -7,3 +7,6 @@ cmake-build*/
 
 # Deps
 dependencies/
+
+# Local
+fonts/
