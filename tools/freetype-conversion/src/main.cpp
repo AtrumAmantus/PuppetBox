@@ -29,11 +29,6 @@ const std::uint32_t endianInt32Byte1 = isHostBigEndian ? 1 : 2;
 const std::uint32_t endianInt32Byte2 = isHostBigEndian ? 2 : 1;
 const std::uint32_t endianInt32Byte3 = isHostBigEndian ? 3 : 0;
 
-const std::uint8_t endianInt32Shift0 = isHostBigEndian ? 0 : 24;
-const std::uint8_t endianInt32Shift1 = isHostBigEndian ? 8 : 16;
-const std::uint8_t endianInt32Shift2 = isHostBigEndian ? 16 : 8;
-const std::uint8_t endianInt32Shift3 = isHostBigEndian ? 24 : 0;
-
 struct ivec2
 {
     union
@@ -96,19 +91,6 @@ struct uivec2
         assert(i < 2);
         return (&x)[i];
     }
-};
-
-/**
- * \brief Similar to Java's "Optional" class, this is used to indicate if the
- * response had a result.
- *
- * \tparam T The type of data being stored in the result.
- */
-template<typename T>
-struct Result
-{
-    bool hasResult = false;
-    T result;
 };
 
 template<typename T>
@@ -199,7 +181,7 @@ std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>> loadFont(SizedAr
     {
         FT_Face face;
 
-        FT_Error ftResultCode = FT_New_Memory_Face(library, (FT_Byte*) bytes.array, bytes.length, 0, &face);
+        FT_Error ftResultCode = FT_New_Memory_Face(library, (FT_Byte*) bytes.array, (FT_Long) bytes.length, 0, &face);
 
         if (ftResultCode != 0)
         {
