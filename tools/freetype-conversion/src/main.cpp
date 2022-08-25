@@ -11,6 +11,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <STBI/stb_image_write.h>
+
 #define BIG_ENDIAN 0
 
 std::uint8_t getHostEndian()
@@ -141,27 +143,8 @@ bool buildFontSet(const FT_Face& face, const std::vector<char>& characters, std:
         }
         else
         {
-            /*
-             * OpenGL uses the bottom left corner as the point of origin,
-             * so we need to invert the "rows" of byte data, since image
-             * data on the host machine is stored with the origin in the
-             * top left corner.
-             */
             std::uint32_t bitmapWidth = face->glyph->bitmap.width;
             std::uint32_t bitmapHeight = face->glyph->bitmap.rows;
-
-            for (std::uint32_t row = 0; row < bitmapHeight / 2; ++row)
-            {
-                for (std::uint32_t column = 0; column < bitmapWidth; ++column)
-                {
-                    std::uint32_t currentIndex = (bitmapWidth * row) + column;
-                    std::uint32_t invertedIndex = (bitmapWidth * (bitmapHeight - row - 1)) + column;
-
-                    std::uint8_t tmp = face->glyph->bitmap.buffer[currentIndex];
-                    face->glyph->bitmap.buffer[currentIndex] = face->glyph->bitmap.buffer[invertedIndex];
-                    face->glyph->bitmap.buffer[invertedIndex] = tmp;
-                }
-            }
 
             // Now organize all the data to be written
             auto* typeChar = (TypeCharacter*) malloc(sizeof(TypeCharacter) + (bitmapWidth * bitmapHeight));
@@ -271,10 +254,10 @@ Config loadRunConfig(std::uint32_t count, char** params)
     return config;
 }
 
-std::string convertToOutput(const std::string& fileName)
+std::string convertToOutput(const std::string& fileName, const std::string& extension)
 {
     std::filesystem::path path{fileName};
-    path.replace_extension("pbf");
+    path.replace_extension(extension);
     return path.string();
 }
 
@@ -298,10 +281,10 @@ void getBytesFromUInt32(std::uint8_t bytes[4], std::uint32_t value)
     bytes[3] = valueBytes[endianInt32Byte3];
 }
 
-void writeToOutputFile(const std::string& outputFile, const std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>>& map)
+void writeToOutputFile(const std::string& outputName, const std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>>& map)
 {
     std::ofstream out;
-    out.open(outputFile, std::ios::binary | std::ios::out);
+    out.open(outputName, std::ios::binary | std::ios::out);
 
     for (const auto& pair : map)
     {
@@ -323,6 +306,118 @@ void writeToOutputFile(const std::string& outputFile, const std::unordered_map<s
     }
 
     out.close();
+}
+
+void generateAtlasImage(const std::string& outputName, const std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>>& map)
+{
+    const std::uint32_t MAX_ROW_SIZE = 512;
+    std::vector<std::uint8_t*> atlasBytes{};
+    std::vector<std::uint8_t*> byteRows{};
+
+    std::uint32_t currentCol = 0;
+
+    for (const auto& pair : map)
+    {
+        const auto& typeChar = pair.second;
+
+        // Check if the next glyph will fit
+        if (MAX_ROW_SIZE - currentCol < typeChar->size.x)
+        {
+            // If it's too small, write zero-bytes to the rest of our data
+            for (auto & byteRow : byteRows)
+            {
+                for (std::uint32_t col = currentCol; col < MAX_ROW_SIZE; ++col)
+                {
+                    byteRow[col] = 0;
+                }
+            }
+
+            // Then save to the atlas
+            for (auto & byteRow : byteRows)
+            {
+                atlasBytes.emplace_back(byteRow);
+            }
+
+            // And clear the data to load more glyphs
+            byteRows.clear();
+            // Reset cursor to left side of atlas
+            currentCol = 0;
+        }
+
+        // Add glyph data
+        std::uint32_t row;
+
+        for (row = 0; row < typeChar->size.y; ++row)
+        {
+            // Check if we have enough space for the next row
+            if (byteRows.size() <= row)
+            {
+                byteRows.emplace_back(new std::uint8_t[MAX_ROW_SIZE]);
+
+                // Fill in preceding columns with zero-bytes
+                for (std::uint32_t col = 0; col < currentCol; ++col)
+                {
+                    byteRows[row][col] = 0;
+                }
+            }
+
+            // Add this glyph's data to the byteRows object
+            for (std::uint32_t col = 0; col < typeChar->size.x; ++col)
+            {
+                byteRows[row][col + currentCol] = typeChar->data[(row * typeChar->size.x) + col];
+            }
+        }
+
+        // Fill remaining rows with zero-bytes
+        for (std::uint32_t r = row; r < byteRows.size(); ++r)
+        {
+            for (std::uint32_t col = 0; col < typeChar->size.x; ++col)
+            {
+                byteRows[r][col + currentCol] = 0;
+            }
+        }
+
+        // This is the column where the next glyph data will start
+        currentCol += typeChar->size.x;
+    }
+
+    // Write zero-bytes to the rest of our data
+    for (auto & byteRow : byteRows)
+    {
+        for (std::uint32_t col = currentCol; col < MAX_ROW_SIZE; ++col)
+        {
+            byteRow[col] = 0;
+        }
+    }
+
+    // Save any leftover data to atlas
+    for (auto & byteRow : byteRows)
+    {
+        atlasBytes.emplace_back(byteRow);
+    }
+
+    // Clear remaining data from glyphs
+    byteRows.clear();
+
+    // Write all atlas bytes to a single 1d array
+    auto imageBytes = new std::uint8_t[atlasBytes.size() * MAX_ROW_SIZE];
+
+    std::uint32_t atlasHeight = atlasBytes.size();
+
+    for (std::uint32_t row = 0; row < atlasHeight; ++row)
+    {
+        for (std::uint32_t col = 0; col < MAX_ROW_SIZE; ++col)
+        {
+            imageBytes[(row * MAX_ROW_SIZE) + col] = atlasBytes[row][col];
+        }
+
+        delete[] atlasBytes[row];
+    }
+
+    atlasBytes.clear();
+
+    stbi_write_png(outputName.c_str(), MAX_ROW_SIZE, (std::int32_t) atlasHeight, 1, imageBytes, MAX_ROW_SIZE);
+    delete[] imageBytes;
 }
 
 int main(int argc, char* argv[])
@@ -352,8 +447,9 @@ int main(int argc, char* argv[])
     for (const auto& fileName : files)
     {
         auto fileBytes = loadFileBytes(fileName);
-        auto map = loadFont(fileBytes, 12, &error);
-        writeToOutputFile(convertToOutput(fileName), map);
+        auto map = loadFont(fileBytes, 36, &error);
+        writeToOutputFile(convertToOutput(fileName, "pbf"), map);
+        generateAtlasImage(convertToOutput(fileName, "png"), map);
     }
 
     return 0;
