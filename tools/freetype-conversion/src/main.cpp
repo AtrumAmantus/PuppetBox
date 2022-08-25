@@ -236,9 +236,11 @@ Config loadRunConfig(std::uint32_t count, char** params)
     return config;
 }
 
-std::string convertToOutput(const std::string& fileName, const std::string& extension)
+std::string convertToOutput(const std::string& fileName, const std::uint32_t fontSize, const std::string& extension)
 {
     std::filesystem::path path{fileName};
+    path.replace_extension();
+    path.concat("-" + std::to_string(fontSize));
     path.replace_extension(extension);
     return path.string();
 }
@@ -263,14 +265,20 @@ void getBytesFromUInt32(std::uint8_t bytes[4], std::uint32_t value)
     bytes[3] = valueBytes[endianInt32Byte3];
 }
 
-void writeToOutputFile(const std::string& outputName, const std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>>& map)
+void writeToOutputFile(
+        const std::string& outputName,
+        const std::uint32_t fontSize,
+        const std::unordered_map<std::int8_t, std::unique_ptr<TypeCharacter>>& map)
 {
     std::ofstream out;
     out.open(outputName, std::ios::binary | std::ios::out);
 
+    std::uint8_t bytes[4];
+    getBytesFromUInt32(bytes, fontSize);
+    out.write((char*) &bytes, 4);
+
     for (const auto& pair : map)
     {
-        std::uint8_t bytes[4];
         const auto& typeChar = pair.second;
         out.write((char*) &typeChar->character, 1);
         getBytesFromInt32(bytes, typeChar->bearing.x);
@@ -426,12 +434,14 @@ int main(int argc, char* argv[])
 
     bool error = false;
 
+    const std::uint32_t FONT_SIZE = 36;
+
     for (const auto& fileName : files)
     {
         auto fileBytes = loadFileBytes(fileName);
-        auto map = loadFont(fileBytes, 36, &error);
-        writeToOutputFile(convertToOutput(fileName, "pbf"), map);
-        generateAtlasImage(convertToOutput(fileName, "png"), map);
+        auto map = loadFont(fileBytes, FONT_SIZE, &error);
+        writeToOutputFile(convertToOutput(fileName, FONT_SIZE, "pbf"), FONT_SIZE, map);
+        generateAtlasImage(convertToOutput(fileName, FONT_SIZE, "png"), map);
     }
 
     return 0;
