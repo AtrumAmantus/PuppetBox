@@ -1,0 +1,9 @@
+# Cmake
+build/
+build_*/
+bin*/
+out/
+cmake-build*/
+
+# Deps
+dependencies/
