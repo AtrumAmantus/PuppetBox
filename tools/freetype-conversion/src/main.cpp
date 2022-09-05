@@ -276,6 +276,8 @@ void writeToOutputFile(
     std::uint8_t bytes[4];
     getBytesFromUInt32(bytes, fontSize);
     out.write((char*) &bytes, 4);
+    getBytesFromUInt32(bytes, map.size());
+    out.write( (char*) &bytes, 4);
 
     for (const auto& pair : map)
     {
